@@ -1,0 +1,202 @@
+/* ═══════════════════════════════════════════════════════════════
+   ATLAS ONYX ULTRADARK — Premium Edition v11.0
+   Fixar: Dubbla radbrytningar, Hem-läsbarhet & Quill Toolbar
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+    --bg-image: url("./onyx-ultradark-bg.jpg");
+    --bg-color: #000000;
+    --text-primary: #ffffff !important;
+    --accent-primary: #10b981; 
+    --border-color: rgba(16, 185, 129, 0.35);
+
+    /* Ultra-Deep Glass */
+    --bg-frosty-sidebar: rgba(5, 5, 5, 0.95);
+    --bg-frosty-header: rgba(10, 10, 10, 0.98);
+    --bg-frosty-content: rgba(10, 10, 10, 0.9);
+    --bg-frosty-bubble-atlas: #18181b; 
+    --bg-frosty-bubble-user: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --blur-amount: 45px;
+}
+
+body { background: var(--bg-image) center/cover no-repeat fixed; color: #ffffff !important; }
+
+/* --- FIX: TA BORT DUBBLA RADBRYTNINGAR I MALLAR --- */
+.ql-editor p {
+    margin-bottom: 0px !important; 
+    padding-bottom: 2px !important; /* Ger ett naturligt men kompakt avstånd */
+    line-height: 1.4 !important;
+}
+
+/* --- FIX: SYNLIG QUILL TOOLBAR (Vita ikoner) --- */
+.ql-toolbar.ql-snow {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: var(--border-color) !important;
+    border-radius: 12px 12px 0 0 !important;
+}
+.ql-snow .ql-stroke { stroke: #ffffff !important; }
+.ql-snow .ql-fill { fill: #ffffff !important; }
+.ql-snow .ql-picker { color: #ffffff !important; }
+.ql-container.ql-snow { border-color: var(--border-color) !important; background: rgba(0,0,0,0.5); }
+
+/* --- PANELER & NAVIGATION --- */
+.sidebar, .chat-header, .chat-input-area, .about-container,
+.template-editor-container, .template-list-container {
+    backdrop-filter: blur(var(--blur-amount)) saturate(200%);
+    -webkit-backdrop-filter: blur(var(--blur-amount)) saturate(200%);
+    border: 1.5px solid rgba(16, 185, 129, 0.4);
+}
+
+.menu-item.active {
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.35), transparent) !important;
+    border-left: 3px solid var(--accent-primary) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ONYX EXPANSION PATCH - ÖVRIGA VYER & EFFEKTER
+   ═══════════════════════════════════════════════════════════════ */
+
+/* --- 1. PREMIUM MENU ITEMS (Glidande effekt) --- */
+.menu-item {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 3px solid transparent;
+}
+
+/* Den glidande bakgrunden vid hover */
+.menu-item::before {
+    content: '';
+    position: absolute;
+    left: -100%; top: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+.menu-item:hover::before { left: 100%; }
+
+.menu-item:hover {
+    background: rgba(16, 185, 129, 0.05);
+    color: var(--accent-primary);
+    transform: translateX(4px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.menu-item.active {
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.2), transparent) !important;
+    border-left: 3px solid var(--accent-primary) !important;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+/* --- 2. OM-SIDAN (Guider & Genvägar) --- */
+.guide-step {
+    background: rgba(10, 10, 10, 0.6);
+    border-left: 4px solid var(--accent-primary);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+}
+.step-number {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #000;
+    font-weight: 800;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.shortcut-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s;
+}
+.shortcut-item:hover {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: var(--accent-primary);
+    transform: translateX(5px);
+}
+.shortcut-item kbd {
+    background: #000;
+    border: 1px solid var(--accent-primary);
+    color: var(--accent-primary);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+/* --- 3. TEAM VIEW (Mina Ärenden - Kort & Taggar) --- */
+
+/* Dina ärenden (Ska lysa grönt/Onyx style) */
+.team-ticket-card.mine {
+    border-left-color: var(--accent-primary);
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);
+    box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.05);
+}
+
+/* Tagna ärenden (Av andra) */
+.team-ticket-card.taken {
+    border-left-color: #3f3f46; /* Mörkgrå */
+    background: rgba(255, 255, 255, 0.03);
+    opacity: 0.7;
+}
+
+/* TAGGAR (Neon-stil för mörkt tema) */
+.ticket-tag.tag-chatt {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981; 
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.1);
+}
+
+.ticket-tag.tag-form { /* MAIL */
+    background: rgba(59, 130, 246, 0.15); /* Blå för kontrast mot det gröna */
+    color: #60a5fa; 
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.1);
+}
+
+/* Status-lampa */
+.status-lamp-dot.green {
+    background-color: #10b981;
+    box-shadow: 0 0 15px #10b981;
+}
+
+/* --- 4. NOTIS-BADGE (Röd/Rosa för maximal kontrast) --- */
+.nav-badge {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.6) !important;
+    color: white !important;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+/* --- 5. MINI CHAT (Inuti ärendevyn) --- */
+#view-my-tickets .message.agent .bubble {
+    background: var(--bg-frosty-bubble-atlas);
+    border: 1px solid var(--border-color);
+}
+#view-my-tickets .mini-chat-input input {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border-color);
+    color: #fff;
+}
+#view-my-tickets .mini-chat-input button {
+    background: var(--accent-primary);
+    color: #000;
+}
+/* --- HEADER BUTTON FIX (ONYX GREEN) --- */
+
+/* ═══════════════════════════════════════════════════════════════
+   HEADER BUTTONS - ONYX GREEN FIX
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Alla "Skapa ny"-knappar i headern blir gröna vid hover */
+#new-chat-btn-header:hover, 
+#new-template-btn:hover,
+#new-mail-btn-my-tickets:hover,
+.header-icon-only:hover {
+    background: var(--accent-primary) !important; /* #10b981 */
+    border-color: #10b981 !important;
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.5) !important; /* Starkt grönt glow */
+}
+
+/* Info-ikonen */
+.info-icon-trigger:hover {
+    color: #10b981 !important;
+    background: rgba(16, 185, 129, 0.15) !important;
+}

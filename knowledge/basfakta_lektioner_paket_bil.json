@@ -1,0 +1,117 @@
+{
+"section_title": "BASFAKTA - Lektioner och Paket (BIL)",
+"source_info": "Information om alla lektioner, kurser och paket för personbil (B).",
+"sections": [
+{
+"title": "Vad är en Testlektion (Provlektion)?",
+"answer": "En Testlektion är en rabatterad första lektion (80 min) för dig som är ny hos oss. Du får köra med en lärare som bedömer din nivå och tar fram en personlig plan för din utbildning. OBS: Testlektion får endast bokas en gång per elev.",
+"keywords": [
+"bedömning",
+"boka testlektion",
+"en gång",
+"nybörjare",
+"planering",
+"provlektion",
+"rabatt",
+"startlektion",
+"testlektion",
+"utbildningsplan",
+"vad är"
+]
+},
+{
+"title": "Vad är en Körlektion (80 min)?",
+"answer": "Våra körlektioner är alltid 80 minuter långa (dubbellektion). Detta ger oss tid att både gå igenom teori i bilen, öva praktiskt och utvärdera körningen, vilket är mer effektivt än korta lektioner.",
+"keywords": [
+"80 min",
+"80 minuter",
+"bil",
+"effektivt",
+"hur lång",
+"körlektion",
+"längd",
+"lärare",
+"övningskörning"
+]
+},
+{
+"title": "Våra Lektionspaket (Minipaket, Mellanpaket, Baspaket)",
+"answer": "Lektionspaketen är för dig som vill ha rabatt på körlektionerna. Minipaket innehåller 5 lektioner, Mellanpaket 10 lektioner och Baspaket 15 lektioner. Ju större paket, desto lägre styckpris per lektion.",
+"keywords": [
+"10 lektioner",
+"15 lektioner",
+"5 lektioner",
+"baspaket",
+"baspaket bil",
+"billigare",
+"lektionspaket",
+"mellanpaket",
+"mellanpaket bil",
+"minipaket",
+"minipaket bil",
+"paket",
+"pris",
+"rabatt"
+]
+},
+{
+"title": "Våra Totalpaket (Startpaket med kurser)",
+"answer": "Totalpaketen är kompletta startpaket. De innehåller både körlektioner (5, 10 eller 15 st), de obligatoriska riskutbildningarna (Risk 1 & 2) och teorin i appen Mitt Körkort. Det är vårt mest prisvärda alternativ för att komma igång.",
+"keywords": [
+"allt i ett",
+"halkbana",
+"ingår",
+"komplett",
+"riskettan",
+"risktvåan",
+"startpaket",
+"teori",
+"totalpaketet",
+"totalpaket",
+"paket bil",
+"bil"
+]
+},
+{
+"title": "Vad är en Prova-på-uppkörning (Utbildningskontroll)?",
+"answer": "Det är en 'fejkad uppkörning' (80 min) med en annan lärare än din ordinarie. Vi sätter dig under press likt ett riktigt prov för att se om du är redo. Detta kallas även Utbildningskontroll.",
+"keywords": [
+"bedömning",
+"fejkad uppkörning",
+"genrep",
+"prova på",
+"test",
+"utbildningskontroll"
+]
+},
+{
+"title": "Hur fungerar Intensivkurs (2 veckor)?",
+"answer": "Vår intensivkurs pågår under en period på 2 veckor. Det är en intensivutbildning som inkluderar 16 körlektioner, Risk 1, Risk 2 och teori. För dig som undrar hur fungerar detta i praktiken, så innebär det träning varje vardag under dagtid för att nå ditt körkort snabbt.",
+"keywords": [
+"2 veckor",
+"hur fungerar",
+"intensivkurs",
+"snabb kurs",
+"varje dag"
+]
+},
+{
+"title": "Extra stöd för återfallselever",
+"answer": "Har du haft körkort tidigare eller kört mycket förut? Vi anpassar utbildningen individuellt. Boka en Testlektion så lägger vi upp en plan som passar just dina behov.",
+"keywords": [
+"anpassning",
+"gammalt körkort",
+"indraget",
+"individuellt",
+"rostig",
+"återfallselev",
+"återtagning"
+]
+}
+],
+"type": "basfakta",
+"id": "basfakta_lektioner_paket_bil",
+"city": "",
+"area": "",
+"vehicle": "BIL"
+}

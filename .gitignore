@@ -1,0 +1,27 @@
+# ========= Logs & Env =========
+*.log
+server_log.txt
+.env
+
+# ========= Node.js =========
+node_modules/
+package-lock.json
+
+# ========= Tests & Scripts (Helt isolerat) =========
+/tests/
+stresstest.js
+test_results.txt
+session_test_results.txt
+
+# ========= Build Output =========
+kundchatt/
+dist/
+win-unpacked/
+
+# ========= Databaser & System =========
+atlas.db
+atlas.db-shm
+atlas.db-wal
+external/
+.DS_Store
+Thumbs.db

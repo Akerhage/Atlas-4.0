@@ -1,0 +1,202 @@
+ID;Datum;Agent;Stad;Fordon;Ämne;Antal_Meddelanden
+DEMO_1769612101690_15116;2026-01-09;Jessica;Linköping;AM;Avbokning av körlektion pga sjukdom;1
+DEMO_1769612101691_49114;2026-01-03;angelholm;Jönköping;MC;Prisfråga MC-kort;1
+DEMO_1769612101691_27916;2026-01-02;vasteras;Uppsala;BIL;Resa utomlands - pausa abonnemang?;1
+DEMO_1769612101691_92154;2026-01-18;admin;Göteborg;BIL;Avbokning av körlektion pga sjukdom;1
+DEMO_1769612101691_11141;2026-01-12;goteborg_vastra_frolunda;Göteborg;AM;När börjar nästa intensivkurs?;1
+DEMO_1769612101691_38449;2026-01-04;goteborg_storaholm;Uppsala;MC;Avbokning av körlektion pga sjukdom;1
+DEMO_1769612101691_30266;2026-01-06;helsingborg_halsobacken;Malmö;MC;Avbokning av körlektion pga sjukdom;1
+DEMO_1769612101692_26092;2026-01-19;landskrona;Malmö;AM;Klagomål på trafiklärare;1
+DEMO_1769612101692_14017;2025-12-29;malmo_city;Jönköping;BIL;Angående min utbildning;1
+DEMO_1769612101692_19440;2026-01-07;stockholm_ostermalm;Linköping;BIL;Prisfråga MC-kort;1
+DEMO_1769612101692_31974;2026-01-12;Patric;Jönköping;BIL;Boka halkbana privat;1
+DEMO_1769612101692_78641;2026-01-09;ystad;Stockholm;AM;Hej!;1
+DEMO_1769612101692_20202;2026-01-17;hassleholm;Helsingborg;AM;Problem med inloggning i appen;1
+DEMO_1769612101692_90174;2026-01-07;Patric;Göteborg;AM;Resa utomlands - pausa abonnemang?;1
+DEMO_1769612101692_85769;2026-01-21;uppsala;Västerås;AM;Byte av trafikskola;1
+DEMO_1769612101693_41833;2025-12-31;kristianstad;Malmö;AM;Dubbelbokning i systemet?;1
+DEMO_1769612101693_10529;2026-01-12;helsingborg_halsobacken;Norrköping;MC;Fråga om faktura #8822;1
+DEMO_1769612101693_53097;2026-01-02;stockholm_sodermalm;Malmö;AM;Dubbelbokning i systemet?;1
+DEMO_1769612101693_60495;2026-01-13;kungsbacka;Linköping;BIL;Intensivkurs boendefråga;1
+DEMO_1769612101693_59917;2026-01-08;stockholm_djursholm;Norrköping;AM;Hej!;1
+DEMO_1769612101693_1940;2026-01-03;kungsbacka;Uppsala;AM;Avbokning av körlektion pga sjukdom;1
+DEMO_1769612101693_1407;2026-01-06;admin;Norrköping;AM;Problem med inloggning i appen;1
+DEMO_1769612101693_31447;2026-01-14;goteborg_aby;Uppsala;AM;Klagomål på trafiklärare;1
+DEMO_1769612101693_88064;2026-01-21;eslov;Jönköping;BIL;Fråga om faktura #8822;1
+DEMO_1769612101693_42416;2026-01-03;stockholm_kungsholmen;Norrköping;MC;Resa utomlands - pausa abonnemang?;1
+DEMO_1769612101693_9225;2026-01-10;varberg;Örebro;AM;Prisfråga MC-kort;1
+DEMO_1769612101693_85000;2026-01-10;Nathalie;Örebro;AM;Boka halkbana privat;1
+DEMO_1769612101693_52549;2026-01-20;goteborg_storaholm;Jönköping;AM;Fråga om faktura #8822;1
+DEMO_1769612101694_52818;2026-01-12;kalmar;Linköping;BIL;Resa utomlands - pausa abonnemang?;1
+DEMO_1769612101694_67831;2026-01-03;goteborg_hogsbo;Helsingborg;BIL;Dubbelbokning i systemet?;1
+DEMO_1769612101694_24147;2026-01-04;stockholm_kungsholmen;Uppsala;MC;Klagomål på trafiklärare;1
+DEMO_1769612101694_15316;2026-01-05;goteborg_storaholm;Norrköping;BIL;Prisfråga MC-kort;1
+DEMO_1769612101694_14567;2026-01-15;malmo_limhamn;Jönköping;MC;Fråga om faktura #8822;1
+DEMO_1769612101695_99750;2026-01-16;kungsbacka;Jönköping;AM;När börjar nästa intensivkurs?;1
+DEMO_1769612101695_92938;2026-01-10;goteborg_vastra_frolunda;Västerås;AM;Hej!;1
+DEMO_1769612101695_79481;2026-01-06;goteborg_aby;Uppsala;MC;När börjar nästa intensivkurs?;1
+DEMO_1769612101695_83857;2026-01-17;malmo_bulltofta;Norrköping;MC;Resa utomlands - pausa abonnemang?;1
+DEMO_1769612101695_3170;2026-01-04;umea;Göteborg;AM;När börjar nästa intensivkurs?;1
+DEMO_1769612101695_54675;2026-01-13;goteborg_hovas;Västerås;AM;Byte av trafikskola;1
+DEMO_1769612101695_49204;2026-01-19;stockholm_sodermalm;Malmö;AM;Angående min utbildning;1
+DEMO_1769612101695_67898;2026-01-10;linkoping;Västerås;AM;Dubbelbokning i systemet?;1
+DEMO_1769612101695_73163;2026-01-07;goteborg_storaholm;Örebro;AM;Återbetalning av saldo;1
+DEMO_1769612101695_11030;2026-01-22;goteborg_molndal;Jönköping;MC;Byte av trafikskola;1
+DEMO_1769612101695_81819;2026-01-07;Patric;Norrköping;MC;Fråga om faktura #8822;1
+DEMO_1769612101695_28024;2026-01-08;Patric;Västerås;MC;När börjar nästa intensivkurs?;1
+DEMO_1769612101696_28272;2026-01-12;malmo_triangeln;Uppsala;BIL;När börjar nästa intensivkurs?;1
+DEMO_1769612101696_55041;2026-01-13;vellinge;Malmö;MC;Problem med inloggning i appen;1
+DEMO_1769612101696_79369;2026-01-20;Patric;Göteborg;BIL;Angående min utbildning;1
+DEMO_1769612101696_15363;2026-01-05;kalmar;Uppsala;AM;Handledarkursen igår;1
+DEMO_1769612101696_59169;2026-01-11;goteborg_molnlycke;Uppsala;MC;Klagomål på trafiklärare;1
+DEMO_1769612101696_49380;2026-01-09;landskrona;Stockholm;AM;Avbokning av körlektion pga sjukdom;1
+DEMO_1769612101696_50301;2026-01-03;varberg;Göteborg;BIL;Dubbelbokning i systemet?;1
+DEMO_1769612101696_69011;2026-01-02;kristianstad;Jönköping;AM;Fråga om faktura #8822;1
+DEMO_1769612101696_67993;2026-01-09;helsingborg_city;Uppsala;BIL;Avbokning av körlektion pga sjukdom;1
+DEMO_1769612101696_61220;2026-01-11;admin;Örebro;BIL;Problem med inloggning i appen;1
+DEMO_1769612101696_65256;2026-01-20;goteborg_hovas;Stockholm;BIL;Boka halkbana privat;1
+DEMO_1769612101696_47507;2026-01-14;stockholm_enskededalen;Jönköping;AM;Klagomål på trafiklärare;1
+DEMO_1769612101697_26023;2026-01-11;ystad;Göteborg;BIL;Fråga om faktura #8822;1
+DEMO_1769612101697_72942;2026-01-05;goteborg_vastra_frolunda;Stockholm;BIL;Avbokning av körlektion pga sjukdom;1
+DEMO_1769612101697_76702;2025-12-30;angelholm;Stockholm;BIL;Fråga om faktura #8822;1
+DEMO_1769612101697_47566;2026-01-09;goteborg_molndal;Helsingborg;BIL;Hej!;1
+DEMO_1769612101697_11829;2026-01-16;gavle;Västerås;AM;Återbetalning av saldo;1
+DEMO_1769612101697_35552;2026-01-09;hollviken;Västerås;MC;Återbetalning av saldo;1
+DEMO_1769612101697_82893;2026-01-21;malmo_varnhem;Helsingborg;BIL;Dubbelbokning i systemet?;1
+DEMO_1769612101697_70573;2026-01-07;kalmar;Västerås;AM;Hej!;1
+DEMO_1769612101697_86825;2026-01-16;angelholm;Uppsala;MC;När börjar nästa intensivkurs?;1
+DEMO_1769612101697_38207;2026-01-18;Jessica;Malmö;BIL;Angående min utbildning;1
+DEMO_1769612101697_17866;2026-01-06;goteborg_dingle;Uppsala;MC;Angående min utbildning;1
+DEMO_1769612101697_58420;2026-01-16;vaxjo;Norrköping;AM;CSN och körkortslån?;1
+DEMO_1769612101697_22477;2026-01-13;goteborg_aby;Västerås;AM;Prisfråga MC-kort;1
+DEMO_1769612101698_41448;2026-01-02;admin;Malmö;AM;Problem med inloggning i appen;1
+DEMO_1769612101698_93431;2026-01-12;goteborg_molndal;Malmö;MC;Problem med inloggning i appen;1
+DEMO_1769612101698_61982;2026-01-14;helsingborg_halsobacken;Jönköping;AM;Handledarkursen igår;1
+DEMO_1769612101698_62041;2026-01-22;varberg;Göteborg;BIL;Boka halkbana privat;1
+DEMO_1769612101698_56929;2026-01-18;goteborg_molnlycke;Malmö;MC;Klagomål på trafiklärare;1
+DEMO_1769612101698_2675;2026-01-20;Oskar;Norrköping;AM;Klagomål på trafiklärare;1
+DEMO_1769612101698_64801;2026-01-19;stockholm_ostermalm;Jönköping;AM;Klagomål på trafiklärare;1
+DEMO_1769612101698_63594;2026-01-10;Nathalie;Linköping;BIL;Handledarkursen igår;1
+DEMO_1769612101698_73787;2025-12-31;linkoping;Jönköping;AM;CSN och körkortslån?;1
+DEMO_1769612101698_59074;2026-01-14;malmo_limhamn;Göteborg;BIL;Handledarkursen igår;1
+DEMO_1769612101698_80969;2026-01-17;Nathalie;Västerås;MC;Klagomål på trafiklärare;1
+DEMO_1769612101698_61754;2026-01-01;umea;Västerås;MC;CSN och körkortslån?;1
+DEMO_1769612101698_24389;2026-01-08;malmo_varnhem;Helsingborg;MC;Boka halkbana privat;1
+DEMO_1769612101699_11578;2026-01-21;malmo_triangeln;Helsingborg;BIL;Angående min utbildning;1
+DEMO_1769612101699_99620;2026-01-23;vaxjo;Västerås;MC;Fråga om faktura #8822;1
+DEMO_1769612101699_95314;2026-01-08;malmo_vastra_hamnen;Linköping;AM;När börjar nästa intensivkurs?;1
+DEMO_1769612101699_78033;2026-01-02;kristianstad;Jönköping;AM;Klagomål på trafiklärare;1
+DEMO_1769612101699_28574;2026-01-18;Jessica;Norrköping;AM;Hej!;1
+DEMO_1769612101699_68344;2026-01-15;hollviken;Göteborg;AM;CSN och körkortslån?;1
+DEMO_1769612101699_95269;2026-01-04;vaxjo;Stockholm;AM;När börjar nästa intensivkurs?;1
+DEMO_1769612101699_2604;2026-01-10;goteborg_molndal;Uppsala;AM;Byte av trafikskola;1
+DEMO_1769612101699_40606;2026-01-06;Nathalie;Stockholm;BIL;Dubbelbokning i systemet?;1
+DEMO_1769612101699_11741;2026-01-09;kalmar;Stockholm;AM;Angående min utbildning;1
+DEMO_1769612101699_20954;2026-01-15;uppsala;Uppsala;BIL;Klagomål på trafiklärare;1
+DEMO_1769612101700_52505;2026-01-12;malmo_limhamn;Norrköping;MC;Hej!;1
+DEMO_1769612101700_28883;2026-01-21;gavle;Norrköping;BIL;Klagomål på trafiklärare;1
+DEMO_1769612101700_86476;2026-01-03;malmo_varnhem;Norrköping;MC;Intensivkurs boendefråga;1
+DEMO_1769612101700_69272;2025-12-30;Oskar;Helsingborg;MC;Resa utomlands - pausa abonnemang?;1
+DEMO_1769612101700_30548;2026-01-09;goteborg_vastra_frolunda;Örebro;MC;Resa utomlands - pausa abonnemang?;1
+DEMO_1769612101700_19342;2026-01-17;malmo_limhamn;Västerås;AM;Inget ämne;3
+DEMO_1769612101701_68528;2026-01-06;goteborg_kungalv;Stockholm;MC;Inget ämne;3
+DEMO_1769612101701_37992;2026-01-20;goteborg_hovas;Linköping;BIL;Inget ämne;3
+DEMO_1769612101701_88186;2026-01-13;Nathalie;Västerås;MC;Inget ämne;3
+DEMO_1769612101701_55350;2026-01-03;gavle;Stockholm;MC;Inget ämne;3
+DEMO_1769612101701_39677;2026-01-01;goteborg_vastra_frolunda;Stockholm;MC;Inget ämne;3
+DEMO_1769612101701_78018;2026-01-11;lund_sodertull;Helsingborg;MC;Inget ämne;3
+DEMO_1769612101701_70906;2026-01-10;goteborg_vastra_frolunda;Göteborg;MC;Inget ämne;3
+DEMO_1769612101701_79691;2026-01-21;stockholm_solna;Helsingborg;AM;Inget ämne;3
+DEMO_1769612101701_7996;2026-01-12;malmo_vastra_hamnen;Örebro;MC;Inget ämne;3
+DEMO_1769612101701_60663;2026-01-08;kungsbacka;Västerås;MC;Inget ämne;3
+DEMO_1769612101701_75697;2026-01-07;stockholm_enskededalen;Linköping;AM;Inget ämne;3
+DEMO_1769612101701_15884;2026-01-18;goteborg_hovas;Norrköping;MC;Inget ämne;3
+DEMO_1769612101702_18586;2026-01-07;uppsala;Linköping;BIL;Inget ämne;3
+DEMO_1769612101702_50443;2026-01-15;stockholm_sodermalm;Göteborg;MC;Inget ämne;3
+DEMO_1769612101702_97687;2026-01-17;stockholm_sodermalm;Uppsala;AM;Inget ämne;3
+DEMO_1769612101702_2175;2026-01-19;malmo_city;Örebro;AM;Inget ämne;3
+DEMO_1769612101702_93189;2026-01-04;trelleborg;Linköping;MC;Inget ämne;3
+DEMO_1769612101702_33552;2026-01-09;goteborg_hogsbo;Norrköping;BIL;Inget ämne;3
+DEMO_1769612101702_41712;2026-01-06;trelleborg;Västerås;AM;Inget ämne;3
+DEMO_1769612101702_94909;2026-01-17;vasteras;Göteborg;MC;Inget ämne;3
+DEMO_1769612101702_92199;2026-01-17;kalmar;Göteborg;AM;Inget ämne;3
+DEMO_1769612101702_47370;2026-01-10;stockholm_sodermalm;Jönköping;AM;Inget ämne;3
+DEMO_1769612101702_59734;2026-01-06;malmo_sodervarn;Norrköping;AM;Inget ämne;3
+DEMO_1769612101702_99045;2026-01-11;hollviken;Norrköping;BIL;Inget ämne;3
+DEMO_1769612101702_85320;2026-01-15;helsingborg_halsobacken;Örebro;MC;Inget ämne;3
+DEMO_1769612101702_39912;2026-01-16;goteborg_molndal;Norrköping;BIL;Inget ämne;3
+DEMO_1769612101703_3852;2026-01-11;malmo_limhamn;Norrköping;MC;Inget ämne;3
+DEMO_1769612101703_43061;2026-01-13;ystad;Norrköping;MC;Inget ämne;3
+DEMO_1769612101703_8098;2026-01-13;Nathalie;Uppsala;MC;Inget ämne;3
+DEMO_1769612101703_4078;2026-01-09;malmo_varnhem;Malmö;BIL;Inget ämne;3
+DEMO_1769612101703_30707;2026-01-07;Jessica;Jönköping;AM;Inget ämne;3
+DEMO_1769612101703_72861;2026-01-06;landskrona;Örebro;BIL;Inget ämne;3
+DEMO_1769612101703_59346;2026-01-13;vasteras;Västerås;AM;Inget ämne;3
+DEMO_1769612101703_3683;2026-01-06;goteborg_dingle;Jönköping;AM;Inget ämne;3
+DEMO_1769612101703_92023;2026-01-03;eslov;Örebro;MC;Inget ämne;3
+DEMO_1769612101703_83244;2026-01-06;kungsbacka;Göteborg;BIL;Inget ämne;3
+DEMO_1769612101703_68056;2026-01-05;lund_sodertull;Malmö;MC;Inget ämne;3
+DEMO_1769612101703_90750;2026-01-02;stockholm_osteraker;Jönköping;AM;Inget ämne;3
+DEMO_1769612101703_9975;2026-01-11;kristianstad;Linköping;AM;Inget ämne;3
+DEMO_1769612101703_39979;2026-01-09;stockholm_djursholm;Uppsala;MC;Inget ämne;3
+DEMO_1769612101704_34374;2026-01-20;goteborg_aby;Göteborg;AM;Inget ämne;3
+DEMO_1769612101704_30699;2026-01-03;goteborg_hovas;Örebro;AM;Inget ämne;3
+DEMO_1769612101704_43291;2026-01-09;admin;Stockholm;BIL;Inget ämne;3
+DEMO_1769612101704_81870;2026-01-04;lund_katedral;Västerås;MC;Inget ämne;3
+DEMO_1769612101704_85800;2026-01-13;stockholm_enskededalen;Stockholm;MC;Inget ämne;3
+DEMO_1769612101704_21492;2025-12-31;landskrona;Malmö;MC;Inget ämne;3
+DEMO_1769612101704_79872;2026-01-11;umea;Örebro;AM;Inget ämne;3
+DEMO_1769612101704_20132;2026-01-04;uppsala;Jönköping;MC;Inget ämne;3
+DEMO_1769612101704_16454;2026-01-06;helsingborg_halsobacken;Norrköping;AM;Inget ämne;3
+DEMO_1769612101704_13008;2026-01-13;vaxjo;Jönköping;MC;Inget ämne;3
+DEMO_1769612101704_17328;2026-01-08;goteborg_molndal;Uppsala;MC;Inget ämne;3
+DEMO_1769612101704_46668;2025-12-30;angelholm;Jönköping;BIL;Inget ämne;3
+DEMO_1769612101704_36561;2026-01-10;malmo_bulltofta;Örebro;BIL;Inget ämne;3
+DEMO_1769612101704_76257;2026-01-12;trelleborg;Västerås;AM;Inget ämne;3
+DEMO_1769612101704_59674;2026-01-09;malmo_vastra_hamnen;Norrköping;BIL;Inget ämne;3
+DEMO_1769612101704_42862;2025-12-31;lund_katedral;Jönköping;MC;Inget ämne;3
+DEMO_1769612101705_66867;2026-01-16;goteborg_vastra_frolunda;Örebro;AM;Inget ämne;3
+DEMO_1769612101705_5688;2026-01-23;stockholm_enskededalen;Malmö;AM;Inget ämne;3
+DEMO_1769612101705_91326;2026-01-15;Patric;Västerås;AM;Inget ämne;3
+DEMO_1769612101705_91583;2025-12-31;lund_katedral;Stockholm;MC;Inget ämne;3
+DEMO_1769612101705_34891;2025-12-30;malmo_city;Örebro;MC;Inget ämne;3
+DEMO_1769612101705_36957;2025-12-31;varberg;Linköping;BIL;Inget ämne;3
+DEMO_1769612101705_45680;2026-01-22;hollviken;Jönköping;MC;Inget ämne;3
+DEMO_1769612101705_58129;2026-01-15;stockholm_kungsholmen;Helsingborg;BIL;Inget ämne;3
+DEMO_1769612101705_43167;2025-12-31;goteborg_hogsbo;Göteborg;BIL;Inget ämne;3
+DEMO_1769612101705_85820;2026-01-07;trelleborg;Örebro;BIL;Inget ämne;3
+DEMO_1769612101705_66377;2026-01-04;goteborg_dingle;Örebro;BIL;Inget ämne;3
+DEMO_1769612101705_5488;2026-01-02;ystad;Jönköping;AM;Inget ämne;3
+DEMO_1769612101705_5028;2026-01-23;malmo_limhamn;Västerås;MC;Inget ämne;3
+DEMO_1769612101705_66015;2026-01-20;landskrona;Stockholm;AM;Inget ämne;3
+DEMO_1769612101705_17507;2026-01-11;varberg;Malmö;BIL;Inget ämne;3
+DEMO_1769612101706_79368;2026-01-15;Oskar;Västerås;BIL;Inget ämne;3
+DEMO_1769612101706_71960;2026-01-03;trelleborg;Uppsala;BIL;Inget ämne;3
+DEMO_1769612101706_91270;2026-01-11;umea;Göteborg;BIL;Inget ämne;3
+DEMO_1769612101706_2984;2026-01-07;uppsala;Norrköping;MC;Inget ämne;3
+DEMO_1769612101706_24669;2026-01-03;angelholm;Norrköping;BIL;Inget ämne;3
+DEMO_1769612101706_91657;2026-01-08;goteborg_storaholm;Uppsala;MC;Inget ämne;3
+DEMO_1769612101706_78911;2025-12-31;stockholm_solna;Stockholm;MC;Inget ämne;3
+DEMO_1769612101706_51208;2026-01-21;goteborg_hovas;Malmö;MC;Inget ämne;3
+DEMO_1769612101706_25243;2026-01-17;kalmar;Malmö;BIL;Inget ämne;3
+DEMO_1769612101706_68869;2026-01-13;ystad;Uppsala;BIL;Inget ämne;3
+DEMO_1769612101706_80946;2026-01-02;kungsbacka;Göteborg;MC;Inget ämne;3
+DEMO_1769612101706_14299;2026-01-09;Jessica;Västerås;BIL;Inget ämne;3
+DEMO_1769612101706_20988;2026-01-14;stockholm_osteraker;Malmö;AM;Inget ämne;3
+DEMO_1769612101707_86081;2026-01-02;helsingborg_halsobacken;Linköping;MC;Inget ämne;3
+DEMO_1769612101707_3995;2026-01-14;linkoping;Västerås;AM;Inget ämne;3
+DEMO_1769612101707_45625;2026-01-11;goteborg_molnlycke;Uppsala;AM;Inget ämne;3
+DEMO_1769612101707_39191;2026-01-05;kalmar;Linköping;BIL;Inget ämne;3
+DEMO_1769612101707_56783;2026-01-06;Jessica;Malmö;BIL;Inget ämne;3
+DEMO_1769612101707_67999;2026-01-04;malmo_triangeln;Uppsala;AM;Inget ämne;3
+DEMO_1769612101707_32512;2026-01-02;stockholm_sodermalm;Västerås;MC;Inget ämne;3
+DEMO_1769612101707_26119;2026-01-08;goteborg_dingle;Örebro;AM;Inget ämne;3
+DEMO_1769612101707_45440;2026-01-09;hollviken;Göteborg;MC;Inget ämne;3
+DEMO_1769612101707_95618;2026-01-15;goteborg_vastra_frolunda;Västerås;MC;Inget ämne;3
+DEMO_1769612101707_14463;2026-01-17;malmo_limhamn;Helsingborg;MC;Inget ämne;3
+DEMO_1769612101707_92071;2025-12-29;stockholm_djursholm;Uppsala;AM;Inget ämne;3
+DEMO_1769612101708_85316;2026-01-05;varberg;Västerås;MC;Inget ämne;3
+DEMO_1769612101708_94271;2026-01-16;lund_katedral;Jönköping;MC;Inget ämne;3
+DEMO_1769612101708_63184;2026-01-16;hassleholm;Stockholm;BIL;Inget ämne;3
+DEMO_1769612101733_56272;2026-01-29;goteborg_ullevi;Helsingborg;AM;Prisfråga MC-kort;1
+DEMO_1769612101777_98860;2026-01-29;Ingen;Örebro;BIL;Problem med inloggning i appen;1

@@ -1,0 +1,159 @@
+{
+  "id": "my_driving_academy_goteborg_kungalv",
+  "name": "My Driving Academy – Göteborg - Kungälv",
+  "city": "Göteborg",
+  "area": "Kungälv",
+  "description": "I Kungälv utgår alla körlektioner från Smedmästaregatan 2 (Bosses Trafikskola) där läraren Adnan möter upp. Om du önskar bli hämtad eller lämnad i närheten, prata med din lärare så löser vi det! Vi erbjuder endast MC trafikkörning och MC Risk 1 Kungälv",
+  "keywords": [
+    "my driving academy",
+    "mda",
+    "trafikskola",
+    "göteborg",
+    "kungälv",
+    "bosses trafikskola",
+    "mc",
+    "motorcykel",
+    "Smedmästaregatan",
+    "adnan",
+    "språk",
+    "undervisning",
+    "utbildning"
+  ],
+  "contact": {
+    "phone": "031-19 99 99",
+    "email": "info@kskolan.com",
+    "address": "Smedmästaregatan 2, 442 34 Kungälv"
+  },
+  "opening_hours": [
+    {
+      "days": "Mån – Tors",
+      "hours": "08:30– 17:00"
+    },
+    {
+      "days": "Fredag",
+      "hours": "08:00 - 14:00"
+    }
+  ],
+  "services_offered": [
+    "MC"
+  ],
+  "languages": [
+    "svenska",
+    "engelska"
+  ],
+  "prices": [
+    {
+      "service_name": "Totalpaket 5 MC",
+      "price": 14499,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 5",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "kungälv"
+      ]
+    },
+    {
+      "service_name": "Totalpaket 10 MC",
+      "price": 20499,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 10",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "kungälv"
+      ]
+    },
+    {
+      "service_name": "Intensivvecka MC",
+      "price": 21999,
+      "currency": "SEK",
+      "keywords": [
+        "intensivvecka",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "kungälv"
+      ]
+    },
+    {
+      "service_name": "Risk 1 MC",
+      "price": 899,
+      "currency": "SEK",
+      "keywords": [
+        "risk 1",
+        "riskettan",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "kungälv"
+      ]
+    },
+    {
+      "service_name": "Risk 2 MC",
+      "price": 3399,
+      "currency": "SEK",
+      "keywords": [
+        "risk 2",
+        "risktvåan",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "kungälv",
+        "stora holm"
+      ]
+    },
+    {
+      "service_name": "Körlektion MC",
+      "price": 1649,
+      "currency": "SEK",
+      "keywords": [
+        "körlektion",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "kungälv"
+      ]
+    },
+    {
+      "service_name": "Lektionspaket 5 MC",
+      "price": 7999,
+      "currency": "SEK",
+      "keywords": [
+        "lektionspaket 5",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "kungälv"
+      ]
+    },
+    {
+      "service_name": "Lektionspaket 10 MC",
+      "price": 15799,
+      "currency": "SEK",
+      "keywords": [
+        "lektionspaket 10",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "kungälv"
+      ]
+    }
+  ],
+  "booking_links": {
+    "CAR": "https://mydrivingacademy.com/goteborg-kungalv/",
+    "MC": "https://booking.mydrivingacademy.com/widget?vehicleType=mc&productType=Service&regionId=200055&locationId=200098&serviceId=200818&vehicleGearType=mcA&instructorId=200401",
+    "AM": null
+  },
+  "type": "kontor_info"
+}

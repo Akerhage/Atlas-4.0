@@ -1,0 +1,178 @@
+{
+  "id": "my_driving_academy_goteborg_storaholm",
+  "name": "My Driving Academy – Göteborg - Stora Holm",
+  "brand": "My Driving Academy",
+  "city": "Göteborg",
+  "area": "Stora Holm",
+  "description": "stora holm är vårt huvudcenter för MC-intensivvveckor och Risk 2. En komplett anläggning för all körning på bana.",
+  "keywords": [
+    "my driving academy",
+    "mda",
+    "trafikskola",
+    "göteborg",
+    "stora holm",
+    "telefon",
+    "mail",
+    "adress",
+    "kontakt",
+    "öppettider",
+    "priser",
+    "språk",
+    "undervisning",
+    "utbildning"
+  ],
+  "contact": {
+    "phone": "031-336 26 65",
+    "email": "goteborg.ullevi@trafikskolan.com",
+    "address": "stora holm, 417 46 Göteborg"
+  },
+  "opening_hours": [
+    {
+      "days": "Mån – Tors",
+      "hours": "08:30– 17:00"
+    },
+    {
+      "days": "Fredag",
+      "hours": "08:00 - 14:00"
+    }
+  ],
+  "services_offered": [
+    "MC",
+    "Risk 2 BIL",
+    "Risk 2 MC",
+    "Intensivvecka MC"
+  ],
+  "languages": [
+    "svenska",
+    "engelska"
+  ],
+  "prices": [
+    {
+      "service_name": "Risk 2 BIL",
+      "price": 2399,
+      "currency": "SEK",
+      "keywords": [
+        "risk 2",
+        "risktvåan",
+        "halkbana",
+        "bil",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "stora holm"
+      ]
+    },
+    {
+      "service_name": "Totalpaket 5 MC",
+      "price": 14499,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 5",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "stora holm"
+      ]
+    },
+    {
+      "service_name": "Totalpaket 10 MC",
+      "price": 20499,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 10",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "stora holm"
+      ]
+    },
+    {
+      "service_name": "Intensivvecka MC",
+      "price": 21999,
+      "currency": "SEK",
+      "keywords": [
+        "intensivvecka",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "stora holm"
+      ]
+    },
+    {
+      "service_name": "Risk 1 MC",
+      "price": 899,
+      "currency": "SEK",
+      "keywords": [
+        "risk 1",
+        "riskettan",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "stora holm"
+      ]
+    },
+    {
+      "service_name": "Risk 2 MC",
+      "price": 3399,
+      "currency": "SEK",
+      "keywords": [
+        "risk 2",
+        "risktvåan",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "stora holm"
+      ]
+    },
+    {
+      "service_name": "Körlektion MC",
+      "price": 1649,
+      "currency": "SEK",
+      "keywords": [
+        "körlektion",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "stora holm"
+      ]
+    },
+    {
+      "service_name": "Lektionspaket 5 MC",
+      "price": 7999,
+      "currency": "SEK",
+      "keywords": [
+        "lektionspaket 5",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "stora holm"
+      ]
+    },
+    {
+      "service_name": "Lektionspaket 10 MC",
+      "price": 15799,
+      "currency": "SEK",
+      "keywords": [
+        "lektionspaket 10",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "stora holm"
+      ]
+    }
+  ],
+  "booking_links": {
+    "CAR": null,
+    "MC": "https://booking.mydrivingacademy.com/widget?vehicleType=car&productType=Bundle&regionId=200005&locationId=200010",
+    "AM": null
+  },
+  "type": "kontor_info"
+}

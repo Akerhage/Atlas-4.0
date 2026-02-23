@@ -1,0 +1,169 @@
+{
+  "id": "my_driving_academy_goteborg_dingle",
+  "name": "My Driving Academy - Göteborg Dingle",
+  "brand": "My Driving Academy",
+  "city": "Göteborg",
+  "area": "Dingle",
+  "description": "I Dingle utgår vi från Kallkärrsvägen 21-22. Här har vi en egen manöverbana och erbjuder MC-utbildning och intensivveckor med Stefan och Adnan.",
+  "keywords": [
+    "my driving academy",
+    "mda",
+    "trafikskola",
+    "göteborg",
+    "dingle",
+    "mc",
+    "motorcykel",
+    "kallkärrsvägen",
+    "stefan",
+    "manöverbana",
+    "språk",
+    "undervisning",
+    "utbildning",
+    "my"
+  ],
+  "contact": {
+    "phone": "010-20 70 775",
+    "email": "hovass@mydrivingacademy.se",
+    "address": "Kallkärrsvägen 21-22, 455 61 Dingle"
+  },
+  "opening_hours": [
+    {
+      "days": "Mån – Tors",
+      "hours": "08:30– 17:00"
+    },
+    {
+      "days": "Fredag",
+      "hours": "08:00 - 14:00"
+    }
+  ],
+  "services_offered": [
+    "MC"
+  ],
+  "languages": [
+    "svenska",
+    "engelska"
+  ],
+  "prices": [
+    {
+      "service_name": "Totalpaket 5 MC",
+      "price": 14499,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 5",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "dingle",
+        "my"
+      ]
+    },
+    {
+      "service_name": "Totalpaket 10 MC",
+      "price": 20499,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 10",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "dingle",
+        "my"
+      ]
+    },
+    {
+      "service_name": "Intensivvecka MC",
+      "price": 21999,
+      "currency": "SEK",
+      "keywords": [
+        "intensivvecka",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "dingle",
+        "my"
+      ]
+    },
+    {
+      "service_name": "Risk 1 MC",
+      "price": 899,
+      "currency": "SEK",
+      "keywords": [
+        "risk 1",
+        "riskettan",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "dingle",
+        "my"
+      ]
+    },
+    {
+      "service_name": "Risk 2 MC",
+      "price": 3399,
+      "currency": "SEK",
+      "keywords": [
+        "risk 2",
+        "risktvåan",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "dingle",
+        "my"
+      ]
+    },
+    {
+      "service_name": "Körlektion MC",
+      "price": 1649,
+      "currency": "SEK",
+      "keywords": [
+        "körlektion",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "dingle",
+        "my"
+      ]
+    },
+    {
+      "service_name": "Lektionspaket 5 MC",
+      "price": 7999,
+      "currency": "SEK",
+      "keywords": [
+        "lektionspaket 5",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "dingle",
+        "my"
+      ]
+    },
+    {
+      "service_name": "Lektionspaket 10 MC",
+      "price": 15799,
+      "currency": "SEK",
+      "keywords": [
+        "lektionspaket 10",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "dingle",
+        "my"
+      ]
+    }
+  ],
+  "booking_links": {
+    "CAR": "https://mydrivingacademy.com/dingle/",
+    "MC": null,
+    "AM": null
+  },
+  "type": "kontor_info",
+  "office_color": "#d08b53"
+}

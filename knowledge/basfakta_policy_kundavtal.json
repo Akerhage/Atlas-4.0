@@ -1,0 +1,287 @@
+{
+"section_title": "BASFAKTA - Policy, Avtal och Integritet",
+"source_info": "Information om köpvillkor, avbokningsregler, återbetalning och integritetspolicy (GDPR).",
+"sections": [
+{
+"title": "När måste jag senast avboka en körlektion?",
+"answer": "Körlektioner måste avbokas senast klockan 12:00 vardagen innan lektionen. Avbokar du senare debiteras du fullt pris. Exempel: En lektion på måndag måste avbokas senast fredag kl 12:00.\n\n(Denna information gäller generellt för alla våra utbildningar: Bil, MC, Moped/AM och Släp).",
+"keywords": [
+"12:00",
+"avgift",
+"avboka",
+"avbokningsregler",
+"full debitering",
+"körlektion",
+"senast",
+"vardagen före",
+"bil",
+"mc",
+"am",
+"moped",
+"alla fordon"
+]
+},
+{
+"title": "Avbokningsregler för Kurser (Risk 1, Intro)",
+"answer": "För kurser som Riskettan och Introduktionskurs gäller avbokning senast klockan 12:00 vardagen innan kursstart.",
+"keywords": [
+"12:00",
+"avboka",
+"handledarkurs",
+"introduktionskurs",
+"risk 1",
+"riskettan",
+"vardagen innan",
+"bil",
+"mc"
+]
+},
+{
+"title": "Avbokningsregler för Halkbana (Risk 2)",
+"answer": "För Risk 2 (Halkbana) gäller striktare regler. Du måste avboka senast 4 vardagar innan kurstillfället för att slippa debitering.",
+"keywords": [
+"4 vardagar",
+"avboka",
+"halkbana",
+"risk 2",
+"risktvåan",
+"bil",
+"mc"
+]
+},
+{
+"title": "Avbokningsregler för AM-kurs (Moped)",
+"answer": "AM-kurs måste avbokas senast kl 12:00 en vecka (7 dagar) innan kursstart.",
+"keywords": [
+"1 vecka",
+"7 dagar",
+"am-kurs",
+"avboka",
+"kl 12:00",
+"mopedkurs",
+"am",
+"moped"
+]
+},
+{
+"title": "Avbokningsregler för MC-Intensivkurs",
+"answer": "MC Intensivkurs måste avbokas senast kl 12:00 två veckor (14 dagar) innan kursstart.",
+"keywords": [
+"14 dagar",
+"2 veckor",
+"avboka",
+"intensivkurs",
+"kl 12:00",
+"mc intensiv",
+"mc",
+"motorcykel"
+]
+},
+{
+"title": "Vad gäller vid sjukdom? (Läkarintyg)",
+"answer": "Om du blir sjuk och måste avboka sent debiteras du inte OM du kan uppvisa ett giltigt läkarintyg inom 1 vecka från avbokningstillfället.",
+"keywords": [
+"debitering",
+"inom 1 vecka",
+"läkarintyg",
+"sjuk",
+"sjukdom",
+"sjukintyg",
+"slippa betala",
+"bil",
+"mc",
+"am",
+"moped"
+]
+},
+{
+"title": "Gäller VAB som giltig frånvaro?",
+"answer": "Nej, tyvärr räknas inte VAB (vård av barn) som giltig orsak för sen avbokning utan debitering. Ordinarie avbokningsregler gäller.",
+"keywords": [
+"giltig frånvaro",
+"räknas inte",
+"vab",
+"vård av barn",
+"bil",
+"mc",
+"am",
+"moped"
+]
+},
+{
+"title": "Ångerrätt och Återbetalning (14 dagar)",
+"answer": "Enligt distanshandelslagen har du 14 dagars ångerrätt vid köp online. Vill du ha pengarna tillbaka efter dessa 14 dagar tar vi ut en administrativ avgift på 10% av det återstående beloppet. **Digital teori** och **teoripaket** återbetalas aldrig efter aktivering då de anses som **förbrukat** material.",
+"boost": 5000000,
+"keywords": ["10%", "14 dagar", "administrativ avgift", "pengarna tillbaka", "ångerrätt", "återbetalning", "digital teori", "teoripaket", "förbrukat"]
+},
+{
+"title": "Hur länge gäller mina köpta paket? (Giltighetstid)",
+"answer": "Dina köpta paket och lektioner är giltiga i 2 år (24 månader) från inköpsdatumet. Efter detta datum förfaller outnyttjade lektioner och kan inte återbetalas.",
+"keywords": [
+"2 år",
+"24 månader",
+"förfaller",
+"giltighet",
+"giltighetstid",
+"hur länge",
+"outnyttjade",
+"giltighetstid paket",
+"paket giltighet",
+"köpta lektioner giltighetstid",
+"paket",
+"bil",
+"mc",
+"am",
+"moped"
+]
+},
+{
+"title": "Giltighetstid för Presentkort",
+"answer": "Ett presentkort är giltigt i 1 år (12 månader) från inköpsdatumet. Detta skiljer sig från våra utbildningspaket som gäller i 2 år.",
+"keywords": [
+"presentkort",
+"giltighetstid presentkort",
+"hur länge gäller presentkort",
+"1 år",
+"12 månader",
+"gåva",
+"bil",
+"mc",
+"am",
+"moped"
+]
+},
+{
+"title": "Integritetspolicy och GDPR (Hur hanterar ni mina uppgifter?)",
+"answer": "Vi följer GDPR och hanterar dina personuppgifter säkert. Vi sparar endast uppgifter som krävs för din utbildning och myndighetsrapportering (Transportstyrelsen). Du kan när som helst begära ett registerutdrag.",
+"keywords": [
+"data",
+"gdpr",
+"integritet",
+"integritetspolicy",
+"personuppgifter",
+"radering",
+"sparar",
+"transportstyrelsen",
+"bil",
+"mc",
+"am",
+"moped"
+]
+},
+{
+"title": "Får man ha passagerare vid övningskörning?",
+"answer": "Ja, det är tillåtet att ha passagerare (t.ex. barn eller kompisar) i bilen vid privat övningskörning, förutsatt att din handledare godkänner det. Vid körlektioner på trafikskolan är det dock läraren som avgör om det är lämpligt för utbildningen.",
+"keywords": [
+"passagerare",
+"barn i bilen",
+"kompis",
+"medföljande",
+"övningsköra med barn",
+"familj",
+"vänner",
+"lagligt",
+"regler",
+"bil"
+]
+},
+{
+"title": "Ingår Trafikverkets avgifter i paketen?",
+"answer": "Nej, Trafikverkets avgifter för kunskapsprov och körprov ingår aldrig i våra paket. Dessa avgifter betalas direkt till Trafikverket. Du måste alltså betala dessa separat.\n\n(Detta gäller oavsett om du kör upp för Bil, MC eller AM).",
+"keywords": [
+"trafikverket",
+"avgifter",
+"fotografering",
+"provavgift",
+"betala",
+"externa kostnader",
+"ingår avgifter",
+"kunskapsprov",
+"körprov",
+"uppkörning",
+"teoriprov",
+"kostar",
+"pris",
+"tillkommer",
+"bil",
+"mc",
+"am",
+"moped"
+]
+},
+{
+"title": "Betalningsalternativ",
+"answer": "Vi samarbetar med Klarna för smidig betalning. Du kan betala med Swish, kort, faktura eller välja delbetalning. All betalning sker i förskott via e-handeln eller appen.",
+"boost": 5000000,
+"keywords": [
+"betala efter",
+"betala senare",
+"betalning",
+"betalningsalternativ",
+"betala",
+"hur betalar jag",
+"delbetalning",
+"efterskott",
+"faktura",
+"förskott",
+"klarna",
+"kort",
+"swish",
+"bil",
+"mc",
+"am",
+"moped"
+]
+},
+{
+"title": "Kostar appen 'Mitt Körkort' något?",
+"answer": "Appen 'Mitt Körkort' är gratis att ladda ner och fungerar för både Bil, MC och Moped. För att få tillgång till premium-innehåll (teorifrågor) krävs en engångskostnad samt att det ingår i våra totalpaket.",
+"keywords": [
+"app",
+"appen",
+"kostnad",
+"gratis",
+"premium",
+"betala",
+"engångskostnad",
+"mitt körkort",
+"pris",
+"teori",
+"teorifrågor",
+"teoripaket",
+"bil",
+"mc",
+"am",
+"moped"
+]
+},
+{
+"title": "Kontakt och Support",
+"answer": "Har du frågor om din bokning eller betalning? Kontakta vår support på 010-333 32 31 eller chatta direkt i appen Mitt Körkort. Vår support hjälper dig oavsett om det gäller Bil, MC eller Moped.",
+"keywords": [
+"010-333 32 31",
+"chatta",
+"kontakt",
+"nummer",
+"ring",
+"support",
+"telefon",
+"kundtjänst",
+"kundservice",
+"öppettider",
+"mejl",
+"e-post",
+"prata med",
+"bil",
+"mc",
+"am",
+"moped"
+]
+}
+],
+"type": "basfakta",
+"id": "basfakta_policy_kundavtal",
+"city": "",
+"area": "",
+"vehicle": ""
+}

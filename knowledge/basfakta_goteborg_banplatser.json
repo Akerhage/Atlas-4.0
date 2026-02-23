@@ -1,0 +1,106 @@
+{
+  "id": "basfakta_goteborg_banplatser",
+  "city": "Göteborg",
+  "section_title": "Banplatser & Startplatser Göteborg - Stora Holm, Åby, Kungälv & Dingle",
+  "source_info": "Information om våra manöverbanor och startplatser i Göteborgsområdet för MC och AM. Observera att dessa platser saknar traditionell reception.",
+  "prices": [
+    {
+      "service_name": "Risk 2 BIL (Stora Holm/Åby)",
+      "price": 2399,
+      "currency": "SEK",
+      "keywords": [
+        "risk 2",
+        "risktvåan",
+        "halkbana",
+        "bil",
+        "göteborg",
+        "stora holm",
+        "åby"
+      ]
+    },
+    {
+      "service_name": "Risk 2 MC (Stora Holm, Åby & Dingle)",
+      "price": 3399,
+      "currency": "SEK",
+      "keywords": [
+        "risk 2",
+        "risktvåan",
+        "mc",
+        "halkbana mc",
+        "göteborg",
+        "stora holm",
+        "åby",
+        "dingle"
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "title": "Var sker manöverkörning och banlektioner i Göteborg?",
+      "answer": "Vi använder flera platser för utbildning på bana: Stora Holm (Hisingen), Åby (Mölndal) och Dingle. Stora Holm används främst för MC-intensivveckor och Risk 2. Åby används för AM-manöverkörning (moped) samt MC-lektioner. I Dingle har vi en egen bana för både manöverkörning och Risk 2 MC.",
+      "keywords": [
+        "manöverkörning",
+        "göteborg",
+        "stora holm",
+        "åby",
+        "dingle",
+        "var ligger banan",
+        "manöverbana"
+      ]
+    },
+    {
+      "title": "MC-utbildning: Startplatser och banor",
+      "answer": "Våra MC-lektioner utgår från flera platser: Stora Holm (intensivveckor), Åby i Mölndal (där Eric ansvarar), Bosses Trafikskola i Kungälv (där Adnan möter upp) samt vår egen bana i Dingle (där Stefan och Adnan jobbar). Kontrollera alltid din bokning för exakt startplats.",
+      "keywords": [
+        "mc",
+        "intensivvecka",
+        "startplats",
+        "åby",
+        "stora holm",
+        "kungälv",
+        "dingle",
+        "eric",
+        "adnan",
+        "stefan"
+      ]
+    },
+    {
+      "title": "MC-lektioner i Kungälv (Bosses)",
+      "answer": "I Kungälv utgår alla MC-lektioner från Bosses Trafikskola på Smedmästaregatan 2. Här jobbar Adnan 100% och möter upp eleverna direkt på plats för trafiklektioner.",
+      "keywords": [
+        "kungälv",
+        "mc",
+        "bosses",
+        "smedmästaregatan",
+        "adnan"
+      ]
+    },
+    {
+      "title": "MC-utbildning och bana i Dingle",
+      "answer": "I Dingle på Kallkärrsvägen har vi en egen manöverbana. Här erbjuder vi trafiklektioner, manöverkörning, Risk 1, Risk 2 MC samt intensivveckor. Stefan och Adnan ansvarar för utbildningen här.",
+      "keywords": [
+        "dingle",
+        "manöverbana",
+        "mc-intensiv",
+        "stefan",
+        "kallkärrsvägen",
+        "risk 2 mc"
+      ]
+    },
+    {
+      "title": "AM-manöverkörning (Moped) på Åby",
+      "answer": "All AM-manöverkörning för moped i Göteborg sker på Åby-banan i Mölndal. Eric ansvarar för banan och ser till att allt flyter på. Samling sker direkt vid banan enligt anvisningar i din bokning.",
+      "keywords": [
+        "am-manöver",
+        "mopedkörning",
+        "åby",
+        "mölndal",
+        "eric",
+        "mopedbana"
+      ]
+    }
+  ],
+  "type": "basfakta",
+  "area": "",
+  "vehicle": ""
+}

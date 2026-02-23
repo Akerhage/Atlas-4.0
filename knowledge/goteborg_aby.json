@@ -1,0 +1,163 @@
+{
+  "id": "my_driving_academy_goteborg_aby",
+  "name": "My Driving Academy – Göteborg - Åby (Bana)",
+  "brand": "My Driving Academy",
+  "city": "Göteborg",
+  "area": "Åby",
+  "description": "Åby är vår centrala startplats i Mölndal för AM-manöverkörning och MC-lektioner. Eric ansvarar för banan. Ingen reception på plats, vi ses direkt vid banan!",
+  "keywords": [
+    "my driving academy",
+    "mda",
+    "trafikskola",
+    "göteborg",
+    "Åby",
+    "telefon",
+    "mail",
+    "adress",
+    "kontakt",
+    "öppettider",
+    "priser",
+    "språk",
+    "undervisning",
+    "utbildning"
+  ],
+  "contact": {
+    "phone": "031-19 99 99",
+    "email": "hej@mydrivingacademy.com",
+    "address": "Åbyvägen, Mölndal (Banan)"
+  },
+  "opening_hours": [
+    {
+      "days": "Mån – Tors",
+      "hours": "08:30– 17:00"
+    },
+    {
+      "days": "Fredag",
+      "hours": "08:00 - 14:00"
+    }
+  ],
+  "services_offered": [
+    "MC",
+    "Risk 2 BIL",
+    "Risk 2 MC",
+    "Intensivvecka MC"
+  ],
+  "languages": [
+    "svenska",
+    "engelska"
+  ],
+  "prices": [
+    {
+      "service_name": "Totalpaket 5 MC",
+      "price": 14499,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 5",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "Åby"
+      ]
+    },
+    {
+      "service_name": "Totalpaket 10 MC",
+      "price": 20499,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 10",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "Åby"
+      ]
+    },
+    {
+      "service_name": "Intensivvecka MC",
+      "price": 21999,
+      "currency": "SEK",
+      "keywords": [
+        "intensivvecka",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "Åby"
+      ]
+    },
+    {
+      "service_name": "Risk 1 MC",
+      "price": 899,
+      "currency": "SEK",
+      "keywords": [
+        "risk 1",
+        "riskettan",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "Åby"
+      ]
+    },
+    {
+      "service_name": "Risk 2 MC",
+      "price": 3399,
+      "currency": "SEK",
+      "keywords": [
+        "risk 2",
+        "risktvåan",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "Åby"
+      ]
+    },
+    {
+      "service_name": "Körlektion MC",
+      "price": 1649,
+      "currency": "SEK",
+      "keywords": [
+        "körlektion",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "Åby"
+      ]
+    },
+    {
+      "service_name": "Lektionspaket 5 MC",
+      "price": 7999,
+      "currency": "SEK",
+      "keywords": [
+        "lektionspaket 5",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "Åby"
+      ]
+    },
+    {
+      "service_name": "Lektionspaket 10 MC",
+      "price": 15799,
+      "currency": "SEK",
+      "keywords": [
+        "lektionspaket 10",
+        "mc",
+        "pris",
+        "kostnad",
+        "göteborg",
+        "Åby"
+      ]
+    }
+  ],
+  "booking_links": {
+    "CAR": null,
+    "MC": null,
+    "AM": null
+  },
+  "type": "kontor_info"
+}
