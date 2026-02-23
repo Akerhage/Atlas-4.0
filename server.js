@@ -743,6 +743,7 @@ res.json(rows);
 
 // 3. POST: Skapa ny agent
 app.post('/api/admin/create-user', authenticateToken, async (req, res) => {
+	if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { username, password, role, display_name, agent_color, avatar_id, routing_tag } = req.body;
 try {
 const hash = await bcrypt.hash(password, 10);
@@ -764,6 +765,7 @@ res.json({ success: true, userId: this.lastID });
 
 // 4. POST: Uppdatera roll (Gör till Admin / Ta bort Admin)
 app.post('/api/admin/update-role', authenticateToken, (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { userId, newRole } = req.body;
 if (userId === req.user.id) return res.status(400).json({ error: "Du kan inte ändra din egen roll" });
 
@@ -775,6 +777,7 @@ res.json({ success: true });
 
 // 5. POST: Reset lösenord (Administrativt)
 app.post('/api/admin/reset-password', authenticateToken, async (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { userId, newPassword } = req.body;
 
 try {
@@ -788,6 +791,7 @@ res.json({ success: true });
 
 // 6. POST: Radera användare permanent
 app.post('/api/admin/delete-user', authenticateToken, async (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { userId } = req.body;
 if (userId === req.user.id) return res.status(400).json({ error: "Du kan inte ta bort dig själv" });
 
@@ -819,6 +823,7 @@ res.status(500).json({ error: "Kunde inte radera användare" });
 
 // GET /api/admin/user-stats/:username - Hämtar statistik för en specifik agent
 app.get('/api/admin/user-stats/:username', authenticateToken, (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { username } = req.params;
 const statsQuery = `
 SELECT
@@ -865,6 +870,7 @@ spam_count:     row ? (row.spam_count     || 0) : 0
 
 // NY: Hämta alla ärenden för en specifik agent (för bläddraren)
 app.get('/api/admin/agent-tickets/:username', authenticateToken, async (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 try {
 const { username } = req.params;
 // Vi hämtar ärenden där agenten är owner och de inte är arkiverade
@@ -941,6 +947,7 @@ res.status(500).json({ error: "Kunde inte uppdatera färg" });
 
 // NY: Uppdatera agentens färg
 app.post('/api/admin/update-agent-color', authenticateToken, (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { username, color } = req.body;
 db.run("UPDATE users SET agent_color = ? WHERE username = ?", [color, username], (err) => {
 if (err) return res.status(500).json({ error: err.message });
@@ -987,7 +994,6 @@ res.status(500).json({ error: "Internt serverfel" });
 }
 });
 
-// Hämta ärenden för ett specifikt kontor (Används i Admin -> Kontor)
 // Hämta ärenden för ett specifikt kontor (Används i Admin -> Kontor)
 app.get('/api/admin/office-tickets/:tag', authenticateToken, async (req, res) => {
 if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
@@ -1038,6 +1044,7 @@ res.status(500).json({ error: err.message });
 
 // Uppdatera roll baserat på användarnamn (Matchar anropet i renderer.js rad 4693)
 app.post('/api/admin/update-role-by-username', authenticateToken, (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { username, newRole } = req.body;
 db.run("UPDATE users SET role = ? WHERE username = ?", [newRole, username], (err) => {
 if (err) return res.status(500).json({ error: err.message });
@@ -2596,7 +2603,7 @@ res.status(500).json({ error: "Database error" });
 // -------------------------------------------------------------------------
 // ENDPOINT: // GET /api/templates - Fetch All Templates (For Electron IPC)
 // -------------------------------------------------------------------------
-app.get('/api/templates', authenticateToken, async (req, res) => { // 🔒 F1.5
+app.get('/api/templates', authenticateToken, async (req, res) => {
 try {
 const templates = await getTemplatesCached();
 res.json(templates);
@@ -2610,6 +2617,7 @@ res.status(500).json({ error: "Database error" });
 // ENDPOINT: /api/templates/save (SPARA/UPPDATERA MALL VIA WEBB)
 // -------------------------------------------------------------------------
 app.post('/api/templates/save', authenticateToken, (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { id, title, content, group_name } = req.body;
 const sql = `
 INSERT INTO templates (id, title, content, group_name) 
@@ -2638,6 +2646,7 @@ res.json({ status: 'success' });
 // ENDPOINT: /api/templates/delete/:id (RADERA MALL VIA WEBB)
 // -------------------------------------------------------------------------
 app.delete('/api/templates/delete/:id', authenticateToken, (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { id } = req.params;
 if (!id) return res.status(400).json({ error: "id saknas" });
 
@@ -2827,6 +2836,7 @@ error: "Internal server error"
 // ENDPOINT: /api/inbox/delete (RADERA FRÅGA TOTALT)
 // -------------------------------------------------------------------------
 app.post('/api/inbox/delete', authenticateToken, async (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { conversationId } = req.body;
 
 if (!conversationId) {
@@ -2865,6 +2875,7 @@ return res.status(500).json({ error: "Kunde inte radera ärendet" });
 // ENDPOINT: /api/inbox/archive (ARKIVERA UTAN ATT RADERA)
 // -------------------------------------------------------------------------
 app.post('/api/inbox/archive', authenticateToken, (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { conversationId } = req.body;
 
 if (!conversationId) {
