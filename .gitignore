@@ -9,12 +9,8 @@ package-lock.json
 
 # ========= Tests & Scripts (Helt isolerat) =========
 /tests/
-stresstest.js
-test_results.txt
-session_test_results.txt
 
 # ========= Build Output =========
-kundchatt/
 dist/
 win-unpacked/
 

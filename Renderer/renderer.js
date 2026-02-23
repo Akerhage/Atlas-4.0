@@ -147,7 +147,7 @@ return await window.electronAPI.deleteQA(id);
 
 // --- XSS SKYDD ---
 window.esc = function(str) { 
-    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); 
+return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); 
 };
 
 // =============================================================================
@@ -206,6 +206,9 @@ console.log(`✅ Laddat ${officeData.length} kontor från SQL.`);
 } catch (err) { console.error("Kunde inte förladda kontor:", err); }
 }
 
+console.log('📋 officeData:', JSON.stringify(officeData.map(o => ({ tag: o.routing_tag, area: o.area, city: o.city }))));
+
+
 async function preloadUsers() {
 try {
 const res = await fetch(`${SERVER_URL}/api/auth/users`, { headers: fetchHeaders });
@@ -219,6 +222,7 @@ const office = officeData.find(o => o.routing_tag === tag);
 if (office) return (office.area || office.city).toUpperCase();
 return tag ? tag.toUpperCase() : "ÄRENDE";
 }
+
 
 // Kompakt ersättare för formatName
 function formatName(tag) {
@@ -786,6 +790,25 @@ renderArchive();
 }, 350);
 });
 
+// 4b. Lyssna på specifika kundmeddelanden (Loveable API)
+window.socketAPI.on('team:customer_message', (data) => {
+console.log("📩 Nytt kundmeddelande via API:", data);
+updateInboxBadge();
+if (State.soundEnabled) playNotificationSound();
+
+// Vi triggar en render för att se det nya meddelandet i listan direkt
+if (DOM.views.inbox.style.display === 'flex') renderInbox();
+});
+
+// 4c. Lyssna på helt nya ärenden (t.ex. interna meddelanden)
+window.socketAPI.on('team:new_ticket', (data) => {
+console.log("🆕 Nytt ärende i kön:", data);
+updateInboxBadge();
+if (State.soundEnabled) playNotificationSound();
+
+// Uppdatera vyn om användaren står i inkorgen
+if (DOM.views.inbox.style.display === 'flex') renderInbox();
+});
 
 // ================================================
 // team:customer_reply
@@ -1022,7 +1045,29 @@ if (typeof playNotificationSound === 'function') playNotificationSound();
 }
 }
 });
-}
+// ==========================================================
+// 🎨 LIVE FÄRG-SYNK (OFFICE & AGENT)
+// ==========================================================
+window.socketAPI.on('office:color_updated', ({ routing_tag, color }) => {
+console.log(`🎨 [LIVE] Kontorsfärg uppdaterad: ${routing_tag} → ${color}`);
+const office = officeData.find(o => o.routing_tag === routing_tag);
+if (office) office.office_color = color;
+renderInbox();
+renderMyTickets();
+if (document.getElementById('view-archive')?.style.display === 'flex') renderArchive();
+});
+
+window.socketAPI.on('agent:color_updated', ({ username, color }) => {
+console.log(`🎨 [LIVE] Agentfärg uppdaterad: ${username} → ${color}`);
+const user = usersCache.find(u => u.username === username);
+if (user) user.agent_color = color;
+if (currentUser?.username === username) currentUser.agent_color = color;
+renderInbox();
+renderMyTickets();
+if (document.getElementById('view-archive')?.style.display === 'flex') renderArchive();
+});
+
+} // <-- Stänger setupSocketListeners-funktionen
 
 // ==========================================================
 // === 1. GLOBALA INSTÄLLNINGAR & STATE ===
@@ -1541,12 +1586,6 @@ renderGroup("Plockade Ärenden", claimedByOthers, `<svg xmlns="http://www.w3.org
 // Uppdatera även den lilla röda pricken i menyn om det behövs
 updateInboxBadge();
 
-// Re-applicera aktiv sökning om en finns (skyddas mot socket-rerenders)
-const _activeSearch = document.getElementById('inbox-search');
-if (_activeSearch && _activeSearch.value.trim()) {
-_activeSearch.dispatchEvent(new Event('input', { bubbles: true }));
-}
-
 } catch (err) {
 console.error("Inbox fel:", err);
 container.innerHTML = `<div class="template-item-empty" style="color:#ff6b6b">Kunde inte ladda inkorgen.</div>`;
@@ -1562,6 +1601,99 @@ detail.removeAttribute('data-current-id');
 }
 }
 } // Slut på async function renderInbox()
+
+// ============================================================================
+// renderInboxFromTickets — Ritar om inkorgslistan med sökresultat
+// ============================================================================
+function renderInboxFromTickets(tickets, searchTerm) {
+const container = DOM.inboxList;
+if (!container) return;
+
+container.innerHTML = '';
+
+if (tickets.length === 0) {
+container.innerHTML = `<div class="template-item-empty" style="padding:24px; text-align:center; opacity:0.6;">
+Inga ärenden matchade <strong>"${esc(searchTerm)}"</strong>
+</div>`;
+return;
+}
+
+const header = document.createElement('div');
+header.className = 'template-group-header';
+header.innerHTML = `
+<div class="group-header-content">
+<span class="group-name" style="opacity:0.7;">Sökresultat för "${esc(searchTerm)}"</span>
+</div>
+<span class="group-badge live-badge">${tickets.length}</span>`;
+container.appendChild(header);
+
+const content = document.createElement('div');
+content.className = 'template-group-content expanded';
+
+tickets.forEach(t => {
+const card = document.createElement('div');
+const styles = getAgentStyles(t.routing_tag || t.owner);
+const timeStr = new Date(t.updated_at * 1000).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+const dateStr = new Date(t.updated_at * 1000).toLocaleDateString('sv-SE');
+const isMail = t.session_type === 'message';
+const typeIcon = isMail ? UI_ICONS.MAIL : UI_ICONS.CHAT;
+const displayTitle = esc(resolveTicketTitle(t));
+const previewText = stripHtml(t.last_message || "Ingen text...");
+const tagText = t.routing_tag ? resolveLabel(t.routing_tag) : (t.owner ? resolveLabel(t.owner) : (isMail ? 'MAIL' : 'CHATT'));
+const vIcon = getVehicleIcon(t.vehicle);
+const vehicleHtml = vIcon ? `<span style="color:${styles.main}; display:flex; align-items:center; opacity:0.9;" title="${t.vehicle}">${vIcon}</span>` : '';
+
+card.className = 'team-ticket-card';
+card.setAttribute('data-id', t.conversation_id);
+card.style.setProperty('--agent-color', styles.main);
+
+card.innerHTML = `
+<div class="ticket-header-row">
+<div class="ticket-title">
+<span style="opacity:0.7; margin-right:6px; display:flex; align-items:center;">${typeIcon}</span>
+<span style="color:${styles.main}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${displayTitle}</span>
+</div>
+<div class="ticket-top-right">
+${vehicleHtml}
+<button class="notes-trigger-btn" data-id="${t.conversation_id}" title="Interna anteckningar" style="color:${styles.main}" onclick="event.stopPropagation(); openNotesModal('${t.conversation_id}')">
+${UI_ICONS.NOTES}
+</button>
+</div>
+</div>
+<div class="ticket-preview">${previewText}</div>
+<div class="ticket-footer-bar">
+<div class="ticket-time">${dateStr} • ${timeStr}</div>
+<div class="ticket-tag" style="color:${styles.main}">${tagText}</div>
+</div>
+<button class="claim-mini-btn claim-action" title="Plocka ärende" style="color:${styles.main}">
+${UI_ICONS.CLAIM}
+</button>`;
+
+const btn = card.querySelector('.claim-action');
+btn.onclick = async (ev) => {
+ev.stopPropagation();
+await fetch(`${SERVER_URL}/team/claim`, {
+method: 'POST',
+headers: fetchHeaders,
+body: JSON.stringify({ conversationId: t.conversation_id, agentName: currentUser.username })
+});
+showToast('✅ Ärendet är nu ditt!');
+renderInbox();
+const searchEl = document.getElementById('inbox-search');
+if (searchEl) searchEl.value = '';
+};
+
+card.addEventListener('mouseup', () => {
+container.querySelectorAll('.team-ticket-card').forEach(c => c.classList.remove('active-ticket'));
+card.classList.add('active-ticket');
+openInboxDetail(t);
+});
+
+content.appendChild(card);
+});
+
+container.appendChild(content);
+}
 
 // ============================================================================
 // 2. DETALJVY FÖR INKORG (FIXAD: OPTIMISTISK STÄNGNING)
@@ -2663,7 +2795,7 @@ return;
 // 3. RENDERA LISTAN
 filtered.forEach(item => {
 const el = document.createElement('div');
-const styles = getAgentStyles(item.owner || (item._isLocal ? currentUser.username : 'unclaimed'));
+const styles = getAgentStyles(item.routing_tag || item.owner || (item._isLocal ? currentUser.username : 'unclaimed'));
 
 const isMail = item.session_type === 'message';
 const typeLabel = item._isLocal ? 'PRIVAT' : (item.owner ? resolveLabel(item.owner) : (isMail ? 'MAIL' : 'OPLOCKAD'));
@@ -2720,7 +2852,7 @@ ${UI_ICONS.NOTES}
 
 <div class="ticket-footer-bar">
 <div class="ticket-time">${fullDateStr}</div>
-<div class="ticket-tag" style="color:${styles.main}">${item.routing_tag ? resolveLabel(item.routing_tag) : (item.city ? item.city.toUpperCase() : '—')}</div>
+<div class="ticket-tag" style="color:${styles.main}">${(item.routing_tag || item.office) ? resolveLabel(item.routing_tag || item.office) : (item.city ? item.city.toUpperCase() : '—')}</div>
 </div>`;
 
 // 6. Klick-händelse (Öppnar detaljvy)
@@ -3061,6 +3193,8 @@ item.classList.toggle('active', item.dataset.view === viewId);
 // 4. Ladda data (Special-logik)
 if (viewId === 'inbox') {
 State.inboxExpanded = { "Live-Chattar": false, "Inkomna MAIL": false, "Plockade Ärenden": false };
+const searchEl = document.getElementById('inbox-search');
+if (searchEl) searchEl.value = '';
 renderInbox();
 } 
 else if (viewId === 'my-tickets') {
@@ -3625,7 +3759,7 @@ const helpTexts = {
 <span><b>Integrerat i svarsrutan</b>: I Mina Ärenden finns en rullgardinsmeny ovanför chattinputen. Välj en mall och texten klistras in direkt — blixtsnabbt och utan klipp-klistra.</span>
 </li>
 </ul>`,
-'settings': `
+'about': `
 <h4><span class="help-header-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Inställningar</h4>
 <ul>
 <li style="display:flex; align-items:flex-start; gap:12px; margin-bottom:12px;">
@@ -7497,75 +7631,41 @@ document.querySelectorAll('.custom-modal-overlay').forEach(m => m.style.display 
 });
 
 // ==================================================
-// 🔍 INKORG-SÖKNING (DOM-filter, rör inte renderInbox)
-// Filtrerar .team-ticket-card via data-search-attribut.
-// Döljer via .search-hidden (display:none !important) — vinner över CSS flex !important.
-// Expanderar grupper med träffar, kollapsar grupper utan.
+// 🔍 INKORG-SÖKNING (Server-side, debounce 300ms)
 // ==================================================
+(function() {
+let _searchTimer = null;
+let _isSearchMode = false;
+
 document.addEventListener('input', (e) => {
 if (e.target.id !== 'inbox-search') return;
-const term = e.target.value.toLowerCase().trim();
+const term = e.target.value.trim();
+
+clearTimeout(_searchTimer);
 
 if (!term) {
-// Töm sökning: ta bort .search-hidden från alla kort och headers
-document.querySelectorAll('#inbox-list .team-ticket-card').forEach(card => {
-card.classList.remove('search-hidden');
-});
-document.querySelectorAll('#inbox-list .template-group-header').forEach(h => {
-h.style.display = '';
-});
-// Återställ expand-state per grupp baserat på State.inboxExpanded
-document.querySelectorAll('#inbox-list .template-group-content').forEach(content => {
-if (content.dataset.searchExpanded) {
-content.classList.remove('expanded');
-const arrow = content.previousElementSibling?.querySelector('.group-arrow');
-if (arrow) arrow.classList.remove('expanded');
-delete content.dataset.searchExpanded;
+if (_isSearchMode) {
+_isSearchMode = false;
+renderInbox();
 }
-});
 return;
 }
 
-// Filtrera via data-search (synliga fält) — undviker falska träffar från meddelandetext
-// Använder .search-hidden-klass (display:none !important) för att vinna över CSS-reglernas flex !important
-document.querySelectorAll('#inbox-list .team-ticket-card').forEach(card => {
-const searchData = card.getAttribute('data-search') || '';
-const match = searchData.includes(term);
-card.classList.toggle('search-hidden', !match);
+_searchTimer = setTimeout(async () => {
+try {
+const res = await fetch(`${SERVER_URL}/team/inbox/search?q=${encodeURIComponent(term)}`, {
+headers: fetchHeaders
 });
-
-// Per grupp: expandera om träff finns, kollapsa om inte, dölj rubrik om ingen träff
-document.querySelectorAll('#inbox-list .template-group-content').forEach(group => {
-const groupCards = Array.from(group.querySelectorAll('.team-ticket-card'));
-const header = group.previousElementSibling;
-
-// Grupper utan kort (empty state) döljs alltid vid aktiv sökning
-if (groupCards.length === 0) {
-if (header) header.style.display = 'none';
-return;
+if (!res.ok) throw new Error('Sökfel');
+const data = await res.json();
+_isSearchMode = true;
+renderInboxFromTickets(data.tickets || [], term);
+} catch (err) {
+console.error('❌ [Inbox Search]', err);
 }
-
-const hasVisible = groupCards.some(c => !c.classList.contains('search-hidden'));
-
-if (hasVisible) {
-// Expandera gruppen om den inte redan är det, märk att sökningen gjorde det
-if (!group.classList.contains('expanded')) {
-group.classList.add('expanded');
-group.dataset.searchExpanded = '1';
-const arrow = header?.querySelector('.group-arrow');
-if (arrow) arrow.classList.add('expanded');
-}
-if (header) header.style.display = '';
-} else {
-// Inga matchande kort — kollapsa och dölj rubrik
-group.classList.remove('expanded');
-const arrow = header?.querySelector('.group-arrow');
-if (arrow) arrow.classList.remove('expanded');
-delete group.dataset.searchExpanded;
-if (header) header.style.display = 'none';
-}
+}, 300);
 });
-});
+})();
 
 // ==================================================
 // ℹ️ ADMIN INFO MODAL

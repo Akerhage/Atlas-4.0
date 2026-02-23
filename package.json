@@ -5,42 +5,56 @@
 "private": true,
 "type": "commonjs",
 "main": "main.js",
+
 "scripts": {
 "start": "node server.js",
 "dev": "npm run electron",
 "electron": "chcp 65001 && electron .",
+
+"gitpush": "node tests/scripts/git-push.js",
+
+"agenttest": "node tests/scripts/test_agent.js",
 "test": "node tests/scripts/test_runner.js",
 "stress": "node tests/scripts/test-stress-arende.js",
-"basfakta": "node tests/scripts/audit_basfakta.js",
-"cleanstate": "node tests/scripts/fix_cleanstate.js",
 "templatesync": "node tests/scripts/fix_mailtemplate_sync.js",
+
+"generatequestions": "node tests/scripts/fix_generate_test_questions.js",
+"cleanstate": "node tests/scripts/fix_cleanstate.js",
+"bigbang": "node tests/scripts/fix_bigbang.js",
+"seed:offices": "node tests/scripts/fix_seed_offices.js",
+"seed:users": "node tests/scripts/fix_seed_users.js",
+
+
+"backupdb": "node tests/scripts/fix_backup_manager.js",
+"restoredb": "node tests/scripts/fix_restore_db_manager.js",
+
+"basfakta": "node tests/scripts/audit_basfakta.js",
+"tree": "node tests/scripts/audit_tree.js",
+"syntax": "node tests/scripts/audit_syntax_check.js",
+
+"audit_db": "node tests/scripts/audit_db.js",
 "manual": "node tests/scripts/audit_create_manual.js",
 "manual2": "node tests/scripts/audit_create_manual2.js",
 "manual3": "node tests/scripts/audit_create_manual3.js",
-"tree": "node tests/scripts/audit_tree.js",
-"syntax": "node tests/scripts/audit_syntax_check.js",
-"gitpush": "node tests/scripts/git-push.js",
-"generatequestions": "node tests/scripts/fix_generate_test_questions.js",
-"agenttest": "node tests/scripts/test_agent.js",
-"bigbang": "node tests/scripts/fix_bigbang.js",
-"backupdb": "node tests/scripts/fix_backup_manager.js",
-"restoredb": "node tests/scripts/fix_restore_db_manager.js",
-"audit_db": "node tests/scripts/audit_db.js",
-  "audit_diagnose": "node tests/scripts/audit_diagnose.js",
-  "audit_server": "node tests/scripts/audit_server.js",
-  "audit_backend": "node tests/scripts/audit_backend.js",
-  "audit_check_balance": "node tests/scripts/audit_check_balance.js",
+
+"audit_diagnose": "node tests/scripts/audit_diagnose.js",
+"audit_server": "node tests/scripts/audit_server.js",
+"audit_backend": "node tests/scripts/audit_backend.js",
+"audit_check_balance": "node tests/scripts/audit_check_balance.js",
+
 "clean:dist": "rimraf dist build",
 "rebuild": "npm run clean:dist && npm run build:win",
 "build:win": "electron-builder --win",
 "build:mac": "electron-builder --mac",
 "build:all": "electron-builder -mwl"
 },
+
 "keywords": [
 "trafikskola",
 "ai",
 "assistant"
 ],
+
 "author": "Patrik Åkerhage",
 "license": "MIT",
 "dependencies": {
@@ -77,6 +91,7 @@
 "electron-builder": "^24.13.3",
 "rimraf": "^6.1.2"
 },
+
 "build": {
 "appId": "com.mydrivingacademy.atlas",
 "productName": "Atlas Trafikskola",

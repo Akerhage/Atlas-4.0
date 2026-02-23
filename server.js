@@ -243,41 +243,33 @@ return res.json({ answer: "", sessionId });
 humanModeLocks.add(sessionId);
 setTimeout(() => humanModeLocks.delete(sessionId), 3000);
 
-// 🔥 FIX 2026: OMvandla City/Area till Agent-ID (t.ex. "goteborg_ullevi")
-let initialOwner = providedContext?.locked_context?.agent_id || null;
+// 🔥 FIX: Routing-logik för att hålla ärenden i Inkorgen (Oplockade)
+let routingTag = providedContext?.locked_context?.agent_id || null;
 
-// Om inget ID skickades, försök räkna ut det från Stad + Område
-if (!initialOwner && providedContext?.locked_context?.city) {
+// Om inget ID skickades (t.ex. vid val av Centralsupport), försök räkna ut det eller kör fallback
+if (!routingTag && providedContext?.locked_context?.city) {
 const searchCity = providedContext.locked_context.city;
 const searchArea = providedContext.locked_context.area || "";
-
-// Vi hämtar alla kontor från DB (Atlas 4.0 logik)
 const allOffices = await getAllOffices();
 const matchedOffice = allOffices.find(o => 
 o.city.toLowerCase() === searchCity.toLowerCase() && 
 (o.area || "").toLowerCase() === searchArea.toLowerCase()
 );
-
-if (matchedOffice) {
-initialOwner = matchedOffice.routing_tag;
-console.log(`📍 [ROUTING] Dynamisk match: "${searchCity} ${searchArea}" -> Tag: "${initialOwner}"`);
-} else {
-initialOwner = 'admin'; 
-console.warn(`⚠️ [ROUTING] Ingen matchning i DB för "${searchCity} ${searchArea}". Fallback: admin`);
-}
+routingTag = matchedOffice ? matchedOffice.routing_tag : 'admin';
+} else if (!routingTag) {
+routingTag = 'admin'; // Total fallback till centralsupport-taggen
 }
 
-// Spara till DB med rätt ägare OCH kontorstagg
+// VIKTIGT: Vi sätter owner till NULL här för att det ska landa i Inkorgen som "Oplockat"
 await new Promise((resolve) => {
 db.run(
 `INSERT INTO chat_v2_state (conversation_id, session_type, human_mode, owner, office, updated_at)
-VALUES (?, 'customer', 1, ?, ?, ?)
+VALUES (?, 'customer', 1, NULL, ?, ?)
 ON CONFLICT(conversation_id) DO UPDATE SET 
 human_mode = 1, 
-owner = CASE WHEN chat_v2_state.owner IS NULL THEN excluded.owner ELSE chat_v2_state.owner END,
-office = CASE WHEN chat_v2_state.office IS NULL THEN excluded.office ELSE chat_v2_state.office END,
+office = excluded.office,
 updated_at = excluded.updated_at`,
-[sessionId, initialOwner, initialOwner, Math.floor(Date.now() / 1000)], // initialOwner skickas två gånger
+[sessionId, routingTag, Math.floor(Date.now() / 1000)],
 () => resolve()
 );
 });
@@ -743,7 +735,7 @@ res.json(rows);
 
 // 3. POST: Skapa ny agent
 app.post('/api/admin/create-user', authenticateToken, async (req, res) => {
-	if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { username, password, role, display_name, agent_color, avatar_id, routing_tag } = req.body;
 try {
 const hash = await bcrypt.hash(password, 10);
@@ -938,6 +930,7 @@ fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
 }
 
 console.log(`🎨 [OFFICE-COLOR] ${routing_tag} → ${color}`);
+io.emit('office:color_updated', { routing_tag, color }); 
 res.json({ success: true });
 } catch (e) {
 console.error('[OFFICE-COLOR] Uppdatering misslyckades:', e);
@@ -951,6 +944,7 @@ if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(
 const { username, color } = req.body;
 db.run("UPDATE users SET agent_color = ? WHERE username = ?", [color, username], (err) => {
 if (err) return res.status(500).json({ error: err.message });
+io.emit('agent:color_updated', { username, color });
 res.json({ success: true });
 });
 });
@@ -1008,8 +1002,8 @@ s.sender,
 s.updated_at,
 o.office_color -- ✅ RÄTT KOLUMN (Hämtas via JOIN)
 FROM chat_v2_state s
-LEFT JOIN offices o ON s.owner = o.routing_tag -- ✅ JOIN KRÄVS HÄR OCKSÅ
-WHERE s.owner = ?
+LEFT JOIN offices o ON s.office = o.routing_tag -- ✅ JOIN KRÄVS HÄR OCKSÅ
+WHERE s.office = ?
 AND (s.is_archived IS NULL OR s.is_archived = 0)
 ORDER BY s.updated_at DESC
 `;
@@ -1022,10 +1016,10 @@ const stored = await getContextRow(t.conversation_id);
 // Parsar context_data säkert för att extrahera ämne och meddelanden
 let ctx = {};
 try { 
-  ctx = typeof stored?.context_data === 'string' ? JSON.parse(stored.context_data) : (stored?.context_data || {}); 
+ctx = typeof stored?.context_data === 'string' ? JSON.parse(stored.context_data) : (stored?.context_data || {}); 
 } catch(e) { 
-  ctx = {}; 
-  console.error('[server] Korrupt context_data:', stored?.conversation_id, e.message); 
+ctx = {}; 
+console.error('[server] Korrupt context_data:', stored?.conversation_id, e.message); 
 }
 
 return {
@@ -1081,7 +1075,7 @@ const address = contact?.address || 'Adress ej angiven';
 await new Promise((resolve, reject) => {
 db.run(
 "INSERT INTO offices (city, area, routing_tag, name, office_color, phone, email, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-[city, area || '', routing_tag,
+[city, area || null, routing_tag,
 `${brand || 'My Driving Academy'} - ${city} ${area || ''}`.trim(),
 office_color || '#0071e3', phone, email, address],
 (err) => err ? reject(err) : resolve()
@@ -1751,24 +1745,23 @@ return; // Avbryt här, skicka inte till AI
 const v2State = await getV2State(sessionId);
 
 // Om detta är första meddelandet OCH session_type saknas...
-// (Här fortsätter din befintliga kod för session_type logic)
 if (isFirstMessage && (!v2State.session_type || v2State.session_type === 'customer')) {
 const incomingType = payload.session_type || 'private';
+const routingTag = payload.context?.locked_context?.agent_id || 'admin';
 
-// Uppdatera i databasen
+// Vi sätter owner till NULL (för att det ska vara i Inkorgen)
+// Vi sätter office till routingTag (för att det ska få rätt färg/kategori)
 await new Promise((resolve, reject) => {
-// Vi hämtar initialOwner (agent_id) för att sätta både owner och office från start
-const initialOwner = payload.context?.locked_context?.agent_id || null;
 db.run(
 `INSERT INTO chat_v2_state (conversation_id, session_type, human_mode, owner, office, updated_at)
-VALUES (?, ?, 0, ?, ?, ?)
+VALUES (?, ?, 0, NULL, ?, ?)
 ON CONFLICT(conversation_id) DO UPDATE SET session_type = excluded.session_type`,
-[sessionId, incomingType, initialOwner, initialOwner, Math.floor(Date.now() / 1000)],
+[sessionId, incomingType, routingTag, Math.floor(Date.now() / 1000)],
 (err) => (err ? reject(err) : resolve())
 );
 });
 
-console.log(`✅ [SESSION-TYPE] Satte ${sessionId} till '${incomingType}'`);
+console.log(`✅ [SESSION-TYPE] Satte ${sessionId} till '${incomingType}' i Inkorgen`);
 v2State.session_type = incomingType;
 }
 
@@ -2432,6 +2425,91 @@ res.status(500).json({ error: "Database error" });
 });
 
 // -------------------------------------------------------------------------
+// ENDPOINT: GET /team/inbox/search?q=... - Sök i aktiva ärenden
+// -------------------------------------------------------------------------
+app.get('/team/inbox/search', authenticateToken, async (req, res) => {
+const q = (req.query.q || '').trim().toLowerCase();
+if (!q) return res.json({ tickets: [] });
+
+try {
+const tickets = await new Promise((resolve, reject) => {
+const sql = `
+SELECT
+s.conversation_id,
+s.session_type,
+s.human_mode,
+s.owner,
+s.sender,
+s.updated_at,
+s.is_archived,
+s.office AS routing_tag,
+o.office_color
+FROM chat_v2_state s
+LEFT JOIN offices o ON s.office = o.routing_tag
+WHERE s.human_mode = 1
+AND (s.is_archived IS NULL OR s.is_archived = 0)
+AND (s.session_type IS NULL OR s.session_type != 'internal')
+ORDER BY s.updated_at ASC
+`;
+db.all(sql, (err, rows) => {
+if (err) reject(err);
+else resolve(rows || []);
+});
+});
+
+const enriched = await Promise.all(
+tickets.map(async (t) => {
+const stored = await getContextRow(t.conversation_id);
+const ctx = stored?.context_data || {};
+const locked = ctx.locked_context || {};
+const messages = ctx.messages || [];
+
+let lastMsg = "";
+if (messages.length > 0) {
+const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+if (lastUserMsg) lastMsg = lastUserMsg.content;
+else lastMsg = messages[messages.length - 1].content || "";
+}
+
+const finalName = locked.name || locked.contact_name || locked.full_name || locked.Name || t.sender || "";
+const email = locked.email || locked.contact_email || "";
+const subject = locked.subject || "";
+
+return {
+...t,
+messages,
+last_message: lastMsg,
+contact_name: finalName,
+contact_email: email,
+contact_phone: locked.phone || locked.contact_phone || null,
+subject,
+city: locked.city || null,
+vehicle: locked.vehicle || null
+};
+})
+);
+
+const results = enriched.filter(t => {
+return [
+t.contact_name,
+t.contact_email,
+t.subject,
+t.last_message,
+t.sender,
+t.owner,
+t.routing_tag,
+t.conversation_id
+].some(field => field && String(field).toLowerCase().includes(q));
+});
+
+res.json({ tickets: results });
+} catch (err) {
+console.error("[TEAM] Inbox search error:", err);
+res.status(500).json({ error: "Sökfel" });
+}
+});
+
+// -------------------------------------------------------------------------
 // ENDPOINT: POST /team/claim - Claim Ticket (Atomic Operation)
 // -------------------------------------------------------------------------
 app.post('/team/claim', authenticateToken, async (req, res) => {
@@ -2738,14 +2816,14 @@ const { sessionId } = req.params;
 const stored = await getContextRow(sessionId);
 const state = await getV2State(sessionId);
 
-// Säkerställ att vi alltid returnerar en array
 const messages = stored?.context_data?.messages || [];
 
 res.json({
 success: true,
-history: messages,   // För Loveable/Framtida bruk
-messages: messages,  // För din nuvarande renderer.js rad 343
-human_mode: state?.human_mode === 1
+history: messages,
+messages: messages,
+human_mode: state?.human_mode === 1,
+is_archived: state?.is_archived === 1   // ← NY RAD
 });
 } catch (err) {
 console.error("❌ History API Error:", err);
@@ -2808,6 +2886,7 @@ email,
 phone,
 subject,
 city: city || null,
+area: area || null,
 vehicle: vehicle || null
 }
 },
@@ -2947,11 +3026,12 @@ s.owner,
 s.session_type,
 s.sender,
 s.human_mode,
-o.office_color, -- ✅ ÄNDRAT: o.office_color istället för s.office_color
+s.office,
+o.office_color,
 c.context_data
 FROM chat_v2_state s
 LEFT JOIN context_store c ON s.conversation_id = c.conversation_id
-LEFT JOIN offices o ON s.owner = o.routing_tag -- ✅ LÄGG TILL DENNA JOIN
+LEFT JOIN offices o ON s.office = o.routing_tag
 WHERE s.is_archived = 1
 AND (
 s.session_type != 'internal'
@@ -2967,16 +3047,16 @@ LIMIT 500
 db.all(sql, [req.user.username, req.user.username, req.user.username], (err, rows) => {
 if (err) {
 console.error("Archive DB Error:", err);
-return res.status(500).json({ error: "Kunde note ladda arkivet" });
+return res.status(500).json({ error: "Kunde inte ladda arkivet" });
 }
 
 const cleanRows = rows.map(row => {
 let ctx = {};
 try { 
-  ctx = (typeof row.context_data === 'string') ? JSON.parse(row.context_data) : (row.context_data || {}); 
+ctx = (typeof row.context_data === 'string') ? JSON.parse(row.context_data) : (row.context_data || {}); 
 } catch(e) { 
-  ctx = {}; 
-  console.error('[server] Korrupt context_data:', row.conversation_id, e.message); 
+ctx = {}; 
+console.error('[server] Korrupt context_data:', row.conversation_id, e.message); 
 }
 
 const locked = ctx.locked_context || {};
@@ -2995,10 +3075,11 @@ conversation_id: row.conversation_id,
 timestamp: row.updated_at * 1000,
 owner: row.owner,
 human_mode: row.human_mode,
-office_color: row.office_color, // ✅ MAPPING-FIX: Skickar färgen till UI:t
+office_color: row.office_color,
 session_type: row.session_type, 
 question: question,
 answer: msgs || [],
+routing_tag: row.office,
 contact_name: locked.name || locked.contact_name || locked.Name || locked.full_name || null,
 contact_email: locked.email || null,
 contact_phone: locked.phone || null,
@@ -3011,6 +3092,8 @@ subject: locked.subject || null
 res.json({ archive: cleanRows });
 });
 });
+
+
 // =============================================================================
 // INTERNAL NOTES API
 // =============================================================================

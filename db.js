@@ -4,10 +4,11 @@
 // =============================================================================
 
 const sqlite3 = require('sqlite3');
+const path = require('path');
+const fs = require('fs');
 const db = new sqlite3.Database('./atlas.db');
 
 // DATABASE CONFIGURATION & OPTIMIZATION
-// WAL Mode & Busy Timeout (Concurrency Protection)
 db.configure("busyTimeout", 5000);
 
 db.run("PRAGMA journal_mode = WAL", (err) => {
@@ -21,14 +22,44 @@ console.log('✅ SQLite WAL mode enabled');
 
 // Table Creation Tracker
 let tablesCreated = 0;
-const REQUIRED_TABLES = 8; // templates, settings, context_store, chat_v2_state
+const REQUIRED_TABLES = 8;
 
 function checkAllTablesCreated() {
 tablesCreated++;
 if (tablesCreated === REQUIRED_TABLES) {
 console.log('✅ All database tables initialized successfully');
+syncOfficeAreaFromKnowledge();
 }
 }
+
+function syncOfficeAreaFromKnowledge() {
+const knowledgePath = process.env.KNOWLEDGE_PATH || path.join(__dirname, 'knowledge');
+try {
+const files = fs.readdirSync(knowledgePath)
+.filter(f => f.endsWith('.json') && !f.startsWith('basfakta'));
+
+let updated = 0;
+for (const file of files) {
+try {
+const data = JSON.parse(fs.readFileSync(path.join(knowledgePath, file), 'utf8'));
+// Fälten ligger direkt på root, inte i office_info
+if (data.type === 'kontor_info' && data.area && data.city) {
+// Härledd routing_tag från filnamnet (goteborg_ullevi.json → goteborg_ullevi)
+const tag = path.basename(file, '.json');
+db.run(
+"UPDATE offices SET area = ? WHERE routing_tag = ? AND (area IS NULL OR area = '')",
+[data.area, tag]
+);
+updated++;
+}
+} catch (_) {}
+}
+console.log(`✅ Office area synkad: ${updated} kontor uppdaterade från JSON-filer`);
+} catch (err) {
+console.error('⚠️ Kunde inte synka office area:', err.message);
+}
+}
+
 
 // =============================================================================
 // TABLE INITIALIZATION
@@ -813,6 +844,16 @@ if (err) reject(err); else resolve(row);
 });
 }
 
+function getTicketNoteById(id) {
+return new Promise((resolve, reject) => {
+db.get("SELECT * FROM ticket_notes WHERE id = ?", [id], (err, row) => {
+if (err) reject(err);
+else resolve(row);
+});
+});
+}
+
+
 // =============================================================================
 // MODULE EXPORTS
 // =============================================================================
@@ -844,5 +885,6 @@ deleteTicketNote,
 updateUserProfile,
 getAllOffices,
 getOfficeByTag,
+getTicketNoteById,
 getUserWithOffice
 };
