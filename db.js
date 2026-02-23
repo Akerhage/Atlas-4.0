@@ -6,7 +6,11 @@
 const sqlite3 = require('sqlite3');
 const path = require('path');
 const fs = require('fs');
-const db = new sqlite3.Database('./atlas.db');
+const isPackaged = process.env.IS_PACKAGED === 'true';
+const dbPath = isPackaged
+  ? require('path').join(process.env.ATLAS_ROOT_PATH, 'atlas.db')
+  : require('path').join(__dirname, 'atlas.db');
+const db = new sqlite3.Database(dbPath);
 
 // DATABASE CONFIGURATION & OPTIMIZATION
 db.configure("busyTimeout", 5000);
@@ -33,7 +37,9 @@ syncOfficeAreaFromKnowledge();
 }
 
 function syncOfficeAreaFromKnowledge() {
-const knowledgePath = process.env.KNOWLEDGE_PATH || path.join(__dirname, 'knowledge');
+const knowledgePath = isPackaged
+  ? path.join(process.env.ATLAS_ROOT_PATH, 'knowledge')
+  : path.join(__dirname, 'knowledge');
 try {
 const files = fs.readdirSync(knowledgePath)
 .filter(f => f.endsWith('.json') && !f.startsWith('basfakta'));
@@ -500,20 +506,24 @@ if (fields.length === 0) {
 return Promise.resolve(); // Inget att uppdatera efter filtrering
 }
 
-values.push(conversationId);
+// FIX: Vi använder millisekunder (13 siffror) för att matcha frontend och undvika 1970-buggen
+const now = Date.now(); 
+
+// Vi pushar nu-tiden först (för updated_at) och conversationId sist (för WHERE-klausulen)
+values.push(now, conversationId);
 
 return new Promise((resolve, reject) => {
 db.run(
 `UPDATE chat_v2_state
 SET ${fields.join(', ')},
-updated_at = strftime('%s','now')
+updated_at = ?
 WHERE conversation_id = ?`,
 values,
 err => {
 if (err) {
 reject(err);
 } else {
-console.log(`🟩 [DB] Flags sparade för ${conversationId}`);
+console.log(`🟩 [DB] Flags sparade för ${conversationId} med timestamp ${now}`);
 resolve();
 }
 }

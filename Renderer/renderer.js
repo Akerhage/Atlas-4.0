@@ -288,8 +288,7 @@ const NOTIFICATION_SOUND = "assets/js/pling.mp3";
 const NGROK_HOST = window.location.origin; // Dynamisk — härleds från aktuell URL
 
 // Välj URL: Localhost för Electron, Ngrok för Webb/Mobil
-// Ny rad 76: Om vi är i Electron ELLER om webbläsaren kör localhost -> använd 3001 lokalt
-const SERVER_URL = (isElectron || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+let SERVER_URL = (isElectron || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
 ? 'http://localhost:3001' 
 : NGROK_HOST;
 
@@ -1420,7 +1419,7 @@ const unassignedChats = visibleTickets.filter(t => t.session_type === 'customer'
 const unassignedMails = visibleTickets.filter(t => t.session_type === 'message' && !t.owner);
 const claimedByOthers = visibleTickets.filter(t => t.owner);
 
-claimedByOthers.sort((a, b) => b.updated_at - a.updated_at);
+claimedByOthers.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
 
 // 🔥 RENSA FÖRST NU - Efter att vi fixat vyer
 container.innerHTML = ''; 
@@ -1610,7 +1609,8 @@ const container = DOM.inboxList;
 if (!container) return;
 
 container.innerHTML = '';
-
+// TVINGA SORTERING: Nyast (högst timestamp) först i listan
+tickets.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
 if (tickets.length === 0) {
 container.innerHTML = `<div class="template-item-empty" style="padding:24px; text-align:center; opacity:0.6;">
 Inga ärenden matchade <strong>"${esc(searchTerm)}"</strong>
@@ -2070,7 +2070,7 @@ container.innerHTML = `
 return;
 }
 
-tickets.sort((a, b) => b.updated_at - a.updated_at);
+tickets.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
 
 tickets.forEach((t, index) => {
 const myName = currentUser.username;
@@ -6993,6 +6993,7 @@ initializeSocket();
 if (window.electronAPI) {
 const info = await window.electronAPI.getAppInfo();
 API_KEY = info.CLIENT_API_KEY;
+if (info.SERVER_URL) SERVER_URL = info.SERVER_URL; 
 
 if (DOM.appName) DOM.appName.textContent = info.APP_NAME;
 if (DOM.appVersion) DOM.appVersion.textContent = info.ATLAS_VERSION;

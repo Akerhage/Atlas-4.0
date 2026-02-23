@@ -1,0 +1,46 @@
+{
+  "appId": "com.mydrivingacademy.atlas-client",
+  "productName": "Atlas Klient",
+  "directories": {
+    "output": "dist-client"
+  },
+  "extraMetadata": {
+    "main": "main-client.js"
+  },
+  "asar": true,
+  "npmRebuild": false,
+  "extraResources": [
+    {
+      "from": ".env",
+      "to": ".env"
+    },
+    {
+      "from": "config.json",
+      "to": "config.json"
+    }
+  ],
+  "files": [
+    "main-client.js",
+    "preload.js",
+    "preload-loader.js",
+    "package.json",
+    "Renderer/**/*"
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "Renderer/assets/icons/app/icon.ico",
+    "verifyUpdateCodeSignature": false
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "runAfterFinish": false,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true
+  }
+}

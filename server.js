@@ -9,6 +9,11 @@ require('dotenv').config({
 path: isPackaged ? path.join(process.cwd(), '.env') : path.join(__dirname, '.env') 
 });
 
+function getWritablePath(relativePath) {
+  const base = isPackaged ? process.env.ATLAS_ROOT_PATH : __dirname;
+  return path.join(base, relativePath);
+}
+
 console.log("🚀 server.js bootar");
 // Säkra env-debuggar (visar närvaro, inte hemliga värden)
 console.log('[ENV] Verifierar viktiga variabler: ', {
@@ -18,6 +23,7 @@ NGROK_TOKEN: !!process.env.NGROK_TOKEN,
 JWT_SECRET: !!process.env.JWT_SECRET,
 OPENAI_API_KEY: !!process.env.OPENAI_API_KEY
 });
+
 const SERVER_VERSION = "3.8"; 
 const express = require('express');
 const crypto = require('crypto');
@@ -77,7 +83,7 @@ linksSentByVehicle: { AM: false, MC: false, CAR: false, INTRO: false, RISK1: fal
 // =============================================================================
 let imapEnabled    = true;
 let backupInterval = 24;   // timmar
-let backupPath     = path.join(__dirname, 'backups');
+let backupPath = getWritablePath('backups');
 let jwtExpiresIn   = '24h';
 let autoHumanExit  = false;
 let backupTimerId  = null;          // Referens för att kunna reschedulera backup-intervallet
@@ -238,7 +244,7 @@ console.log(`🚨 [HUMAN-MODE] TVINGANDE TRIGGER HITTAD (HTTP): "${query}" för 
 // 🔒 F3.2: Race-guard — förhindrar dubbel-trigger om Socket-vägen redan hanterat detta
 if (humanModeLocks.has(sessionId)) {
 console.log(`[HUMAN-MODE] Lås aktivt för ${sessionId} — hoppar över dubbel-trigger (HTTP)`);
-return res.json({ answer: "", sessionId });
+return { answer: "", sessionId };
 }
 humanModeLocks.add(sessionId);
 setTimeout(() => humanModeLocks.delete(sessionId), 3000);
@@ -291,7 +297,7 @@ if (typeof io !== 'undefined') {
 io.emit('team:update', { 
 type: 'human_mode_triggered', 
 sessionId,
-office: initialOwner || 'admin' 
+office: routingTag  || 'admin' 
 });
 }
 
@@ -484,7 +490,7 @@ app.use('/socket.io', express.static(path.join(__dirname, 'node_modules/socket.i
 // 📂 FILUPPLADDNING KONFIGURATION (MULTER)
 // =============================================================================
 // 🔥 FIX: Säkerställ att mappen 'uploads' faktiskt existerar
-const uploadDir = path.join(__dirname, 'uploads');
+const uploadDir = getWritablePath('uploads');
 if (!fs.existsSync(uploadDir)) {
 fs.mkdirSync(uploadDir, { recursive: true });
 console.log("📁 Skapade saknad mapp: /uploads");
@@ -2836,7 +2842,7 @@ res.status(500).json({ error: "Internt serverfel" });
 // =====================================================================
 app.post("/api/customer/message-form", async (req, res) => {
 try {
-const { name, email, phone, subject, message, city, vehicle } = req.body; // 🔥 HÄMTA CITY/VEHICLE
+const { name, email, phone, subject, message, city, area, vehicle } = req.body; // 🔥 HÄMTA CITY/VEHICLE
 
 if (!name || !email || !message) {
 return res.status(400).json({
@@ -2863,7 +2869,7 @@ office,
 updated_at
 ) VALUES (?, 'message', 1, ?, ?, ?)
 `,
-[conversationId, agent_id || null, agent_id || null, now],
+[conversationId, null, agent_id || null, now],
 err => (err ? reject(err) : resolve())
 );
 });
@@ -3628,7 +3634,7 @@ try {
 const dir = backupPath;
 if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 const ts  = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
-const src = path.join(__dirname, 'atlas.db');
+const src = getWritablePath('atlas.db');
 const dst = path.join(dir, `atlas_${ts}.db`);
 fs.copyFileSync(src, dst);
 console.log(`✅ [Backup] atlas.db → ${dst}`);
@@ -3652,7 +3658,7 @@ const mm = String(lastMonth.getMonth() + 1).padStart(2, '0');
 
 const filename = `atlas_archive_${yyyy}_${mm}.csv`;
 // Skapar exports-mappen i samma mapp som server.js
-const exportDir = path.join(__dirname, 'exports');
+const exportDir = getWritablePath('exports');
 const exportPath = path.join(exportDir, filename);
 
 // Skapa mapp om den inte finns
