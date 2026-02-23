@@ -54,22 +54,22 @@ deleteTicketNote
 // HELPER: Säker parsning av context_data (sträng eller objekt → normaliserat objekt)
 // =============================================================================
 function parseContextData(raw) {
-    try {
-        const data = (typeof raw === 'string') ? JSON.parse(raw) : (raw || {});
-        if (!Array.isArray(data.messages))
-            data.messages = [];
-        if (!data.locked_context)
-            data.locked_context = { city: null, area: null, vehicle: null };
-        if (!data.linksSentByVehicle)
-            data.linksSentByVehicle = { AM: false, MC: false, CAR: false, INTRO: false, RISK1: false, RISK2: false };
-        return data;
-    } catch(e) {
-        return {
-            messages: [],
-            locked_context: { city: null, area: null, vehicle: null },
-            linksSentByVehicle: { AM: false, MC: false, CAR: false, INTRO: false, RISK1: false, RISK2: false }
-        };
-    }
+try {
+const data = (typeof raw === 'string') ? JSON.parse(raw) : (raw || {});
+if (!Array.isArray(data.messages))
+data.messages = [];
+if (!data.locked_context)
+data.locked_context = { city: null, area: null, vehicle: null };
+if (!data.linksSentByVehicle)
+data.linksSentByVehicle = { AM: false, MC: false, CAR: false, INTRO: false, RISK1: false, RISK2: false };
+return data;
+} catch(e) {
+return {
+messages: [],
+locked_context: { city: null, area: null, vehicle: null },
+linksSentByVehicle: { AM: false, MC: false, CAR: false, INTRO: false, RISK1: false, RISK2: false }
+};
+}
 }
 
 // =============================================================================
@@ -92,24 +92,24 @@ const LOGIN_WINDOW_MS    = 15 * 60 * 1000; // 15 minuter
 const humanModeLocks = new Set(); // conversationId → låst under ~3 sek
 
 function getSetting(key, defaultVal) {
-    return new Promise((resolve) => {
-        db.get("SELECT value FROM settings WHERE key = ?", [key], (err, row) => {
-            resolve(row ? row.value : defaultVal);
-        });
-    });
+return new Promise((resolve) => {
+db.get("SELECT value FROM settings WHERE key = ?", [key], (err, row) => {
+resolve(row ? row.value : defaultVal);
+});
+});
 }
 function setSetting(key, value) {
-    db.run("INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
-        [key, String(value)]);
+db.run("INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+[key, String(value)]);
 }
 
 async function loadOperationSettings() {
-    imapEnabled    = (await getSetting('imap_enabled',   'true')) === 'true';
-    backupInterval = parseInt(await getSetting('backup_interval_hours', '24'), 10) || 24;
-    backupPath     = await getSetting('backup_path', path.join(__dirname, 'backups'));
-    jwtExpiresIn   = await getSetting('jwt_expires_in', '24h');
-    autoHumanExit  = (await getSetting('auto_human_exit', 'false')) === 'true';
-    console.log(`✅ [Settings] IMAP:${imapEnabled} Backup:${backupInterval}h JWT:${jwtExpiresIn} AutoExit:${autoHumanExit}`);
+imapEnabled    = (await getSetting('imap_enabled',   'true')) === 'true';
+backupInterval = parseInt(await getSetting('backup_interval_hours', '24'), 10) || 24;
+backupPath     = await getSetting('backup_path', path.join(__dirname, 'backups'));
+jwtExpiresIn   = await getSetting('jwt_expires_in', '24h');
+autoHumanExit  = (await getSetting('auto_human_exit', 'false')) === 'true';
+console.log(`✅ [Settings] IMAP:${imapEnabled} Backup:${backupInterval}h JWT:${jwtExpiresIn} AutoExit:${autoHumanExit}`);
 }
 
 // === MAIL CONFIGURATION (NODEMAILER) ===
@@ -748,16 +748,16 @@ try {
 const hash = await bcrypt.hash(password, 10);
 const sql = `INSERT INTO users (username, password_hash, role, display_name, agent_color, avatar_id, routing_tag) VALUES (?, ?, ?, ?, ?, ?, ?)`;
 db.run(sql, [
-  username.toLowerCase(),
-  hash,
-  role || 'agent',
-  display_name || username.toLowerCase(),
-  agent_color || '#0071e3',
-  avatar_id ?? 1,
-  routing_tag || null
+username.toLowerCase(),
+hash,
+role || 'agent',
+display_name || username.toLowerCase(),
+agent_color || '#0071e3',
+avatar_id ?? 1,
+routing_tag || null
 ], function(err) {
-  if (err) return res.status(400).json({ error: "Användarnamnet upptaget" });
-  res.json({ success: true, userId: this.lastID });
+if (err) return res.status(400).json({ error: "Användarnamnet upptaget" });
+res.json({ success: true, userId: this.lastID });
 });
 } catch (e) { res.status(500).json({ error: "Kunde inte skapa användare" }); }
 });
@@ -792,28 +792,28 @@ const { userId } = req.body;
 if (userId === req.user.id) return res.status(400).json({ error: "Du kan inte ta bort dig själv" });
 
 try {
-  // 1. Hämta användarnamn för owner-rensning i ärenden
-  const userRow = await new Promise((resolve, reject) => {
-    db.get("SELECT username FROM users WHERE id = ?", [userId], (err, row) => err ? reject(err) : resolve(row));
-  });
-  if (!userRow) return res.status(404).json({ error: "Användare hittades inte" });
+// 1. Hämta användarnamn för owner-rensning i ärenden
+const userRow = await new Promise((resolve, reject) => {
+db.get("SELECT username FROM users WHERE id = ?", [userId], (err, row) => err ? reject(err) : resolve(row));
+});
+if (!userRow) return res.status(404).json({ error: "Användare hittades inte" });
 
-  // 2. Radera användaren från databasen
-  await new Promise((resolve, reject) => {
-    db.run("DELETE FROM users WHERE id = ?", [userId], (err) => err ? reject(err) : resolve());
-  });
+// 2. Radera användaren från databasen
+await new Promise((resolve, reject) => {
+db.run("DELETE FROM users WHERE id = ?", [userId], (err) => err ? reject(err) : resolve());
+});
 
-  // 3. Frigör ärenden som ägdes av den raderade agenten (owner → NULL = återgår till publik inkorg)
-  await new Promise((resolve, reject) => {
-    db.run("UPDATE chat_v2_state SET owner = NULL WHERE owner = ?", [userRow.username], (err) => err ? reject(err) : resolve());
-  });
+// 3. Frigör ärenden som ägdes av den raderade agenten (owner → NULL = återgår till publik inkorg)
+await new Promise((resolve, reject) => {
+db.run("UPDATE chat_v2_state SET owner = NULL WHERE owner = ?", [userRow.username], (err) => err ? reject(err) : resolve());
+});
 
-  console.log(`✅ [ADMIN] Raderade agent: ${userRow.username} – ärenden frigjorda.`);
-  res.json({ success: true });
+console.log(`✅ [ADMIN] Raderade agent: ${userRow.username} – ärenden frigjorda.`);
+res.json({ success: true });
 
 } catch (err) {
-  console.error("❌ Delete User Error:", err);
-  res.status(500).json({ error: "Kunde inte radera användare" });
+console.error("❌ Delete User Error:", err);
+res.status(500).json({ error: "Kunde inte radera användare" });
 }
 });
 
@@ -822,25 +822,25 @@ app.get('/api/admin/user-stats/:username', authenticateToken, (req, res) => {
 const { username } = req.params;
 const statsQuery = `
 SELECT
-  -- Egna: pågående ärenden som ägs av agenten
-  (SELECT COUNT(*) FROM chat_v2_state WHERE owner = ? AND (is_archived IS NULL OR is_archived = 0)) as active_count,
-  -- Egna: arkiverade ärenden
-  (SELECT COUNT(*) FROM chat_v2_state WHERE owner = ? AND is_archived = 1) as archived_count,
-  -- Egna: arkiverade mailärenden (hanterade mail)
-  (SELECT COUNT(*) FROM chat_v2_state WHERE owner = ? AND is_archived = 1 AND session_type = 'message') as mail_handled,
-  -- Egna: interna meddelanden skickade av agenten
-  (SELECT COUNT(*) FROM chat_v2_state WHERE sender = ? AND session_type = 'internal') as internals_sent,
-  -- System: totalt pågående (exkl. interna)
-  (SELECT COUNT(*) FROM chat_v2_state WHERE (is_archived IS NULL OR is_archived = 0) AND (session_type IS NULL OR session_type != 'internal')) as total_active,
-  -- System: totalt arkiverade
-  (SELECT COUNT(*) FROM chat_v2_state WHERE is_archived = 1) as total_archived,
-  -- System: AI-besvarade (avslutade utan human mode)
-  (SELECT COUNT(*) FROM chat_v2_state WHERE human_mode = 0 AND is_archived = 1) as ai_answered,
-  -- System: agentbesvarade (avslutade med human mode)
-  (SELECT COUNT(*) FROM chat_v2_state WHERE human_mode = 1 AND is_archived = 1) as human_handled,
-  -- System: spam/tomma (arkiverade AI-ärenden utan lagrad kontext)
-  (SELECT COUNT(*) FROM chat_v2_state WHERE is_archived = 1 AND human_mode = 0
-    AND NOT EXISTS (SELECT 1 FROM context_store c WHERE c.conversation_id = chat_v2_state.conversation_id)) as spam_count
+-- Egna: pågående ärenden som ägs av agenten
+(SELECT COUNT(*) FROM chat_v2_state WHERE owner = ? AND (is_archived IS NULL OR is_archived = 0)) as active_count,
+-- Egna: arkiverade ärenden
+(SELECT COUNT(*) FROM chat_v2_state WHERE owner = ? AND is_archived = 1) as archived_count,
+-- Egna: arkiverade mailärenden (hanterade mail)
+(SELECT COUNT(*) FROM chat_v2_state WHERE owner = ? AND is_archived = 1 AND session_type = 'message') as mail_handled,
+-- Egna: interna meddelanden skickade av agenten
+(SELECT COUNT(*) FROM chat_v2_state WHERE sender = ? AND session_type = 'internal') as internals_sent,
+-- System: totalt pågående (exkl. interna)
+(SELECT COUNT(*) FROM chat_v2_state WHERE (is_archived IS NULL OR is_archived = 0) AND (session_type IS NULL OR session_type != 'internal')) as total_active,
+-- System: totalt arkiverade
+(SELECT COUNT(*) FROM chat_v2_state WHERE is_archived = 1) as total_archived,
+-- System: AI-besvarade (avslutade utan human mode)
+(SELECT COUNT(*) FROM chat_v2_state WHERE human_mode = 0 AND is_archived = 1) as ai_answered,
+-- System: agentbesvarade (avslutade med human mode)
+(SELECT COUNT(*) FROM chat_v2_state WHERE human_mode = 1 AND is_archived = 1) as human_handled,
+-- System: spam/tomma (arkiverade AI-ärenden utan lagrad kontext)
+(SELECT COUNT(*) FROM chat_v2_state WHERE is_archived = 1 AND human_mode = 0
+AND NOT EXISTS (SELECT 1 FROM context_store c WHERE c.conversation_id = chat_v2_state.conversation_id)) as spam_count
 `;
 
 db.get(statsQuery, [username, username, username, username], (err, row) => {
@@ -908,34 +908,34 @@ res.status(500).json({ error: err.message });
 // NY: Uppdatera kontorsfärg direkt — snabb väg, ingen AI-validering
 app.post('/api/admin/update-office-color', authenticateToken, async (req, res) => {
 if (req.user.role !== 'admin' && req.user.role !== 'support') {
-  return res.status(403).json({ error: "Access denied" });
+return res.status(403).json({ error: "Access denied" });
 }
 const { routing_tag, color } = req.body;
 if (!routing_tag || !color) return res.status(400).json({ error: "routing_tag och color krävs" });
 
 try {
-  // 1. Uppdatera SQL-tabellen (påverkar getAgentStyles via officeData)
-  await new Promise((resolve, reject) => {
-    db.run('UPDATE offices SET office_color = ? WHERE routing_tag = ?', [color, routing_tag],
-      (err) => err ? reject(err) : resolve());
-  });
+// 1. Uppdatera SQL-tabellen (påverkar getAgentStyles via officeData)
+await new Promise((resolve, reject) => {
+db.run('UPDATE offices SET office_color = ? WHERE routing_tag = ?', [color, routing_tag],
+(err) => err ? reject(err) : resolve());
+});
 
-  // 2. Uppdatera JSON-kunskapsfilen
-  const knowledgePath = isPackaged
-    ? path.join(process.resourcesPath, 'knowledge')
-    : path.join(__dirname, 'knowledge');
-  const filePath = path.join(knowledgePath, `${routing_tag}.json`);
-  if (fs.existsSync(filePath)) {
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    data.office_color = color;
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
-  }
+// 2. Uppdatera JSON-kunskapsfilen
+const knowledgePath = isPackaged
+? path.join(process.resourcesPath, 'knowledge')
+: path.join(__dirname, 'knowledge');
+const filePath = path.join(knowledgePath, `${routing_tag}.json`);
+if (fs.existsSync(filePath)) {
+const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+data.office_color = color;
+fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+}
 
-  console.log(`🎨 [OFFICE-COLOR] ${routing_tag} → ${color}`);
-  res.json({ success: true });
+console.log(`🎨 [OFFICE-COLOR] ${routing_tag} → ${color}`);
+res.json({ success: true });
 } catch (e) {
-  console.error('[OFFICE-COLOR] Uppdatering misslyckades:', e);
-  res.status(500).json({ error: "Kunde inte uppdatera färg" });
+console.error('[OFFICE-COLOR] Uppdatering misslyckades:', e);
+res.status(500).json({ error: "Kunde inte uppdatera färg" });
 }
 });
 
@@ -951,7 +951,7 @@ res.json({ success: true });
 // NY: Hantera agentens kontorsroller (routing_tags) - SYNCHRONIZED WITH RENDERER
 app.post('/api/admin/update-agent-offices', authenticateToken, async (req, res) => {
 if (req.user.role !== 'admin' && req.user.role !== 'support')
-  return res.status(403).json({ error: "Access denied" });
+return res.status(403).json({ error: "Access denied" });
 
 // Vi mappar nu mot Renderer rad 4882 som skickar { username, tag, isChecked }
 const { username, tag, isChecked } = req.body; 
@@ -988,7 +988,9 @@ res.status(500).json({ error: "Internt serverfel" });
 });
 
 // Hämta ärenden för ett specifikt kontor (Används i Admin -> Kontor)
+// Hämta ärenden för ett specifikt kontor (Används i Admin -> Kontor)
 app.get('/api/admin/office-tickets/:tag', authenticateToken, async (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 try {
 const { tag } = req.params;
 const sql = `
@@ -1014,8 +1016,11 @@ const stored = await getContextRow(t.conversation_id);
 // Parsar context_data säkert för att extrahera ämne och meddelanden
 let ctx = {};
 try { 
-ctx = typeof stored?.context_data === 'string' ? JSON.parse(stored.context_data) : (stored?.context_data || {}); 
-} catch(e) { console.error("Parse error office tickets", e); }
+  ctx = typeof stored?.context_data === 'string' ? JSON.parse(stored.context_data) : (stored?.context_data || {}); 
+} catch(e) { 
+  ctx = {}; 
+  console.error('[server] Korrupt context_data:', stored?.conversation_id, e.message); 
+}
 
 return {
 ...t,
@@ -1045,18 +1050,18 @@ res.json({ success: true });
 // =============================================================================
 app.post('/api/admin/create-office', authenticateToken, async (req, res) => {
 if (req.user.role !== 'admin' && req.user.role !== 'support')
-  return res.status(403).json({ error: "Access denied" });
+return res.status(403).json({ error: "Access denied" });
 
 const { city, area, routing_tag, office_color, brand, services_offered,
-        prices: customPrices, contact, description, languages } = req.body;
+prices: customPrices, contact, description, languages } = req.body;
 
 if (!city || !routing_tag) return res.status(400).json({ error: "City and Routing Tag required" });
 
 try {
 // 0. Kontrollera att routing_tag inte redan används (duplicate-kontroll)
 const existing = await new Promise((resolve, reject) => {
-  db.get("SELECT id FROM offices WHERE routing_tag = ?", [routing_tag],
-    (err, row) => err ? reject(err) : resolve(row));
+db.get("SELECT id FROM offices WHERE routing_tag = ?", [routing_tag],
+(err, row) => err ? reject(err) : resolve(row));
 });
 if (existing) return res.status(409).json({ error: `Routing tag '${routing_tag}' används redan.` });
 
@@ -1067,13 +1072,13 @@ const address = contact?.address || 'Adress ej angiven';
 
 // 2. Spara i Databasen (Tabell: offices)
 await new Promise((resolve, reject) => {
-  db.run(
-    "INSERT INTO offices (city, area, routing_tag, name, office_color, phone, email, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [city, area || '', routing_tag,
-     `${brand || 'My Driving Academy'} - ${city} ${area || ''}`.trim(),
-     office_color || '#0071e3', phone, email, address],
-    (err) => err ? reject(err) : resolve()
-  );
+db.run(
+"INSERT INTO offices (city, area, routing_tag, name, office_color, phone, email, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+[city, area || '', routing_tag,
+`${brand || 'My Driving Academy'} - ${city} ${area || ''}`.trim(),
+office_color || '#0071e3', phone, email, address],
+(err) => err ? reject(err) : resolve()
+);
 });
 
 // 3. Bestäm ID-prefix baserat på varumärke (viktigt för RAG)
@@ -1081,91 +1086,91 @@ const idPrefix = brand === 'Mårtenssons Trafikskola' ? 'martenssons_trafikskola
 
 // 4. Bygg den kompletta JSON-strukturen
 const templateData = {
-  id: `${idPrefix}_${routing_tag}`,
-  name: `${brand || 'My Driving Academy'} - ${city} ${area || ''}`.trim(),
-  brand: brand || "My Driving Academy",
-  city: city,
-  area: area || "",
-  office_color: office_color || "#0071e3",
-  description: description || `Välkommen till ${brand || 'My Driving Academy'} i ${city}${area ? ' ' + area : ''}.`,
-  keywords: [
-    brand?.toLowerCase().split(' ')[0],
-    "trafikskola",
-    city.toLowerCase(),
-    (area || "").toLowerCase(),
-    "kontakt", "priser"
-  ].filter(k => k),
-  contact: {
-    phone,
-    email,
-    address,
-    zip: "",
-    city_zip: city,
-    coordinates: { lat: 59.3293, lng: 18.0686 }
-  },
-  opening_hours: [
-    { days: "Mån – Tors", hours: "08:30 – 17:00" },
-    { days: "Fredag", hours: "08:00 – 14:00" }
-  ],
-  services_offered: services_offered || ["Bil"],
-  languages: (Array.isArray(languages) && languages.length) ? languages : ["svenska", "engelska"],
-  prices: [],
-  booking_links: { CAR: null, MC: null, AM: null },
-  type: "kontor_info"
+id: `${idPrefix}_${routing_tag}`,
+name: `${brand || 'My Driving Academy'} - ${city} ${area || ''}`.trim(),
+brand: brand || "My Driving Academy",
+city: city,
+area: area || "",
+office_color: office_color || "#0071e3",
+description: description || `Välkommen till ${brand || 'My Driving Academy'} i ${city}${area ? ' ' + area : ''}.`,
+keywords: [
+brand?.toLowerCase().split(' ')[0],
+"trafikskola",
+city.toLowerCase(),
+(area || "").toLowerCase(),
+"kontakt", "priser"
+].filter(k => k),
+contact: {
+phone,
+email,
+address,
+zip: "",
+city_zip: city,
+coordinates: { lat: 59.3293, lng: 18.0686 }
+},
+opening_hours: [
+{ days: "Mån – Tors", hours: "08:30 – 17:00" },
+{ days: "Fredag", hours: "08:00 – 14:00" }
+],
+services_offered: services_offered || ["Bil"],
+languages: (Array.isArray(languages) && languages.length) ? languages : ["svenska", "engelska"],
+prices: [],
+booking_links: { CAR: null, MC: null, AM: null },
+type: "kontor_info"
 };
 
 // 5. Prislogik: customPrices prioriteras, services_offered som fallback
 if (customPrices && Array.isArray(customPrices) && customPrices.length > 0) {
-  const cityKey = city.toLowerCase();
-  const areaKey = (area || "").toLowerCase();
-  // Injicera city/area som keywords i varje pris (RAG-precision)
-  templateData.prices = customPrices.map(p => ({
-    ...p,
-    keywords: [...new Set([...(p.keywords || []), cityKey, areaKey].filter(k => k))]
-  }));
-  // Synca booking_links baserat på keywords
-  templateData.prices.forEach(p => {
-    const kw = p.keywords || [];
-    if (kw.includes('bil')) templateData.booking_links.CAR = "https://mitt.mydrivingacademy.com/login";
-    if (kw.includes('mc') || kw.includes('motorcykel')) templateData.booking_links.MC = "https://mitt.mydrivingacademy.com/login";
-    if (kw.includes('am') || kw.includes('moped')) templateData.booking_links.AM = "https://mitt.mydrivingacademy.com/login";
-  });
-  // Synca services_offered från priser
-  const sSet = new Set(templateData.services_offered);
-  templateData.prices.forEach(p => {
-    const kw = p.keywords || [];
-    if (kw.includes('bil')) sSet.add('Bil');
-    if (kw.includes('mc') || kw.includes('motorcykel')) sSet.add('MC');
-    if (kw.includes('am') || kw.includes('moped')) sSet.add('AM');
-  });
-  templateData.services_offered = [...sSet];
+const cityKey = city.toLowerCase();
+const areaKey = (area || "").toLowerCase();
+// Injicera city/area som keywords i varje pris (RAG-precision)
+templateData.prices = customPrices.map(p => ({
+...p,
+keywords: [...new Set([...(p.keywords || []), cityKey, areaKey].filter(k => k))]
+}));
+// Synca booking_links baserat på keywords
+templateData.prices.forEach(p => {
+const kw = p.keywords || [];
+if (kw.includes('bil')) templateData.booking_links.CAR = "https://mitt.mydrivingacademy.com/login";
+if (kw.includes('mc') || kw.includes('motorcykel')) templateData.booking_links.MC = "https://mitt.mydrivingacademy.com/login";
+if (kw.includes('am') || kw.includes('moped')) templateData.booking_links.AM = "https://mitt.mydrivingacademy.com/login";
+});
+// Synca services_offered från priser
+const sSet = new Set(templateData.services_offered);
+templateData.prices.forEach(p => {
+const kw = p.keywords || [];
+if (kw.includes('bil')) sSet.add('Bil');
+if (kw.includes('mc') || kw.includes('motorcykel')) sSet.add('MC');
+if (kw.includes('am') || kw.includes('moped')) sSet.add('AM');
+});
+templateData.services_offered = [...sSet];
 } else {
-  // Befintlig services_offered-logik (Bil/MC/AM) — bevarad oförändrad
-  const s = templateData.services_offered;
+// Befintlig services_offered-logik (Bil/MC/AM) — bevarad oförändrad
+const s = templateData.services_offered;
 
-  if (s.includes("Bil")) {
-    templateData.prices.push(
-      { service_name: "Testlektion Bil (80 min)", price: 499, currency: "SEK", keywords: ["bil", "testlektion", "provlektion"] },
-      { service_name: "Körlektion Bil (40 min)", price: 850, currency: "SEK", keywords: ["bil", "lektion"] },
-      { service_name: "Riskettan Bil", price: 800, currency: "SEK", keywords: ["risk 1", "riskettan", "bil"] },
-      { service_name: "Risktvåan Bil (Halkbana)", price: 2200, currency: "SEK", keywords: ["risk 2", "halkbana", "bil"] }
-    );
-    templateData.booking_links.CAR = "https://mitt.mydrivingacademy.com/login";
-  }
+if (s.includes("Bil")) {
+templateData.prices.push(
+{ service_name: "Testlektion Bil (80 min)", price: 499, currency: "SEK", keywords: ["bil", "testlektion", "provlektion"] },
+{ service_name: "Körlektion Bil (40 min)", price: 850, currency: "SEK", keywords: ["bil", "lektion"] },
+{ service_name: "Riskettan Bil", price: 800, currency: "SEK", keywords: ["risk 1", "riskettan", "bil"] },
+{ service_name: "Risktvåan Bil (Halkbana)", price: 2200, currency: "SEK", keywords: ["risk 2", "halkbana", "bil"] }
+);
+templateData.booking_links.CAR = "https://mitt.mydrivingacademy.com/login";
+}
 
-  if (s.includes("MC")) {
-    templateData.prices.push(
-      { service_name: "Körlektion MC (80 min)", price: 1650, currency: "SEK", keywords: ["mc", "lektion", "motorcykel"] },
-      { service_name: "Riskettan MC", price: 800, currency: "SEK", keywords: ["risk 1", "mc", "riskettan"] },
-      { service_name: "Risktvåan MC", price: 3400, currency: "SEK", keywords: ["risk 2", "mc", "knix"] }
-    );
-    templateData.booking_links.MC = "https://mitt.mydrivingacademy.com/login";
-  }
+if (s.includes("MC")) {
+templateData.prices.push(
+{ service_name: "Körlektion MC (80 min)", price: 1650, currency: "SEK", keywords: ["mc", "lektion", "motorcykel"] },
+{ service_name: "Riskettan MC", price: 800, currency: "SEK", keywords: ["risk 1", "mc", "riskettan"] },
+{ service_name: "Risktvåan MC", price: 3400, currency: "SEK", keywords: ["risk 2", "mc", "knix"] }
+);
+templateData.booking_links.MC = "https://mitt.mydrivingacademy.com/login";
+}
 
-  if (s.includes("AM")) {
-    templateData.prices.push({ service_name: "Mopedutbildning AM", price: 5400, currency: "SEK", keywords: ["moped", "am", "moppekort"] });
-    templateData.booking_links.AM = "https://mitt.mydrivingacademy.com/login";
-  }
+if (s.includes("AM")) {
+templateData.prices.push({ service_name: "Mopedutbildning AM", price: 5400, currency: "SEK", keywords: ["moped", "am", "moppekort"] });
+templateData.booking_links.AM = "https://mitt.mydrivingacademy.com/login";
+}
 }
 
 // 6. Skriv till fil
@@ -1176,11 +1181,11 @@ console.log(`✅ [ADMIN] Skapat kontor och JSON-fil: ${routing_tag}`);
 res.json({ success: true });
 
 } catch (err) {
-  console.error("❌ Create Office Error:", err);
-  if (err.message?.includes('UNIQUE constraint')) {
-    return res.status(409).json({ error: `Routing tag '${routing_tag}' eller namn används redan.` });
-  }
-  res.status(500).json({ error: "Internt serverfel vid skapande av kontor" });
+console.error("❌ Create Office Error:", err);
+if (err.message?.includes('UNIQUE constraint')) {
+return res.status(409).json({ error: `Routing tag '${routing_tag}' eller namn används redan.` });
+}
+res.status(500).json({ error: "Internt serverfel vid skapande av kontor" });
 }
 });
 
@@ -1194,43 +1199,43 @@ const { tag } = req.params;
 if (!tag) return res.status(400).json({ error: "Tag required" });
 
 try {
-  // 1. Radera knowledge-filen om den finns
-  const knowledgePath = isPackaged ? path.join(process.resourcesPath, 'knowledge') : path.join(__dirname, 'knowledge');
-  const filePath = path.join(knowledgePath, `${tag}.json`);
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-    console.log(`🗑️ [ADMIN] Raderade kunskapsfil: ${tag}.json`);
-  } else {
-    console.warn(`⚠️ [ADMIN] Kunskapsfil saknades redan: ${tag}.json`);
-  }
+// 1. Radera knowledge-filen om den finns
+const knowledgePath = isPackaged ? path.join(process.resourcesPath, 'knowledge') : path.join(__dirname, 'knowledge');
+const filePath = path.join(knowledgePath, `${tag}.json`);
+if (fs.existsSync(filePath)) {
+fs.unlinkSync(filePath);
+console.log(`🗑️ [ADMIN] Raderade kunskapsfil: ${tag}.json`);
+} else {
+console.warn(`⚠️ [ADMIN] Kunskapsfil saknades redan: ${tag}.json`);
+}
 
-  // 2. Radera kontoret från databasen
-  await new Promise((resolve, reject) => {
-    db.run("DELETE FROM offices WHERE routing_tag = ?", [tag], (err) => err ? reject(err) : resolve());
-  });
+// 2. Radera kontoret från databasen
+await new Promise((resolve, reject) => {
+db.run("DELETE FROM offices WHERE routing_tag = ?", [tag], (err) => err ? reject(err) : resolve());
+});
 
-  // 3. Rensa taggen från alla användares routing_tag-sträng
-  const usersWithTag = await new Promise((resolve, reject) => {
-    db.all("SELECT id, routing_tag FROM users WHERE routing_tag LIKE ?", [`%${tag}%`], (err, rows) => err ? reject(err) : resolve(rows || []));
-  });
+// 3. Rensa taggen från alla användares routing_tag-sträng
+const usersWithTag = await new Promise((resolve, reject) => {
+db.all("SELECT id, routing_tag FROM users WHERE routing_tag LIKE ?", [`%${tag}%`], (err, rows) => err ? reject(err) : resolve(rows || []));
+});
 
-  for (const u of usersWithTag) {
-    const cleaned = (u.routing_tag || '')
-      .split(',')
-      .map(t => t.trim())
-      .filter(t => t !== tag)
-      .join(',');
-    await new Promise((resolve, reject) => {
-      db.run("UPDATE users SET routing_tag = ? WHERE id = ?", [cleaned || null, u.id], (err) => err ? reject(err) : resolve());
-    });
-  }
+for (const u of usersWithTag) {
+const cleaned = (u.routing_tag || '')
+.split(',')
+.map(t => t.trim())
+.filter(t => t !== tag)
+.join(',');
+await new Promise((resolve, reject) => {
+db.run("UPDATE users SET routing_tag = ? WHERE id = ?", [cleaned || null, u.id], (err) => err ? reject(err) : resolve());
+});
+}
 
-  console.log(`✅ [ADMIN] Kontor raderat: ${tag} (${usersWithTag.length} användare uppdaterade)`);
-  res.json({ success: true });
+console.log(`✅ [ADMIN] Kontor raderat: ${tag} (${usersWithTag.length} användare uppdaterade)`);
+res.json({ success: true });
 
 } catch (err) {
-  console.error("❌ Delete Office Error:", err);
-  res.status(500).json({ error: "Internt serverfel vid radering av kontor" });
+console.error("❌ Delete Office Error:", err);
+res.status(500).json({ error: "Internt serverfel vid radering av kontor" });
 }
 });
 
@@ -1462,25 +1467,25 @@ if (updates.services_offered) data.services_offered = updates.services_offered;
 
 // --- E. PRISUPPDATERING (KOMPLETT ERSÄTTNING — stöder radering av rader) ---
 if (updates.prices && Array.isArray(updates.prices)) {
-  data.prices = updates.prices;
+data.prices = updates.prices;
 
-  // Dedup-synk av services_offered: baserat på keywords hos kvarvarande priser
-  const activeServices = new Set();
-  data.prices.forEach(p => {
-    const kw = p.keywords || [];
-    if (kw.some(k => k === 'bil')) activeServices.add('Bil');
-    if (kw.some(k => k === 'mc' || k === 'motorcykel')) activeServices.add('MC');
-    if (kw.some(k => k === 'am' || k === 'moped')) activeServices.add('AM');
-  });
-  // Bevara bara de tjänster som faktiskt har kvarvarande priser
-  data.services_offered = (data.services_offered || []).filter(s => activeServices.has(s));
+// Dedup-synk av services_offered: baserat på keywords hos kvarvarande priser
+const activeServices = new Set();
+data.prices.forEach(p => {
+const kw = p.keywords || [];
+if (kw.some(k => k === 'bil')) activeServices.add('Bil');
+if (kw.some(k => k === 'mc' || k === 'motorcykel')) activeServices.add('MC');
+if (kw.some(k => k === 'am' || k === 'moped')) activeServices.add('AM');
+});
+// Bevara bara de tjänster som faktiskt har kvarvarande priser
+data.services_offered = (data.services_offered || []).filter(s => activeServices.has(s));
 
-  // Städa booking_links för borttagna tjänster
-  if (data.booking_links) {
-    if (!activeServices.has('Bil')) data.booking_links.CAR = null;
-    if (!activeServices.has('MC')) data.booking_links.MC = null;
-    if (!activeServices.has('AM')) data.booking_links.AM = null;
-  }
+// Städa booking_links för borttagna tjänster
+if (data.booking_links) {
+if (!activeServices.has('Bil')) data.booking_links.CAR = null;
+if (!activeServices.has('MC')) data.booking_links.MC = null;
+if (!activeServices.has('AM')) data.booking_links.AM = null;
+}
 }
 
 // --- F. 🧠 GLOBAL SMART KEYWORD LOGIC (FÖR RAG-MOTORN) ---
@@ -1528,14 +1533,14 @@ fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
 
 // --- I. SYNKA FÄRG TILL SQL (så preloadOffices/ärendekort får rätt färg direkt) ---
 if (updates.office_color) {
-  await new Promise((resolve, reject) => {
-    db.run(
-      'UPDATE offices SET office_color = ? WHERE routing_tag = ?',
-      [updates.office_color, routingTag],
-      (err) => err ? reject(err) : resolve()
-    );
-  });
-  console.log(`🎨 [ADMIN-UPDATE] office_color synkad till SQL för ${routingTag}: ${updates.office_color}`);
+await new Promise((resolve, reject) => {
+db.run(
+'UPDATE offices SET office_color = ? WHERE routing_tag = ?',
+[updates.office_color, routingTag],
+(err) => err ? reject(err) : resolve()
+);
+});
+console.log(`🎨 [ADMIN-UPDATE] office_color synkad till SQL för ${routingTag}: ${updates.office_color}`);
 }
 
 console.log(`✅ [ADMIN-UPDATE] ${routingTag}.json sparad och SEO-säkrad.`);
@@ -1586,7 +1591,7 @@ if (socket.user) {
 // En agent anslöt (Verifierad via JWT)
 activeAgents.set(socket.user.id, socket.id);
 db.run("UPDATE users SET is_online = 1, last_seen = ? WHERE id = ?",
-    [Math.floor(Date.now() / 1000), socket.user.id]);
+[Math.floor(Date.now() / 1000), socket.user.id]);
 // Gå med i rum för alla kontor agenten bevakar (t.ex. "hogsbo, frolunda")
 if (socket.user.routing_tag) {
 const tags = socket.user.routing_tag.split(',').map(t => t.trim());
@@ -1614,7 +1619,7 @@ socket.on('disconnect', () => {
 if (socket.user) {
 activeAgents.delete(socket.user.id);
 db.run("UPDATE users SET is_online = 0, last_seen = ? WHERE id = ?",
-    [Math.floor(Date.now() / 1000), socket.user.id]);
+[Math.floor(Date.now() / 1000), socket.user.id]);
 // Meddela alla att agenten gick offline
 io.emit('presence:update', {userId: socket.user.id,status: 'offline',lastSeen: Date.now()});}
 });
@@ -1937,11 +1942,11 @@ updated_at: Math.floor(Date.now() / 1000)
 
 // Synka updated_at i chat_v2_state — kortlistan sorteras på detta fält
 await new Promise((resolve, reject) => {
-  db.run(
-    'UPDATE chat_v2_state SET updated_at = ? WHERE conversation_id = ?',
-    [Math.floor(Date.now() / 1000), conversationId],
-    (err) => err ? reject(err) : resolve()
-  );
+db.run(
+'UPDATE chat_v2_state SET updated_at = ? WHERE conversation_id = ?',
+[Math.floor(Date.now() / 1000), conversationId],
+(err) => err ? reject(err) : resolve()
+);
 });
 
 // ✅ GLOBAL SYNC: Ser till att svaret syns i alla agenter/fönster direkt
@@ -2957,8 +2962,11 @@ return res.status(500).json({ error: "Kunde note ladda arkivet" });
 const cleanRows = rows.map(row => {
 let ctx = {};
 try { 
-ctx = (typeof row.context_data === 'string') ? JSON.parse(row.context_data) : (row.context_data || {}); 
-} catch(e) { ctx = {}; }
+  ctx = (typeof row.context_data === 'string') ? JSON.parse(row.context_data) : (row.context_data || {}); 
+} catch(e) { 
+  ctx = {}; 
+  console.error('[server] Korrupt context_data:', row.conversation_id, e.message); 
+}
 
 const locked = ctx.locked_context || {};
 const msgs = ctx.messages || [];
@@ -2992,7 +3000,6 @@ subject: locked.subject || null
 res.json({ archive: cleanRows });
 });
 });
-
 // =============================================================================
 // INTERNAL NOTES API
 // =============================================================================
@@ -3014,6 +3021,10 @@ res.json({ success: true });
 
 app.put('/api/notes/:id', authenticateToken, async (req, res) => {
 try {
+const note = await getTicketNoteById(req.params.id);
+if (!note) return res.status(404).json({ error: 'Note not found' });
+if (note.agent_name !== req.user.username && req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+
 await updateTicketNote(req.params.id, req.body.content);
 res.json({ success: true });
 } catch (err) { res.status(500).json({ error: err.message }); }
@@ -3021,6 +3032,10 @@ res.json({ success: true });
 
 app.delete('/api/notes/:id', authenticateToken, async (req, res) => {
 try {
+const note = await getTicketNoteById(req.params.id);
+if (!note) return res.status(404).json({ error: 'Note not found' });
+if (note.agent_name !== req.user.username && req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+
 await deleteTicketNote(req.params.id);
 res.json({ success: true });
 } catch (err) { res.status(500).json({ error: err.message }); }
@@ -3481,25 +3496,25 @@ console.error("❌ Fel vid inaktivitetskontroll:", err);
 
 // Auto-Human-Exit: Om aktiverat, kontrollera agenter vars alla ärenden är avslutade
 if (autoHumanExit) {
-    db.all(
-        `SELECT DISTINCT owner FROM chat_v2_state
-         WHERE is_archived=0 AND human_mode=1 AND owner IS NOT NULL`,
-        [], (err, agentRows) => {
-            if (err || !agentRows) return;
-            agentRows.forEach(({ owner }) => {
-                db.get(
-                    `SELECT COUNT(*) as cnt FROM chat_v2_state
-                     WHERE owner=? AND is_archived=0`,
-                    [owner], (err2, row) => {
-                        if (!err2 && row && row.cnt === 0) {
-                            db.run(`UPDATE chat_v2_state SET human_mode=0 WHERE owner=? AND is_archived=0`, [owner]);
-                            io.emit('team:update', { type: 'human_mode_triggered', sessionId: null });
-                        }
-                    }
-                );
-            });
-        }
-    );
+db.all(
+`SELECT DISTINCT owner FROM chat_v2_state
+WHERE is_archived=0 AND human_mode=1 AND owner IS NOT NULL`,
+[], (err, agentRows) => {
+if (err || !agentRows) return;
+agentRows.forEach(({ owner }) => {
+db.get(
+`SELECT COUNT(*) as cnt FROM chat_v2_state
+WHERE owner=? AND is_archived=0`,
+[owner], (err2, row) => {
+if (!err2 && row && row.cnt === 0) {
+db.run(`UPDATE chat_v2_state SET human_mode=0 WHERE owner=? AND is_archived=0`, [owner]);
+io.emit('team:update', { type: 'human_mode_triggered', sessionId: null });
+}
+}
+);
+});
+}
+);
 }
 }
 
@@ -3515,17 +3530,17 @@ setTimeout(checkEmailReplies, 5000);
 // 💾 DATABASBACKUP
 // =============================================================================
 function runDatabaseBackup() {
-    try {
-        const dir = backupPath;
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        const ts  = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
-        const src = path.join(__dirname, 'atlas.db');
-        const dst = path.join(dir, `atlas_${ts}.db`);
-        fs.copyFileSync(src, dst);
-        console.log(`✅ [Backup] atlas.db → ${dst}`);
-    } catch (e) {
-        console.error('❌ [Backup] Fel:', e.message);
-    }
+try {
+const dir = backupPath;
+if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+const ts  = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+const src = path.join(__dirname, 'atlas.db');
+const dst = path.join(dir, `atlas_${ts}.db`);
+fs.copyFileSync(src, dst);
+console.log(`✅ [Backup] atlas.db → ${dst}`);
+} catch (e) {
+console.error('❌ [Backup] Fel:', e.message);
+}
 }
 
 // =============================================================================
@@ -3803,80 +3818,80 @@ res.status(500).json({ error: 'Kunde inte spara konfiguration.' });
 // 🛡️ ADMIN — DRIFT & SÄKERHET (operation-settings)
 // =====================================================================
 app.get('/api/admin/operation-settings', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
-    res.json({
-        imap_enabled:           imapEnabled,
-        backup_interval_hours:  backupInterval,
-        backup_path:            backupPath,
-        jwt_expires_in:         jwtExpiresIn,
-        auto_human_exit:        autoHumanExit
-    });
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+res.json({
+imap_enabled:           imapEnabled,
+backup_interval_hours:  backupInterval,
+backup_path:            backupPath,
+jwt_expires_in:         jwtExpiresIn,
+auto_human_exit:        autoHumanExit
+});
 });
 
 app.post('/api/admin/operation-settings', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
-    const { field, value } = req.body;
-    const allowed = [
-        'imap_enabled', 'backup_interval_hours', 'backup_path',
-        'jwt_expires_in', 'auto_human_exit',
-        'OPENAI_API_KEY' // Tillåten att uppdatera via operation-settings (exponeras ej i GET)
-    ];
-    if (!allowed.includes(field)) return res.status(400).json({ error: 'Okänt fält.' });
-    setSetting(field, value);
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+const { field, value } = req.body;
+const allowed = [
+'imap_enabled', 'backup_interval_hours', 'backup_path',
+'jwt_expires_in', 'auto_human_exit',
+'OPENAI_API_KEY' // Tillåten att uppdatera via operation-settings (exponeras ej i GET)
+];
+if (!allowed.includes(field)) return res.status(400).json({ error: 'Okänt fält.' });
+setSetting(field, value);
 
-    // --- Runtime hot-reload per fält ---
+// --- Runtime hot-reload per fält ---
 
-    if (field === 'imap_enabled') {
-        imapEnabled = (value === 'true' || value === true);
-        // IMAP-intervallet körs alltid men checkar imapEnabled-flaggan i sin loop — ingen restart behövs
-        console.log(`✅ [HotReload] IMAP ${imapEnabled ? 'aktiverat' : 'inaktiverat'}`);
-    }
+if (field === 'imap_enabled') {
+imapEnabled = (value === 'true' || value === true);
+// IMAP-intervallet körs alltid men checkar imapEnabled-flaggan i sin loop — ingen restart behövs
+console.log(`✅ [HotReload] IMAP ${imapEnabled ? 'aktiverat' : 'inaktiverat'}`);
+}
 
-    if (field === 'backup_interval_hours') {
-        backupInterval = parseInt(value, 10) || 24;
-        // Avbryt det gamla intervallet och starta ett nytt med den nya tiden
-        if (backupTimerId) clearInterval(backupTimerId);
-        backupTimerId = setInterval(runDatabaseBackup, backupInterval * 3600 * 1000);
-        console.log(`✅ [HotReload] Backup-intervall ändrat till ${backupInterval}h`);
-    }
+if (field === 'backup_interval_hours') {
+backupInterval = parseInt(value, 10) || 24;
+// Avbryt det gamla intervallet och starta ett nytt med den nya tiden
+if (backupTimerId) clearInterval(backupTimerId);
+backupTimerId = setInterval(runDatabaseBackup, backupInterval * 3600 * 1000);
+console.log(`✅ [HotReload] Backup-intervall ändrat till ${backupInterval}h`);
+}
 
-    if (field === 'backup_path') {
-        backupPath = value;
-        console.log(`✅ [HotReload] Backup-sökväg: ${backupPath}`);
-    }
+if (field === 'backup_path') {
+backupPath = value;
+console.log(`✅ [HotReload] Backup-sökväg: ${backupPath}`);
+}
 
-    if (field === 'jwt_expires_in') {
-        jwtExpiresIn = value;
-        // JWT-ändringen påverkar nya tokens; befintliga tokens fortsätter att gälla tills de löper ut
-        console.log(`✅ [HotReload] JWT-livslängd: ${jwtExpiresIn}`);
-    }
+if (field === 'jwt_expires_in') {
+jwtExpiresIn = value;
+// JWT-ändringen påverkar nya tokens; befintliga tokens fortsätter att gälla tills de löper ut
+console.log(`✅ [HotReload] JWT-livslängd: ${jwtExpiresIn}`);
+}
 
-    if (field === 'auto_human_exit') {
-        autoHumanExit = (value === 'true' || value === true);
-        console.log(`✅ [HotReload] AutoHumanExit: ${autoHumanExit}`);
-    }
+if (field === 'auto_human_exit') {
+autoHumanExit = (value === 'true' || value === true);
+console.log(`✅ [HotReload] AutoHumanExit: ${autoHumanExit}`);
+}
 
-    if (field === 'OPENAI_API_KEY') {
-        try {
-            const trimmedKey = String(value).trim();
-            if (trimmedKey) {
-                process.env.OPENAI_API_KEY = trimmedKey;
-                aiEnabled = true;
-                console.log(`✅ [HotReload] OpenAI API-nyckel uppdaterad. AI aktiverat.`);
-            } else {
-                // Tom nyckel — inaktivera AI-anrop defensivt istället för att krascha
-                process.env.OPENAI_API_KEY = '';
-                aiEnabled = false;
-                console.warn(`⚠️ [HotReload] OpenAI API-nyckel rensad. AI-anrop inaktiverade (aiEnabled = false).`);
-            }
-        } catch (err) {
-            console.error('❌ [HotReload] Fel vid uppdatering av OpenAI-nyckel:', err.message);
-            return res.status(500).json({ error: 'Kunde inte uppdatera OpenAI-nyckel.' });
-        }
-    }
+if (field === 'OPENAI_API_KEY') {
+try {
+const trimmedKey = String(value).trim();
+if (trimmedKey) {
+process.env.OPENAI_API_KEY = trimmedKey;
+aiEnabled = true;
+console.log(`✅ [HotReload] OpenAI API-nyckel uppdaterad. AI aktiverat.`);
+} else {
+// Tom nyckel — inaktivera AI-anrop defensivt istället för att krascha
+process.env.OPENAI_API_KEY = '';
+aiEnabled = false;
+console.warn(`⚠️ [HotReload] OpenAI API-nyckel rensad. AI-anrop inaktiverade (aiEnabled = false).`);
+}
+} catch (err) {
+console.error('❌ [HotReload] Fel vid uppdatering av OpenAI-nyckel:', err.message);
+return res.status(500).json({ error: 'Kunde inte uppdatera OpenAI-nyckel.' });
+}
+}
 
-    console.log(`[OpSettings] ${field} = ${field === 'OPENAI_API_KEY' ? '***' : value}`);
-    res.json({ success: true, field, value: field === 'OPENAI_API_KEY' ? '***' : value });
+console.log(`[OpSettings] ${field} = ${field === 'OPENAI_API_KEY' ? '***' : value}`);
+res.json({ success: true, field, value: field === 'OPENAI_API_KEY' ? '***' : value });
 });
 
 // =====================================================================
@@ -4022,7 +4037,7 @@ const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
 // Nollställ alla online-statusar vid serverstart (förhindrar "ghost agents" efter krasch)
 db.run("UPDATE users SET is_online = 0", () => {
-    console.log('✅ [Startup] is_online reset för alla användare');
+console.log('✅ [Startup] is_online reset för alla användare');
 });
 
 // 1. Logga omedelbart att servern är uppe lokalt
@@ -4034,8 +4049,8 @@ console.log("💡 Ngrok-starten hanteras av main process (om konfigurerad)");
 
 // 3. Ladda drift-inställningar från settings-tabellen
 loadOperationSettings().then(() => {
-    const backupMs = (backupInterval || 24) * 3600 * 1000;
-    backupTimerId = setInterval(runDatabaseBackup, backupMs); // Spara referens för hot-reload
-    console.log(`✅ [Backup] Schemalagt var ${backupInterval}h`);
+const backupMs = (backupInterval || 24) * 3600 * 1000;
+backupTimerId = setInterval(runDatabaseBackup, backupMs); // Spara referens för hot-reload
+console.log(`✅ [Backup] Schemalagt var ${backupInterval}h`);
 });
 });

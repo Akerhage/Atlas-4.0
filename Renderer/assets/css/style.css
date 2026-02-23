@@ -880,9 +880,9 @@ font-size: 13px;
 
 /* SETTINGS — Kompakta mail-mallar. Rör ej global .template-item */
 #view-templates .template-item {
-    padding: 7px 12px !important;
-    min-height: 30px !important;
-    margin: 3px 0 !important;
+padding: 7px 12px !important;
+min-height: 30px !important;
+margin: 3px 0 !important;
 }
 
 /* editor-placeholder: visas i redigeringsytan för mailmallar.
@@ -1776,27 +1776,27 @@ color: white;
 .info-icon-svg { width: 18px; height: 18px; stroke-width: 2px; }
 
 /* =============================================================================
-   INKORG — DISKRET SÖKRUTA
-   ============================================================================= */
+INKORG — DISKRET SÖKRUTA
+============================================================================= */
 .subtle-search-input {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    width: 200px;
-    transition: all 0.2s ease;
-    outline: none;
+background: rgba(255, 255, 255, 0.05);
+border: 1px solid rgba(255, 255, 255, 0.1);
+color: var(--text-primary);
+padding: 6px 12px;
+border-radius: 20px;
+font-size: 13px;
+width: 200px;
+transition: all 0.2s ease;
+outline: none;
 }
 .subtle-search-input:focus {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 5px rgba(0, 113, 227, 0.3);
-    width: 250px;
+background: rgba(255, 255, 255, 0.1);
+border-color: var(--accent-primary);
+box-shadow: 0 0 5px rgba(0, 113, 227, 0.3);
+width: 250px;
 }
 .subtle-search-input::placeholder {
-    color: rgba(255, 255, 255, 0.35);
+color: rgba(255, 255, 255, 0.35);
 }
 
 /* Generell header för ALLA vyer */
@@ -2562,8 +2562,8 @@ border-color: var(--agent-color, #0071e3) !important;
 }
 
 /* =============================================================================
-   ADMIN MINI CARD — Isolerad under #view-admin. Rör ej .team-ticket-card eller .admin-list-card
-   ============================================================================= */
+ADMIN MINI CARD — Isolerad under #view-admin. Rör ej .team-ticket-card eller .admin-list-card
+============================================================================= */
 #view-admin .admin-mini-card {
 box-sizing: border-box;
 width: 100%;
@@ -2597,80 +2597,80 @@ box-shadow: none;
 
 /* Kontorskort — bubble och subtitle med named classes för live-uppdatering */
 #view-admin .office-card-bubble {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  border: 1.5px solid;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-weight: 700;
-  font-size: 12px;
-  opacity: 0.85;
+width: 28px;
+height: 28px;
+border-radius: 6px;
+border: 1.5px solid;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+font-weight: 700;
+font-size: 12px;
+opacity: 0.85;
 }
 
 #view-admin .office-card-sub {
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+font-weight: 600;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
 }
 
 /* ADMIN TICKET PREVIEW — Isolerad. Rör ej .profile-ticket-row eller .team-ticket-card */
 #view-admin .admin-ticket-preview {
-    display: flex;
-    align-items: center;
-    padding: 12px 14px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.10);
-    border-left: 4px solid var(--atp-color, #0071e3);
-    border-radius: 8px;
-    margin-bottom: 6px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    gap: 8px;
+display: flex;
+align-items: center;
+padding: 12px 14px;
+background: rgba(255,255,255,0.04);
+border: 1px solid rgba(255,255,255,0.10);
+border-left: 4px solid var(--atp-color, #0071e3);
+border-radius: 8px;
+margin-bottom: 6px;
+cursor: pointer;
+transition: all 0.15s ease;
+gap: 8px;
 }
 #view-admin .admin-ticket-preview:hover {
-    background: rgba(255,255,255,0.06);
-    border-left-color: var(--atp-color, #0071e3);
-    transform: translateX(2px);
+background: rgba(255,255,255,0.06);
+border-left-color: var(--atp-color, #0071e3);
+transform: translateX(2px);
 }
 #view-admin .admin-ticket-preview .atp-sender {
-    font-weight: 600;
-    font-size: 12px;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+font-weight: 600;
+font-size: 12px;
+color: var(--text-primary);
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
 }
 #view-admin .admin-ticket-preview .atp-subject {
-    font-size: 11px;
-    opacity: 0.55;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 2px;
+font-size: 11px;
+opacity: 0.55;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+margin-top: 2px;
 }
 #view-admin .admin-ticket-preview .atp-note-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    opacity: 0.65;
-    padding: 6px;
-    border-radius: 6px;
-    flex-shrink: 0;
-    transition: opacity 0.2s;
-    line-height: 0;
+background: transparent;
+border: none;
+cursor: pointer;
+opacity: 0.65;
+padding: 6px;
+border-radius: 6px;
+flex-shrink: 0;
+transition: opacity 0.2s;
+line-height: 0;
 }
 #view-admin .admin-ticket-preview .atp-note-btn:hover {
-    opacity: 1;
-    background: rgba(255,255,255,0.08);
+opacity: 1;
+background: rgba(255,255,255,0.08);
 }
 
 /* =============================================================================
-   ADMIN TAB 3 — SYSTEMKONFIGURATION (scoped under #view-admin)
-   ============================================================================= */
+ADMIN TAB 3 — SYSTEMKONFIGURATION (scoped under #view-admin)
+============================================================================= */
 #view-admin .admin-sysconfig-nav-item {
 box-sizing: border-box;
 width: 100%;
@@ -2774,8 +2774,8 @@ gap: 8px;
 }
 
 /* =============================================================================
-   ADMIN KUNSKAPSBANK — Section Cards (scoped under #view-admin)
-   ============================================================================= */
+ADMIN KUNSKAPSBANK — Section Cards (scoped under #view-admin)
+============================================================================= */
 #view-admin .admin-kb-section-card {
 background: rgba(255, 255, 255, 0.02);
 border: 1px solid rgba(255, 255, 255, 0.06);
@@ -3171,49 +3171,49 @@ border-color: #f39c12 !important;
 }
 
 /* =============================================================================
-   FIX: CLAIM-HANDEN (INKORGEN) - UNDER NOTES UTAN RUTA
-   ============================================================================= */
+FIX: CLAIM-HANDEN (INKORGEN) - UNDER NOTES UTAN RUTA
+============================================================================= */
 
 /* Unifierad styling för handen (Inkorgen) */
 .team-ticket-card .claim-mini-btn,
 .team-ticket-card .claim-action {
-    position: absolute !important;
-    top: 26px !important;      /* Ändrat från 48px för att landa precis under Notes */
-    right: 14px !important;    /* Linjerad vertikalt med Notes-ikonen */
-    width: 20px !important;
-    height: 20px !important;
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    opacity: 0;
-    transition: opacity 0.2s ease !important;
-    transform: none !important;
-    z-index: 10 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+position: absolute !important;
+top: 26px !important;      /* Ändrat från 48px för att landa precis under Notes */
+right: 14px !important;    /* Linjerad vertikalt med Notes-ikonen */
+width: 20px !important;
+height: 20px !important;
+background: none !important;
+border: none !important;
+box-shadow: none !important;
+opacity: 0;
+transition: opacity 0.2s ease !important;
+transform: none !important;
+z-index: 10 !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
 }
 
 /* Visa handen vid hovring på kortet */
 .team-ticket-card:hover .claim-mini-btn,
 .team-ticket-card:hover .claim-action {
-    opacity: 1 !important;
+opacity: 1 !important;
 }
 
 /* Ikon-färg och glöd vid hover — ärver från parent color */
 .claim-mini-btn svg,
 .claim-action svg {
-    width: 16px !important;
-    height: 16px !important;
-    stroke: currentColor !important;
-    fill: none !important;
-    transition: transform 0.2s ease;
+width: 16px !important;
+height: 16px !important;
+stroke: currentColor !important;
+fill: none !important;
+transition: transform 0.2s ease;
 }
 
 .claim-mini-btn:hover svg,
 .claim-action:hover svg {
-    transform: scale(1.2);
-    filter: drop-shadow(0 0 5px currentColor);
+transform: scale(1.2);
+filter: drop-shadow(0 0 5px currentColor);
 }
 
 /* =============================================================================
@@ -3335,11 +3335,11 @@ padding: 8px !important;
 
 /* ADMIN LIST — Korrigerar overflow ur .admin-sidebar-list (280px förälder) */
 #view-admin #admin-main-list {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    flex-shrink: 1 !important;
-    border-right: none !important;
+width: 100% !important;
+min-width: 0 !important;
+max-width: 100% !important;
+flex-shrink: 1 !important;
+border-right: none !important;
 }
 
 /* 3. LAYOUT: SOLO-VYER (Hem & Inställningar) */
@@ -3522,187 +3522,187 @@ outline: none !important;
 /* Admin — Mörk bakgrund på service-dropdown */
 #admin-detail-content select,
 #new-service-select {
-    background: rgba(20, 18, 28, 0.90) !important;
-    color: var(--text-primary) !important;
-    border: 1px solid rgba(255,255,255,0.18) !important;
+background: rgba(20, 18, 28, 0.90) !important;
+color: var(--text-primary) !important;
+border: 1px solid rgba(255,255,255,0.18) !important;
 }
 #admin-detail-content select option,
 #new-service-select option {
-    background: #1a1825;
-    color: #ffffff;
+background: #1a1825;
+color: #ffffff;
 }
 
 /* =============================================================================
-   FIX 8c — Admin placeholder overflow
-   ============================================================================= */
+FIX 8c — Admin placeholder overflow
+============================================================================= */
 #admin-placeholder {
-  max-height: 100% !important;
-  overflow: hidden !important;
-  box-sizing: border-box !important;
+max-height: 100% !important;
+overflow: hidden !important;
+box-sizing: border-box !important;
 }
 
 /* =============================================================================
-   FIX 8d — Blå linje i Inkorg/Mina ärenden chat-inputs
-   ============================================================================= */
+FIX 8d — Blå linje i Inkorg/Mina ärenden chat-inputs
+============================================================================= */
 #inbox-chat-input {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
-  outline: none !important;
+border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+outline: none !important;
 }
 
 /* =============================================================================
-   FIX C — Om-vyn: 4-rutors grid
-   ============================================================================= */
+FIX C — Om-vyn: 4-rutors grid
+============================================================================= */
 .about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 16px;
-  padding: 20px;
-  height: 100%;
-  box-sizing: border-box;
-  overflow: hidden;
+display: grid;
+grid-template-columns: 1fr 1fr;
+grid-template-rows: 1fr 1fr;
+gap: 16px;
+padding: 20px;
+height: 100%;
+box-sizing: border-box;
+overflow: hidden;
 }
 .about-cell {
-  border-radius: 14px;
-  padding: 20px;
-  background: rgba(255,255,255,0.04) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  backdrop-filter: blur(20px) !important;
-  overflow: hidden;       /* FIX: Ingen scroll — innehåll anpassar sig till cellen */
-  min-height: 0;          /* FIX: Tillåter flex-children att krympa korrekt */
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+border-radius: 14px;
+padding: 20px;
+background: rgba(255,255,255,0.04) !important;
+border: 1px solid rgba(255,255,255,0.08) !important;
+backdrop-filter: blur(20px) !important;
+overflow: hidden;       /* FIX: Ingen scroll — innehåll anpassar sig till cellen */
+min-height: 0;          /* FIX: Tillåter flex-children att krympa korrekt */
+display: flex;
+flex-direction: column;
+gap: 8px;
 }
 .about-cell-title {
-  margin: 0 0 12px 0;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--accent-primary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
+margin: 0 0 12px 0;
+font-size: 12px;
+text-transform: uppercase;
+letter-spacing: 1px;
+color: var(--accent-primary);
+display: flex;
+align-items: center;
+gap: 8px;
 }
 .about-stat-row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: center;
-  text-align: center;
+display: flex;
+flex-direction: column;
+gap: 4px;
+align-items: center;
+text-align: center;
 }
 
 /* System & Status-rutan: ingen scroll, kompakt info-rad */
 .about-cell.no-scroll {
-  overflow: hidden;
-  font-size: 12px;
+overflow: hidden;
+font-size: 12px;
 }
 
 /* Compact info-items inuti Om-cellerna (override av globala 10px padding) */
 .about-cell .info-item {
-  padding: 5px 4px;
-  font-size: 12px;
+padding: 5px 4px;
+font-size: 12px;
 }
 
 /* =============================================================================
-   FIX A — Mail Composer: knappar auto-bredd
-   ============================================================================= */
+FIX A — Mail Composer: knappar auto-bredd
+============================================================================= */
 #atlas-mail-composer .btn-modal-cancel,
 #atlas-mail-composer .btn-modal-confirm {
-  width: auto !important;
-  flex: none !important;
+width: auto !important;
+flex: none !important;
 }
 
 /* =============================================================================
-   FIX F1 — Blå linje i placeholders: skärpt nollställning
-   ============================================================================= */
+FIX F1 — Blå linje i placeholders: skärpt nollställning
+============================================================================= */
 #view-inbox .template-editor-container,
 #view-my-tickets .template-editor-container {
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-  border-bottom: none !important;
+border: none !important;
+box-shadow: none !important;
+outline: none !important;
+border-bottom: none !important;
 }
 #view-inbox .template-editor-container::after,
 #view-my-tickets .template-editor-container::after {
-  display: none !important;
+display: none !important;
 }
 
 /* =============================================================================
-   FIX F2 — Quill-toolbar dold i placeholder-läge
-   ============================================================================= */
+FIX F2 — Quill-toolbar dold i placeholder-läge
+============================================================================= */
 #editor-placeholder:not([style*="display: none"]) ~ #template-editor-form .ql-toolbar,
 #editor-placeholder:not([style*="display: none"]) ~ #template-editor-form {
-  display: none !important;
+display: none !important;
 }
 
 /* =============================================================================
-   FIX F4 — Sidebar-ikon glow: dämpad
-   ============================================================================= */
+FIX F4 — Sidebar-ikon glow: dämpad
+============================================================================= */
 .menu-item.active .menu-icon svg,
 .menu-item:hover .menu-icon svg {
-  filter: drop-shadow(0 0 3px var(--accent-primary)) !important;
+filter: drop-shadow(0 0 3px var(--accent-primary)) !important;
 }
 
 /* ===================================================
-   BULK MODE — Inkorg flerval
-   =================================================== */
+BULK MODE — Inkorg flerval
+=================================================== */
 #inbox-list.bulk-mode-active .team-ticket-card {
-  cursor: pointer;
-  opacity: 0.72;
-  transition: box-shadow 0.15s, opacity 0.15s;
+cursor: pointer;
+opacity: 0.72;
+transition: box-shadow 0.15s, opacity 0.15s;
 }
 #inbox-list.bulk-mode-active .team-ticket-card:hover {
-  opacity: 1;
+opacity: 1;
 }
 #inbox-list .team-ticket-card.bulk-selected {
-  opacity: 1 !important;
-  box-shadow: 0 0 0 2px var(--agent-color, #0071e3) !important;
-  background: color-mix(in srgb, var(--agent-color, #0071e3) 14%, transparent) !important;
+opacity: 1 !important;
+box-shadow: 0 0 0 2px var(--agent-color, #0071e3) !important;
+background: color-mix(in srgb, var(--agent-color, #0071e3) 14%, transparent) !important;
 }
 
 /* Flytande bulk-toolbar */
 .bulk-action-toolbar {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5000;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 22px;
-  border-radius: 14px;
-  background: rgba(28, 28, 32, 0.94);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.55);
-  animation: bulkToolbarIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+position: fixed;
+bottom: 28px;
+left: 50%;
+transform: translateX(-50%);
+z-index: 5000;
+display: flex;
+align-items: center;
+gap: 14px;
+padding: 12px 22px;
+border-radius: 14px;
+background: rgba(28, 28, 32, 0.94);
+backdrop-filter: blur(24px);
+-webkit-backdrop-filter: blur(24px);
+border: 1px solid rgba(255, 255, 255, 0.12);
+box-shadow: 0 8px 36px rgba(0, 0, 0, 0.55);
+animation: bulkToolbarIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 @keyframes bulkToolbarIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(14px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+from { opacity: 0; transform: translateX(-50%) translateY(14px); }
+to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 .bulk-count-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
-  min-width: 56px;
+font-size: 13px;
+font-weight: 600;
+color: rgba(255, 255, 255, 0.6);
+min-width: 56px;
 }
 .bulk-toolbar-btns {
-  display: flex;
-  gap: 8px;
+display: flex;
+gap: 8px;
 }
 .bulk-btn {
-  padding: 7px 16px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.15s;
-  white-space: nowrap;
+padding: 7px 16px;
+border-radius: 8px;
+border: 1px solid rgba(255, 255, 255, 0.14);
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+transition: opacity 0.15s;
+white-space: nowrap;
 }
 .bulk-btn-cancel  { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.65); }
 .bulk-btn-claim   { background: #0071e3; color: #fff; border-color: transparent; }

@@ -24,42 +24,42 @@ const AVATAR_ICONS = [
 
 // Centralt bibliotek för alla UI-ikoner i Atlas (OPTIMERAD v4.0)
 const UI_ICONS = {
-    // FORDON (14px)
-    CAR: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>`,
-    BIKE: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 14-1-3"/><path d="m3 9 6 2a2 2 0 0 1 2-2h2a2 2 0 0 1 1.99 1.81"/><path d="M8 17h3a1 1 0 0 0 1-1 6 6 0 0 1 6-6 1 1 0 0 0 1-1v-.75A5 5 0 0 0 17 5"/><circle cx="19" cy="17" r="3"/><circle cx="5" cy="17" r="3"/></svg>`,
-    MOPED: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10 11 11 .9a1 1 0 0 1 .8 1.1l-.665 4.158a1 1 0 0 1-.988.842H20"/><path d="M16 18h-5"/><path d="M18 5a1 1 0 0 0-1 1v5.573"/><path d="M3 4h8.129a1 1 0 0 1 .99.863L13 11.246"/><path d="M4 11V4"/><path d="M7 15h.01"/><path d="M8 10.1V4"/><circle cx="18" cy="18" r="2"/><circle cx="7" cy="15" r="5"/></svg>`,
-    TRUCK: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`,
-    TRAILER: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h14V7H3z"/><path d="M17 17h5"/><circle cx="7" cy="17" r="2"/><circle cx="13" cy="17" r="2"/><path d="M22 14v3"/></svg>`,
-    
-    // KANALER
-    MAIL: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>`,
-    CHAT: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
-    LOCK: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
-    
-    // ÅTGÄRDER (18px)
-    ARCHIVE: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>`,
-    TRASH: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
-    RESTORE: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843"/><path d="m13.378 9.633 4.096 1.098 1.097-4.096"/></svg>`,
-    NOTES: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>`,
-    CLAIM: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11.5V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1.4"/><path d="M14 10V8a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 9.9V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v15"/><path d="M6 14a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8 2 2 0 1 1 4 0"/></svg>`,
-    ASSIGN: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>`,
-    TAKE_OVER: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
-    SEND: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.714 3.048a.498.498 0 0 0-.683.627l2.843 7.627a2 2 0 0 1 0 1.396l-2.842 7.627a.498.498 0 0 0 .682.627l18-8.5a.5.5 0 0 0 0-.904z"/><path d="M6 12h16"/></svg>`,
-    AI: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>`,
-    CALENDAR: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
-    CITY_SMALL: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>`,
-    AGENT_SMALL: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
-    PHONE: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.28-2.28a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`
+// FORDON (14px)
+CAR: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>`,
+BIKE: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 14-1-3"/><path d="m3 9 6 2a2 2 0 0 1 2-2h2a2 2 0 0 1 1.99 1.81"/><path d="M8 17h3a1 1 0 0 0 1-1 6 6 0 0 1 6-6 1 1 0 0 0 1-1v-.75A5 5 0 0 0 17 5"/><circle cx="19" cy="17" r="3"/><circle cx="5" cy="17" r="3"/></svg>`,
+MOPED: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10 11 11 .9a1 1 0 0 1 .8 1.1l-.665 4.158a1 1 0 0 1-.988.842H20"/><path d="M16 18h-5"/><path d="M18 5a1 1 0 0 0-1 1v5.573"/><path d="M3 4h8.129a1 1 0 0 1 .99.863L13 11.246"/><path d="M4 11V4"/><path d="M7 15h.01"/><path d="M8 10.1V4"/><circle cx="18" cy="18" r="2"/><circle cx="7" cy="15" r="5"/></svg>`,
+TRUCK: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`,
+TRAILER: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h14V7H3z"/><path d="M17 17h5"/><circle cx="7" cy="17" r="2"/><circle cx="13" cy="17" r="2"/><path d="M22 14v3"/></svg>`,
+
+// KANALER
+MAIL: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>`,
+CHAT: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+LOCK: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
+
+// ÅTGÄRDER (18px)
+ARCHIVE: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>`,
+TRASH: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
+RESTORE: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843"/><path d="m13.378 9.633 4.096 1.098 1.097-4.096"/></svg>`,
+NOTES: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>`,
+CLAIM: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11.5V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1.4"/><path d="M14 10V8a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 9.9V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v15"/><path d="M6 14a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8 2 2 0 1 1 4 0"/></svg>`,
+ASSIGN: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>`,
+TAKE_OVER: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+SEND: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.714 3.048a.498.498 0 0 0-.683.627l2.843 7.627a2 2 0 0 1 0 1.396l-2.842 7.627a.498.498 0 0 0 .682.627l18-8.5a.5.5 0 0 0 0-.904z"/><path d="M6 12h16"/></svg>`,
+AI: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>`,
+CALENDAR: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+CITY_SMALL: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>`,
+AGENT_SMALL: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+PHONE: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.28-2.28a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`
 };
 
 const ADMIN_UI_ICONS = {
-    EDIT:        `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>`,
-    SAVE:        `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
-    CANCEL:      `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>`,
-    DELETE:      `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
-    NEW:         `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg>`,
-    ARROW_LEFT:  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`,
-    ARROW_RIGHT: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`,
+EDIT:        `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>`,
+SAVE:        `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
+CANCEL:      `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>`,
+DELETE:      `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
+NEW:         `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg>`,
+ARROW_LEFT:  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`,
+ARROW_RIGHT: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`,
 };
 
 // =============================================================================
@@ -143,6 +143,11 @@ window.deleteQA = async (id) => {
 if (window.electronAPI && window.electronAPI.deleteQA) {
 return await window.electronAPI.deleteQA(id);
 }
+};
+
+// --- XSS SKYDD ---
+window.esc = function(str) { 
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); 
 };
 
 // =============================================================================
@@ -757,28 +762,28 @@ addBubble(`⚠️ Serverfel: ${err.message}`, 'atlas');
 // Debounce-timer: förhindrar scrollbar-flimmer vid snabba socket-events
 let _teamUpdateDebounce = null;
 window.socketAPI.on('team:update', (evt) => {
-  updateInboxBadge();
+updateInboxBadge();
 
-  // FIX: Hoppa över render vid client_typing — hanteras nu av team:client_typing direkt
-  if (evt.type === 'client_typing') return;
+// FIX: Hoppa över render vid client_typing — hanteras nu av team:client_typing direkt
+if (evt.type === 'client_typing') return;
 
-  if (evt.type === 'new_message' && State.soundEnabled) {
-    playNotificationSound();
-  }
+if (evt.type === 'new_message' && State.soundEnabled) {
+playNotificationSound();
+}
 
-  // Debounce 350ms — grupperar tätt inkommande events till en enda render
-  clearTimeout(_teamUpdateDebounce);
-  _teamUpdateDebounce = setTimeout(() => {
-    if (DOM.views && DOM.views.inbox && DOM.views.inbox.style.display === 'flex' && State.inboxMode === 'team') {
-      renderInbox();
-    }
-    if (DOM.views && DOM.views['my-tickets'] && DOM.views['my-tickets'].style.display === 'flex') {
-      renderMyTickets();
-    }
-    if (DOM.views && DOM.views.archive && DOM.views.archive.style.display === 'flex') {
-      renderArchive();
-    }
-  }, 350);
+// Debounce 350ms — grupperar tätt inkommande events till en enda render
+clearTimeout(_teamUpdateDebounce);
+_teamUpdateDebounce = setTimeout(() => {
+if (DOM.views && DOM.views.inbox && DOM.views.inbox.style.display === 'flex' && State.inboxMode === 'team') {
+renderInbox();
+}
+if (DOM.views && DOM.views['my-tickets'] && DOM.views['my-tickets'].style.display === 'flex') {
+renderMyTickets();
+}
+if (DOM.views && DOM.views.archive && DOM.views.archive.style.display === 'flex') {
+renderArchive();
+}
+}, 350);
 });
 
 
@@ -828,8 +833,8 @@ wrapper.className = 'msg-row atlas';
 wrapper.style.cssText = 'display:flex; width:100%; margin-bottom:12px; justify-content:flex-end;';
 wrapper.innerHTML = `
 <div style="display:flex; flex-direction:column; align-items:flex-end; max-width:75%;">
-  <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-right:4px;">Du • ${_timeStr}</div>
-  <div class="bubble" style="background:var(--bg-dark-tertiary) !important; border:1px solid rgba(255,255,255,0.1) !important; color:var(--text-primary) !important;">${formatAtlasMessage(clean)}</div>
+<div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-right:4px;">Du • ${_timeStr}</div>
+<div class="bubble" style="background:var(--bg-dark-tertiary) !important; border:1px solid rgba(255,255,255,0.1) !important; color:var(--text-primary) !important;">${formatAtlasMessage(clean)}</div>
 </div>
 <div class="msg-avatar" style="background:${agentStyles.main}; color:white; font-weight:bold; margin-left:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0;">${ownInitial}</div>
 `;
@@ -840,8 +845,8 @@ wrapper.style.cssText = 'display:flex; width:100%; margin-bottom:12px; justify-c
 wrapper.innerHTML = `
 <div class="msg-avatar" style="background:rgba(255,255,255,0.15); color:white; margin-right:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; flex-shrink:0;">K</div>
 <div style="display:flex; flex-direction:column; align-items:flex-start; max-width:75%;">
-  <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-left:4px;"><b>Kund</b> • ${_dateStr} ${_timeStr}</div>
-  <div class="bubble" style="background:${theme.bubbleBg} !important; border:1px solid ${theme.border} !important; color:var(--text-primary) !important;">${formatAtlasMessage(clean)}</div>
+<div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-left:4px;"><b>Kund</b> • ${_dateStr} ${_timeStr}</div>
+<div class="bubble" style="background:${theme.bubbleBg} !important; border:1px solid ${theme.border} !important; color:var(--text-primary) !important;">${formatAtlasMessage(clean)}</div>
 </div>
 `;
 } else {
@@ -854,8 +859,8 @@ wrapper.style.cssText = 'display:flex; width:100%; margin-bottom:12px; justify-c
 wrapper.innerHTML = `
 <div class="msg-avatar" style="background:${agentStyles.main}; color:white; margin-right:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; flex-shrink:0;">${colInitial}</div>
 <div style="display:flex; flex-direction:column; align-items:flex-start; max-width:75%;">
-  <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-left:4px;"><b>${senderName}</b> • ${_dateStr} ${_timeStr}</div>
-  <div class="bubble" style="background:${agentStyles.bubbleBg} !important; border:1px solid ${agentStyles.border} !important; color:var(--text-primary) !important;">${formatAtlasMessage(clean)}</div>
+<div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-left:4px;"><b>${senderName}</b> • ${_dateStr} ${_timeStr}</div>
+<div class="bubble" style="background:${agentStyles.bubbleBg} !important; border:1px solid ${agentStyles.border} !important; color:var(--text-primary) !important;">${formatAtlasMessage(clean)}</div>
 </div>
 `;
 }
@@ -1417,7 +1422,7 @@ card.setAttribute('data-id', t.conversation_id);
 card.style.setProperty('--agent-color', styles.main);
 
 // Variabler deklareras INNAN de används i sökindex och HTML
-const displayTitle = resolveTicketTitle(t);
+const displayTitle = esc(resolveTicketTitle(t));
 
 // SÄKRAD TEXT: Hämtar text från context_data för att slippa "Ingen text"
 let rawPreview = t.last_message || t.question || t.subject;
@@ -1431,39 +1436,39 @@ rawPreview = ctx.messages[0].content || ctx.messages[0].text;
 }
 const isPrivateInbox = t.session_type === 'internal';
 const previewText = isPrivateInbox
-  ? `<span style="color:#f1c40f; display:flex; align-items:center; gap:4px;">${UI_ICONS.LOCK} Privat ärende</span>`
-  : stripHtml(rawPreview || "Ingen text...");
+? `<span style="color:#f1c40f; display:flex; align-items:center; gap:4px;">${UI_ICONS.LOCK} Privat ärende</span>`
+: stripHtml(rawPreview || "Ingen text...");
 const vIcon = getVehicleIcon(t.vehicle);
 const vehicleHtml = vIcon ? `<span style="color: ${styles.main}; display: flex; align-items: center; opacity: 0.9;" title="${t.vehicle}">${vIcon}</span>` : '';
 
 // Sökindex: bara synliga fält — undviker falska träffar från meddelandetext
 const searchIndex = [
-    displayTitle, tagText, dateStr,
-    t.sender || '', t.contact_email || '',
-    t.routing_tag || '', t.owner || ''
+displayTitle, tagText, dateStr,
+t.sender || '', t.contact_email || '',
+t.routing_tag || '', t.owner || ''
 ].join(' ').toLowerCase();
 card.setAttribute('data-search', searchIndex);
 
 card.innerHTML = `
 <div class="ticket-header-row">
-    <div class="ticket-title">
-        <span style="opacity:0.7; margin-right:6px; display:flex; align-items:center;">${typeIcon}</span>
-        <span style="color:${styles.main}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${displayTitle}</span>
-    </div>
-    <div class="ticket-top-right">
-        ${vehicleHtml}
-        <button class="notes-trigger-btn" data-id="${t.conversation_id}" title="Interna anteckningar" style="color:${styles.main}" onclick="event.stopPropagation(); openNotesModal('${t.conversation_id}')">
-            ${UI_ICONS.NOTES}
-        </button>
-    </div>
+<div class="ticket-title">
+<span style="opacity:0.7; margin-right:6px; display:flex; align-items:center;">${typeIcon}</span>
+<span style="color:${styles.main}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${displayTitle}</span>
+</div>
+<div class="ticket-top-right">
+${vehicleHtml}
+<button class="notes-trigger-btn" data-id="${t.conversation_id}" title="Interna anteckningar" style="color:${styles.main}" onclick="event.stopPropagation(); openNotesModal('${t.conversation_id}')">
+${UI_ICONS.NOTES}
+</button>
+</div>
 </div>
 <div class="ticket-preview">${previewText}</div>
 <div class="ticket-footer-bar">
-    <div class="ticket-time">${dateStr} • ${timeStr}</div>
-    <div class="ticket-tag" style="color:${styles.main}">${tagText}</div>
+<div class="ticket-time">${dateStr} • ${timeStr}</div>
+<div class="ticket-tag" style="color:${styles.main}">${tagText}</div>
 </div>
 <button class="claim-mini-btn claim-action" title="Plocka ärende" style="color:${styles.main}" onclick="event.stopPropagation(); claimTicket('${t.conversation_id}')">
-    ${UI_ICONS.CLAIM}
+${UI_ICONS.CLAIM}
 </button>`;
 
 // Claim-knapp (inline onclick ersätts med querySelector-handler)
@@ -1484,33 +1489,33 @@ renderInbox();
 let _lpTimer = null;
 let _lpFired = false;
 card.addEventListener('mousedown', () => {
-  _lpFired = false;
-  _lpTimer = setTimeout(() => {
-    _lpFired = true;
-    _lpTimer = null;
-    if (!isBulkMode) {
-      isBulkMode = true;
-      container.classList.add('bulk-mode-active');
-      showBulkToolbar();
-    }
-    toggleBulkCard(card, t.conversation_id);
-  }, 800);
+_lpFired = false;
+_lpTimer = setTimeout(() => {
+_lpFired = true;
+_lpTimer = null;
+if (!isBulkMode) {
+isBulkMode = true;
+container.classList.add('bulk-mode-active');
+showBulkToolbar();
+}
+toggleBulkCard(card, t.conversation_id);
+}, 800);
 });
 card.addEventListener('mouseup', () => {
-  clearTimeout(_lpTimer);
-  _lpTimer = null;
-  if (_lpFired) { _lpFired = false; return; } // long press hanterade redan
-  if (isBulkMode) {
-    toggleBulkCard(card, t.conversation_id);
-  } else {
-    container.querySelectorAll('.team-ticket-card').forEach(c => c.classList.remove('active-ticket'));
-    card.classList.add('active-ticket');
-    openInboxDetail(t);
-  }
+clearTimeout(_lpTimer);
+_lpTimer = null;
+if (_lpFired) { _lpFired = false; return; } // long press hanterade redan
+if (isBulkMode) {
+toggleBulkCard(card, t.conversation_id);
+} else {
+container.querySelectorAll('.team-ticket-card').forEach(c => c.classList.remove('active-ticket'));
+card.classList.add('active-ticket');
+openInboxDetail(t);
+}
 });
 card.addEventListener('mouseleave', () => {
-  clearTimeout(_lpTimer);
-  _lpTimer = null;
+clearTimeout(_lpTimer);
+_lpTimer = null;
 });
 
 content.appendChild(card);
@@ -1539,7 +1544,7 @@ updateInboxBadge();
 // Re-applicera aktiv sökning om en finns (skyddas mot socket-rerenders)
 const _activeSearch = document.getElementById('inbox-search');
 if (_activeSearch && _activeSearch.value.trim()) {
-  _activeSearch.dispatchEvent(new Event('input', { bubbles: true }));
+_activeSearch.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 } catch (err) {
@@ -1579,7 +1584,7 @@ detailView.style.setProperty('background', `linear-gradient(to bottom, ${styles.
 detailView.innerHTML = '';
 
 const isMine = currentUser && ticket.owner === currentUser.username;
-const mainTitle = resolveTicketTitle(ticket);
+const mainTitle = esc(resolveTicketTitle(ticket));
 
 let topActionBtn = '';
 if (isSupportAgent()) {
@@ -1682,8 +1687,8 @@ bodyContent = `<div class="inbox-chat-history" style="padding:10px 5px;">${chatH
 
 // Villkor för Snabbsvar: admin/agent + chattärende (customer) + ej plockat
 const canQuickReply = ['admin', 'agent'].includes(currentUser?.role)
-  && ticket.session_type === 'customer'
-  && !ticket.owner;
+&& ticket.session_type === 'customer'
+&& !ticket.owner;
 
 const content = document.createElement('div');
 content.className = 'detail-container';
@@ -1694,15 +1699,15 @@ ${bodyContent}
 </div>
 ${canQuickReply ? `
 <div id="quick-reply-area" style="padding:8px 16px; border-top:1px solid ${styles.border}; background:${styles.bg}; display:flex; align-items:flex-end; gap:8px;">
-  <textarea id="quick-reply-input" placeholder="Snabbsvar... (Ctrl+Enter)"
-    style="flex:1; min-height:44px; max-height:120px; resize:vertical; padding:8px 10px; border-radius:8px;
-    background:rgba(255,255,255,0.07); border:1px solid ${styles.border};
-    color:var(--text-primary); font-size:13px; font-family:inherit; box-sizing:border-box;"></textarea>
-  <button id="btn-quick-reply-send" title="Skicka svar" style="flex-shrink:0; width:36px; height:36px; border-radius:8px;
-    background:${styles.main}; color:white; border:none; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;">
-    ${UI_ICONS.SEND}
-  </button>
+<textarea id="quick-reply-input" placeholder="Snabbsvar... (Ctrl+Enter)"
+style="flex:1; min-height:44px; max-height:120px; resize:vertical; padding:8px 10px; border-radius:8px;
+background:rgba(255,255,255,0.07); border:1px solid ${styles.border};
+color:var(--text-primary); font-size:13px; font-family:inherit; box-sizing:border-box;"></textarea>
+<button id="btn-quick-reply-send" title="Skicka svar" style="flex-shrink:0; width:36px; height:36px; border-radius:8px;
+background:${styles.main}; color:white; border:none; cursor:pointer;
+display:flex; align-items:center; justify-content:center;">
+${UI_ICONS.SEND}
+</button>
 </div>` : ''}
 <div class="detail-footer-area">
 <div class="detail-footer-toolbar" style="padding: 12px 20px; border-top:1px solid var(--border-color); background:rgba(0,0,0,0.25); display:flex; justify-content:flex-end; gap:12px;">
@@ -1720,40 +1725,40 @@ refreshNotesGlow(ticket.conversation_id);
 
 // Koppla Quick Reply-logik efter HTML är i DOM
 if (canQuickReply) {
-  const quickReply = async () => {
-    const input = document.getElementById('quick-reply-input');
-    const msg = (input?.value || '').trim();
-    if (!msg) return;
-    const qrBtn = document.getElementById('btn-quick-reply-send');
-    if (qrBtn) { qrBtn.disabled = true; qrBtn.style.opacity = '0.5'; }
-    try {
-      // 1. Claima ärendet (flyttar det till Mina Ärenden)
-      await fetch(`${SERVER_URL}/team/claim`, {
-        method: 'POST', headers: fetchHeaders,
-        body: JSON.stringify({ conversationId: ticket.conversation_id, agentName: currentUser.username })
-      });
-      // 2. Skicka svaret via socket
-      window.socketAPI.emit('team:agent_reply', {
-        conversationId: ticket.conversation_id,
-        message: msg
-      });
-      // Stäng detail + ladda om inkorg (ärendet försvinner dit — det är nu i Mina Ärenden)
-      clearDetailView();
-      renderInbox();
-      renderMyTickets?.();
-      showToast('✅ Svar skickat! Ärendet ligger i Mina Ärenden.');
-    } catch(err) {
-      console.error('[QuickReply] Fel:', err);
-      showToast('❌ Fel vid skicka — försök igen.');
-      if (qrBtn) { qrBtn.disabled = false; qrBtn.style.opacity = '1'; }
-    }
-  };
-  const qrBtn = document.getElementById('btn-quick-reply-send');
-  if (qrBtn) qrBtn.onclick = quickReply;
-  const qrInput = document.getElementById('quick-reply-input');
-  if (qrInput) qrInput.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.key === 'Enter') quickReply();
-  });
+const quickReply = async () => {
+const input = document.getElementById('quick-reply-input');
+const msg = (input?.value || '').trim();
+if (!msg) return;
+const qrBtn = document.getElementById('btn-quick-reply-send');
+if (qrBtn) { qrBtn.disabled = true; qrBtn.style.opacity = '0.5'; }
+try {
+// 1. Claima ärendet (flyttar det till Mina Ärenden)
+await fetch(`${SERVER_URL}/team/claim`, {
+method: 'POST', headers: fetchHeaders,
+body: JSON.stringify({ conversationId: ticket.conversation_id, agentName: currentUser.username })
+});
+// 2. Skicka svaret via socket
+window.socketAPI.emit('team:agent_reply', {
+conversationId: ticket.conversation_id,
+message: msg
+});
+// Stäng detail + ladda om inkorg (ärendet försvinner dit — det är nu i Mina Ärenden)
+clearDetailView();
+renderInbox();
+renderMyTickets?.();
+showToast('✅ Svar skickat! Ärendet ligger i Mina Ärenden.');
+} catch(err) {
+console.error('[QuickReply] Fel:', err);
+showToast('❌ Fel vid skicka — försök igen.');
+if (qrBtn) { qrBtn.disabled = false; qrBtn.style.opacity = '1'; }
+}
+};
+const qrBtn = document.getElementById('btn-quick-reply-send');
+if (qrBtn) qrBtn.onclick = quickReply;
+const qrInput = document.getElementById('quick-reply-input');
+if (qrInput) qrInput.addEventListener('keydown', (e) => {
+if (e.ctrlKey && e.key === 'Enter') quickReply();
+});
 }
 
 const clearDetailView = () => {
@@ -1873,14 +1878,14 @@ const myName = window.currentUser.username.toLowerCase();
 
 // Agentens bevakade kontor-taggar (från token/localStorage)
 const myOfficeTags = (window.currentUser.routing_tag || '')
-  .split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
 
 // TILLÅT OM: Jag är personlig ägare ELLER kontoret tillhör mig ELLER avsändare (interna)
 tickets = tickets.filter(t => {
-  if (t.owner && t.owner.toLowerCase() === myName) return true;
-  if (t.sender && t.sender.toLowerCase() === myName) return true;
-  if (t.routing_tag && myOfficeTags.includes(t.routing_tag.toLowerCase())) return true;
-  return false;
+if (t.owner && t.owner.toLowerCase() === myName) return true;
+if (t.sender && t.sender.toLowerCase() === myName) return true;
+if (t.routing_tag && myOfficeTags.includes(t.routing_tag.toLowerCase())) return true;
+return false;
 });
 }
 
@@ -1936,21 +1941,21 @@ return;
 tickets.sort((a, b) => b.updated_at - a.updated_at);
 
 tickets.forEach((t, index) => {
-  const myName = currentUser.username;
-  const styles = getAgentStyles(t.routing_tag || t.owner || myName);
+const myName = currentUser.username;
+const styles = getAgentStyles(t.routing_tag || t.owner || myName);
 
-  // FIX: Visa kontoret (routing_tag) på kortet. Interna ärenden visar avsändarens visningsnamn.
-  const tagText = (t.session_type === 'internal')
-    ? (() => { const u = usersCache.find(u => u.username === (t.sender || t.owner)); return (u?.display_name || t.sender || t.owner || 'INTERN').toUpperCase(); })()
-    : resolveLabel(t.routing_tag || t.owner || myName);
+// FIX: Visa kontoret (routing_tag) på kortet. Interna ärenden visar avsändarens visningsnamn.
+const tagText = (t.session_type === 'internal')
+? (() => { const u = usersCache.find(u => u.username === (t.sender || t.owner)); return (u?.display_name || t.sender || t.owner || 'INTERN').toUpperCase(); })()
+: resolveLabel(t.routing_tag || t.owner || myName);
 
-  const isMail = t.session_type === 'message';
-  const typeIcon = isMail ? `${UI_ICONS.MAIL}` : `${UI_ICONS.CHAT}`;
-  let displayTitle = resolveTicketTitle(t);
+const isMail = t.session_type === 'message';
+const typeIcon = isMail ? `${UI_ICONS.MAIL}` : `${UI_ICONS.CHAT}`;
+let displayTitle = resolveTicketTitle(t);
 
-  if (t.session_type === 'internal' && t.sender) {
-    displayTitle = (typeof formatName === 'function') ? formatName(t.sender) : t.sender;
-  }
+if (t.session_type === 'internal' && t.sender) {
+displayTitle = (typeof formatName === 'function') ? formatName(t.sender) : t.sender;
+}
 
 // SÄKRAD TEXT (Löser "Ingen text")
 let myRawPreview = t.last_message || t.question || t.subject;
@@ -1964,8 +1969,8 @@ myRawPreview = ctx.messages[0].content || ctx.messages[0].text;
 }
 const isPrivateTicket = t.session_type === 'internal';
 const myPreviewText = isPrivateTicket
-  ? `<span style="color:#f1c40f; display:flex; align-items:center; gap:4px;">${UI_ICONS.LOCK} Privat ärende</span>`
-  : stripHtml(myRawPreview || "...");
+? `<span style="color:#f1c40f; display:flex; align-items:center; gap:4px;">${UI_ICONS.LOCK} Privat ärende</span>`
+: stripHtml(myRawPreview || "...");
 
 const vIcon = getVehicleIcon(t.vehicle);
 const vehicleHtml = vIcon ? `<span style="color: ${styles.main}; display: flex; align-items: center; opacity: 0.9;" title="${t.vehicle}">${vIcon}</span>` : '';
@@ -2146,8 +2151,8 @@ isUser = false;
 
 // Beräkna avsändarens färg för vänsterbubblan i internchatt
 const senderStyles = (isInternal && isUser)
-  ? getAgentStyles(m.sender)
-  : styles;
+? getAgentStyles(m.sender)
+: styles;
 
 // 3. AVATARER & NAMN
 const leftInitial = rowDisplayTitle ? rowDisplayTitle.charAt(0).toUpperCase() : 'K';
@@ -3079,73 +3084,73 @@ if (!grid) return;
 const savedTheme = localStorage.getItem('atlas-theme') || 'standard-theme';
 const soundOn = State.soundEnabled !== false;
 const themeOptions = [
-  ['standard-theme', 'Standard Vision ⚡'],
-  ['onyx-ultradark', 'Atlas Onyx ⚫'],
-  ['apple-dark', 'Apple Dark 🍏'],
-  ['apple-road', 'Apple Road 🛣️'],
-  ['atlas-nebula', 'Atlas Nebula 🌌'],
-  ['sunset-horizon', 'Sunset Horizon 🌅'],
-  ['atlas-navigator', 'Atlas Navigator 🧭'],
+['standard-theme', 'Standard Vision ⚡'],
+['onyx-ultradark', 'Atlas Onyx ⚫'],
+['apple-dark', 'Apple Dark 🍏'],
+['apple-road', 'Apple Road 🛣️'],
+['atlas-nebula', 'Atlas Nebula 🌌'],
+['sunset-horizon', 'Sunset Horizon 🌅'],
+['atlas-navigator', 'Atlas Navigator 🧭'],
 ].map(([v, l]) => `<option value="${v}"${savedTheme === v ? ' selected' : ''}>${l}</option>`).join('');
 
 grid.innerHTML = `
-  <div class="about-cell glass-effect" style="overflow-y: auto;">
-    <h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Snabbguide &amp; Genvägar</h3>
-    <div class="guide-section">
-      <div class="guide-step"><span class="step-number">1</span><div class="step-content"><strong>Markera text</strong> i vilket program som helst</div></div>
-      <div class="guide-step"><span class="step-number">2</span><div class="step-content"><strong>Tryck Ctrl+C</strong> för att kopiera</div></div>
-      <div class="guide-step"><span class="step-number">3</span><div class="step-content"><strong>Tryck Ctrl+P</strong> för att starta <strong>NY</strong> chatt</div></div>
-      <div class="guide-step"><span class="step-number">4</span><div class="step-content"><strong>Ctrl+Alt+P</strong> för att ställa en <strong>följdfråga</strong></div></div>
-    </div>
-    <div class="shortcut-list" style="margin-top:12px;">
-      <div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>P</kbd></div><span>Ny fråga</span></div>
-      <div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd></div><span>Följdfråga</span></div>
-      <div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>S</kbd></div><span>Spara mall</span></div>
-      <div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd></div><span>Byt tema</span></div>
-    </div>
-  </div>
+<div class="about-cell glass-effect" style="overflow-y: auto;">
+<h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Snabbguide &amp; Genvägar</h3>
+<div class="guide-section">
+<div class="guide-step"><span class="step-number">1</span><div class="step-content"><strong>Markera text</strong> i vilket program som helst</div></div>
+<div class="guide-step"><span class="step-number">2</span><div class="step-content"><strong>Tryck Ctrl+C</strong> för att kopiera</div></div>
+<div class="guide-step"><span class="step-number">3</span><div class="step-content"><strong>Tryck Ctrl+P</strong> för att starta <strong>NY</strong> chatt</div></div>
+<div class="guide-step"><span class="step-number">4</span><div class="step-content"><strong>Ctrl+Alt+P</strong> för att ställa en <strong>följdfråga</strong></div></div>
+</div>
+<div class="shortcut-list" style="margin-top:12px;">
+<div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>P</kbd></div><span>Ny fråga</span></div>
+<div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd></div><span>Följdfråga</span></div>
+<div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>S</kbd></div><span>Spara mall</span></div>
+<div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd></div><span>Byt tema</span></div>
+</div>
+</div>
 
-  <div class="about-cell glass-effect">
-    <h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9z"/></svg> Utseende &amp; Ljud</h3>
-    <div class="setting-item">
-      <label>Välj tema</label>
-      <select id="theme-select" class="filter-select" onchange="changeTheme(this.value)">${themeOptions}</select>
-    </div>
-    <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; padding-top:15px; border-top:1px solid var(--border-color);">
-      <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">🔔 Pling-ljud vid nytt ärende</label>
-      <input type="checkbox" id="sound-toggle" ${soundOn ? 'checked' : ''} style="transform:scale(1.3); cursor:pointer; appearance:auto; -webkit-appearance:checkbox; width:16px; height:16px; flex-shrink:0;" onchange="window._handleSoundToggle(this.checked)">
-    </div>
-  </div>
+<div class="about-cell glass-effect">
+<h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9z"/></svg> Utseende &amp; Ljud</h3>
+<div class="setting-item">
+<label>Välj tema</label>
+<select id="theme-select" class="filter-select" onchange="changeTheme(this.value)">${themeOptions}</select>
+</div>
+<div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; padding-top:15px; border-top:1px solid var(--border-color);">
+<label style="cursor:pointer; display:flex; align-items:center; gap:8px;">🔔 Pling-ljud vid nytt ärende</label>
+<input type="checkbox" id="sound-toggle" ${soundOn ? 'checked' : ''} style="transform:scale(1.3); cursor:pointer; appearance:auto; -webkit-appearance:checkbox; width:16px; height:16px; flex-shrink:0;" onchange="window._handleSoundToggle(this.checked)">
+</div>
+</div>
 
-  <div class="about-cell glass-effect">
-    <h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Min Statistik</h3>
-    <div id="about-stats-content" style="flex:1; min-height:0; overflow:hidden; display:flex; align-items:center; justify-content:center;"><div class="spinner-small"></div></div>
-  </div>
+<div class="about-cell glass-effect">
+<h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Min Statistik</h3>
+<div id="about-stats-content" style="flex:1; min-height:0; overflow:hidden; display:flex; align-items:center; justify-content:center;"><div class="spinner-small"></div></div>
+</div>
 
-  <div class="about-cell glass-effect no-scroll">
-    <h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> System &amp; Status</h3>
-    <div class="info-item"><span class="info-label">Atlas Version:</span><span id="app-version-display">${ATLAS_VERSION}</span></div>
-    <div class="info-item"><span class="info-label">Server Version:</span><span id="server-version-display">Hämtar...</span></div>
-    <div class="info-item"><span class="info-label">Serverstatus:</span><span id="server-status" style="color:#f1c40f; font-weight:700;">● Ansluter...</span></div>
-    <div class="info-item" id="about-user-info"></div>
-    <div class="info-item"><span class="info-label">Skapad av:</span><span>Patrik Åkerhage</span></div>
-  </div>
+<div class="about-cell glass-effect no-scroll">
+<h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> System &amp; Status</h3>
+<div class="info-item"><span class="info-label">Atlas Version:</span><span id="app-version-display">${ATLAS_VERSION}</span></div>
+<div class="info-item"><span class="info-label">Server Version:</span><span id="server-version-display">Hämtar...</span></div>
+<div class="info-item"><span class="info-label">Serverstatus:</span><span id="server-status" style="color:#f1c40f; font-weight:700;">● Ansluter...</span></div>
+<div class="info-item" id="about-user-info"></div>
+<div class="info-item"><span class="info-label">Skapad av:</span><span>Patrik Åkerhage</span></div>
+</div>
 `;
 
 // Populera serverstatus direkt med aktuellt socket-läge
 const statusEl = document.getElementById('server-status');
 const verEl = document.getElementById('server-version-display');
 if (statusEl && window.socketAPI) {
-  const connected = window.socketAPI.isConnected();
-  statusEl.textContent = connected ? "🟢 LIVE" : "🔴 Frånkopplad";
-  statusEl.style.color = connected ? "#4cd137" : "#ff6b6b";
+const connected = window.socketAPI.isConnected();
+statusEl.textContent = connected ? "🟢 LIVE" : "🔴 Frånkopplad";
+statusEl.style.color = connected ? "#4cd137" : "#ff6b6b";
 }
 // Försök hämta version via REST om socket-versionen inte är känd
 if (verEl && verEl.textContent === 'Hämtar...') {
-  try {
-    const vRes = await fetch(`${SERVER_URL}/api/public/version`, { headers: { 'ngrok-skip-browser-warning': 'true' } });
-    if (vRes.ok) { const vData = await vRes.json(); verEl.textContent = vData.version || SERVER_VERSION || '—'; }
-  } catch (_) { verEl.textContent = '—'; }
+try {
+const vRes = await fetch(`${SERVER_URL}/api/public/version`, { headers: { 'ngrok-skip-browser-warning': 'true' } });
+if (vRes.ok) { const vData = await vRes.json(); verEl.textContent = vData.version || SERVER_VERSION || '—'; }
+} catch (_) { verEl.textContent = '—'; }
 }
 
 // Ladda statistik
@@ -3159,57 +3164,57 @@ const userEl  = document.getElementById('about-user-info');
 
 // Fix: namn och roll i ett enda span (eliminerar dubblett)
 if (userEl) userEl.innerHTML = `
-  <span class="info-label">Inloggad som:</span>
-  <span><strong>${currentUser.display_name || currentUser.username}</strong>&nbsp;<span style="font-size:10px; opacity:0.45;">${(currentUser.role||'').toUpperCase()}</span></span>`;
+<span class="info-label">Inloggad som:</span>
+<span><strong>${currentUser.display_name || currentUser.username}</strong>&nbsp;<span style="font-size:10px; opacity:0.45;">${(currentUser.role||'').toUpperCase()}</span></span>`;
 
 // Mini-ikoner för statistikrader
 const ICO = {
-  bolt:    `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
-  archive: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>`,
-  mail:    `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
-  chat:    `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
-  pulse:   `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
-  check:   `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
-  robot:   `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>`,
-  person:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
-  filter:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>`
+bolt:    `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+archive: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>`,
+mail:    `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
+chat:    `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+pulse:   `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+check:   `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+robot:   `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>`,
+person:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+filter:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>`
 };
 
 // Hjälpfunktion: ett stat-kort (siffra + läsbar etikett, centrerat)
 const statCard = (label, val, color = 'var(--text-primary)') =>
-  `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px 6px; background:rgba(255,255,255,0.04); border-radius:8px; border:1px solid var(--border-color); flex:1; min-height:0; text-align:center;">
-    <strong style="font-size:18px; font-weight:800; color:${color}; line-height:1.2;">${val}</strong>
-    <span style="font-size:11px; color:var(--text-secondary); opacity:0.85; margin-top:1px;">${label}</span>
-  </div>`;
+`<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px 6px; background:rgba(255,255,255,0.04); border-radius:8px; border:1px solid var(--border-color); flex:1; min-height:0; text-align:center;">
+<strong style="font-size:18px; font-weight:800; color:${color}; line-height:1.2;">${val}</strong>
+<span style="font-size:11px; color:var(--text-secondary); opacity:0.85; margin-top:1px;">${label}</span>
+</div>`;
 
 // Hjälpfunktion: systemrad (etikett vänster / värde höger)
 const sysRow = (label, val, color = 'var(--text-secondary)') =>
-  `<div style="display:flex; align-items:center; justify-content:space-between; gap:4px; padding:3px 6px; border-radius:6px; background:rgba(255,255,255,0.025);">
-    <span style="font-size:11px; color:var(--text-secondary); opacity:0.8;">${label}</span>
-    <strong style="font-size:14px; font-weight:700; color:${color}; white-space:nowrap;">${val}</strong>
-  </div>`;
+`<div style="display:flex; align-items:center; justify-content:space-between; gap:4px; padding:3px 6px; border-radius:6px; background:rgba(255,255,255,0.025);">
+<span style="font-size:11px; color:var(--text-secondary); opacity:0.8;">${label}</span>
+<strong style="font-size:14px; font-weight:700; color:${color}; white-space:nowrap;">${val}</strong>
+</div>`;
 
 if (statsEl) statsEl.innerHTML = `
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; height:100%; overflow:hidden;">
 
-  <!-- Vänster: Egna -->
-  <div style="display:flex; flex-direction:column; gap:3px; min-height:0;">
-    <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--accent-primary); margin-bottom:1px;">Egna</div>
-    ${statCard('Aktiva',     s('active'),         'var(--accent-primary)')}
-    ${statCard('Arkiverade', s('archived'),       '#4cd964')}
-    ${statCard('Mail',       s('mail_handled'),   'var(--text-primary)')}
-    ${statCard('Interna',    s('internals_sent'), 'var(--text-primary)')}
-  </div>
+<!-- Vänster: Egna -->
+<div style="display:flex; flex-direction:column; gap:3px; min-height:0;">
+<div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--accent-primary); margin-bottom:1px;">Egna</div>
+${statCard('Aktiva',     s('active'),         'var(--accent-primary)')}
+${statCard('Arkiverade', s('archived'),       '#4cd964')}
+${statCard('Mail',       s('mail_handled'),   'var(--text-primary)')}
+${statCard('Interna',    s('internals_sent'), 'var(--text-primary)')}
+</div>
 
-  <!-- Höger: Systemtotal -->
-  <div style="display:flex; flex-direction:column; gap:3px; border-left:1px solid var(--border-color); padding-left:8px; min-height:0;">
-    <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-secondary); opacity:0.7; margin-bottom:1px;">Systemtotal</div>
-    ${sysRow('Pågående',      s('total_active'),  'var(--text-primary)')}
-    ${sysRow('Avslutade',     s('total_archived'), 'var(--text-primary)')}
-    ${sysRow('AI-besvarade',  s('ai_answered'),   'var(--accent-primary)')}
-    ${sysRow('Agenthandlade', s('human_handled'), '#4cd964')}
-    ${sysRow('Spam/Tomma',    s('spam_count'),    '#ff453a')}
-  </div>
+<!-- Höger: Systemtotal -->
+<div style="display:flex; flex-direction:column; gap:3px; border-left:1px solid var(--border-color); padding-left:8px; min-height:0;">
+<div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-secondary); opacity:0.7; margin-bottom:1px;">Systemtotal</div>
+${sysRow('Pågående',      s('total_active'),  'var(--text-primary)')}
+${sysRow('Avslutade',     s('total_archived'), 'var(--text-primary)')}
+${sysRow('AI-besvarade',  s('ai_answered'),   'var(--accent-primary)')}
+${sysRow('Agenthandlade', s('human_handled'), '#4cd964')}
+${sysRow('Spam/Tomma',    s('spam_count'),    '#ff453a')}
+</div>
 
 </div>`;
 } catch (_) {
@@ -3269,10 +3274,10 @@ if (!tag || tag.toLowerCase() === 'unclaimed') return { ...fallback, main: '#ff4
 const office = officeData.find(o => o.routing_tag === tag.toLowerCase());
 let hex = fallbackHex;
 if (office) {
-  hex = office.office_color;
+hex = office.office_color;
 } else {
-  const u = usersCache.find(u => u.username === tag);
-  hex = u?.agent_color || (tag === currentUser?.username ? currentUser.agent_color : fallbackHex);
+const u = usersCache.find(u => u.username === tag);
+hex = u?.agent_color || (tag === currentUser?.username ? currentUser.agent_color : fallbackHex);
 }
 
 // Säkerställ att hex är en sträng och börjar med #
@@ -3779,73 +3784,73 @@ return text.length > 60 ? text.substring(0, 60) + "..." : text;
 // MASTER HEADER ENGINE - SYNCHRONIZED
 // ============================================================================
 function renderDetailHeader(item, styles, extraActions = '') {
-    // Säkra datumformat
-    const timestamp = item.timestamp || (item.updated_at ? item.updated_at * 1000 : Date.now());
-    const dateStr = new Date(timestamp).toLocaleString('sv-SE', { 
-        year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' 
-    });
+// Säkra datumformat
+const timestamp = item.timestamp || (item.updated_at ? item.updated_at * 1000 : Date.now());
+const dateStr = new Date(timestamp).toLocaleString('sv-SE', { 
+year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+});
 
-    const vIcon = getVehicleIcon(item.vehicle || item.vehicle_type);
+const vIcon = getVehicleIcon(item.vehicle || item.vehicle_type);
 
-    // Bygg "Pills"
-    let pills = `<span class="pill">${UI_ICONS.CALENDAR} ${dateStr}</span>`;
+// Bygg "Pills"
+let pills = `<span class="pill">${UI_ICONS.CALENDAR} ${dateStr}</span>`;
 
-    // Stad/Kontor — routing_tag har prio, annars kolla om owner är ett kontor, annars city
-    const _officeMatch = officeData.find(o =>
-      o.routing_tag === item.routing_tag || o.routing_tag === item.owner
-    );
-    const officeLabel = _officeMatch
-      ? (_officeMatch.area || _officeMatch.city).toUpperCase()
-      : (item.city ? item.city.toUpperCase() : null);
-    if (officeLabel) {
-      pills += `<span class="pill" style="color:${styles.main}; border-color:${styles.border}; font-weight:700;">${UI_ICONS.CITY_SMALL} ${officeLabel}</span>`;
-    }
+// Stad/Kontor — routing_tag har prio, annars kolla om owner är ett kontor, annars city
+const _officeMatch = officeData.find(o =>
+o.routing_tag === item.routing_tag || o.routing_tag === item.owner
+);
+const officeLabel = _officeMatch
+? (_officeMatch.area || _officeMatch.city).toUpperCase()
+: (item.city ? item.city.toUpperCase() : null);
+if (officeLabel) {
+pills += `<span class="pill" style="color:${styles.main}; border-color:${styles.border}; font-weight:700;">${UI_ICONS.CITY_SMALL} ${officeLabel}</span>`;
+}
 
-    // Agent/Ägare
-    if (item.owner) {
-        pills += `<span class="pill">${UI_ICONS.AGENT_SMALL} ${formatName(item.owner)}</span>`;
-    }
+// Agent/Ägare
+if (item.owner) {
+pills += `<span class="pill">${UI_ICONS.AGENT_SMALL} ${formatName(item.owner)}</span>`;
+}
 
-    // Fordon
-    if (vIcon && item.vehicle) {
-        pills += `<span class="pill" title="${item.vehicle}">${vIcon} ${item.vehicle.toUpperCase()}</span>`;
-    }
+// Fordon
+if (vIcon && item.vehicle) {
+pills += `<span class="pill" title="${item.vehicle}">${vIcon} ${item.vehicle.toUpperCase()}</span>`;
+}
 
-    // Kontaktvägar (Namn, Mail, Mobil)
-    if (item.email || item.contact_email) {
-        pills += `<span class="pill">${UI_ICONS.MAIL} ${item.email || item.contact_email}</span>`;
-    }
-    if (item.phone || item.contact_phone) {
-        pills += `<span class="pill">${UI_ICONS.PHONE} ${item.phone || item.contact_phone}</span>`;
-    }
+// Kontaktvägar (Namn, Mail, Mobil)
+if (item.email || item.contact_email) {
+pills += `<span class="pill">${UI_ICONS.MAIL} ${item.email || item.contact_email}</span>`;
+}
+if (item.phone || item.contact_phone) {
+pills += `<span class="pill">${UI_ICONS.PHONE} ${item.phone || item.contact_phone}</span>`;
+}
 
-    // AI-Badge för oeskalerade ärenden i Arkivet
-    const aiBadge = item.human_mode === 0 ? `<span class="ai-badge" style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px; border:1px solid rgba(255,255,255,0.2); vertical-align:middle;">AI</span>` : '';
+// AI-Badge för oeskalerade ärenden i Arkivet
+const aiBadge = item.human_mode === 0 ? `<span class="ai-badge" style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px; border:1px solid rgba(255,255,255,0.2); vertical-align:middle;">AI</span>` : '';
 
-    return `
+return `
 <div class="detail-header-top">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-        <div style="flex: 1; overflow: hidden;">
-            <div class="detail-subject">
-                ${resolveTicketTitle(item)} ${aiBadge}
-            </div>
-            <div style="display: flex; gap: 6px; flex-wrap: wrap; font-size:12px; margin-top:6px;">
-                ${pills}
-            </div>
-        </div>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+<div style="flex: 1; overflow: hidden;">
+<div class="detail-subject">
+${resolveTicketTitle(item)} ${aiBadge}
+</div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; font-size:12px; margin-top:6px;">
+${pills}
+</div>
+</div>
 
-        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: 20px;">
-            ${extraActions} 
-            <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div> 
-            <button class="notes-trigger-btn header-button icon-only-btn"
-                data-id="${item.conversation_id || item.id}"
-                title="Interna anteckningar"
-                style="color:${styles.main}"
-                onclick="event.stopPropagation(); openNotesModal('${item.conversation_id || item.id}')">
-                ${UI_ICONS.NOTES}
-            </button>
-        </div>
-    </div>
+<div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: 20px;">
+${extraActions} 
+<div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div> 
+<button class="notes-trigger-btn header-button icon-only-btn"
+data-id="${item.conversation_id || item.id}"
+title="Interna anteckningar"
+style="color:${styles.main}"
+onclick="event.stopPropagation(); openNotesModal('${item.conversation_id || item.id}')">
+${UI_ICONS.NOTES}
+</button>
+</div>
+</div>
 </div>
 `;
 }
@@ -4223,13 +4228,13 @@ actionContainer.innerHTML = '';
 if (tab === 'users') {
 listTitle.innerText = "Personal";
 if (isSupportAgent()) {
-  actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewAgentForm()" title="Ny Agent"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></button>`;
+actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewAgentForm()" title="Ny Agent"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></button>`;
 }
 renderAdminUserList();
 } else if (tab === 'offices') {
 listTitle.innerText = "Kontorsnätverk";
 if (isSupportAgent()) {
-  actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewOfficeForm()" title="Nytt Kontor"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="13" height="18"/><path d="M21 15V9"/><path d="M21 3v3"/><line x1="19" y1="6" x2="23" y2="6"/><line x1="9" y1="9" x2="9" y2="9"/><line x1="13" y1="9" x2="13" y2="9"/><line x1="9" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="13" y2="14"/></svg></button>`;
+actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewOfficeForm()" title="Nytt Kontor"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="13" height="18"/><path d="M21 15V9"/><path d="M21 3v3"/><line x1="19" y1="6" x2="23" y2="6"/><line x1="9" y1="9" x2="9" y2="9"/><line x1="13" y1="9" x2="13" y2="9"/><line x1="9" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="13" y2="14"/></svg></button>`;
 }
 renderAdminOfficeList();
 } else if (tab === 'config') {
@@ -4458,19 +4463,19 @@ ${actionsHTML}
 <h4 style="margin:0 0 12px 0; font-size:10px; opacity:0.5; text-transform:uppercase;">Kontorsbehörighet</h4>
 <div style="display:flex; flex-wrap:wrap; gap:6px; overflow-y:auto; max-height:100px;">
 ${offices.map(o => {
-    const isAssigned = u.routing_tag && u.routing_tag.includes(o.routing_tag);
-    const displayName = o.city + (o.area ? ' / ' + o.area : '');
-    const bg = isAssigned ? 'rgba(100,60,200,0.25)' : 'rgba(255,255,255,0.04)';
-    const border = isAssigned ? 'rgba(150,100,255,0.5)' : 'rgba(255,255,255,0.06)';
-    const color = isAssigned ? '#b09fff' : 'inherit';
-    return `
-    <label style="display:flex; align-items:center; gap:6px; font-size:11px;
-                  padding:5px 10px; border-radius:6px; ${readOnly ? 'cursor:default;' : 'cursor:pointer;'}
-                  background:${bg}; border:1px solid ${border}; color:${color};">
-        <input type="checkbox" ${isAssigned ? 'checked' : ''}
-               ${readOnly ? 'disabled' : `onchange="updateAgentOfficeRole('${u.username}', '${o.routing_tag}', this.checked, this)"`}>
-        ${adminEscapeHtml(displayName)}
-    </label>`;
+const isAssigned = u.routing_tag && u.routing_tag.includes(o.routing_tag);
+const displayName = o.city + (o.area ? ' / ' + o.area : '');
+const bg = isAssigned ? 'rgba(100,60,200,0.25)' : 'rgba(255,255,255,0.04)';
+const border = isAssigned ? 'rgba(150,100,255,0.5)' : 'rgba(255,255,255,0.06)';
+const color = isAssigned ? '#b09fff' : 'inherit';
+return `
+<label style="display:flex; align-items:center; gap:6px; font-size:11px;
+padding:5px 10px; border-radius:6px; ${readOnly ? 'cursor:default;' : 'cursor:pointer;'}
+background:${bg}; border:1px solid ${border}; color:${color};">
+<input type="checkbox" ${isAssigned ? 'checked' : ''}
+${readOnly ? 'disabled' : `onchange="updateAgentOfficeRole('${u.username}', '${o.routing_tag}', this.checked, this)"`}>
+${adminEscapeHtml(displayName)}
+</label>`;
 }).join('')}
 </div>
 </div>
@@ -4481,16 +4486,16 @@ ${offices.map(o => {
 <div class="scroll-list" style="background:rgba(0,0,0,0.1); border-radius:12px; padding:10px; border:1px solid var(--border-color);">
 ${tickets.length ? tickets.map((t, idx) => `
 <div class="admin-ticket-preview" onclick="openTicketReader(${idx})"
-     style="--atp-color: ${styles.main}">
-    <div style="flex:1; min-width:0;">
-        <div class="atp-sender">${t.sender || 'Okänd kund'}</div>
-        <div class="atp-subject">${t.subject || 'Inget ämne'}</div>
-    </div>
-    <button class="atp-note-btn"
-            onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')"
-            title="Intern anteckning">
-        ${UI_ICONS.NOTES}
-    </button>
+style="--atp-color: ${styles.main}">
+<div style="flex:1; min-width:0;">
+<div class="atp-sender">${t.sender || 'Okänd kund'}</div>
+<div class="atp-subject">${t.subject || 'Inget ämne'}</div>
+</div>
+<button class="atp-note-btn"
+onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')"
+title="Intern anteckning">
+${UI_ICONS.NOTES}
+</button>
 </div>
 `).join('') : '<div class="template-item-empty">Inga aktiva ärenden.</div>'}
 </div>
@@ -4527,13 +4532,13 @@ const oc = o.office_color || '#0071e3';
 
 return `
 <div class="admin-mini-card" onclick="openAdminOfficeDetail('${o.routing_tag}', this)" style="--agent-color: ${oc}" data-routing-tag="${o.routing_tag}">
-  <div class="office-card-bubble" style="background:${oc}18; border-color:${oc}; color:${oc};">
-    ${initial}
-  </div>
-  <div style="min-width:0; flex:1; overflow:hidden;">
-    <div class="office-card-sub" style="color:${oc};">${o.city}</div>
-    <div style="font-size:10px; opacity:0.6; color:var(--text-secondary); min-height:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${subtext}</div>
-  </div>
+<div class="office-card-bubble" style="background:${oc}18; border-color:${oc}; color:${oc};">
+${initial}
+</div>
+<div style="min-width:0; flex:1; overflow:hidden;">
+<div class="office-card-sub" style="color:${oc};">${o.city}</div>
+<div style="font-size:10px; opacity:0.6; color:var(--text-secondary); min-height:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${subtext}</div>
+</div>
 </div>`;
 }).join('');
 } catch (e) {
@@ -4614,19 +4619,19 @@ ${UI_ICONS.NOTES}
 </button>
 
 <button class="btn-glass-icon" onclick="toggleEditMode('box-office-master')" id="edit-mode-trigger" title="Redigera kontorsuppgifter" style="display:${readOnly ? 'none' : 'flex'}">
-  ${ADMIN_UI_ICONS.EDIT}
+${ADMIN_UI_ICONS.EDIT}
 </button>
 <div class="save-actions" style="display: none; gap: 8px;">
-  <button class="btn-glass-icon" data-action="cancel" onclick="cancelEdit('box-office-master')" title="Avbryt">
-    ${ADMIN_UI_ICONS.CANCEL}
-  </button>
-  <button class="btn-glass-icon" data-action="save" onclick="saveOfficeSection('${tag}', 'all')" title="Spara allt">
-    ${ADMIN_UI_ICONS.SAVE}
-  </button>
+<button class="btn-glass-icon" data-action="cancel" onclick="cancelEdit('box-office-master')" title="Avbryt">
+${ADMIN_UI_ICONS.CANCEL}
+</button>
+<button class="btn-glass-icon" data-action="save" onclick="saveOfficeSection('${tag}', 'all')" title="Spara allt">
+${ADMIN_UI_ICONS.SAVE}
+</button>
 </div>
 <button class="btn-glass-icon" onclick="deleteOffice('${tag}')" title="Radera kontor permanent"
-  style="color:#ff453a; border-color:rgba(255,69,58,0.3); display:${readOnly ? 'none' : 'flex'}">
-  ${ADMIN_UI_ICONS.DELETE}
+style="color:#ff453a; border-color:rgba(255,69,58,0.3); display:${readOnly ? 'none' : 'flex'}">
+${ADMIN_UI_ICONS.DELETE}
 </button>
 </div>
 </div>
@@ -4642,18 +4647,18 @@ ${UI_ICONS.NOTES}
 <input type="text" id="inp-email" class="filter-input" value="${data.contact?.email || ''}" disabled placeholder="E-post">
 <input type="text" id="inp-address" class="filter-input" value="${data.contact?.address || ''}" disabled placeholder="Adress">
 <div style="display:flex; align-items:center; gap:10px; padding:8px 0;
-            border-top:1px solid rgba(255,255,255,0.05); margin-top:4px;">
-    <label style="font-size:11px; opacity:0.5; text-transform:uppercase; min-width:80px;">
-        Profilfärg
-    </label>
-    <input type="color" id="inp-office-color" value="${data.office_color || '#0071e3'}"
-           oninput="window._updateOfficeLiveColor(this.value)"
-           style="width:28px; height:28px; cursor:pointer; border:none;
-                  background:transparent; border-radius:4px;">
-    <span id="inp-office-color-hex"
-          style="font-family:monospace; font-size:12px; opacity:0.6;">
-        ${data.office_color || '#0071e3'}
-    </span>
+border-top:1px solid rgba(255,255,255,0.05); margin-top:4px;">
+<label style="font-size:11px; opacity:0.5; text-transform:uppercase; min-width:80px;">
+Profilfärg
+</label>
+<input type="color" id="inp-office-color" value="${data.office_color || '#0071e3'}"
+oninput="window._updateOfficeLiveColor(this.value)"
+style="width:28px; height:28px; cursor:pointer; border:none;
+background:transparent; border-radius:4px;">
+<span id="inp-office-color-hex"
+style="font-family:monospace; font-size:12px; opacity:0.6;">
+${data.office_color || '#0071e3'}
+</span>
 </div>
 </div>
 </div>
@@ -4668,16 +4673,16 @@ ${data.prices ? data.prices.map((p, idx) => `
 <input type="number" class="price-inp" data-idx="${idx}" value="${p.price}" disabled style="width: 80px; text-align: right;">
 <span style="font-size: 11px; opacity: 0.6;">SEK</span>
 <button class="price-delete-btn" title="Ta bort tjänst"
-  style="display:none; width:22px; height:22px; border-radius:50%; background:rgba(255,69,58,0.15);
-  border:1px solid rgba(255,69,58,0.3); color:#ff453a; cursor:pointer; font-size:14px;
-  align-items:center; justify-content:center; padding:0; line-height:1; flex-shrink:0;"
-  onclick="this.closest('.price-row').remove(); window._adminFormDirty=true;">×</button>
+style="display:none; width:22px; height:22px; border-radius:50%; background:rgba(255,69,58,0.15);
+border:1px solid rgba(255,69,58,0.3); color:#ff453a; cursor:pointer; font-size:14px;
+align-items:center; justify-content:center; padding:0; line-height:1; flex-shrink:0;"
+onclick="this.closest('.price-row').remove(); window._adminFormDirty=true;">×</button>
 </div>
 </div>
 `).join('') : '<div class="template-item-empty">Inga priser inlagda.</div>'}
 </div>
 <button id="add-service-btn" style="display:none; margin-top:10px; width:100%;" class="btn-glass-small" onclick="openAddServicePanel()">
-  + Lägg till tjänst
++ Lägg till tjänst
 </button>
 <div id="add-service-panel" style="display:none; margin-top:14px; padding:12px; background:rgba(0,113,227,0.05); border:1px solid rgba(0,113,227,0.2); border-radius:8px;">
 <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px; text-transform:uppercase;">Välj tjänst att lägga till</div>
@@ -4695,14 +4700,14 @@ ${data.prices ? data.prices.map((p, idx) => `
 <div class="glass-panel" id="box-booking" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
 <h4 style="margin: 0 0 15px 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Bokningslänkar</h4>
 <div style="display:grid; gap:10px;">
-  ${[['CAR','Bil'], ['MC','MC'], ['AM','AM/Moped']].map(([key, label]) => `
-  <div style="display:flex; align-items:center; gap:10px;">
-    <span style="font-size:11px; opacity:0.5; text-transform:uppercase; width:52px; flex-shrink:0;">${label}</span>
-    <input id="inp-booking-${key.toLowerCase()}" class="filter-input" type="url" disabled
-      placeholder="https://..."
-      value="${(data.booking_links && data.booking_links[key]) || ''}"
-      style="flex:1;">
-  </div>`).join('')}
+${[['CAR','Bil'], ['MC','MC'], ['AM','AM/Moped']].map(([key, label]) => `
+<div style="display:flex; align-items:center; gap:10px;">
+<span style="font-size:11px; opacity:0.5; text-transform:uppercase; width:52px; flex-shrink:0;">${label}</span>
+<input id="inp-booking-${key.toLowerCase()}" class="filter-input" type="url" disabled
+placeholder="https://..."
+value="${(data.booking_links && data.booking_links[key]) || ''}"
+style="flex:1;">
+</div>`).join('')}
 </div>
 </div>
 
@@ -4719,16 +4724,16 @@ ${data.prices ? data.prices.map((p, idx) => `
 <div class="scroll-list">
 ${tickets.length ? tickets.map((t, idx) => `
 <div class="admin-ticket-preview" onclick="openTicketReader(${idx})"
-     style="--atp-color: ${oc}">
-    <div style="flex:1; min-width:0;">
-        <div class="atp-sender">${t.sender || 'Okänd kund'}</div>
-        <div class="atp-subject">${t.subject || 'Inget ämne'}</div>
-    </div>
-    <button class="atp-note-btn"
-            onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')"
-            title="Intern anteckning">
-        ${UI_ICONS.NOTES}
-    </button>
+style="--atp-color: ${oc}">
+<div style="flex:1; min-width:0;">
+<div class="atp-sender">${t.sender || 'Okänd kund'}</div>
+<div class="atp-subject">${t.subject || 'Inget ämne'}</div>
+</div>
+<button class="atp-note-btn"
+onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')"
+title="Intern anteckning">
+${UI_ICONS.NOTES}
+</button>
 </div>
 `).join('') : '<div class="template-item-empty" style="text-align:center;">Kön är tom ✅</div>'}
 </div>
@@ -4753,10 +4758,10 @@ ${u.is_online ? '<span style="width:7px;height:7px;border-radius:50%;background:
 window.toggleEditMode = (boxId) => {
 const box = document.getElementById(boxId);
 box.querySelectorAll('input, textarea').forEach(el => {
-  if (el.id === 'inp-office-color') return; // färgväljare är alltid aktiv
-  el.disabled = false;
-  el.style.borderColor = 'var(--accent-primary)';
-  el.style.background = 'rgba(255,255,255,0.08)';
+if (el.id === 'inp-office-color') return; // färgväljare är alltid aktiv
+el.disabled = false;
+el.style.borderColor = 'var(--accent-primary)';
+el.style.background = 'rgba(255,255,255,0.08)';
 });
 // Visa raderingsknapparna på prisrader
 box.querySelectorAll('.price-delete-btn').forEach(btn => btn.style.display = 'flex');
@@ -4764,39 +4769,39 @@ document.getElementById('edit-mode-trigger').style.display = 'none';
 
 const saveActions = box.querySelector('.save-actions');
 if (saveActions) {
-  saveActions.style.display = 'flex';
-  // Starta inaktiva — aktiveras först vid faktisk ändring
-  const saveBtns = saveActions.querySelectorAll('button');
-  saveBtns.forEach(btn => {
-    btn.style.opacity = '0.35';
-    btn.style.pointerEvents = 'none';
-    btn.style.cursor = 'not-allowed';
-    btn.style.color = '';
-    btn.style.borderColor = '';
-  });
-  const activateSave = () => {
-    saveBtns.forEach(btn => {
-      btn.style.opacity = '1';
-      btn.style.pointerEvents = 'auto';
-      btn.style.cursor = 'pointer';
-      if (btn.getAttribute('data-action') === 'cancel') {
-        btn.style.color = '#ff453a';
-        btn.style.borderColor = 'rgba(255,69,58,0.4)';
-      } else if (btn.getAttribute('data-action') === 'save') {
-        btn.style.color = '#4cd964';
-        btn.style.borderColor = 'rgba(76,217,100,0.4)';
-      }
-    });
-    // Lyssna bara en gång
-    box.querySelectorAll('input, textarea').forEach(el => {
-      el.removeEventListener('input', activateSave);
-      el.removeEventListener('change', activateSave);
-    });
-  };
-  box.querySelectorAll('input, textarea').forEach(el => {
-    el.addEventListener('input', activateSave);
-    el.addEventListener('change', activateSave);
-  });
+saveActions.style.setProperty('display', 'none', 'important');
+// Starta inaktiva — aktiveras först vid faktisk ändring
+const saveBtns = saveActions.querySelectorAll('button');
+saveBtns.forEach(btn => {
+btn.style.opacity = '0.35';
+btn.style.pointerEvents = 'none';
+btn.style.cursor = 'not-allowed';
+btn.style.color = '';
+btn.style.borderColor = '';
+});
+const activateSave = () => {
+saveBtns.forEach(btn => {
+btn.style.opacity = '1';
+btn.style.pointerEvents = 'auto';
+btn.style.cursor = 'pointer';
+if (btn.getAttribute('data-action') === 'cancel') {
+btn.style.color = '#ff453a';
+btn.style.borderColor = 'rgba(255,69,58,0.4)';
+} else if (btn.getAttribute('data-action') === 'save') {
+btn.style.color = '#4cd964';
+btn.style.borderColor = 'rgba(76,217,100,0.4)';
+}
+});
+// Lyssna bara en gång
+box.querySelectorAll('input, textarea').forEach(el => {
+el.removeEventListener('input', activateSave);
+el.removeEventListener('change', activateSave);
+});
+};
+box.querySelectorAll('input, textarea').forEach(el => {
+el.addEventListener('input', activateSave);
+el.addEventListener('change', activateSave);
+});
 }
 
 const addServiceBtn = document.getElementById('add-service-btn');
@@ -4810,63 +4815,63 @@ openAdminOfficeDetail(tag); // Ladda om vyn
 // Live-uppdatering av kontorets accentfärg — kallas från color picker oninput
 // Sparas automatiskt med debounce, ingen spara-knapp behövs för färgändring
 window._updateOfficeLiveColor = (hex) => {
-  // Hex-display bredvid pickern
-  const hexEl = document.getElementById('inp-office-color-hex');
-  if (hexEl) hexEl.textContent = hex;
+// Hex-display bredvid pickern
+const hexEl = document.getElementById('inp-office-color-hex');
+if (hexEl) hexEl.textContent = hex;
 
-  // Header — gradient och border
-  const header = document.getElementById('office-detail-header');
-  if (header) {
-    header.style.borderBottomColor = hex;
-    header.style.background = `linear-gradient(90deg, ${hex}1a, transparent)`;
-  }
+// Header — gradient och border
+const header = document.getElementById('office-detail-header');
+if (header) {
+header.style.borderBottomColor = hex;
+header.style.background = `linear-gradient(90deg, ${hex}1a, transparent)`;
+}
 
-  // Avatar-bubbla i headern
-  const avatar = document.getElementById('office-avatar-circle');
-  if (avatar) avatar.style.background = hex;
+// Avatar-bubbla i headern
+const avatar = document.getElementById('office-avatar-circle');
+if (avatar) avatar.style.background = hex;
 
-  // KONTOR-pill
-  const pill = document.querySelector('.office-pill-accent');
-  if (pill) { pill.style.borderColor = hex; pill.style.color = hex; }
+// KONTOR-pill
+const pill = document.querySelector('.office-pill-accent');
+if (pill) { pill.style.borderColor = hex; pill.style.color = hex; }
 
-  // Notes-knapp i headern
-  const notesBtn = document.querySelector('.detail-footer-toolbar .notes-trigger-btn');
-  if (notesBtn) notesBtn.style.color = hex;
+// Notes-knapp i headern
+const notesBtn = document.querySelector('.detail-footer-toolbar .notes-trigger-btn');
+if (notesBtn) notesBtn.style.color = hex;
 
-  // Aktivt kort i listan
-  const activeCard = document.querySelector('#admin-main-list .admin-mini-card.active');
-  if (activeCard) {
-    activeCard.style.setProperty('--agent-color', hex);
-    const bubble = activeCard.querySelector('.office-card-bubble');
-    if (bubble) { bubble.style.background = hex + '18'; bubble.style.borderColor = hex; bubble.style.color = hex; }
-    const sub = activeCard.querySelector('.office-card-sub');
-    if (sub) sub.style.color = hex;
-  }
+// Aktivt kort i listan
+const activeCard = document.querySelector('#admin-main-list .admin-mini-card.active');
+if (activeCard) {
+activeCard.style.setProperty('--agent-color', hex);
+const bubble = activeCard.querySelector('.office-card-bubble');
+if (bubble) { bubble.style.background = hex + '18'; bubble.style.borderColor = hex; bubble.style.color = hex; }
+const sub = activeCard.querySelector('.office-card-sub');
+if (sub) sub.style.color = hex;
+}
 
-  // Ärendekortens vänsterlinje i kontorsdetaljvyn
-  document.querySelectorAll('#admin-detail-content .admin-ticket-preview').forEach(card => {
-    card.style.setProperty('--atp-color', hex);
-  });
+// Ärendekortens vänsterlinje i kontorsdetaljvyn
+document.querySelectorAll('#admin-detail-content .admin-ticket-preview').forEach(card => {
+card.style.setProperty('--atp-color', hex);
+});
 
-  // Auto-spara med debounce — snabb endpoint, ingen AI-validering
-  clearTimeout(window._colorSaveTimer);
-  window._colorSaveTimer = setTimeout(async () => {
-    try {
-      const saveRes = await fetch(`${SERVER_URL}/api/admin/update-office-color`, {
-        method: 'POST',
-        headers: fetchHeaders,
-        body: JSON.stringify({ routing_tag: tag, color: hex })
-      });
-      if (saveRes.ok) {
-        await preloadOffices();      // Uppdatera officeData-cache
-        renderMyTickets?.();         // Ärendekort i Mina Ärenden
-        renderInbox?.();             // Ärendekort i Inkorg
-        showToast('🎨 Kontorsfärg sparad');
-      }
-    } catch (e) {
-      console.error('[OfficeColor] Auto-spara misslyckades:', e);
-    }
-  }, 700);
+// Auto-spara med debounce — snabb endpoint, ingen AI-validering
+clearTimeout(window._colorSaveTimer);
+window._colorSaveTimer = setTimeout(async () => {
+try {
+const saveRes = await fetch(`${SERVER_URL}/api/admin/update-office-color`, {
+method: 'POST',
+headers: fetchHeaders,
+body: JSON.stringify({ routing_tag: tag, color: hex })
+});
+if (saveRes.ok) {
+await preloadOffices();      // Uppdatera officeData-cache
+renderMyTickets?.();         // Ärendekort i Mina Ärenden
+renderInbox?.();             // Ärendekort i Inkorg
+showToast('🎨 Kontorsfärg sparad');
+}
+} catch (e) {
+console.error('[OfficeColor] Auto-spara misslyckades:', e);
+}
+}, 700);
 };
 
 window.saveOfficeSection = async (tag, section) => {
@@ -4886,24 +4891,24 @@ if (colorInput) currentData.office_color = colorInput.value;
 const bookingKeys = { car: 'CAR', mc: 'MC', am: 'AM' };
 if (!currentData.booking_links) currentData.booking_links = {};
 Object.entries(bookingKeys).forEach(([inputKey, dataKey]) => {
-  const el = document.getElementById(`inp-booking-${inputKey}`);
-  if (el) currentData.booking_links[dataKey] = el.value.trim() || null;
+const el = document.getElementById(`inp-booking-${inputKey}`);
+if (el) currentData.booking_links[dataKey] = el.value.trim() || null;
 });
 
 // Priser — bygg komplett array från kvarvarande DOM-rader (raderade är borta)
 const remainingPrices = [];
 document.querySelectorAll('#price-list-grid .price-row').forEach(row => {
-  const inp = row.querySelector('.price-inp');
-  if (!inp) return;
-  const newService = inp.getAttribute('data-new-service');
-  const idx = inp.getAttribute('data-idx');
-  if (newService) {
-    // Ny tjänst tillagd i editläge
-    remainingPrices.push({ service_name: newService, price: parseInt(inp.value) || 0, keywords: [] });
-  } else if (idx !== null && currentData.prices[idx]) {
-    // Existerande tjänst — bevara keywords, uppdatera pris
-    remainingPrices.push({ ...currentData.prices[idx], price: parseInt(inp.value) || 0 });
-  }
+const inp = row.querySelector('.price-inp');
+if (!inp) return;
+const newService = inp.getAttribute('data-new-service');
+const idx = inp.getAttribute('data-idx');
+if (newService) {
+// Ny tjänst tillagd i editläge
+remainingPrices.push({ service_name: newService, price: parseInt(inp.value) || 0, keywords: [] });
+} else if (idx !== null && currentData.prices[idx]) {
+// Existerande tjänst — bevara keywords, uppdatera pris
+remainingPrices.push({ ...currentData.prices[idx], price: parseInt(inp.value) || 0 });
+}
 });
 currentData.prices = remainingPrices;
 
@@ -5022,8 +5027,8 @@ listContainer.innerHTML = sections.map(s => `
 async function openSystemConfigSection(section, element) {
 const wasOpen = element && element.dataset.kbOpen === 'true';
 document.querySelectorAll('.admin-sysconfig-nav-item').forEach(el => {
-    el.classList.remove('active');
-    el.dataset.kbOpen = 'false';
+el.classList.remove('active');
+el.dataset.kbOpen = 'false';
 });
 const existingKb = document.getElementById('kb-sublist');
 if (existingKb) existingKb.remove();
@@ -5037,22 +5042,22 @@ placeholder.style.display = 'none';
 detailBox.style.display = 'flex';
 
 if (section === 'knowledge') {
-    if (wasOpen) {
-        if (detailBox) detailBox.style.display = 'none';
-        if (placeholder) { placeholder.style.display = 'flex'; }
-        return;
-    }
-    if (element) element.dataset.kbOpen = 'true';
-    detailBox.innerHTML = '<div class="spinner-small"></div>';
-    try {
-        const res = await fetch(`${SERVER_URL}/api/admin/basfakta-list`, { headers: fetchHeaders });
-        if (!res.ok) throw new Error('List fetch failed');
-        const files = await res.json();
-        renderBasfaktaSubList(files);
-    } catch (e) {
-        detailBox.innerHTML = '<div style="padding:20px; color:#ff6b6b;">Kunde inte ladda kunskapsbanken.</div>';
-    }
-    return;
+if (wasOpen) {
+if (detailBox) detailBox.style.display = 'none';
+if (placeholder) { placeholder.style.display = 'flex'; }
+return;
+}
+if (element) element.dataset.kbOpen = 'true';
+detailBox.innerHTML = '<div class="spinner-small"></div>';
+try {
+const res = await fetch(`${SERVER_URL}/api/admin/basfakta-list`, { headers: fetchHeaders });
+if (!res.ok) throw new Error('List fetch failed');
+const files = await res.json();
+renderBasfaktaSubList(files);
+} catch (e) {
+detailBox.innerHTML = '<div style="padding:20px; color:#ff6b6b;">Kunde inte ladda kunskapsbanken.</div>';
+}
+return;
 }
 
 if (section === 'drift') {
@@ -5512,82 +5517,82 @@ const readerSubtitle = resolveLabel(t.routing_tag || t.owner);
 modal.innerHTML = `
 <div class="glass-modal-box glass-effect" style="width:680px; max-width:92vw; border-top:3px solid ${rStyles.main}; position:relative; display:flex; flex-direction:column; max-height:82vh; overflow:hidden;">
 
-  <!-- Stängknapp -->
-  <button onclick="document.getElementById('atlas-reader-modal').style.display='none'"
-    style="position:absolute; top:10px; right:10px; z-index:10; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.4); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;"
-    onmouseover="this.style.background='rgba(255,69,58,0.45)';this.style.color='white'"
-    onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='rgba(255,255,255,0.4)'">
-    ${ADMIN_UI_ICONS.CANCEL}
-  </button>
+<!-- Stängknapp -->
+<button onclick="document.getElementById('atlas-reader-modal').style.display='none'"
+style="position:absolute; top:10px; right:10px; z-index:10; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.4); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;"
+onmouseover="this.style.background='rgba(255,69,58,0.45)';this.style.color='white'"
+onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='rgba(255,255,255,0.4)'">
+${ADMIN_UI_ICONS.CANCEL}
+</button>
 
-  <!-- Header: Avatar + Titel + Notes-ikon + Nav-pilar -->
-  <div style="padding:14px 48px 14px 16px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; background:linear-gradient(90deg, ${rStyles.main}14, transparent);">
-    <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
-      <div style="width:40px; height:40px; border-radius:10px; background:${rStyles.main}; color:black; font-weight:800; font-size:17px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 12px ${rStyles.main}55;">
-        ${(readerTitle || 'U').substring(0,1).toUpperCase()}
-      </div>
-      <div style="min-width:0;">
-        <div style="font-size:15px; font-weight:700; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px;">${readerTitle || 'Okänd'}</div>
-        <div style="font-size:10px; opacity:0.4; color:white; letter-spacing:0.3px;">${readerSubtitle || ''} • ${t.conversation_id.replace('session_','').substring(0,10)}</div>
-      </div>
-    </div>
+<!-- Header: Avatar + Titel + Notes-ikon + Nav-pilar -->
+<div style="padding:14px 48px 14px 16px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; background:linear-gradient(90deg, ${rStyles.main}14, transparent);">
+<div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
+<div style="width:40px; height:40px; border-radius:10px; background:${rStyles.main}; color:black; font-weight:800; font-size:17px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 12px ${rStyles.main}55;">
+${(readerTitle || 'U').substring(0,1).toUpperCase()}
+</div>
+<div style="min-width:0;">
+<div style="font-size:15px; font-weight:700; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px;">${readerTitle || 'Okänd'}</div>
+<div style="font-size:10px; opacity:0.4; color:white; letter-spacing:0.3px;">${readerSubtitle || ''} • ${t.conversation_id.replace('session_','').substring(0,10)}</div>
+</div>
+</div>
 
-    <!-- Verktyg: Notes + separator + Nav -->
-    <div style="display:flex; align-items:center; gap:5px; flex-shrink:0; margin-left:10px;">
-      <button class="btn-glass-icon notes-trigger-btn"
-        onclick="openNotesModal('${t.conversation_id}')"
-        title="Interna anteckningar"
-        style="color:${rStyles.main}; border-color:${rStyles.border};">
-        ${UI_ICONS.NOTES}
-      </button>
-      <div style="width:1px; height:16px; background:rgba(255,255,255,0.1); margin:0 3px;"></div>
-      <button class="btn-glass-icon" onclick="navigateReader(-1)"
-        ${currentTicketIdx === 0 ? 'disabled' : ''}
-        style="${currentTicketIdx === 0 ? 'opacity:0.22; pointer-events:none;' : ''}"
-        title="Föregående ärende">
-        ${ADMIN_UI_ICONS.ARROW_LEFT}
-      </button>
-      <span style="font-size:11px; font-weight:700; opacity:0.55; font-family:monospace; color:white; min-width:32px; text-align:center;">${currentTicketIdx + 1}/${currentTicketList.length}</span>
-      <button class="btn-glass-icon" onclick="navigateReader(1)"
-        ${currentTicketIdx === currentTicketList.length - 1 ? 'disabled' : ''}
-        style="${currentTicketIdx === currentTicketList.length - 1 ? 'opacity:0.22; pointer-events:none;' : ''}"
-        title="Nästa ärende">
-        ${ADMIN_UI_ICONS.ARROW_RIGHT}
-      </button>
-    </div>
-  </div>
+<!-- Verktyg: Notes + separator + Nav -->
+<div style="display:flex; align-items:center; gap:5px; flex-shrink:0; margin-left:10px;">
+<button class="btn-glass-icon notes-trigger-btn"
+onclick="openNotesModal('${t.conversation_id}')"
+title="Interna anteckningar"
+style="color:${rStyles.main}; border-color:${rStyles.border};">
+${UI_ICONS.NOTES}
+</button>
+<div style="width:1px; height:16px; background:rgba(255,255,255,0.1); margin:0 3px;"></div>
+<button class="btn-glass-icon" onclick="navigateReader(-1)"
+${currentTicketIdx === 0 ? 'disabled' : ''}
+style="${currentTicketIdx === 0 ? 'opacity:0.22; pointer-events:none;' : ''}"
+title="Föregående ärende">
+${ADMIN_UI_ICONS.ARROW_LEFT}
+</button>
+<span style="font-size:11px; font-weight:700; opacity:0.55; font-family:monospace; color:white; min-width:32px; text-align:center;">${currentTicketIdx + 1}/${currentTicketList.length}</span>
+<button class="btn-glass-icon" onclick="navigateReader(1)"
+${currentTicketIdx === currentTicketList.length - 1 ? 'disabled' : ''}
+style="${currentTicketIdx === currentTicketList.length - 1 ? 'opacity:0.22; pointer-events:none;' : ''}"
+title="Nästa ärende">
+${ADMIN_UI_ICONS.ARROW_RIGHT}
+</button>
+</div>
+</div>
 
-  <!-- Meddelandehistorik med scroll -->
-  <div style="flex:1; overflow-y:auto; padding:16px 18px; display:flex; flex-direction:column; gap:10px; min-height:0;">
-    ${(t.messages || []).length === 0
-      ? `<div style="text-align:center; padding:40px 0; opacity:0.35; font-size:13px;">Ingen historik ännu.</div>`
-      : (t.messages || []).map(m => {
-          const isUser = m.role === 'user';
-          return `
-          <div style="display:flex; flex-direction:column; align-items:${isUser ? 'flex-start' : 'flex-end'};">
-            <div style="font-size:9px; font-weight:700; letter-spacing:0.8px; opacity:0.4; margin-bottom:3px; color:${isUser ? rStyles.main : 'rgba(255,255,255,0.7)'};">
-              ${isUser ? 'KUND' : 'AGENT'}
-            </div>
-            <div style="max-width:78%; padding:9px 13px; border-radius:${isUser ? '3px 12px 12px 12px' : '12px 3px 12px 12px'}; background:${isUser ? rStyles.bubbleBg : 'rgba(255,255,255,0.05)'}; border:1px solid ${isUser ? rStyles.border : 'rgba(255,255,255,0.07)'}; font-size:13px; line-height:1.55; color:var(--text-primary); word-break:break-word;">
-              ${m.content || m.text || ''}
-            </div>
-          </div>`;
-        }).join('')}
-  </div>
+<!-- Meddelandehistorik med scroll -->
+<div style="flex:1; overflow-y:auto; padding:16px 18px; display:flex; flex-direction:column; gap:10px; min-height:0;">
+${(t.messages || []).length === 0
+? `<div style="text-align:center; padding:40px 0; opacity:0.35; font-size:13px;">Ingen historik ännu.</div>`
+: (t.messages || []).map(m => {
+const isUser = m.role === 'user';
+return `
+<div style="display:flex; flex-direction:column; align-items:${isUser ? 'flex-start' : 'flex-end'};">
+<div style="font-size:9px; font-weight:700; letter-spacing:0.8px; opacity:0.4; margin-bottom:3px; color:${isUser ? rStyles.main : 'rgba(255,255,255,0.7)'};">
+${isUser ? 'KUND' : 'AGENT'}
+</div>
+<div style="max-width:78%; padding:9px 13px; border-radius:${isUser ? '3px 12px 12px 12px' : '12px 3px 12px 12px'}; background:${isUser ? rStyles.bubbleBg : 'rgba(255,255,255,0.05)'}; border:1px solid ${isUser ? rStyles.border : 'rgba(255,255,255,0.07)'}; font-size:13px; line-height:1.55; color:var(--text-primary); word-break:break-word;">
+${m.content || m.text || ''}
+</div>
+</div>`;
+}).join('')}
+</div>
 
-  <!-- Footer: Ikon-knappar -->
-  <div style="padding:9px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.3); display:flex; justify-content:flex-end; align-items:center; gap:8px; flex-shrink:0;">
-    <button class="btn-glass-icon" onclick="assignTicketFromReader('${t.conversation_id}')"
-      title="Tilldela ärende till agent"
-      style="color:var(--text-secondary);">
-      ${UI_ICONS.ASSIGN}
-    </button>
-    <button class="btn-glass-icon" onclick="claimTicketFromReader('${t.conversation_id}')"
-      title="Plocka upp ärendet"
-      style="color:${rStyles.main}; border-color:${rStyles.border}; background:${rStyles.main}1a;">
-      ${UI_ICONS.CLAIM}
-    </button>
-  </div>
+<!-- Footer: Ikon-knappar -->
+<div style="padding:9px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.3); display:flex; justify-content:flex-end; align-items:center; gap:8px; flex-shrink:0;">
+<button class="btn-glass-icon" onclick="assignTicketFromReader('${t.conversation_id}')"
+title="Tilldela ärende till agent"
+style="color:var(--text-secondary);">
+${UI_ICONS.ASSIGN}
+</button>
+<button class="btn-glass-icon" onclick="claimTicketFromReader('${t.conversation_id}')"
+title="Plocka upp ärendet"
+style="color:${rStyles.main}; border-color:${rStyles.border}; background:${rStyles.main}1a;">
+${UI_ICONS.CLAIM}
+</button>
+</div>
 
 </div>`;
 
@@ -5665,99 +5670,99 @@ const officeBadgesHTML = offices.map(o => `
 
 detailBox.innerHTML = `
 <div class="detail-container" style="padding:24px;width:100%;overflow-y:auto;box-sizing:border-box;">
-  <!-- Header -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:16px;">
-    <h2 style="margin:0;font-size:18px;color:white;font-weight:700;">Skapa ny agent</h2>
-    <div style="display:flex;gap:8px;">
-      <button class="btn-glass-icon" style="color:#4cd964;border-color:rgba(76,217,100,0.4);" onclick="saveNewAgent()" title="Spara agent">${ADMIN_UI_ICONS.SAVE}</button>
-      <button class="btn-glass-icon" style="color:#ff453a;border-color:rgba(255,69,58,0.4);" onclick="renderAdminUserList();document.getElementById('admin-placeholder').style.display='flex';document.getElementById('admin-detail-content').style.display='none';" title="Avbryt">${ADMIN_UI_ICONS.CANCEL}</button>
-    </div>
-  </div>
+<!-- Header -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:16px;">
+<h2 style="margin:0;font-size:18px;color:white;font-weight:700;">Skapa ny agent</h2>
+<div style="display:flex;gap:8px;">
+<button class="btn-glass-icon" style="color:#4cd964;border-color:rgba(76,217,100,0.4);" onclick="saveNewAgent()" title="Spara agent">${ADMIN_UI_ICONS.SAVE}</button>
+<button class="btn-glass-icon" style="color:#ff453a;border-color:rgba(255,69,58,0.4);" onclick="renderAdminUserList();document.getElementById('admin-placeholder').style.display='flex';document.getElementById('admin-detail-content').style.display='none';" title="Avbryt">${ADMIN_UI_ICONS.CANCEL}</button>
+</div>
+</div>
 
-  <!-- 2-kolumnslayout -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+<!-- 2-kolumnslayout -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
 
-    <!-- Vänster: Baskonfiguration -->
-    <div style="display:flex;flex-direction:column;gap:16px;">
+<!-- Vänster: Baskonfiguration -->
+<div style="display:flex;flex-direction:column;gap:16px;">
 
-      <!-- Live avatar-preview (med inbyggd färgväljare) -->
-      <div style="display:flex;align-items:center;gap:16px;padding:14px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);">
-        <div id="new-agent-avatar-preview" style="width:64px;height:64px;border-radius:50%;background:#0071e3;display:flex;align-items:center;justify-content:center;color:white;font-size:26px;font-weight:700;box-shadow:0 0 20px rgba(0,113,227,0.45);flex-shrink:0;transition:background 0.2s,box-shadow 0.2s;">A</div>
-        <div style="flex:1;min-width:0;">
-          <div id="new-agent-preview-name" style="font-size:14px;font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ny agent</div>
-          <div id="new-agent-preview-role" style="font-size:11px;opacity:0.5;margin-top:2px;">Agent</div>
-        </div>
-        <!-- Färgväljare inbyggd i preview-kortet -->
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
-          <input type="color" id="new-agent-color" value="#0071e3"
-            style="width:34px;height:34px;border:none;background:transparent;cursor:pointer;border-radius:8px;padding:2px;"
-            title="Välj accentfärg" oninput="window._updateNewAgentColor(this.value);">
-          <span id="new-agent-color-hex" style="font-family:monospace;font-size:10px;opacity:0.5;">#0071e3</span>
-        </div>
-      </div>
+<!-- Live avatar-preview (med inbyggd färgväljare) -->
+<div style="display:flex;align-items:center;gap:16px;padding:14px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);">
+<div id="new-agent-avatar-preview" style="width:64px;height:64px;border-radius:50%;background:#0071e3;display:flex;align-items:center;justify-content:center;color:white;font-size:26px;font-weight:700;box-shadow:0 0 20px rgba(0,113,227,0.45);flex-shrink:0;transition:background 0.2s,box-shadow 0.2s;">A</div>
+<div style="flex:1;min-width:0;">
+<div id="new-agent-preview-name" style="font-size:14px;font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ny agent</div>
+<div id="new-agent-preview-role" style="font-size:11px;opacity:0.5;margin-top:2px;">Agent</div>
+</div>
+<!-- Färgväljare inbyggd i preview-kortet -->
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+<input type="color" id="new-agent-color" value="#0071e3"
+style="width:34px;height:34px;border:none;background:transparent;cursor:pointer;border-radius:8px;padding:2px;"
+title="Välj accentfärg" oninput="window._updateNewAgentColor(this.value);">
+<span id="new-agent-color-hex" style="font-family:monospace;font-size:10px;opacity:0.5;">#0071e3</span>
+</div>
+</div>
 
-      <!-- Användarnamn -->
-      <div>
-        <label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Användarnamn *</label>
-        <input id="new-agent-username" class="filter-input" type="text" placeholder="t.ex. anna.karlsson"
-          oninput="window._adminFormDirty=true; const prev=document.getElementById('new-agent-avatar-preview'); if(prev&&!prev.querySelector('svg'))prev.textContent=this.value.charAt(0).toUpperCase()||'A'; const dn=document.getElementById('new-agent-displayname'); if(dn&&!dn._touched){dn.placeholder='t.ex. Anna Karlsson'; document.getElementById('new-agent-preview-name').textContent=this.value||'Ny agent';}">
-      </div>
+<!-- Användarnamn -->
+<div>
+<label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Användarnamn *</label>
+<input id="new-agent-username" class="filter-input" type="text" placeholder="t.ex. anna.karlsson"
+oninput="window._adminFormDirty=true; const prev=document.getElementById('new-agent-avatar-preview'); if(prev&&!prev.querySelector('svg'))prev.textContent=this.value.charAt(0).toUpperCase()||'A'; const dn=document.getElementById('new-agent-displayname'); if(dn&&!dn._touched){dn.placeholder='t.ex. Anna Karlsson'; document.getElementById('new-agent-preview-name').textContent=this.value||'Ny agent';}">
+</div>
 
-      <!-- Visningsnamn -->
-      <div>
-        <label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Visningsnamn</label>
-        <input id="new-agent-displayname" class="filter-input" type="text" placeholder="t.ex. Anna Karlsson"
-          oninput="window._adminFormDirty=true; this._touched=true; document.getElementById('new-agent-preview-name').textContent=this.value||document.getElementById('new-agent-username').value||'Ny agent';">
-      </div>
+<!-- Visningsnamn -->
+<div>
+<label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Visningsnamn</label>
+<input id="new-agent-displayname" class="filter-input" type="text" placeholder="t.ex. Anna Karlsson"
+oninput="window._adminFormDirty=true; this._touched=true; document.getElementById('new-agent-preview-name').textContent=this.value||document.getElementById('new-agent-username').value||'Ny agent';">
+</div>
 
-      <!-- Lösenord -->
-      <div>
-        <label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Lösenord *</label>
-        <input id="new-agent-password" class="filter-input" type="password" placeholder="Välj ett starkt lösenord"
-          oninput="window._adminFormDirty=true; window._checkNewAgentPw();">
-      </div>
+<!-- Lösenord -->
+<div>
+<label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Lösenord *</label>
+<input id="new-agent-password" class="filter-input" type="password" placeholder="Välj ett starkt lösenord"
+oninput="window._adminFormDirty=true; window._checkNewAgentPw();">
+</div>
 
-      <!-- Bekräfta lösenord -->
-      <div>
-        <label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Bekräfta lösenord *</label>
-        <input id="new-agent-password2" class="filter-input" type="password" placeholder="Upprepa lösenordet"
-          oninput="window._adminFormDirty=true; window._checkNewAgentPw();">
-        <div id="pw-match-indicator" style="font-size:11px;margin-top:5px;height:14px;"></div>
-      </div>
+<!-- Bekräfta lösenord -->
+<div>
+<label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Bekräfta lösenord *</label>
+<input id="new-agent-password2" class="filter-input" type="password" placeholder="Upprepa lösenordet"
+oninput="window._adminFormDirty=true; window._checkNewAgentPw();">
+<div id="pw-match-indicator" style="font-size:11px;margin-top:5px;height:14px;"></div>
+</div>
 
-      <!-- Roll -->
-      <div>
-        <label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Roll</label>
-        <select id="new-agent-role" class="filter-input" style="cursor:pointer;"
-          onchange="document.getElementById('new-agent-preview-role').textContent=this.options[this.selectedIndex].text; window._adminFormDirty=true;">
-          <option value="agent">Agent</option>
-          <option value="support">Support / Admin</option>
-        </select>
-      </div>
+<!-- Roll -->
+<div>
+<label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Roll</label>
+<select id="new-agent-role" class="filter-input" style="cursor:pointer;"
+onchange="document.getElementById('new-agent-preview-role').textContent=this.options[this.selectedIndex].text; window._adminFormDirty=true;">
+<option value="agent">Agent</option>
+<option value="support">Support / Admin</option>
+</select>
+</div>
 
-    </div>
+</div>
 
-    <!-- Höger: Avatar-väljare + Kontor -->
-    <div style="display:flex;flex-direction:column;gap:20px;">
+<!-- Höger: Avatar-väljare + Kontor -->
+<div style="display:flex;flex-direction:column;gap:20px;">
 
-      <!-- Avatar-grid -->
-      <div>
-        <label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:10px;letter-spacing:0.05em;">Välj avatar</label>
-        <div id="new-agent-avatar-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
-          ${avatarGridHTML}
-        </div>
-      </div>
+<!-- Avatar-grid -->
+<div>
+<label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:10px;letter-spacing:0.05em;">Välj avatar</label>
+<div id="new-agent-avatar-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+${avatarGridHTML}
+</div>
+</div>
 
-      <!-- Kopplade kontor -->
-      ${offices.length ? `<div>
-        <label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:10px;letter-spacing:0.05em;">Kopplade kontor</label>
-        <div style="display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto;padding-right:4px;">
-          ${officeBadgesHTML}
-        </div>
-      </div>` : ''}
+<!-- Kopplade kontor -->
+${offices.length ? `<div>
+<label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:10px;letter-spacing:0.05em;">Kopplade kontor</label>
+<div style="display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto;padding-right:4px;">
+${officeBadgesHTML}
+</div>
+</div>` : ''}
 
-    </div>
-  </div>
+</div>
+</div>
 </div>`;
 
 // Lösenordsmatch-validator
@@ -5778,19 +5783,19 @@ const city = cb.dataset.city || cb.value;
 const color = document.getElementById('new-agent-color')?.value || '#0071e3';
 window._adminFormDirty = true;
 if (cb.checked) {
-  if (label) {
-    label.style.background = color + '22';
-    label.style.borderColor = color;
-    label.style.color = 'white';
-  }
-  showToast(`📍 Kontor tillagt: ${city}`);
+if (label) {
+label.style.background = color + '22';
+label.style.borderColor = color;
+label.style.color = 'white';
+}
+showToast(`📍 Kontor tillagt: ${city}`);
 } else {
-  if (label) {
-    label.style.background = 'rgba(255,255,255,0.03)';
-    label.style.borderColor = 'rgba(255,255,255,0.07)';
-    label.style.color = '';
-  }
-  showToast(`🗑️ Kontor borttaget: ${city}`);
+if (label) {
+label.style.background = 'rgba(255,255,255,0.03)';
+label.style.borderColor = 'rgba(255,255,255,0.07)';
+label.style.color = '';
+}
+showToast(`🗑️ Kontor borttaget: ${city}`);
 }
 };
 
@@ -5802,14 +5807,14 @@ const prev = document.getElementById('new-agent-avatar-preview');
 if (prev) { prev.style.background = color; prev.style.boxShadow = `0 0 20px ${color}66`; }
 // Uppdatera vald avatar-ikon i grid
 document.querySelectorAll('.new-agent-avatar-opt.nao-selected').forEach(el => {
-  el.style.color = color;
-  el.style.borderColor = color;
-  el.style.background = color + '26';
+el.style.color = color;
+el.style.borderColor = color;
+el.style.background = color + '26';
 });
 // Uppdatera redan valda kontors-badges till ny färg
 document.querySelectorAll('.new-agent-office-cb:checked').forEach(cb => {
-  const label = cb.closest('.new-agent-office-label');
-  if (label) { label.style.background = color + '22'; label.style.borderColor = color; }
+const label = cb.closest('.new-agent-office-label');
+if (label) { label.style.background = color + '22'; label.style.borderColor = color; }
 });
 };
 
@@ -5822,31 +5827,31 @@ if (first) first.classList.add('nao-selected');
 _avatarId = 0;
 
 avatarGrid.addEventListener('click', function(e) {
-  const opt = e.target.closest('.new-agent-avatar-opt');
-  if (!opt) return;
-  _avatarId = parseInt(opt.dataset.id);
-  const color = document.getElementById('new-agent-color')?.value || '#0071e3';
+const opt = e.target.closest('.new-agent-avatar-opt');
+if (!opt) return;
+_avatarId = parseInt(opt.dataset.id);
+const color = document.getElementById('new-agent-color')?.value || '#0071e3';
 
-  // Återställ alla, markera vald
-  avatarGrid.querySelectorAll('.new-agent-avatar-opt').forEach(el => {
-    el.classList.remove('nao-selected');
-    el.style.borderColor = 'rgba(255,255,255,0.08)';
-    el.style.background = 'rgba(255,255,255,0.03)';
-    el.style.color = 'rgba(255,255,255,0.35)';
-  });
-  opt.classList.add('nao-selected');
-  opt.style.borderColor = color;
-  opt.style.background = color + '26';
-  opt.style.color = color;
+// Återställ alla, markera vald
+avatarGrid.querySelectorAll('.new-agent-avatar-opt').forEach(el => {
+el.classList.remove('nao-selected');
+el.style.borderColor = 'rgba(255,255,255,0.08)';
+el.style.background = 'rgba(255,255,255,0.03)';
+el.style.color = 'rgba(255,255,255,0.35)';
+});
+opt.classList.add('nao-selected');
+opt.style.borderColor = color;
+opt.style.background = color + '26';
+opt.style.color = color;
 
-  // Visa vald avatar i preview-bubblan
-  const prev = document.getElementById('new-agent-avatar-preview');
-  if (prev) {
-    prev.style.background = color;
-    prev.style.boxShadow = `0 0 20px ${color}66`;
-    prev.innerHTML = `<span style="display:flex;width:32px;height:32px;color:white;">${AVATAR_ICONS[_avatarId]}</span>`;
-  }
-  window._adminFormDirty = true;
+// Visa vald avatar i preview-bubblan
+const prev = document.getElementById('new-agent-avatar-preview');
+if (prev) {
+prev.style.background = color;
+prev.style.boxShadow = `0 0 20px ${color}66`;
+prev.innerHTML = `<span style="display:flex;width:32px;height:32px;color:white;">${AVATAR_ICONS[_avatarId]}</span>`;
+}
+window._adminFormDirty = true;
 });
 }
 
@@ -5909,243 +5914,243 @@ detailBox.style.display = 'flex';
 
 // Paketmallar för tjänste-knappar
 const PKG_TEMPLATES = {
-  'Bil': [
-    { service_name: 'Testlektion BIL',   price: 0, currency: 'SEK', keywords: ['bil','testlektion','provlektion'] },
-    { service_name: 'Körlektion Bil',    price: 0, currency: 'SEK', keywords: ['körlektion','bil','lektion'] },
-    { service_name: 'Risk 1 BIL',        price: 0, currency: 'SEK', keywords: ['risk 1','riskettan','bil'] },
-    { service_name: 'Risk 2 BIL',        price: 0, currency: 'SEK', keywords: ['risk 2','halkbana','bil'] },
-    { service_name: 'Minipaket BIL',     price: 0, currency: 'SEK', keywords: ['minipaket','paket','bil'] },
-    { service_name: 'Mellanpaket BIL',   price: 0, currency: 'SEK', keywords: ['mellanpaket','paket','bil'] },
-    { service_name: 'Baspaket BIL',      price: 0, currency: 'SEK', keywords: ['baspaket','paket','bil'] },
-  ],
-  'MC': [
-    { service_name: 'Körlektion MC',     price: 0, currency: 'SEK', keywords: ['körlektion','mc','motorcykel','lektion'] },
-    { service_name: 'Risk 1 MC',         price: 0, currency: 'SEK', keywords: ['risk 1','riskettan','mc'] },
-    { service_name: 'Risk 2 MC',         price: 0, currency: 'SEK', keywords: ['risk 2','mc','knix'] },
-  ],
-  'AM':   [{ service_name: 'AM Mopedutbildning', price: 0, currency: 'SEK', keywords: ['moped','am','moppekort'] }],
-  'Släp': [
-    { service_name: 'B96 Paket',         price: 0, currency: 'SEK', keywords: ['b96','släp'] },
-    { service_name: 'BE Paket',          price: 0, currency: 'SEK', keywords: ['be','släp'] },
-  ],
+'Bil': [
+{ service_name: 'Testlektion BIL',   price: 0, currency: 'SEK', keywords: ['bil','testlektion','provlektion'] },
+{ service_name: 'Körlektion Bil',    price: 0, currency: 'SEK', keywords: ['körlektion','bil','lektion'] },
+{ service_name: 'Risk 1 BIL',        price: 0, currency: 'SEK', keywords: ['risk 1','riskettan','bil'] },
+{ service_name: 'Risk 2 BIL',        price: 0, currency: 'SEK', keywords: ['risk 2','halkbana','bil'] },
+{ service_name: 'Minipaket BIL',     price: 0, currency: 'SEK', keywords: ['minipaket','paket','bil'] },
+{ service_name: 'Mellanpaket BIL',   price: 0, currency: 'SEK', keywords: ['mellanpaket','paket','bil'] },
+{ service_name: 'Baspaket BIL',      price: 0, currency: 'SEK', keywords: ['baspaket','paket','bil'] },
+],
+'MC': [
+{ service_name: 'Körlektion MC',     price: 0, currency: 'SEK', keywords: ['körlektion','mc','motorcykel','lektion'] },
+{ service_name: 'Risk 1 MC',         price: 0, currency: 'SEK', keywords: ['risk 1','riskettan','mc'] },
+{ service_name: 'Risk 2 MC',         price: 0, currency: 'SEK', keywords: ['risk 2','mc','knix'] },
+],
+'AM':   [{ service_name: 'AM Mopedutbildning', price: 0, currency: 'SEK', keywords: ['moped','am','moppekort'] }],
+'Släp': [
+{ service_name: 'B96 Paket',         price: 0, currency: 'SEK', keywords: ['b96','släp'] },
+{ service_name: 'BE Paket',          price: 0, currency: 'SEK', keywords: ['be','släp'] },
+],
 };
 
 // Hämta kontorlista för kopiera-dropdown
 let templateOptions = '<option value="">Välj kontor att kopiera...</option>';
 try {
-  const r = await fetch(`${SERVER_URL}/api/public/offices`, { headers: fetchHeaders });
-  if (r.ok) {
-    const allOffices = await r.json();
-    templateOptions += allOffices.map(o => `<option value="${o.routing_tag}">${o.city}${o.area ? ' – ' + o.area : ''}</option>`).join('');
-  }
+const r = await fetch(`${SERVER_URL}/api/public/offices`, { headers: fetchHeaders });
+if (r.ok) {
+const allOffices = await r.json();
+templateOptions += allOffices.map(o => `<option value="${o.routing_tag}">${o.city}${o.area ? ' – ' + o.area : ''}</option>`).join('');
+}
 } catch (_) {}
 
 detailBox.innerHTML = `
 <div class="detail-container" style="padding:25px; width:100%; overflow-y:auto; box-sizing:border-box;">
-  <!-- Header -->
-  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:16px;">
-    <h2 style="margin:0; font-size:18px; color:white;">Nytt kontor</h2>
-    <div style="display:flex; gap:8px;">
-      <button id="no-save-btn" class="btn-glass-icon" style="color:#4cd964; border-color:rgba(76,217,100,0.4);" onclick="saveNewOffice()" title="Spara">${ADMIN_UI_ICONS.SAVE}</button>
-      <button class="btn-glass-icon" style="color:#ff453a; border-color:rgba(255,69,58,0.4);" onclick="renderAdminOfficeList(); document.getElementById('admin-placeholder').style.display='flex'; document.getElementById('admin-detail-content').style.display='none';" title="Avbryt">${ADMIN_UI_ICONS.CANCEL}</button>
-    </div>
-  </div>
+<!-- Header -->
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:16px;">
+<h2 style="margin:0; font-size:18px; color:white;">Nytt kontor</h2>
+<div style="display:flex; gap:8px;">
+<button id="no-save-btn" class="btn-glass-icon" style="color:#4cd964; border-color:rgba(76,217,100,0.4);" onclick="saveNewOffice()" title="Spara">${ADMIN_UI_ICONS.SAVE}</button>
+<button class="btn-glass-icon" style="color:#ff453a; border-color:rgba(255,69,58,0.4);" onclick="renderAdminOfficeList(); document.getElementById('admin-placeholder').style.display='flex'; document.getElementById('admin-detail-content').style.display='none';" title="Avbryt">${ADMIN_UI_ICONS.CANCEL}</button>
+</div>
+</div>
 
-  <!-- 2-kolumnsgrid -->
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;">
+<!-- 2-kolumnsgrid -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;">
 
-    <!-- VÄNSTER KOLUMN -->
-    <div style="display:grid; gap:14px;">
+<!-- VÄNSTER KOLUMN -->
+<div style="display:grid; gap:14px;">
 
-      <!-- Profil-cirkel + color picker -->
-      <div style="display:flex; align-items:center; gap:16px; padding:14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);">
-        <div id="no-avatar-circle" style="width:64px; height:64px; border-radius:14px; background:#0071e3; display:flex; align-items:center; justify-content:center; color:white; font-size:28px; font-weight:700; box-shadow:0 0 20px rgba(0,113,227,0.4); flex-shrink:0; transition:background 0.2s;">N</div>
-        <div style="flex:1; min-width:0;">
-          <div id="no-preview-name" style="font-size:14px; font-weight:600; color:white;">Nytt kontor</div>
-          <div id="no-preview-tag" style="font-size:11px; opacity:0.5; margin-top:2px; font-family:monospace;">routing_tag</div>
-        </div>
-        <div style="display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0;">
-          <input type="color" id="no-color-picker" value="#0071e3"
-            style="width:34px; height:34px; border:none; background:transparent; cursor:pointer; border-radius:8px;"
-            oninput="window._noUpdateColor(this.value)">
-          <span id="no-color-hex" style="font-family:monospace; font-size:10px; opacity:0.5;">#0071e3</span>
-        </div>
-      </div>
+<!-- Profil-cirkel + color picker -->
+<div style="display:flex; align-items:center; gap:16px; padding:14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);">
+<div id="no-avatar-circle" style="width:64px; height:64px; border-radius:14px; background:#0071e3; display:flex; align-items:center; justify-content:center; color:white; font-size:28px; font-weight:700; box-shadow:0 0 20px rgba(0,113,227,0.4); flex-shrink:0; transition:background 0.2s;">N</div>
+<div style="flex:1; min-width:0;">
+<div id="no-preview-name" style="font-size:14px; font-weight:600; color:white;">Nytt kontor</div>
+<div id="no-preview-tag" style="font-size:11px; opacity:0.5; margin-top:2px; font-family:monospace;">routing_tag</div>
+</div>
+<div style="display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0;">
+<input type="color" id="no-color-picker" value="#0071e3"
+style="width:34px; height:34px; border:none; background:transparent; cursor:pointer; border-radius:8px;"
+oninput="window._noUpdateColor(this.value)">
+<span id="no-color-hex" style="font-family:monospace; font-size:10px; opacity:0.5;">#0071e3</span>
+</div>
+</div>
 
-      <!-- Stad -->
-      <div>
-        <label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Stad *</label>
-        <input id="new-office-city" class="filter-input" type="text" placeholder="t.ex. Göteborg"
-          oninput="window._adminFormDirty=true; window._updateRoutingTagPreview(); window._noPreviewUpdate();">
-      </div>
+<!-- Stad -->
+<div>
+<label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Stad *</label>
+<input id="new-office-city" class="filter-input" type="text" placeholder="t.ex. Göteborg"
+oninput="window._adminFormDirty=true; window._updateRoutingTagPreview(); window._noPreviewUpdate();">
+</div>
 
-      <!-- Område -->
-      <div>
-        <label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Område</label>
-        <input id="new-office-area" class="filter-input" type="text" placeholder="t.ex. Ullevi (lämna tomt för centralt)"
-          oninput="window._adminFormDirty=true; window._updateRoutingTagPreview(); window._noPreviewUpdate();">
-      </div>
+<!-- Område -->
+<div>
+<label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Område</label>
+<input id="new-office-area" class="filter-input" type="text" placeholder="t.ex. Ullevi (lämna tomt för centralt)"
+oninput="window._adminFormDirty=true; window._updateRoutingTagPreview(); window._noPreviewUpdate();">
+</div>
 
-      <!-- Routing Tag -->
-      <div>
-        <label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Routing Tag (auto-genereras)</label>
-        <input id="new-office-tag" class="filter-input" type="text" placeholder="auto"
-          oninput="window._adminFormDirty=true; document.getElementById('no-preview-tag').textContent=this.value||'routing_tag';">
-      </div>
+<!-- Routing Tag -->
+<div>
+<label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Routing Tag (auto-genereras)</label>
+<input id="new-office-tag" class="filter-input" type="text" placeholder="auto"
+oninput="window._adminFormDirty=true; document.getElementById('no-preview-tag').textContent=this.value||'routing_tag';">
+</div>
 
-      <!-- Adress -->
-      <div>
-        <label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Adress</label>
-        <input id="new-office-address" class="filter-input" type="text" placeholder="Gatuadress, Postnummer Stad" oninput="window._adminFormDirty=true;">
-      </div>
+<!-- Adress -->
+<div>
+<label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Adress</label>
+<input id="new-office-address" class="filter-input" type="text" placeholder="Gatuadress, Postnummer Stad" oninput="window._adminFormDirty=true;">
+</div>
 
-      <!-- Telefon -->
-      <div>
-        <label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Telefon</label>
-        <input id="new-office-phone" class="filter-input" type="text" placeholder="010-20 70 775" oninput="window._adminFormDirty=true;">
-      </div>
+<!-- Telefon -->
+<div>
+<label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Telefon</label>
+<input id="new-office-phone" class="filter-input" type="text" placeholder="010-20 70 775" oninput="window._adminFormDirty=true;">
+</div>
 
-      <!-- E-post -->
-      <div>
-        <label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">E-post</label>
-        <input id="new-office-email" class="filter-input" type="email" placeholder="hej@mydrivingacademy.com" oninput="window._adminFormDirty=true;">
-      </div>
+<!-- E-post -->
+<div>
+<label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">E-post</label>
+<input id="new-office-email" class="filter-input" type="email" placeholder="hej@mydrivingacademy.com" oninput="window._adminFormDirty=true;">
+</div>
 
-      <!-- Språk -->
-      <div>
-        <label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Språk (komma-separerade)</label>
-        <input id="new-office-languages" class="filter-input" type="text" placeholder="svenska, engelska" value="svenska, engelska" oninput="window._adminFormDirty=true;">
-      </div>
+<!-- Språk -->
+<div>
+<label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Språk (komma-separerade)</label>
+<input id="new-office-languages" class="filter-input" type="text" placeholder="svenska, engelska" value="svenska, engelska" oninput="window._adminFormDirty=true;">
+</div>
 
-      <!-- Beskrivning -->
-      <div>
-        <label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Beskrivning</label>
-        <textarea id="new-office-desc" class="filter-input" rows="3" placeholder="Välkommen till oss..."
-          style="resize:vertical; font-family:inherit; line-height:1.5;" oninput="window._adminFormDirty=true;"></textarea>
-      </div>
+<!-- Beskrivning -->
+<div>
+<label style="font-size:10px; text-transform:uppercase; opacity:0.5; display:block; margin-bottom:6px;">Beskrivning</label>
+<textarea id="new-office-desc" class="filter-input" rows="3" placeholder="Välkommen till oss..."
+style="resize:vertical; font-family:inherit; line-height:1.5;" oninput="window._adminFormDirty=true;"></textarea>
+</div>
 
-    </div><!-- /VÄNSTER -->
+</div><!-- /VÄNSTER -->
 
-    <!-- HÖGER KOLUMN -->
-    <div style="display:grid; gap:14px;">
+<!-- HÖGER KOLUMN -->
+<div style="display:grid; gap:14px;">
 
-      <!-- Tjänster & Priser rubrik -->
-      <div style="font-size:11px; text-transform:uppercase; opacity:0.4; letter-spacing:0.08em; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.06);">Tjänster &amp; Priser</div>
+<!-- Tjänster & Priser rubrik -->
+<div style="font-size:11px; text-transform:uppercase; opacity:0.4; letter-spacing:0.08em; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.06);">Tjänster &amp; Priser</div>
 
-      <!-- Paket-knappar -->
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="btn-glass-small" onclick="window._noAddPackage('Bil')" style="font-size:12px;">+ Bil</button>
-        <button class="btn-glass-small" onclick="window._noAddPackage('MC')" style="font-size:12px;">+ MC</button>
-        <button class="btn-glass-small" onclick="window._noAddPackage('AM')" style="font-size:12px;">+ AM</button>
-        <button class="btn-glass-small" onclick="window._noAddPackage('Släp')" style="font-size:12px;">+ Släp</button>
-      </div>
+<!-- Paket-knappar -->
+<div style="display:flex; gap:8px; flex-wrap:wrap;">
+<button class="btn-glass-small" onclick="window._noAddPackage('Bil')" style="font-size:12px;">+ Bil</button>
+<button class="btn-glass-small" onclick="window._noAddPackage('MC')" style="font-size:12px;">+ MC</button>
+<button class="btn-glass-small" onclick="window._noAddPackage('AM')" style="font-size:12px;">+ AM</button>
+<button class="btn-glass-small" onclick="window._noAddPackage('Släp')" style="font-size:12px;">+ Släp</button>
+</div>
 
-      <!-- Kopiera från kontor -->
-      <div>
-        <div style="font-size:10px; text-transform:uppercase; opacity:0.4; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-          <div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
-          <span>eller kopiera från</span>
-          <div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
-        </div>
-        <select id="no-copy-select" class="filter-input" onchange="window._noLoadTemplate(this.value)">
-          ${templateOptions}
-        </select>
-      </div>
+<!-- Kopiera från kontor -->
+<div>
+<div style="font-size:10px; text-transform:uppercase; opacity:0.4; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+<div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
+<span>eller kopiera från</span>
+<div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
+</div>
+<select id="no-copy-select" class="filter-input" onchange="window._noLoadTemplate(this.value)">
+${templateOptions}
+</select>
+</div>
 
-      <!-- Prislista -->
-      <div id="no-price-list" style="display:grid; gap:4px; max-height:400px; overflow-y:auto; padding-right:4px;">
-        <div style="font-size:12px; opacity:0.3; padding:10px 0; text-align:center;">Inga tjänster tillagda ännu.</div>
-      </div>
+<!-- Prislista -->
+<div id="no-price-list" style="display:grid; gap:4px; max-height:400px; overflow-y:auto; padding-right:4px;">
+<div style="font-size:12px; opacity:0.3; padding:10px 0; text-align:center;">Inga tjänster tillagda ännu.</div>
+</div>
 
-    </div><!-- /HÖGER -->
+</div><!-- /HÖGER -->
 
-  </div><!-- /grid -->
+</div><!-- /grid -->
 </div>`;
 
 // ──────── Hjälpfunktioner (window-scope) ────────
 
 window._updateRoutingTagPreview = function() {
-  const city = document.getElementById('new-office-city')?.value || '';
-  const area = document.getElementById('new-office-area')?.value || '';
-  const tagEl = document.getElementById('new-office-tag');
-  if (!tagEl) return;
-  const clean = (s) => s.toLowerCase().replace(/[åä]/g,'a').replace(/ö/g,'o').replace(/[^a-z0-9]/g,'');
-  const generated = area ? `${clean(city)}_${clean(area)}` : clean(city);
-  tagEl.value = generated;
-  const previewTag = document.getElementById('no-preview-tag');
-  if (previewTag) previewTag.textContent = generated || 'routing_tag';
+const city = document.getElementById('new-office-city')?.value || '';
+const area = document.getElementById('new-office-area')?.value || '';
+const tagEl = document.getElementById('new-office-tag');
+if (!tagEl) return;
+const clean = (s) => s.toLowerCase().replace(/[åä]/g,'a').replace(/ö/g,'o').replace(/[^a-z0-9]/g,'');
+const generated = area ? `${clean(city)}_${clean(area)}` : clean(city);
+tagEl.value = generated;
+const previewTag = document.getElementById('no-preview-tag');
+if (previewTag) previewTag.textContent = generated || 'routing_tag';
 };
 
 window._noUpdateColor = function(hex) {
-  window._newOfficeColor = hex;
-  const circle = document.getElementById('no-avatar-circle');
-  if (circle) { circle.style.background = hex; circle.style.boxShadow = `0 0 20px ${hex}66`; }
-  const label = document.getElementById('no-color-hex');
-  if (label) label.textContent = hex;
+window._newOfficeColor = hex;
+const circle = document.getElementById('no-avatar-circle');
+if (circle) { circle.style.background = hex; circle.style.boxShadow = `0 0 20px ${hex}66`; }
+const label = document.getElementById('no-color-hex');
+if (label) label.textContent = hex;
 };
 
 window._noPreviewUpdate = function() {
-  const city = document.getElementById('new-office-city')?.value || '';
-  const area = document.getElementById('new-office-area')?.value || '';
-  const circle = document.getElementById('no-avatar-circle');
-  if (circle) circle.textContent = (city.charAt(0) || 'N').toUpperCase();
-  const nameEl = document.getElementById('no-preview-name');
-  if (nameEl) nameEl.textContent = city ? (area ? `${city} – ${area}` : city) : 'Nytt kontor';
+const city = document.getElementById('new-office-city')?.value || '';
+const area = document.getElementById('new-office-area')?.value || '';
+const circle = document.getElementById('no-avatar-circle');
+if (circle) circle.textContent = (city.charAt(0) || 'N').toUpperCase();
+const nameEl = document.getElementById('no-preview-name');
+if (nameEl) nameEl.textContent = city ? (area ? `${city} – ${area}` : city) : 'Nytt kontor';
 };
 
 window._noAddPackage = function(type) {
-  const templates = PKG_TEMPLATES[type] || [];
-  const existing = new Set(window._newOfficePrices.map(p => p.service_name));
-  const toAdd = templates.filter(p => !existing.has(p.service_name));
-  window._newOfficePrices.push(...toAdd);
-  window._noRenderPriceList();
+const templates = PKG_TEMPLATES[type] || [];
+const existing = new Set(window._newOfficePrices.map(p => p.service_name));
+const toAdd = templates.filter(p => !existing.has(p.service_name));
+window._newOfficePrices.push(...toAdd);
+window._noRenderPriceList();
 };
 
 window._noLoadTemplate = async function(tag) {
-  if (!tag) return;
-  try {
-    const r = await fetch(`${SERVER_URL}/api/knowledge/${tag}`, { headers: fetchHeaders });
-    if (!r.ok) { showToast('Kunde inte läsa kontorsdata.'); return; }
-    const data = await r.json();
-    const prices = data.prices || [];
-    const cityKey = (data.city || '').toLowerCase();
-    const areaKey = (data.area || '').toLowerCase();
-    const stopWords = new Set([cityKey, areaKey, 'my', 'mårtenssons', 'trafikskola', 'my driving academy'].filter(k => k));
-    window._newOfficePrices = prices.map(p => ({
-      ...p,
-      keywords: (p.keywords || []).filter(kw => !stopWords.has(kw.toLowerCase()))
-    }));
-    window._noRenderPriceList();
-    // Återställ dropdown
-    const sel = document.getElementById('no-copy-select');
-    if (sel) sel.value = '';
-  } catch (_) { showToast('Anslutningsfel vid kopiering.'); }
+if (!tag) return;
+try {
+const r = await fetch(`${SERVER_URL}/api/knowledge/${tag}`, { headers: fetchHeaders });
+if (!r.ok) { showToast('Kunde inte läsa kontorsdata.'); return; }
+const data = await r.json();
+const prices = data.prices || [];
+const cityKey = (data.city || '').toLowerCase();
+const areaKey = (data.area || '').toLowerCase();
+const stopWords = new Set([cityKey, areaKey, 'my', 'mårtenssons', 'trafikskola', 'my driving academy'].filter(k => k));
+window._newOfficePrices = prices.map(p => ({
+...p,
+keywords: (p.keywords || []).filter(kw => !stopWords.has(kw.toLowerCase()))
+}));
+window._noRenderPriceList();
+// Återställ dropdown
+const sel = document.getElementById('no-copy-select');
+if (sel) sel.value = '';
+} catch (_) { showToast('Anslutningsfel vid kopiering.'); }
 };
 
 window._noRemovePrice = function(idx) {
-  window._newOfficePrices.splice(idx, 1);
-  window._noRenderPriceList();
+window._newOfficePrices.splice(idx, 1);
+window._noRenderPriceList();
 };
 
 window._noRenderPriceList = function() {
-  const list = document.getElementById('no-price-list');
-  if (!list) return;
-  if (!window._newOfficePrices.length) {
-    list.innerHTML = '<div style="font-size:12px; opacity:0.3; padding:10px 0; text-align:center;">Inga tjänster tillagda ännu.</div>';
-    return;
-  }
-  list.innerHTML = window._newOfficePrices.map((p, i) => `
-    <div class="no-price-row" style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:rgba(0,0,0,0.2); border-radius:8px; margin-bottom:4px;">
-      <span style="font-size:12px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.service_name}</span>
-      <div style="display:flex; align-items:center; gap:6px; flex-shrink:0; margin-left:8px;">
-        <input type="number" data-idx="${i}" value="${p.price}"
-          style="width:80px; text-align:right; padding:4px 8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:6px; color:inherit; font-size:12px;"
-          oninput="window._newOfficePrices[${i}].price=parseFloat(this.value)||0">
-        <span style="font-size:11px; opacity:0.5;">SEK</span>
-        <button onclick="window._noRemovePrice(${i})"
-          style="width:22px; height:22px; border-radius:50%; background:rgba(255,69,58,0.15); border:1px solid rgba(255,69,58,0.3); color:#ff453a; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; padding:0; line-height:1;">×</button>
-      </div>
-    </div>`).join('');
+const list = document.getElementById('no-price-list');
+if (!list) return;
+if (!window._newOfficePrices.length) {
+list.innerHTML = '<div style="font-size:12px; opacity:0.3; padding:10px 0; text-align:center;">Inga tjänster tillagda ännu.</div>';
+return;
+}
+list.innerHTML = window._newOfficePrices.map((p, i) => `
+<div class="no-price-row" style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:rgba(0,0,0,0.2); border-radius:8px; margin-bottom:4px;">
+<span style="font-size:12px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.service_name}</span>
+<div style="display:flex; align-items:center; gap:6px; flex-shrink:0; margin-left:8px;">
+<input type="number" data-idx="${i}" value="${p.price}"
+style="width:80px; text-align:right; padding:4px 8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:6px; color:inherit; font-size:12px;"
+oninput="window._newOfficePrices[${i}].price=parseFloat(this.value)||0">
+<span style="font-size:11px; opacity:0.5;">SEK</span>
+<button onclick="window._noRemovePrice(${i})"
+style="width:22px; height:22px; border-radius:50%; background:rgba(255,69,58,0.15); border:1px solid rgba(255,69,58,0.3); color:#ff453a; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; padding:0; line-height:1;">×</button>
+</div>
+</div>`).join('');
 };
 
 };
@@ -6158,9 +6163,9 @@ if (!city || !routingTag) { showToast('Ange minst stad och routing tag.'); retur
 
 // Samla kontaktuppgifter
 const contact = {
-  phone:   document.getElementById('new-office-phone')?.value.trim() || '',
-  email:   document.getElementById('new-office-email')?.value.trim() || '',
-  address: document.getElementById('new-office-address')?.value.trim() || '',
+phone:   document.getElementById('new-office-phone')?.value.trim() || '',
+email:   document.getElementById('new-office-email')?.value.trim() || '',
+address: document.getElementById('new-office-address')?.value.trim() || '',
 };
 
 // Hämta beskrivning & språk
@@ -6172,11 +6177,11 @@ const languages = langRaw.split(',').map(s => s.trim()).filter(Boolean);
 const prices = window._newOfficePrices || [];
 const sSet = new Set();
 prices.forEach(p => {
-  const kw = p.keywords || [];
-  if (kw.includes('bil')) sSet.add('Bil');
-  if (kw.includes('mc') || kw.includes('motorcykel')) sSet.add('MC');
-  if (kw.includes('am') || kw.includes('moped')) sSet.add('AM');
-  if (kw.includes('b96') || kw.includes('be') || kw.includes('släp')) sSet.add('Släp');
+const kw = p.keywords || [];
+if (kw.includes('bil')) sSet.add('Bil');
+if (kw.includes('mc') || kw.includes('motorcykel')) sSet.add('MC');
+if (kw.includes('am') || kw.includes('moped')) sSet.add('AM');
+if (kw.includes('b96') || kw.includes('be') || kw.includes('släp')) sSet.add('Släp');
 });
 const services_offered = [...sSet];
 
@@ -6185,31 +6190,31 @@ const saveBtn = document.getElementById('no-save-btn');
 if (saveBtn) { saveBtn.disabled = true; saveBtn.style.opacity = '0.5'; }
 
 try {
-  const res = await fetch(`${SERVER_URL}/api/admin/create-office`, {
-    method: 'POST', headers: fetchHeaders,
-    body: JSON.stringify({
-      city, area, routing_tag: routingTag,
-      office_color: window._newOfficeColor || '#0071e3',
-      services_offered,
-      prices,
-      contact,
-      description,
-      languages
-    })
-  });
-  if (res.ok) {
-    window._adminFormDirty = false;
-    showToast(`✅ Kontoret ${city} är nu live!`);
-    await renderAdminOfficeList();
-    openAdminOfficeDetail(routingTag, null);
-  } else {
-    const err = await res.json().catch(() => ({}));
-    showToast('Fel: ' + (err.error || 'Kunde inte skapa kontor.'));
-    if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = ''; }
-  }
+const res = await fetch(`${SERVER_URL}/api/admin/create-office`, {
+method: 'POST', headers: fetchHeaders,
+body: JSON.stringify({
+city, area, routing_tag: routingTag,
+office_color: window._newOfficeColor || '#0071e3',
+services_offered,
+prices,
+contact,
+description,
+languages
+})
+});
+if (res.ok) {
+window._adminFormDirty = false;
+showToast(`✅ Kontoret ${city} är nu live!`);
+await renderAdminOfficeList();
+openAdminOfficeDetail(routingTag, null);
+} else {
+const err = await res.json().catch(() => ({}));
+showToast('Fel: ' + (err.error || 'Kunde inte skapa kontor.'));
+if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = ''; }
+}
 } catch (e) {
-  showToast('Anslutningsfel.');
-  if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = ''; }
+showToast('Anslutningsfel.');
+if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = ''; }
 }
 };
 
@@ -6233,36 +6238,36 @@ if (res.ok) showToast(`Rättigheter uppdaterade för @${username}`);
 window.updateAgentColor = async (username, color) => {
 const res = await fetch(`${SERVER_URL}/api/admin/update-agent-color`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ username, color }) });
 if (res.ok) {
-  showToast("Färg sparad");
-  // Uppdatera detaljhuvudet live utan att behöva ladda om hela vyn
-  const detailBox = document.getElementById('admin-detail-content');
-  if (detailBox) {
-    const headerTop = detailBox.querySelector('.detail-header-top');
-    if (headerTop) {
-      headerTop.style.borderBottomColor = color;
-      headerTop.style.background = `linear-gradient(90deg, ${color}22, transparent)`;
-    }
-    const avatar = detailBox.querySelector('.msg-avatar');
-    if (avatar) {
-      avatar.style.borderColor = color;
-      // Uppdatera inner SVG-ikon/initial-bokstavens färg live
-      const innerDiv = avatar.querySelector('div');
-      if (innerDiv) innerDiv.style.color = color;
-    }
-    const rolePill = detailBox.querySelector('.header-pills-row .pill');
-    if (rolePill) { rolePill.style.borderColor = color; rolePill.style.color = color; }
-    // Uppdatera ärendekortens vänsterlinje live
-    detailBox.querySelectorAll('.admin-ticket-preview').forEach(card => {
-      card.style.setProperty('--atp-color', color);
-    });
-  }
-  // Uppdatera usersCache direkt för att getAgentStyles returnerar rätt färg utan reload
-  const cached = usersCache.find(u => u.username === username);
-  if (cached) cached.agent_color = color;
-  renderAdminUserList();
-  // Uppdatera ärendekort i Inkorg och Mina Ärenden
-  renderMyTickets?.();
-  renderInbox?.();
+showToast("Färg sparad");
+// Uppdatera detaljhuvudet live utan att behöva ladda om hela vyn
+const detailBox = document.getElementById('admin-detail-content');
+if (detailBox) {
+const headerTop = detailBox.querySelector('.detail-header-top');
+if (headerTop) {
+headerTop.style.borderBottomColor = color;
+headerTop.style.background = `linear-gradient(90deg, ${color}22, transparent)`;
+}
+const avatar = detailBox.querySelector('.msg-avatar');
+if (avatar) {
+avatar.style.borderColor = color;
+// Uppdatera inner SVG-ikon/initial-bokstavens färg live
+const innerDiv = avatar.querySelector('div');
+if (innerDiv) innerDiv.style.color = color;
+}
+const rolePill = detailBox.querySelector('.header-pills-row .pill');
+if (rolePill) { rolePill.style.borderColor = color; rolePill.style.color = color; }
+// Uppdatera ärendekortens vänsterlinje live
+detailBox.querySelectorAll('.admin-ticket-preview').forEach(card => {
+card.style.setProperty('--atp-color', color);
+});
+}
+// Uppdatera usersCache direkt för att getAgentStyles returnerar rätt färg utan reload
+const cached = usersCache.find(u => u.username === username);
+if (cached) cached.agent_color = color;
+renderAdminUserList();
+// Uppdatera ärendekort i Inkorg och Mina Ärenden
+renderMyTickets?.();
+renderInbox?.();
 }
 };
 
@@ -6273,16 +6278,16 @@ headers: fetchHeaders,
 body: JSON.stringify({ username, tag, isChecked })
 });
 if (res.ok) {
-  showToast("Kontor uppdaterat");
-  // Visuell uppdatering direkt utan reload
-  if (checkboxEl) {
-    const label = checkboxEl.closest('label');
-    if (label) {
-      label.style.background = isChecked ? 'rgba(100,60,200,0.25)' : 'rgba(255,255,255,0.04)';
-      label.style.borderColor = isChecked ? 'rgba(150,100,255,0.5)' : 'rgba(255,255,255,0.06)';
-      label.style.color = isChecked ? '#b09fff' : '';
-    }
-  }
+showToast("Kontor uppdaterat");
+// Visuell uppdatering direkt utan reload
+if (checkboxEl) {
+const label = checkboxEl.closest('label');
+if (label) {
+label.style.background = isChecked ? 'rgba(100,60,200,0.25)' : 'rgba(255,255,255,0.04)';
+label.style.borderColor = isChecked ? 'rgba(150,100,255,0.5)' : 'rgba(255,255,255,0.06)';
+label.style.color = isChecked ? '#b09fff' : '';
+}
+}
 }
 };
 
@@ -6312,27 +6317,27 @@ window.resetUserPassword = (id, name) => {
 // DEL 4B: Dedikerad tvåfälts-modal — inget hårdkodat lösenord
 let modal = document.getElementById('atlas-reset-pw-modal');
 if (!modal) {
-  modal = document.createElement('div');
-  modal.id = 'atlas-reset-pw-modal';
-  modal.className = 'custom-modal-overlay';
-  modal.style.zIndex = '30000';
-  modal.innerHTML = `
-  <div class="glass-modal-box" style="min-width:340px;">
-    <div class="glass-modal-header"><h3 id="rpw-title">Återställ lösenord</h3></div>
-    <div class="glass-modal-body" style="display:flex; flex-direction:column; gap:12px;">
-      <p id="rpw-msg" style="opacity:0.7; font-size:13px;"></p>
-      <input id="rpw-pass1" type="password" placeholder="Nytt lösenord"
-        style="width:100%; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; font-size:14px; box-sizing:border-box;">
-      <input id="rpw-pass2" type="password" placeholder="Bekräfta lösenord"
-        style="width:100%; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; font-size:14px; box-sizing:border-box;">
-      <p id="rpw-error" style="color:#ff6b6b; font-size:12px; min-height:16px;"></p>
-    </div>
-    <div class="glass-modal-footer">
-      <button id="rpw-cancel" class="btn-modal-cancel">Avbryt</button>
-      <button id="rpw-ok" class="btn-modal-ok">Spara</button>
-    </div>
-  </div>`;
-  document.body.appendChild(modal);
+modal = document.createElement('div');
+modal.id = 'atlas-reset-pw-modal';
+modal.className = 'custom-modal-overlay';
+modal.style.zIndex = '30000';
+modal.innerHTML = `
+<div class="glass-modal-box" style="min-width:340px;">
+<div class="glass-modal-header"><h3 id="rpw-title">Återställ lösenord</h3></div>
+<div class="glass-modal-body" style="display:flex; flex-direction:column; gap:12px;">
+<p id="rpw-msg" style="opacity:0.7; font-size:13px;"></p>
+<input id="rpw-pass1" type="password" placeholder="Nytt lösenord"
+style="width:100%; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; font-size:14px; box-sizing:border-box;">
+<input id="rpw-pass2" type="password" placeholder="Bekräfta lösenord"
+style="width:100%; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; font-size:14px; box-sizing:border-box;">
+<p id="rpw-error" style="color:#ff6b6b; font-size:12px; min-height:16px;"></p>
+</div>
+<div class="glass-modal-footer">
+<button id="rpw-cancel" class="btn-modal-cancel">Avbryt</button>
+<button id="rpw-ok" class="btn-modal-ok">Spara</button>
+</div>
+</div>`;
+document.body.appendChild(modal);
 }
 document.getElementById('rpw-msg').textContent = `Nytt lösenord för @${name}:`;
 document.getElementById('rpw-pass1').value = '';
@@ -6343,13 +6348,13 @@ setTimeout(() => document.getElementById('rpw-pass1')?.focus(), 50);
 
 document.getElementById('rpw-cancel').onclick = () => { modal.style.display = 'none'; };
 document.getElementById('rpw-ok').onclick = async () => {
-  const p1 = document.getElementById('rpw-pass1').value.trim();
-  const p2 = document.getElementById('rpw-pass2').value.trim();
-  if (!p1) { document.getElementById('rpw-error').textContent = 'Lösenord får inte vara tomt.'; return; }
-  if (p1 !== p2) { document.getElementById('rpw-error').textContent = 'Lösenorden matchar inte.'; return; }
-  modal.style.display = 'none';
-  const res = await fetch(`${SERVER_URL}/api/admin/reset-password`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ userId: id, newPassword: p1 }) });
-  if (res.ok) showToast("Lösenord ändrat");
+const p1 = document.getElementById('rpw-pass1').value.trim();
+const p2 = document.getElementById('rpw-pass2').value.trim();
+if (!p1) { document.getElementById('rpw-error').textContent = 'Lösenord får inte vara tomt.'; return; }
+if (p1 !== p2) { document.getElementById('rpw-error').textContent = 'Lösenorden matchar inte.'; return; }
+modal.style.display = 'none';
+const res = await fetch(`${SERVER_URL}/api/admin/reset-password`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ userId: id, newPassword: p1 }) });
+if (res.ok) showToast("Lösenord ändrat");
 };
 };
 
@@ -6357,16 +6362,16 @@ window.deleteUser = async (id, name) => {
 const ok = await atlasConfirm("Radera agent", `Ta bort @${name} permanent?\nAgentens aktiva ärenden frigörs tillbaka till inkorgen.`);
 if (!ok) return;
 try {
-  const res = await fetch(`${SERVER_URL}/api/admin/delete-user`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ userId: id }) });
-  if (res.ok) {
-    showToast(`🗑️ @${name} raderad. Ärenden frigjorda till inkorgen.`);
-    renderAdminUserList();
-    document.getElementById('admin-placeholder').style.display = 'flex';
-    document.getElementById('admin-detail-content').style.display = 'none';
-  } else {
-    const err = await res.json().catch(() => ({}));
-    showToast('Fel: ' + (err.error || 'Kunde inte radera agenten.'));
-  }
+const res = await fetch(`${SERVER_URL}/api/admin/delete-user`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ userId: id }) });
+if (res.ok) {
+showToast(`🗑️ @${name} raderad. Ärenden frigjorda till inkorgen.`);
+renderAdminUserList();
+document.getElementById('admin-placeholder').style.display = 'flex';
+document.getElementById('admin-detail-content').style.display = 'none';
+} else {
+const err = await res.json().catch(() => ({}));
+showToast('Fel: ' + (err.error || 'Kunde inte radera agenten.'));
+}
 } catch (e) { showToast('Anslutningsfel.'); }
 };
 
@@ -6374,16 +6379,16 @@ window.deleteOffice = async (tag) => {
 const ok = await atlasConfirm('Radera kontor', 'Är du säker? Detta raderar både databasposten och JSON-filen permanent.');
 if (!ok) return;
 try {
-  const res = await fetch(`${SERVER_URL}/api/admin/office/${tag}`, { method: 'DELETE', headers: fetchHeaders });
-  if (res.ok) {
-    showToast('🗑️ Kontor och tillhörande data raderat.');
-    await renderAdminOfficeList();
-    document.getElementById('admin-placeholder').style.display = 'flex';
-    document.getElementById('admin-detail-content').style.display = 'none';
-  } else {
-    const err = await res.json().catch(() => ({}));
-    showToast('Fel: ' + (err.error || 'Kunde inte radera kontoret.'));
-  }
+const res = await fetch(`${SERVER_URL}/api/admin/office/${tag}`, { method: 'DELETE', headers: fetchHeaders });
+if (res.ok) {
+showToast('🗑️ Kontor och tillhörande data raderat.');
+await renderAdminOfficeList();
+document.getElementById('admin-placeholder').style.display = 'flex';
+document.getElementById('admin-detail-content').style.display = 'none';
+} else {
+const err = await res.json().catch(() => ({}));
+showToast('Fel: ' + (err.error || 'Kunde inte radera kontoret.'));
+}
 } catch (e) { showToast('Anslutningsfel.'); }
 };
 
@@ -6594,90 +6599,90 @@ await loadNotes(convId);
 // ==========================================================
 
 function toggleBulkCard(card, id) {
-  if (selectedBulkTickets.has(id)) {
-    selectedBulkTickets.delete(id);
-    card.classList.remove('bulk-selected');
-  } else {
-    selectedBulkTickets.add(id);
-    card.classList.add('bulk-selected');
-  }
-  updateBulkToolbar();
+if (selectedBulkTickets.has(id)) {
+selectedBulkTickets.delete(id);
+card.classList.remove('bulk-selected');
+} else {
+selectedBulkTickets.add(id);
+card.classList.add('bulk-selected');
+}
+updateBulkToolbar();
 }
 
 function showBulkToolbar() {
-  if (document.getElementById('bulk-action-toolbar')) return;
-  const inboxView = document.getElementById('view-inbox');
-  if (!inboxView) return;
-  const toolbar = document.createElement('div');
-  toolbar.id = 'bulk-action-toolbar';
-  toolbar.className = 'bulk-action-toolbar';
-  toolbar.innerHTML = `
-    <span class="bulk-count-label">0 valda</span>
-    <div class="bulk-toolbar-btns">
-      <button class="bulk-btn bulk-btn-cancel" onclick="exitBulkMode()">Avbryt</button>
-      <button class="bulk-btn bulk-btn-claim" onclick="bulkClaim()">Plocka (0)</button>
-      <button class="bulk-btn bulk-btn-archive" onclick="bulkArchive()">Arkivera (0)</button>
-    </div>
-  `;
-  inboxView.appendChild(toolbar);
+if (document.getElementById('bulk-action-toolbar')) return;
+const inboxView = document.getElementById('view-inbox');
+if (!inboxView) return;
+const toolbar = document.createElement('div');
+toolbar.id = 'bulk-action-toolbar';
+toolbar.className = 'bulk-action-toolbar';
+toolbar.innerHTML = `
+<span class="bulk-count-label">0 valda</span>
+<div class="bulk-toolbar-btns">
+<button class="bulk-btn bulk-btn-cancel" onclick="exitBulkMode()">Avbryt</button>
+<button class="bulk-btn bulk-btn-claim" onclick="bulkClaim()">Plocka (0)</button>
+<button class="bulk-btn bulk-btn-archive" onclick="bulkArchive()">Arkivera (0)</button>
+</div>
+`;
+inboxView.appendChild(toolbar);
 }
 
 function updateBulkToolbar() {
-  const n = selectedBulkTickets.size;
-  const label = document.querySelector('#bulk-action-toolbar .bulk-count-label');
-  const claimBtn = document.querySelector('#bulk-action-toolbar .bulk-btn-claim');
-  const archBtn = document.querySelector('#bulk-action-toolbar .bulk-btn-archive');
-  if (label) label.textContent = `${n} valda`;
-  if (claimBtn) claimBtn.textContent = `Plocka (${n})`;
-  if (archBtn) archBtn.textContent = `Arkivera (${n})`;
+const n = selectedBulkTickets.size;
+const label = document.querySelector('#bulk-action-toolbar .bulk-count-label');
+const claimBtn = document.querySelector('#bulk-action-toolbar .bulk-btn-claim');
+const archBtn = document.querySelector('#bulk-action-toolbar .bulk-btn-archive');
+if (label) label.textContent = `${n} valda`;
+if (claimBtn) claimBtn.textContent = `Plocka (${n})`;
+if (archBtn) archBtn.textContent = `Arkivera (${n})`;
 }
 
 window.exitBulkMode = function() {
-  isBulkMode = false;
-  selectedBulkTickets.clear();
-  if (DOM.inboxList) DOM.inboxList.classList.remove('bulk-mode-active');
-  document.querySelectorAll('#inbox-list .team-ticket-card.bulk-selected')
-    .forEach(c => c.classList.remove('bulk-selected'));
-  const toolbar = document.getElementById('bulk-action-toolbar');
-  if (toolbar) toolbar.remove();
+isBulkMode = false;
+selectedBulkTickets.clear();
+if (DOM.inboxList) DOM.inboxList.classList.remove('bulk-mode-active');
+document.querySelectorAll('#inbox-list .team-ticket-card.bulk-selected')
+.forEach(c => c.classList.remove('bulk-selected'));
+const toolbar = document.getElementById('bulk-action-toolbar');
+if (toolbar) toolbar.remove();
 };
 
 window.bulkClaim = async function() {
-  const ids = [...selectedBulkTickets];
-  if (!ids.length) return;
-  exitBulkMode();
-  try {
-    await Promise.all(ids.map(id =>
-      fetch(`${SERVER_URL}/team/claim`, {
-        method: 'POST', headers: fetchHeaders,
-        body: JSON.stringify({ conversationId: id, agentName: currentUser.username })
-      })
-    ));
-    showToast(`✅ ${ids.length} ärenden plockade!`);
-  } catch(e) {
-    console.error('[BulkClaim] Fel:', e);
-    showToast('⚠️ Några ärenden kunde inte plockas.');
-  }
-  renderInbox();
+const ids = [...selectedBulkTickets];
+if (!ids.length) return;
+exitBulkMode();
+try {
+await Promise.all(ids.map(id =>
+fetch(`${SERVER_URL}/team/claim`, {
+method: 'POST', headers: fetchHeaders,
+body: JSON.stringify({ conversationId: id, agentName: currentUser.username })
+})
+));
+showToast(`✅ ${ids.length} ärenden plockade!`);
+} catch(e) {
+console.error('[BulkClaim] Fel:', e);
+showToast('⚠️ Några ärenden kunde inte plockas.');
+}
+renderInbox();
 };
 
 window.bulkArchive = async function() {
-  const ids = [...selectedBulkTickets];
-  if (!ids.length) return;
-  exitBulkMode();
-  try {
-    await Promise.all(ids.map(id =>
-      fetch(`${SERVER_URL}/api/inbox/archive`, {
-        method: 'POST', headers: fetchHeaders,
-        body: JSON.stringify({ conversationId: id })
-      })
-    ));
-    showToast(`✅ ${ids.length} ärenden arkiverade!`);
-  } catch(e) {
-    console.error('[BulkArchive] Fel:', e);
-    showToast('⚠️ Några ärenden kunde inte arkiveras.');
-  }
-  renderInbox();
+const ids = [...selectedBulkTickets];
+if (!ids.length) return;
+exitBulkMode();
+try {
+await Promise.all(ids.map(id =>
+fetch(`${SERVER_URL}/api/inbox/archive`, {
+method: 'POST', headers: fetchHeaders,
+body: JSON.stringify({ conversationId: id })
+})
+));
+showToast(`✅ ${ids.length} ärenden arkiverade!`);
+} catch(e) {
+console.error('[BulkArchive] Fel:', e);
+showToast('⚠️ Några ärenden kunde inte arkiveras.');
+}
+renderInbox();
 };
 
 // ==========================================================
@@ -7190,13 +7195,13 @@ if (input) input.focus();
 if (cmdKey && e.altKey && e.key.toLowerCase() === 't') {
 e.preventDefault();
 const THEME_CYCLE = [
-  'standard-theme',
-  'onyx-ultradark',
-  'apple-dark',
-  'apple-road',
-  'atlas-nebula',
-  'sunset-horizon',
-  'atlas-navigator'
+'standard-theme',
+'onyx-ultradark',
+'apple-dark',
+'apple-road',
+'atlas-nebula',
+'sunset-horizon',
+'atlas-navigator'
 ];
 const currentTheme = localStorage.getItem('atlas-theme') || 'standard-theme';
 const currentIdx   = THEME_CYCLE.indexOf(currentTheme);
@@ -7478,17 +7483,17 @@ document.addEventListener('DOMContentLoaded', initAtlasRenderer);
 // Stänger alla .custom-modal-overlay vid klick på bakgrund eller ESC
 // ==================================================
 document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('custom-modal-overlay')) {
-        e.target.style.display = 'none';
-    }
+if (e.target.classList.contains('custom-modal-overlay')) {
+e.target.style.display = 'none';
+}
 });
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        // 🔧 F4.1: Stäng inte modalen om fokus är inne i ett textfält
-        const active = document.activeElement;
-        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
-        document.querySelectorAll('.custom-modal-overlay').forEach(m => m.style.display = 'none');
-    }
+if (e.key === 'Escape') {
+// 🔧 F4.1: Stäng inte modalen om fokus är inne i ett textfält
+const active = document.activeElement;
+if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+document.querySelectorAll('.custom-modal-overlay').forEach(m => m.style.display = 'none');
+}
 });
 
 // ==================================================
@@ -7498,68 +7503,68 @@ document.addEventListener('keydown', (e) => {
 // Expanderar grupper med träffar, kollapsar grupper utan.
 // ==================================================
 document.addEventListener('input', (e) => {
-    if (e.target.id !== 'inbox-search') return;
-    const term = e.target.value.toLowerCase().trim();
+if (e.target.id !== 'inbox-search') return;
+const term = e.target.value.toLowerCase().trim();
 
-    if (!term) {
-        // Töm sökning: ta bort .search-hidden från alla kort och headers
-        document.querySelectorAll('#inbox-list .team-ticket-card').forEach(card => {
-            card.classList.remove('search-hidden');
-        });
-        document.querySelectorAll('#inbox-list .template-group-header').forEach(h => {
-            h.style.display = '';
-        });
-        // Återställ expand-state per grupp baserat på State.inboxExpanded
-        document.querySelectorAll('#inbox-list .template-group-content').forEach(content => {
-            if (content.dataset.searchExpanded) {
-                content.classList.remove('expanded');
-                const arrow = content.previousElementSibling?.querySelector('.group-arrow');
-                if (arrow) arrow.classList.remove('expanded');
-                delete content.dataset.searchExpanded;
-            }
-        });
-        return;
-    }
+if (!term) {
+// Töm sökning: ta bort .search-hidden från alla kort och headers
+document.querySelectorAll('#inbox-list .team-ticket-card').forEach(card => {
+card.classList.remove('search-hidden');
+});
+document.querySelectorAll('#inbox-list .template-group-header').forEach(h => {
+h.style.display = '';
+});
+// Återställ expand-state per grupp baserat på State.inboxExpanded
+document.querySelectorAll('#inbox-list .template-group-content').forEach(content => {
+if (content.dataset.searchExpanded) {
+content.classList.remove('expanded');
+const arrow = content.previousElementSibling?.querySelector('.group-arrow');
+if (arrow) arrow.classList.remove('expanded');
+delete content.dataset.searchExpanded;
+}
+});
+return;
+}
 
-    // Filtrera via data-search (synliga fält) — undviker falska träffar från meddelandetext
-    // Använder .search-hidden-klass (display:none !important) för att vinna över CSS-reglernas flex !important
-    document.querySelectorAll('#inbox-list .team-ticket-card').forEach(card => {
-        const searchData = card.getAttribute('data-search') || '';
-        const match = searchData.includes(term);
-        card.classList.toggle('search-hidden', !match);
-    });
+// Filtrera via data-search (synliga fält) — undviker falska träffar från meddelandetext
+// Använder .search-hidden-klass (display:none !important) för att vinna över CSS-reglernas flex !important
+document.querySelectorAll('#inbox-list .team-ticket-card').forEach(card => {
+const searchData = card.getAttribute('data-search') || '';
+const match = searchData.includes(term);
+card.classList.toggle('search-hidden', !match);
+});
 
-    // Per grupp: expandera om träff finns, kollapsa om inte, dölj rubrik om ingen träff
-    document.querySelectorAll('#inbox-list .template-group-content').forEach(group => {
-        const groupCards = Array.from(group.querySelectorAll('.team-ticket-card'));
-        const header = group.previousElementSibling;
+// Per grupp: expandera om träff finns, kollapsa om inte, dölj rubrik om ingen träff
+document.querySelectorAll('#inbox-list .template-group-content').forEach(group => {
+const groupCards = Array.from(group.querySelectorAll('.team-ticket-card'));
+const header = group.previousElementSibling;
 
-        // Grupper utan kort (empty state) döljs alltid vid aktiv sökning
-        if (groupCards.length === 0) {
-            if (header) header.style.display = 'none';
-            return;
-        }
+// Grupper utan kort (empty state) döljs alltid vid aktiv sökning
+if (groupCards.length === 0) {
+if (header) header.style.display = 'none';
+return;
+}
 
-        const hasVisible = groupCards.some(c => !c.classList.contains('search-hidden'));
+const hasVisible = groupCards.some(c => !c.classList.contains('search-hidden'));
 
-        if (hasVisible) {
-            // Expandera gruppen om den inte redan är det, märk att sökningen gjorde det
-            if (!group.classList.contains('expanded')) {
-                group.classList.add('expanded');
-                group.dataset.searchExpanded = '1';
-                const arrow = header?.querySelector('.group-arrow');
-                if (arrow) arrow.classList.add('expanded');
-            }
-            if (header) header.style.display = '';
-        } else {
-            // Inga matchande kort — kollapsa och dölj rubrik
-            group.classList.remove('expanded');
-            const arrow = header?.querySelector('.group-arrow');
-            if (arrow) arrow.classList.remove('expanded');
-            delete group.dataset.searchExpanded;
-            if (header) header.style.display = 'none';
-        }
-    });
+if (hasVisible) {
+// Expandera gruppen om den inte redan är det, märk att sökningen gjorde det
+if (!group.classList.contains('expanded')) {
+group.classList.add('expanded');
+group.dataset.searchExpanded = '1';
+const arrow = header?.querySelector('.group-arrow');
+if (arrow) arrow.classList.add('expanded');
+}
+if (header) header.style.display = '';
+} else {
+// Inga matchande kort — kollapsa och dölj rubrik
+group.classList.remove('expanded');
+const arrow = header?.querySelector('.group-arrow');
+if (arrow) arrow.classList.remove('expanded');
+delete group.dataset.searchExpanded;
+if (header) header.style.display = 'none';
+}
+});
 });
 
 // ==================================================
@@ -7570,31 +7575,31 @@ const modal = document.createElement('div');
 modal.className = 'custom-modal-overlay';
 modal.style.zIndex = '20000';
 modal.innerHTML = `
-  <div class="glass-modal-box glass-effect" style="max-width:500px;">
-    <div class="glass-modal-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
-      <h3 style="margin:0;">Om Admin-panelen</h3>
-      <button onclick="this.closest('.custom-modal-overlay').remove()" style="background:none; border:none; color:var(--text-primary); opacity:0.6; cursor:pointer; padding:4px; font-size:18px; line-height:1; margin-top:-2px; flex-shrink:0;" title="Stäng">✕</button>
-    </div>
-    <div class="glass-modal-body" style="font-size:13px; line-height:1.7;">
-      <div style="padding:12px; border-radius:8px; background:rgba(255,69,58,0.1); border:1px solid rgba(255,69,58,0.3); margin-bottom:16px; color:#ff6b6b;">
-        ⚠️ <strong>Varning:</strong> Ändringar här påverkar systemets prestanda och stabilitet.
-        Endast behörig personal bör ändra dessa värden.
-      </div>
-      <ul style="margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px;">
-        <li><strong>Agenter</strong> — Skapa, redigera och ta bort supportpersonal. Klicka på 🔑 för att återställa lösenord med en säker tvåstegsmodal. Klicka på färgväljaren för att ändra agentens profilfärg direkt.</li>
-        <li><strong>Kontor &amp; Utbildningar</strong> — Hantera kontor, tjänster och priser. Klicka på pennan för att aktivera redigeringsläge.</li>
-        <li><strong>Systemkonfiguration</strong> — AI-trösklar, nätverksinställningar och säkerhet. Känsliga fält (lösenord, API-nycklar) visas maskerade.</li>
-      </ul>
-      <div style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08); display:grid; gap:6px; font-size:12px;">
-        <div style="display:flex; justify-content:space-between;"><span style="opacity:0.5;">Version</span><span>Atlas ${ATLAS_VERSION}</span></div>
-        <div style="display:flex; justify-content:space-between;"><span style="opacity:0.5;">Plattform</span><span>Electron / Node.js / SQLite</span></div>
-        <div style="display:flex; justify-content:space-between;"><span style="opacity:0.5;">Skapad av</span><span>Patrik Åkerhage</span></div>
-      </div>
-    </div>
-    <div class="glass-modal-footer">
-      <button class="btn-modal-cancel" onclick="this.closest('.custom-modal-overlay').remove()">Stäng</button>
-    </div>
-  </div>`;
+<div class="glass-modal-box glass-effect" style="max-width:500px;">
+<div class="glass-modal-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+<h3 style="margin:0;">Om Admin-panelen</h3>
+<button onclick="this.closest('.custom-modal-overlay').remove()" style="background:none; border:none; color:var(--text-primary); opacity:0.6; cursor:pointer; padding:4px; font-size:18px; line-height:1; margin-top:-2px; flex-shrink:0;" title="Stäng">✕</button>
+</div>
+<div class="glass-modal-body" style="font-size:13px; line-height:1.7;">
+<div style="padding:12px; border-radius:8px; background:rgba(255,69,58,0.1); border:1px solid rgba(255,69,58,0.3); margin-bottom:16px; color:#ff6b6b;">
+⚠️ <strong>Varning:</strong> Ändringar här påverkar systemets prestanda och stabilitet.
+Endast behörig personal bör ändra dessa värden.
+</div>
+<ul style="margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px;">
+<li><strong>Agenter</strong> — Skapa, redigera och ta bort supportpersonal. Klicka på 🔑 för att återställa lösenord med en säker tvåstegsmodal. Klicka på färgväljaren för att ändra agentens profilfärg direkt.</li>
+<li><strong>Kontor &amp; Utbildningar</strong> — Hantera kontor, tjänster och priser. Klicka på pennan för att aktivera redigeringsläge.</li>
+<li><strong>Systemkonfiguration</strong> — AI-trösklar, nätverksinställningar och säkerhet. Känsliga fält (lösenord, API-nycklar) visas maskerade.</li>
+</ul>
+<div style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08); display:grid; gap:6px; font-size:12px;">
+<div style="display:flex; justify-content:space-between;"><span style="opacity:0.5;">Version</span><span>Atlas ${ATLAS_VERSION}</span></div>
+<div style="display:flex; justify-content:space-between;"><span style="opacity:0.5;">Plattform</span><span>Electron / Node.js / SQLite</span></div>
+<div style="display:flex; justify-content:space-between;"><span style="opacity:0.5;">Skapad av</span><span>Patrik Åkerhage</span></div>
+</div>
+</div>
+<div class="glass-modal-footer">
+<button class="btn-modal-cancel" onclick="this.closest('.custom-modal-overlay').remove()">Stäng</button>
+</div>
+</div>`;
 document.body.appendChild(modal);
 modal.style.display = 'flex'; // Kritisk rad som saknades — modal var alltid display:none
 modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
@@ -7608,21 +7613,21 @@ let modal = document.getElementById('atlas-mail-composer');
 
 // Fält finns redan (andra anropet) — töm och visa utan att återskapa
 if (modal && document.getElementById('composer-to')) {
-  document.getElementById('composer-to').value = '';
-  document.getElementById('composer-subject').value = '';
-  document.getElementById('composer-body').value = '';
-  modal.style.display = 'flex';
-  setTimeout(() => document.getElementById('composer-to').focus(), 50);
-  return;
+document.getElementById('composer-to').value = '';
+document.getElementById('composer-subject').value = '';
+document.getElementById('composer-body').value = '';
+modal.style.display = 'flex';
+setTimeout(() => document.getElementById('composer-to').focus(), 50);
+return;
 }
 
 // Statiskt skal från index.html finns men saknar formuläret — eller modal saknas helt
 if (!modal) {
-  modal = document.createElement('div');
-  modal.id = 'atlas-mail-composer';
-  modal.className = 'custom-modal-overlay';
-  modal.style.display = 'none';
-  document.body.appendChild(modal);
+modal = document.createElement('div');
+modal.id = 'atlas-mail-composer';
+modal.className = 'custom-modal-overlay';
+modal.style.display = 'none';
+document.body.appendChild(modal);
 }
 // Injicera fullt formulär-HTML (ersätter det tomma statiska skalet)
 
