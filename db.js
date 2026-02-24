@@ -507,7 +507,7 @@ return Promise.resolve(); // Inget att uppdatera efter filtrering
 }
 
 // FIX: Vi använder millisekunder (13 siffror) för att matcha frontend och undvika 1970-buggen
-const now = Date.now(); 
+const now = Math.floor(Date.now() / 1000); 
 
 // Vi pushar nu-tiden först (för updated_at) och conversationId sist (för WHERE-klausulen)
 values.push(now, conversationId);

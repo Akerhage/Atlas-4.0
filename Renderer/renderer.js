@@ -1419,6 +1419,8 @@ const unassignedChats = visibleTickets.filter(t => t.session_type === 'customer'
 const unassignedMails = visibleTickets.filter(t => t.session_type === 'message' && !t.owner);
 const claimedByOthers = visibleTickets.filter(t => t.owner);
 
+unassignedChats.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
+unassignedMails.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
 claimedByOthers.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
 
 // 🔥 RENSA FÖRST NU - Efter att vi fixat vyer
@@ -2003,6 +2005,7 @@ const res = await fetch(`${SERVER_URL}/team/my-tickets?t=${Date.now()}`, { heade
 if (!res.ok) throw new Error("Kunde inte hämta ärenden");
 const data = await res.json();
 let tickets = data.tickets || [];
+tickets.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
 
 // Filtrera till agentens egna ärenden + kontorsärenden
 if (window.currentUser && window.currentUser.username) {
@@ -2069,8 +2072,6 @@ container.innerHTML = `
 </div>`;
 return;
 }
-
-tickets.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
 
 tickets.forEach((t, index) => {
 const myName = currentUser.username;
