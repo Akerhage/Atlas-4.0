@@ -391,7 +391,6 @@ newCancel.onclick = () => { modal.style.display = 'none'; resolve(false); };
 });
 }
 
-
 // CHANGE THEME =================================================================
 function changeTheme(themeName) {
 // SÄKRAD: Kolla både globala DOM-objektet och stylesheet-referensen
@@ -409,48 +408,55 @@ localStorage.setItem('atlas-theme', themeName);
 // FIX 1: BADGE-HANTERING + WINDOWS TASKBAR ICON (SÄKRAD)
 // ============================================================================
 async function updateInboxBadge() {
-// SÄKRAD: Kör inte om vi saknar token
 if (typeof authToken === 'undefined' || !authToken) return;
-
 const inboxBadge = document.getElementById('badge-inbox');
 const myBadge = document.getElementById('badge-my-tickets');
-
 try {
-const res = await fetch(`${SERVER_URL}/team/inbox`, { 
-headers: (typeof fetchHeaders !== 'undefined') ? fetchHeaders : {} 
-});
-const data = await res.json();
-const tickets = data.tickets || [];
+// Hämta både inkorg och mina ärenden parallellt
+const [inboxRes, myRes] = await Promise.all([
+fetch(`${SERVER_URL}/team/inbox`, { headers: fetchHeaders }),
+fetch(`${SERVER_URL}/team/my-tickets?t=${Date.now()}`, { headers: fetchHeaders })
+]);
 
-// 2. Räkna - SÄKRAD: Optional chaining (?.) för att slippa krasch
-const unassignedCount = tickets.filter(t => !t.owner).length;
-const myName = (typeof currentUser !== 'undefined' && currentUser) ? currentUser.username : null;
-const myCount = tickets.filter(t => t.owner === myName).length;
+const inboxData = await inboxRes.json();
+const myData = await myRes.json();
 
-const totalCount = unassignedCount + myCount;
+const inboxTickets = inboxData.tickets || [];
+const myTickets = myData.tickets || [];
 
-// 3. Uppdatera UI
+// Inkorg: alla oplockat (live-chattar + mail + plockade ärenden)
+const inboxCount = inboxTickets.filter(t => !t.owner).length;
+
+// Plockade ärenden i inkorgen (routade till kontor)
+const claimedCount = (inboxData.claimed || []).length;
+
+// Mina ärenden: alla som API:et returnerar för denna agent
+const myCount = myTickets.length;
+
+const totalInbox = inboxCount + claimedCount;
+const totalCount = totalInbox + myCount;
+
+// Uppdatera badges
 if (inboxBadge) {
-inboxBadge.textContent = unassignedCount;
-inboxBadge.style.setProperty('display', unassignedCount > 0 ? 'flex' : 'none', 'important');
+inboxBadge.textContent = totalInbox;
+inboxBadge.style.setProperty('display', totalInbox > 0 ? 'flex' : 'none', 'important');
 }
-
 if (myBadge) {
 myBadge.textContent = myCount;
 myBadge.style.setProperty('display', myCount > 0 ? 'flex' : 'none', 'important');
 }
 
-// 4. 🔥 UPPDATERA WINDOWS AKTIVITETSFÄLT
+// Windows aktivitetsfält
 if (typeof isElectron !== 'undefined' && isElectron && window.electronAPI?.setTaskbarIcon) {
 if (totalCount > 0) {
 const badgeDataUrl = drawTaskbarBadge(totalCount);
-window.electronAPI.setTaskbarIcon(badgeDataUrl, `${totalCount} nya ärenden`);
+window.electronAPI.setTaskbarIcon(badgeDataUrl, `${totalCount} ärenden`);
 } else {
 window.electronAPI.setTaskbarIcon(null, '');
 }
 }
-} catch (err) { 
-console.warn("Badge-systemet väntar..."); 
+} catch (err) {
+console.warn("Badge-systemet väntar...");
 }
 }
 // Hjälpfunktion: Ritar röd cirkel - BEVARAD EXAKT

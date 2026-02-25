@@ -53,7 +53,8 @@ updateUserPassword,
 addTicketNote, 
 getTicketNotes, 
 updateTicketNote, 
-deleteTicketNote 
+deleteTicketNote,
+getTicketNoteById
 } = require('./db');
 
 // =============================================================================
