@@ -766,23 +766,19 @@ addBubble(`⚠️ Serverfel: ${err.message}`, 'atlas');
 let _teamUpdateDebounce = null;
 window.socketAPI.on('team:update', (evt) => {
 updateInboxBadge();
-
-// FIX: Hoppa över render vid client_typing — hanteras nu av team:client_typing direkt
 if (evt.type === 'client_typing') return;
 
-if (evt.type === 'new_message' && State.soundEnabled) {
+if (
+(evt.type === 'new_message' || evt.type === 'human_mode_triggered')
+&& State.soundEnabled
+) {
 playNotificationSound();
 }
 
-// Debounce 350ms — grupperar tätt inkommande events till en enda render
 clearTimeout(_teamUpdateDebounce);
 _teamUpdateDebounce = setTimeout(() => {
-if (DOM.views && DOM.views.inbox && DOM.views.inbox.style.display === 'flex' && State.inboxMode === 'team') {
 renderInbox();
-}
-if (DOM.views && DOM.views['my-tickets'] && DOM.views['my-tickets'].style.display === 'flex') {
 renderMyTickets();
-}
 if (DOM.views && DOM.views.archive && DOM.views.archive.style.display === 'flex') {
 renderArchive();
 }
@@ -1381,17 +1377,29 @@ const res = await fetch(`${SERVER_URL}/team/inbox?t=${Date.now()}`, { headers: f
 if (!res.ok) throw new Error("Kunde inte ladda kön");
 
 const data = await res.json();
-const allTickets = data.tickets || [];
 
-// 1. FILTRERING (Visa bara relevant — interna ärenden aldrig i Inkorg)
-const visibleTickets = allTickets.filter(t => {
-if (t.session_type === 'internal') return false; // Interna hör hemma i Mina Ärenden
+// 1. HÄMTA KATEGORIER (Läser de tre listorna direkt från servern)
+let unassignedChats = data.live_chats || [];
+let unassignedMails = data.mail || [];
+let claimedByOthers = data.claimed || [];
+
+// Fallback för agenter (om servern bara skickar 'tickets'-arrayen)
+if (!data.live_chats && data.tickets) {
+const fallback = data.tickets.filter(t => {
+if (t.session_type === 'internal') return false;
 if (!t.owner) return true;
 if (currentUser && t.owner.toLowerCase() !== currentUser.username.toLowerCase()) return true;
 return false;
 });
+unassignedChats = fallback.filter(t => t.session_type === 'customer' && !t.owner);
+unassignedMails = fallback.filter(t => t.session_type === 'message' && !t.owner);
+claimedByOthers = fallback.filter(t => t.owner);
+}
 
-// 🧹 STÄDPATRULL - KÖR INNAN VI RENDERAR OM
+// Skapa visibleTickets för städpatrullen att checka emot
+const visibleTickets = [...unassignedChats, ...unassignedMails, ...claimedByOthers];
+
+// 🧹 STÄDPATRULL - Rensar detaljvyn om ärendet blivit plockat/arkiverat
 const detail = document.getElementById('inbox-detail');
 const placeholder = document.getElementById('inbox-placeholder');
 const currentId = detail?.getAttribute('data-current-id');
@@ -1402,11 +1410,10 @@ detail.innerHTML = '';
 detail.style.display = 'none';
 placeholder.style.display = 'flex';
 } else {
-// Kolla om ärendet fortfarande finns
 const stillVisible = visibleTickets.find(t => t.conversation_id === currentId);
 if (!stillVisible) {
 console.log("🧹 Ärendet borta - totalrensar vyn.");
-detail.innerHTML = ''; // <--- VIKTIGT: Döda innehållet!
+detail.innerHTML = ''; 
 detail.style.display = 'none';
 detail.removeAttribute('data-current-id');
 placeholder.style.display = 'flex';
@@ -1414,14 +1421,11 @@ placeholder.style.display = 'flex';
 }
 }
 
-// 2. KATEGORISERING & SORTERING
-const unassignedChats = visibleTickets.filter(t => t.session_type === 'customer' && !t.owner);
-const unassignedMails = visibleTickets.filter(t => t.session_type === 'message' && !t.owner);
-const claimedByOthers = visibleTickets.filter(t => t.owner);
-
-unassignedChats.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
-unassignedMails.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
-claimedByOthers.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
+// 2. SORTERING (Nyast överst i varje korg)
+const sortFn = (a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0);
+unassignedChats.sort(sortFn);
+unassignedMails.sort(sortFn);
+claimedByOthers.sort(sortFn);
 
 // 🔥 RENSA FÖRST NU - Efter att vi fixat vyer
 container.innerHTML = ''; 
@@ -1604,7 +1608,9 @@ detail.removeAttribute('data-current-id');
 } // Slut på async function renderInbox()
 
 // ============================================================================
-// renderInboxFromTickets — Ritar om inkorgslistan med sökresultat
+// renderInboxFromTickets — Ritar om inkorgslistan med sökresultat (MED MULTISELECT)
+// ============================================================================
+// renderInboxFromTickets — Ritar om inkorgslistan med sökresultat (MED MULTISELECT)
 // ============================================================================
 function renderInboxFromTickets(tickets, searchTerm) {
 const container = DOM.inboxList;
@@ -1613,6 +1619,7 @@ if (!container) return;
 container.innerHTML = '';
 // TVINGA SORTERING: Nyast (högst timestamp) först i listan
 tickets.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0));
+
 if (tickets.length === 0) {
 container.innerHTML = `<div class="template-item-empty" style="padding:24px; text-align:center; opacity:0.6;">
 Inga ärenden matchade <strong>"${esc(searchTerm)}"</strong>
@@ -1632,8 +1639,15 @@ container.appendChild(header);
 const content = document.createElement('div');
 content.className = 'template-group-content expanded';
 
+// Aktivera bulk-läge visuellt om det redan är igång
+if (typeof isBulkMode !== 'undefined' && isBulkMode) {
+container.classList.add('bulk-mode-active');
+}
+
 tickets.forEach(t => {
 const card = document.createElement('div');
+
+// 🔥 DIN ORIGINAL-MAPPING - EXAKT SOM DU SKREV DEN
 const styles = getAgentStyles(t.routing_tag || t.owner);
 const timeStr = new Date(t.updated_at * 1000).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
 const dateStr = new Date(t.updated_at * 1000).toLocaleDateString('sv-SE');
@@ -1648,6 +1662,11 @@ const vehicleHtml = vIcon ? `<span style="color:${styles.main}; display:flex; al
 card.className = 'team-ticket-card';
 card.setAttribute('data-id', t.conversation_id);
 card.style.setProperty('--agent-color', styles.main);
+
+// Om kortet redan är valt i en pågående bulk-session
+if (typeof selectedTicketIds !== 'undefined' && selectedTicketIds.has(t.conversation_id)) {
+card.classList.add('bulk-selected');
+}
 
 card.innerHTML = `
 <div class="ticket-header-row">
@@ -1671,6 +1690,43 @@ ${UI_ICONS.NOTES}
 ${UI_ICONS.CLAIM}
 </button>`;
 
+// --- MULTISELECT LOGIK ---
+let _lpTimer = null;
+let _lpFired = false;
+
+card.addEventListener('mousedown', () => {
+_lpFired = false;
+_lpTimer = setTimeout(() => {
+_lpFired = true;
+_lpTimer = null;
+if (!isBulkMode) {
+isBulkMode = true;
+container.classList.add('bulk-mode-active');
+if (typeof showBulkToolbar === 'function') showBulkToolbar();
+}
+if (typeof toggleBulkCard === 'function') toggleBulkCard(card, t.conversation_id);
+}, 800);
+});
+
+card.addEventListener('mouseup', () => {
+clearTimeout(_lpTimer);
+_lpTimer = null;
+if (_lpFired) { _lpFired = false; return; }
+
+if (isBulkMode) {
+if (typeof toggleBulkCard === 'function') toggleBulkCard(card, t.conversation_id);
+} else {
+container.querySelectorAll('.team-ticket-card').forEach(c => c.classList.remove('active-ticket'));
+card.classList.add('active-ticket');
+openInboxDetail(t);
+}
+});
+
+card.addEventListener('mouseleave', () => {
+clearTimeout(_lpTimer);
+_lpTimer = null;
+});
+
 const btn = card.querySelector('.claim-action');
 btn.onclick = async (ev) => {
 ev.stopPropagation();
@@ -1684,12 +1740,6 @@ renderInbox();
 const searchEl = document.getElementById('inbox-search');
 if (searchEl) searchEl.value = '';
 };
-
-card.addEventListener('mouseup', () => {
-container.querySelectorAll('.team-ticket-card').forEach(c => c.classList.remove('active-ticket'));
-card.classList.add('active-ticket');
-openInboxDetail(t);
-});
 
 content.appendChild(card);
 });

@@ -210,8 +210,8 @@ await killPort3001(); // Denna kör taskkill /F /IM ngrok.exe /T
 const TOKEN = process.env.NGROK_TOKEN;
 const DOMAIN = process.env.NGROK_DOMAIN;
 const NGROK_BIN = app.isPackaged
-  ? path.join(process.resourcesPath, 'ngrok.exe')
-  : path.join(__dirname, 'ngrok.exe');
+? path.join(process.resourcesPath, 'ngrok.exe')
+: path.join(__dirname, 'ngrok.exe');
 
 console.log(`[NGROK] Konfigurering: TOKEN=${TOKEN ? '✓' : '✗'}, DOMAIN=${DOMAIN ? '✓' : '✗'}, BIN=${NGROK_BIN}`);
 

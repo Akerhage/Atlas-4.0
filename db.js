@@ -8,8 +8,8 @@ const path = require('path');
 const fs = require('fs');
 const isPackaged = process.env.IS_PACKAGED === 'true';
 const dbPath = isPackaged
-  ? require('path').join(process.env.ATLAS_ROOT_PATH, 'atlas.db')
-  : require('path').join(__dirname, 'atlas.db');
+? require('path').join(process.env.ATLAS_ROOT_PATH, 'atlas.db')
+: require('path').join(__dirname, 'atlas.db');
 const db = new sqlite3.Database(dbPath);
 
 // DATABASE CONFIGURATION & OPTIMIZATION
@@ -38,8 +38,8 @@ syncOfficeAreaFromKnowledge();
 
 function syncOfficeAreaFromKnowledge() {
 const knowledgePath = isPackaged
-  ? path.join(process.env.ATLAS_ROOT_PATH, 'knowledge')
-  : path.join(__dirname, 'knowledge');
+? path.join(process.env.ATLAS_ROOT_PATH, 'knowledge')
+: path.join(__dirname, 'knowledge');
 try {
 const files = fs.readdirSync(knowledgePath)
 .filter(f => f.endsWith('.json') && !f.startsWith('basfakta'));
@@ -265,14 +265,19 @@ console.log('✅ Table "users" ready (Atlas 3.8 Clean Start)');
 checkAllTablesCreated();
 });
 
-// Migration: Add Team Management Columns to QA History
+// Migration: Add Team Management Columns to QA History 24/2-FIX
 // Dessa ligger kvar för att säkra att historik-tabellen har rätt fält för din vision.
 const alterColumns = [
 "ALTER TABLE local_qa_history ADD COLUMN handled_by INTEGER",
 "ALTER TABLE local_qa_history ADD COLUMN handled_at DATETIME",
 "ALTER TABLE local_qa_history ADD COLUMN solution_text TEXT",
 "ALTER TABLE local_qa_history ADD COLUMN original_question TEXT",
-"ALTER TABLE local_qa_history ADD COLUMN is_archived INTEGER DEFAULT 0"
+"ALTER TABLE local_qa_history ADD COLUMN is_archived INTEGER DEFAULT 0",
+"ALTER TABLE chat_v2_state ADD COLUMN email TEXT",
+"ALTER TABLE chat_v2_state ADD COLUMN phone TEXT",
+"ALTER TABLE chat_v2_state ADD COLUMN name TEXT",
+"ALTER TABLE chat_v2_state ADD COLUMN source TEXT",
+"ALTER TABLE chat_v2_state ADD COLUMN is_archived INTEGER DEFAULT 0"
 ];
 
 alterColumns.forEach(sql => {
@@ -666,26 +671,23 @@ if (err) reject(err); else resolve(this.lastID);
 }
 
 // =============================================================================
-// HÄMTA AGENTENS ÄRENDEN (PERSONLIGA + KONTOR) - VERIFIERAD VERSION v3.9.1
+// HÄMTA AGENTENS ÄRENDEN (PERSONLIGA + KONTOR) - VERIFIERAD VERSION v3.9.2
 // =============================================================================
 function getAgentTickets(agentName) {
 return new Promise(async (resolve, reject) => {
 try {
-// 1. Behåller din logik för att hämta agenten och dess bevakade kontor
 const user = await getUserByUsername(agentName);
-const ownersToFetch = [agentName];
+const officeTags = user && user.routing_tag
+? user.routing_tag.split(',').map(t => t.trim()).filter(t => t)
+: [];
 
-if (user && user.routing_tag) {
-const tags = user.routing_tag.split(',').map(t => t.trim()).filter(t => t);
-ownersToFetch.push(...tags);
-}
+const placeholders = officeTags.length > 0
+? officeTags.map(() => '?').join(',')
+: "'__NOMATCH__'";
 
-// 2. Din dynamiska SQL-hantering (Oförändrad)
-const placeholders = ownersToFetch.map(() => '?').join(',');
-const params = [...ownersToFetch, agentName];
+// params: owner-match, office IN (...), owner IS NULL check, owner = agent check, internal sender
+const params = [agentName, ...officeTags, agentName, agentName];
 
-// 3. SQL med LEFT JOIN - Vi mappar chat_v2_state.owner mot offices.routing_tag
-// Vi lägger till s.* för att hämta alla fält från chatten och o.office_color för färgen
 const sql = `
 SELECT
 s.conversation_id,
@@ -702,9 +704,12 @@ LEFT JOIN offices o ON s.office = o.routing_tag
 WHERE s.human_mode = 1
 AND (s.is_archived IS NULL OR s.is_archived = 0)
 AND (
-s.owner IN (${placeholders})
-OR
-(s.session_type = 'internal' AND s.sender = ?)
+s.owner = ?
+OR (
+s.office IN (${placeholders})
+AND (s.owner IS NULL OR s.owner = ?)
+)
+OR (s.session_type = 'internal' AND s.sender = ?)
 )
 ORDER BY s.updated_at ASC
 `;
@@ -717,7 +722,6 @@ reject(err);
 resolve(rows);
 }
 });
-
 } catch (error) {
 console.error("❌ getAgentTickets Logic Error:", error);
 reject(error);

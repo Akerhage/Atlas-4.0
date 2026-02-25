@@ -3387,7 +3387,7 @@ overflow-y: auto !important;
 /* OBS: display utan !important — JS kontrollerar show/hide */
 #admin-detail-content {
 flex: 1 !important;
-display: flex !important;
+display: flex
 flex-direction: column !important;
 min-width: 0 !important;
 min-height: 0 !important;
@@ -3415,7 +3415,7 @@ border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
 flex-shrink: 0 !important;
 }
 .claim-action { margin-top: 10px !important; display: flex !important; gap: 8px !important; justify-content: flex-end !important; }
-.save-actions { padding: 15px !important; display: flex !important; justify-content: flex-end !important; gap: 12px !important; border-top: 1px solid var(--border-color) !important; }
+.save-actions { padding: 15px !important; display: flex; justify-content: flex-end !important; gap: 12px !important; border-top: 1px solid var(--border-color) !important; }
 .inbox-chat-history { flex: 1 !important; overflow-y: auto !important; display: flex !important; flex-direction: column !important; gap: 12px !important; padding: 20px !important; }
 
 /* Knappar & UI */

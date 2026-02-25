@@ -10,8 +10,8 @@ path: isPackaged ? path.join(process.cwd(), '.env') : path.join(__dirname, '.env
 });
 
 function getWritablePath(relativePath) {
-  const base = isPackaged ? process.env.ATLAS_ROOT_PATH : __dirname;
-  return path.join(base, relativePath);
+const base = isPackaged ? process.env.ATLAS_ROOT_PATH : __dirname;
+return path.join(base, relativePath);
 }
 
 console.log("🚀 server.js bootar");
@@ -61,15 +61,45 @@ deleteTicketNote
 // =============================================================================
 function parseContextData(raw) {
 try {
-const data = (typeof raw === 'string') ? JSON.parse(raw) : (raw || {});
-if (!Array.isArray(data.messages))
+// 1. Om data saknas helt, returnera din standardstruktur direkt
+if (!raw) {
+return {
+messages: [],
+locked_context: { city: null, area: null, vehicle: null },
+linksSentByVehicle: { AM: false, MC: false, CAR: false, INTRO: false, RISK1: false, RISK2: false }
+};
+}
+
+// 2. Försök parsa om det är en sträng, annars använd objektet
+let data = (typeof raw === 'string') ? JSON.parse(raw) : raw;
+
+// Säkerställ att vi faktiskt har ett objekt efter parsing
+if (!data || typeof data !== 'object') data = {};
+
+// 3. Sanitering: Tvinga fram korrekt struktur på underobjekten (Dina regler)
+if (!Array.isArray(data.messages)) {
 data.messages = [];
-if (!data.locked_context)
+}
+
+if (!data.locked_context) {
 data.locked_context = { city: null, area: null, vehicle: null };
-if (!data.linksSentByVehicle)
-data.linksSentByVehicle = { AM: false, MC: false, CAR: false, INTRO: false, RISK1: false, RISK2: false };
+}
+
+if (!data.linksSentByVehicle) {
+data.linksSentByVehicle = { 
+AM: false, 
+MC: false, 
+CAR: false, 
+INTRO: false, 
+RISK1: false, 
+RISK2: false 
+};
+}
+
 return data;
-} catch(e) {
+} catch (e) {
+// 4. Logga felet för felsökning men låt servern leva vidare
+console.error("[Atlas Server] JSON Parse Error i kontext:", e.message);
 return {
 messages: [],
 locked_context: { city: null, area: null, vehicle: null },
@@ -206,10 +236,10 @@ linksSentByVehicle: { AM: false, MC: false, CAR: false, INTRO: false, RISK1: fal
 if (storedContext?.context_data) {
 // 🔥 FIX: Parsa textsträng till objekt (LÖSER KRASCHEN)
 const raw = storedContext.context_data;
-contextData = (typeof raw === 'string') ? JSON.parse(raw) : raw;
+contextData = parseContextData(raw);
 
-// Säkra upp strukturen
-if (!Array.isArray(contextData.messages)) contextData.messages = []; // Tvingar till array om den saknas
+// Säkra upp strukturen (Bevarar dina manuella checkar här)
+if (!Array.isArray(contextData.messages)) contextData.messages = []; 
 if (!contextData.locked_context) contextData.locked_context = { city: null, area: null, vehicle: null };
 if (!contextData.linksSentByVehicle) contextData.linksSentByVehicle = { AM: false, MC: false, CAR: false, INTRO: false, RISK1: false, RISK2: false };
 }
@@ -304,10 +334,9 @@ office: routingTag  || 'admin'
 // Sätt flaggor (stad/fordon)
 if (isFirstMessage) {
 const flags = {
-vehicle: contextData.locked_context?.vehicle || null,
-office: contextData.locked_context?.city || null
+vehicle: contextData.locked_context?.vehicle || null
 };
-if (flags.vehicle || flags.office) {
+if (flags.vehicle) {
 await updateTicketFlags(sessionId, flags);
 }
 }
@@ -727,12 +756,6 @@ res.json(rows);
 
 // 2. GET: Hämta ALLA användare för Admin-panelen
 app.get('/api/admin/users', authenticateToken, (req, res) => {
-// Kontrollen måste ligga HÄR INNE för att req.user ska existera
-if (req.user.role !== 'admin' && req.user.role !== 'support') {
-return res.status(403).json({ error: "Endast för administratörer" });
-}
-
-// ✅ FIXAD: Nu inkluderas 'routing_tag' i listan (fixar checkboxarna i Admin)
 db.all("SELECT id, username, role, agent_color, avatar_id, status_text, display_name, is_online, last_seen, routing_tag FROM users WHERE role != 'system' ORDER BY username ASC", [], (err, rows) => {
 if (err) return res.status(500).json({ error: "Database error" });
 res.json(rows);
@@ -819,6 +842,23 @@ res.status(500).json({ error: "Kunde inte radera användare" });
 }
 });
 
+// GET /api/admin/user-stats - Hämtar global statistik för dashboarden
+app.get('/api/admin/user-stats', authenticateToken, (req, res) => {
+db.get(`
+SELECT 
+COUNT(DISTINCT conversation_id) as total_sessions,
+SUM(CASE WHEN human_mode = 1 THEN 1 ELSE 0 END) as human_sessions,
+MAX(updated_at) as last_activity
+FROM chat_v2_state
+`, [], (err, row) => {
+if (err) {
+console.error('❌ Fel vid hämtning av global statistik:', err.message);
+return res.status(500).json({ error: err.message });
+}
+res.json(row || { total_sessions: 0, human_sessions: 0, last_activity: null });
+});
+});
+
 // GET /api/admin/user-stats/:username - Hämtar statistik för en specifik agent
 app.get('/api/admin/user-stats/:username', authenticateToken, (req, res) => {
 if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
@@ -871,37 +911,53 @@ app.get('/api/admin/agent-tickets/:username', authenticateToken, async (req, res
 if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 try {
 const { username } = req.params;
-// Vi hämtar ärenden där agenten är owner och de inte är arkiverade
+
+const user = await getUserByUsername(username);
+const officeTags = user && user.routing_tag
+? user.routing_tag.split(',').map(t => t.trim()).filter(t => t)
+: [];
+
+const placeholders = officeTags.length > 0
+? officeTags.map(() => '?').join(',')
+: "'__NOMATCH__'";
+
+const params = [username, ...officeTags];
+
 const sql = `
 SELECT
 s.conversation_id,
+s.session_type,
+s.human_mode,
+s.owner,
 s.sender,
 s.updated_at,
+s.is_archived,
 s.office AS routing_tag,
 o.office_color
 FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag
-WHERE s.owner = ?
-AND s.human_mode = 1
+WHERE s.human_mode = 1
 AND (s.is_archived IS NULL OR s.is_archived = 0)
+AND (
+s.owner = ?
+OR
+s.office IN (${placeholders})
+)
 ORDER BY s.updated_at DESC
 `;
 
-db.all(sql, [username], async (err, rows) => {
+db.all(sql, params, async (err, rows) => {
 if (err) return res.status(500).json({ error: err.message });
-
-// Koppla på meddelanden och metadata från context_store för varje ärende
 const ticketsWithData = await Promise.all(rows.map(async (t) => {
 const stored = await getContextRow(t.conversation_id);
 const ctx = stored?.context_data || {};
 return {
 ...t,
-office_color: t.office_color, // ✅ Skickar vidare rätt färg
+office_color: t.office_color,
 subject: ctx.locked_context?.subject || "Inget ämne",
 messages: ctx.messages || []
 };
 }));
-
 res.json(ticketsWithData);
 });
 } catch (err) {
@@ -1653,6 +1709,15 @@ io.to(sessionId).emit('client:agent_typing', { sessionId });
 io.emit('team:client_typing', { sessionId });
 });
 
+// Vidarebefordra agentens skriv-status till kundens fönster
+socket.on('client:agent_typing', (payload) => {
+const { sessionId, isTyping } = payload;
+if (sessionId) {
+// Skicka till rummet (rum-namnet är sessionId)
+socket.to(sessionId).emit('client:agent_typing', { sessionId, isTyping });
+}
+});
+
 // ==================================================================
 // 💬 CLIENT:MESSAGE - HUVUDHANTERARE FÖR CHATT
 // ==================================================================
@@ -1675,12 +1740,9 @@ console.log('🎯 [SOCKET PRE-SAVE] Sparar namn/context från socket:', context.
 
 let tempStored = await getContextRow(sessionId);
 
-// 🔥 FIX: Packa upp textsträngen här med!
+// 🔥 FIX: Använd den säkra funktionen för att packa upp data 24/2-gemini
 const raw = tempStored?.context_data;
-let tempCtx = (typeof raw === 'string' ? JSON.parse(raw) : raw) || { 
-messages: [], 
-locked_context: { city: null, area: null, vehicle: null } 
-};
+let tempCtx = parseContextData(raw);
 
 // Slå ihop nytt context med gammalt
 tempCtx.locked_context = {
@@ -2072,8 +2134,8 @@ const stored = await getContextRow(conversationId);
 let contextData = { messages: [], locked_context: {} };
 
 if (stored && stored.context_data) {
-// ✅ RÄTT: Vi uppdaterar variabeln vi skapade ovanför
-contextData = stored?.context_data || { messages: [], locked_context: {} }; 
+// ✅ RÄTT: Vi använder parseContextData för att garantera strukturen
+contextData = parseContextData(stored.context_data);
 }
 
 if (!contextData.locked_context) contextData.locked_context = {};
@@ -2355,75 +2417,127 @@ res.status(500).json({ error: "Internal Server Error" });
 // -------------------------------------------------------------------------
 app.get('/team/inbox', authenticateToken, async (req, res) => {
 try {
-let tickets;
 if (req.user.role === 'admin' || req.user.role === 'support') {
-tickets = await new Promise((resolve, reject) => {
-// ERSÄTT SQL-strängen inuti if (req.user.role === 'admin')
-const sql = `
-SELECT
-s.conversation_id,
-s.session_type,
-s.human_mode,
-s.owner,
-s.sender,
-s.updated_at,
-s.is_archived,
-s.office AS routing_tag,
-o.office_color
+
+const sqlLiveChats = `
+SELECT s.conversation_id, s.session_type, s.human_mode, s.owner, s.sender,
+s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color
 FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag
 WHERE s.human_mode = 1
 AND (s.is_archived IS NULL OR s.is_archived = 0)
 AND (s.session_type IS NULL OR s.session_type != 'internal')
+AND (s.office = 'admin' OR s.office IS NULL)
+AND s.session_type = 'customer'
+AND s.owner IS NULL
 ORDER BY s.updated_at ASC
 `;
-db.all(sql, (err, rows) => {
-if (err) {
-console.error("❌ Admin inbox SQL Error:", err);
-reject(err);
-} else {
-resolve(rows || []);
-}
-});
-});
-} else {
-// Här anropas db.js - se till att getAgentTickets också SELECT:ar office_color
-tickets = await getAgentTickets(req.user.username);
-}
 
-const ticketsWithData = await Promise.all(
-tickets.map(async (t) => {
+const sqlMail = `
+SELECT s.conversation_id, s.session_type, s.human_mode, s.owner, s.sender,
+s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color
+FROM chat_v2_state s
+LEFT JOIN offices o ON s.office = o.routing_tag
+WHERE s.human_mode = 1
+AND (s.is_archived IS NULL OR s.is_archived = 0)
+AND (s.session_type IS NULL OR s.session_type != 'internal')
+AND (s.office = 'admin' OR s.office IS NULL)
+AND s.session_type = 'message'
+AND s.owner IS NULL
+ORDER BY s.updated_at ASC
+`;
+
+const sqlClaimed = `
+SELECT s.conversation_id, s.session_type, s.human_mode, s.owner, s.sender,
+s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color
+FROM chat_v2_state s
+LEFT JOIN offices o ON s.office = o.routing_tag
+WHERE s.human_mode = 1
+AND (s.is_archived IS NULL OR s.is_archived = 0)
+AND (s.session_type IS NULL OR s.session_type != 'internal')
+AND s.office IS NOT NULL
+AND s.office != 'admin'
+AND (s.owner IS NULL OR s.owner != ?)
+ORDER BY s.updated_at ASC
+`;
+
+const runQuery = (sql, params = []) => new Promise((resolve, reject) => {
+db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows || []));
+});
+
+const [liveChats, mail, claimed] = await Promise.all([
+runQuery(sqlLiveChats),
+runQuery(sqlMail),
+runQuery(sqlClaimed, [req.user.username])
+]);
+
+const enrichTickets = async (tickets) => Promise.all(tickets.map(async (t) => {
 const stored = await getContextRow(t.conversation_id);
 const ctx = stored?.context_data || {};
 const locked = ctx.locked_context || {};
 const messages = ctx.messages || [];
-
 let lastMsg = "Ingen text";
 if (messages.length > 0) {
 const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
 if (lastUserMsg) lastMsg = lastUserMsg.content;
 else lastMsg = messages[messages.length - 1].content;
 }
-
-const finalName = locked.name || locked.contact_name || locked.full_name || locked.Name || null;
-
 return {
 ...t,
 messages,
 last_message: lastMsg,
-office_color: t.office_color, // ✅ MAPPING-FIX: Tvingar med färgen till frontend
-contact_name: finalName,
+office_color: t.office_color,
+contact_name: locked.name || locked.contact_name || locked.full_name || null,
 contact_email: locked.email || locked.contact_email || null,
 contact_phone: locked.phone || locked.contact_phone || null,
 subject: locked.subject || null,
 city: locked.city || null,
 vehicle: locked.vehicle || null
 };
-})
-);
+}));
 
+const [enrichedLive, enrichedMail, enrichedClaimed] = await Promise.all([
+enrichTickets(liveChats),
+enrichTickets(mail),
+enrichTickets(claimed)
+]);
+
+res.json({
+tickets: [...enrichedLive, ...enrichedMail, ...enrichedClaimed], // Bakåtkompatibilitet
+live_chats: enrichedLive,
+mail: enrichedMail,
+claimed: enrichedClaimed
+});
+
+} else {
+// Agent-flöde oförändrat
+const tickets = await getAgentTickets(req.user.username);
+const ticketsWithData = await Promise.all(tickets.map(async (t) => {
+const stored = await getContextRow(t.conversation_id);
+const ctx = stored?.context_data || {};
+const locked = ctx.locked_context || {};
+const messages = ctx.messages || [];
+let lastMsg = "Ingen text";
+if (messages.length > 0) {
+const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+if (lastUserMsg) lastMsg = lastUserMsg.content;
+else lastMsg = messages[messages.length - 1].content;
+}
+return {
+...t,
+messages,
+last_message: lastMsg,
+office_color: t.office_color,
+contact_name: locked.name || locked.contact_name || locked.full_name || null,
+contact_email: locked.email || locked.contact_email || null,
+contact_phone: locked.phone || locked.contact_phone || null,
+subject: locked.subject || null,
+city: locked.city || null,
+vehicle: locked.vehicle || null
+};
+}));
 res.json({ tickets: ticketsWithData });
-
+}
 } catch (err) {
 console.error("[TEAM] Inbox error:", err);
 res.status(500).json({ error: "Database error" });
@@ -2726,6 +2840,19 @@ res.json({ status: 'success' });
 });
 });
 
+// POST /api/templates/delete - Alternativ raderingsväg för frontend-kompatibilitet
+app.post('/api/templates/delete', authenticateToken, (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+const { id } = req.body;
+if (!id) return res.status(400).json({ error: "id saknas" });
+
+db.run('DELETE FROM templates WHERE id = ?', [id], function(err) {
+if (err) return res.status(500).json({ error: "Kunde inte radera" });
+cachedTemplates = null;
+res.json({ status: 'success' });
+});
+});
+
 // -------------------------------------------------------------------------
 // ENDPOINT: /api/templates/delete/:id (RADERA MALL VIA WEBB)
 // -------------------------------------------------------------------------
@@ -2842,7 +2969,7 @@ res.status(500).json({ error: "Internt serverfel" });
 // =====================================================================
 app.post("/api/customer/message-form", async (req, res) => {
 try {
-const { name, email, phone, subject, message, city, area, vehicle } = req.body; // 🔥 HÄMTA CITY/VEHICLE
+const { name, email, phone, subject, message, city, area, vehicle } = req.body;
 
 if (!name || !email || !message) {
 return res.status(400).json({
@@ -2852,11 +2979,10 @@ error: "name, email and message are required"
 
 // Skapa ett unikt ärende-id
 const conversationId = crypto.randomUUID();
-
 const now = Math.floor(Date.now() / 1000);
 
-// Spara som nytt ärende i chat_v2_state
-const { agent_id } = req.body; // 🔥 Hämta kontorsvalet (t.ex. eslov)
+// 1. Spara till chat_v2_state (Nu med dedikerade kolumner för sökbarhet och snyggare Inkorg)
+const { agent_id } = req.body; 
 await new Promise((resolve, reject) => {
 db.run(
 `
@@ -2866,15 +2992,27 @@ session_type,
 human_mode,
 owner,
 office,
-updated_at
-) VALUES (?, 'message', 1, ?, ?, ?)
+updated_at,
+name,
+email,
+phone,
+source,
+is_archived
+) VALUES (?, 'message', 1, NULL, ?, ?, ?, ?, ?, 'form', 0)
 `,
-[conversationId, null, agent_id || null, now],
+[
+conversationId, 
+agent_id || null, 
+now, 
+name, 
+email, 
+phone
+],
 err => (err ? reject(err) : resolve())
 );
 });
 
-// 🔥 SPARA I LOCKED_CONTEXT FÖR AGENTENS FÄRGKODNING
+// 2. Spara till context_store (För historik och detaljvy)
 await upsertContextRow({
 conversation_id: conversationId,
 last_message_id: 1,
@@ -2899,10 +3037,11 @@ vehicle: vehicle || null
 updated_at: now
 });
 
-// ✅ GLOBAL UPDATE: Nytt ärende från formulär synkas direkt för alla
+// ✅ GLOBAL UPDATE: Nytt ärende från formulär synkas direkt för alla agenter
 if (typeof io !== 'undefined') {
 io.emit('team:update', { type: 'new_message', sessionId: conversationId });
 }
+
 res.json({
 success: true,
 sessionId: conversationId
@@ -2915,7 +3054,6 @@ error: "Internal server error"
 });
 }
 });
-
 // =============================================================================
 // INBOX MANAGEMENT ENDPOINTS
 // ENDPOINT: /api/inbox/delete (RADERA FRÅGA TOTALT)
@@ -3220,12 +3358,11 @@ console.log(`[HUMAN-MODE] Aktiveras för ${chat_id}`);
 // 1. Spara meddelandet i historiken
 let storedContext = await getContextRow(chat_id);
 
-// 🔥 FIX: Parsa om sträng (Viktig säkerhetsåtgärd)
+// 🔥 FIX: Parsa om sträng (Viktig säkerhetsåtgärd - här togs syntaxfelet bort)
 let raw = storedContext?.context_data;
-let contextData = (typeof raw === 'string' ? JSON.parse(raw) : raw) 
-|| { variables: {}, messages: [] };
+let contextData = parseContextData(raw); 
 
-// Säkra att messages är en array innan push
+// Säkra att messages är en array innan push (Bevarar din hängsle-och-livrem check)
 if (!Array.isArray(contextData.messages)) contextData.messages = [];
 
 contextData.messages.push({ role: 'user', content: msg, timestamp: Date.now() });
@@ -3742,8 +3879,6 @@ knowledgePath: path.join(base, 'knowledge')
 }
 
 app.get('/api/admin/system-config', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
-
 const envPath = getEnvPath();
 const fp = getFilePaths();
 const config = {};
@@ -3918,13 +4053,12 @@ res.status(500).json({ error: 'Kunde inte spara konfiguration.' });
 // 🛡️ ADMIN — DRIFT & SÄKERHET (operation-settings)
 // =====================================================================
 app.get('/api/admin/operation-settings', authenticateToken, async (req, res) => {
-if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 res.json({
-imap_enabled:           imapEnabled,
-backup_interval_hours:  backupInterval,
-backup_path:            backupPath,
-jwt_expires_in:         jwtExpiresIn,
-auto_human_exit:        autoHumanExit
+imap_enabled:          imapEnabled,
+backup_interval_hours: backupInterval,
+backup_path:           backupPath,
+jwt_expires_in:        jwtExpiresIn,
+auto_human_exit:       autoHumanExit
 });
 });
 
