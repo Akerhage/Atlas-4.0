@@ -155,5 +155,6 @@
     "MC": "https://booking.mydrivingacademy.com/widget?vehicleType=mc&productType=Service&regionId=200055&locationId=200098&serviceId=200818&vehicleGearType=mcA&instructorId=200401",
     "AM": null
   },
-  "type": "kontor_info"
+  "type": "kontor_info",
+  "office_color": "#2cdd1e"
 }

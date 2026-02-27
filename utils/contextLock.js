@@ -1,6 +1,9 @@
-// /utils/contextLock.js
-// KORRIGERAD VERSION (v1.4)
-// Fixar buggen där Area låg kvar när man bytte City.
+// ============================================
+// contextLock.js
+// VAD DEN GÖR: Löser konflikter i kontext-slots (stad/område/fordon) och hindrar stale area vid stadsbyte.
+// ANVÄNDS AV: legacy_engine.js
+// SENAST STÄDAD: 2026-02-27
+// ============================================
 
 module.exports = {
   /**
@@ -17,7 +20,7 @@ module.exports = {
   },
 
   /**
-   * Lockar fordontyp:
+   * Löser fordon-slot: explicit fordon har företräde framför sparat.
    */
   resolveVehicle({ savedVehicle, explicitVehicle }) {
     if (explicitVehicle && typeof explicitVehicle === "string") {

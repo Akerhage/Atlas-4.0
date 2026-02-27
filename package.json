@@ -30,18 +30,21 @@
 
 "audit:all": "node tests/scripts/audit_1_server_db_renderer.js && node tests/scripts/audit_2_server_engines.js && node tests/scripts/audit_3_server_package_db_main.js && node tests/scripts/audit_4_renderer_html_css.js",
 
-"audit_db": "node tests/scripts/audit_db.js",
-"manual": "node tests/scripts/audit_create_manual.js",
-"manual2": "node tests/scripts/audit_create_manual2.js",
-"manual3": "node tests/scripts/audit_create_manual3.js",
 "audit:1": "node tests/scripts/audit_1_server_db_renderer.js",
 "audit:2": "node tests/scripts/audit_2_server_engines.js",
 "audit:3": "node tests/scripts/audit_3_server_package_db_main.js",
 "audit:4": "node tests/scripts/audit_4_renderer_html_css.js",
-"audit_diagnose": "node tests/scripts/audit_diagnose.js",
-"audit_server": "node tests/scripts/audit_server.js",
-"audit_backend": "node tests/scripts/audit_backend.js",
-"audit_check_balance": "node tests/scripts/audit_check_balance.js",
+
+"audit:db": "node tests/scripts/audit_db.js",
+
+"manual1": "node tests/scripts/audit_create_manual.js",
+"manual2": "node tests/scripts/audit_create_manual2.js",
+"manual3": "node tests/scripts/audit_create_manual3.js",
+
+"audit:diagnose": "node tests/scripts/audit_diagnose.js",
+"audit:server": "node tests/scripts/audit_server.js",
+"audit:backend": "node tests/scripts/audit_backend.js",
+"audit:balance": "node tests/scripts/audit_check_balance.js",
 
 "clean:dist": "rimraf dist build",
 "rebuild": "npm run clean:dist && npm run build:win",

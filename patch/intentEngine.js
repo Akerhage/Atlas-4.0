@@ -1,4 +1,9 @@
-// /patch/intentEngine.js Version. 1.9.2 (SLUTGILTIG FIX: Förbättrade intent-matchningar baserat på logg)
+// ============================================
+// intentEngine.js
+// VAD DEN GÖR: Identifierar användarens avsikt (intent) och extraherar stad/fordon/tjänst från fritext.
+// ANVÄNDS AV: legacy_engine.js
+// SENAST STÄDAD: 2026-02-27
+// ============================================
 
 const INTENT_PATTERNS = {
 price: /(vad kostar|pris|hur mycket|kostar det|pris för|vad tar ni|pris på|prislista|finns pris)/i,
@@ -23,7 +28,6 @@ age_limit: /\b(ålder|gammal|fyllt|när får man)\b/i,
 };
 
 const SERVICE_KEYWORD_MAP = [
-// ... (Ingen ändring här)
 { term: "Körlektion BIL", kws: ["körlektion bil", "lektion bil"] },
 { term: "Testlektion Bil", kws: ["testlektion", "provlektion"] },
 { term: "Risk 1", kws: ["riskettan", "risk 1"] },
@@ -67,7 +71,6 @@ return (s || "").toString()
 .replace(/\s+/g, ' ');
 }
 
-// intentEngine.js - Robust extractCity
 extractCity(queryLower, currentContextCity) {
 const q = (queryLower || "").toLowerCase();
 

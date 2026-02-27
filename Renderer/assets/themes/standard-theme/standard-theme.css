@@ -1,334 +1,72 @@
 /* ═══════════════════════════════════════════════════════════════
-   ATLAS PRIME — Deep Space Dark Theme
-   Bakgrund: AI-väg med berg och kretskort
-   Fil: standard-theme/standard-theme.css
+   ATLAS PRIME — Standard Vision 2.0 (Deep Blue Edition)
+   Design: Deep Blue, Electric Cyan accents, Polished UI
 ═══════════════════════════════════════════════════════════════ */
 
 :root {
---bg-image: url("./standard-theme-bg.jpg");
---bg-color: #03080f;
+    --bg-image: url("./standard-theme-bg.jpg");
+    --bg-color: #02060c;
+    --bg-dark-primary: #040a15;
+    --bg-dark-secondary: #081220;
+    --bg-dark-tertiary: #0c1a2e;
+    --text-primary: #f0f7ff;
+    --text-secondary: #8ab0d0;
+    --accent-primary: #00e1ff;
+    --accent-hover: #5df0ff;
+    --border-color: rgba(0, 225, 255, 0.15);
 
---bg-dark-primary: #060e1a;
---bg-dark-secondary: #0a1628;
---bg-dark-tertiary: #0f1e35;
---text-primary: #ddeeff;
---text-secondary: #6a9abf;
---accent-primary: #00c8ff;
---accent-hover: #40d8ff;
---border-color: rgba(0, 200, 255, 0.18);
-
---group-bg: rgba(0, 200, 255, 0.08);
---group-hover: rgba(0, 200, 255, 0.18);
---group-text: #00c8ff;
---group-border: rgba(0, 200, 255, 0.35);
---group-shadow: rgba(0, 200, 255, 0.15);
---group-shadow-hover: rgba(0, 200, 255, 0.35);
---item-bg: rgba(15, 30, 53, 0.95);
---item-hover: rgba(0, 200, 255, 0.18);
---item-border: rgba(0, 200, 255, 0.25);
---accent: #00c8ff;
-
---bg-frosty-sidebar: rgba(6, 14, 26, 0.88);
---bg-frosty-header: rgba(8, 18, 32, 0.85);
---bg-frosty-content: rgba(10, 22, 40, 0.82);
---bg-frosty-bubble-atlas: rgba(12, 24, 44, 0.94);
---bg-frosty-bubble-user: linear-gradient(135deg, #005f8a 0%, #007baf 100%);
---bg-frosty-input-area: rgba(8, 18, 32, 0.90);
---bg-frosty-input-field: rgba(15, 30, 53, 0.92);
---blur-amount: 28px;
-
---glow-primary: 0 0 30px rgba(0, 200, 255, 0.45);
---glow-soft: 0 0 20px rgba(0, 200, 255, 0.25);
---transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
---transition-slow: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* Glassmorphism */
+    --bg-frosty-sidebar: rgba(4, 10, 21, 0.85);
+    --bg-frosty-header: rgba(6, 15, 30, 0.8);
+    --bg-frosty-content: rgba(8, 20, 35, 0.75);
+    --blur-amount: 22px;
 }
 
 body {
-background: var(--bg-image) center/cover no-repeat fixed;
-background-color: var(--bg-color);
-color: var(--text-primary);
-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-position: relative;
+    background: var(--bg-image) center/cover no-repeat fixed;
+    background-color: var(--bg-color);
 }
 
-/* Subtil overlay för djup */
-body::before {
-content: "";
-position: fixed;
-inset: 0;
-background: linear-gradient(
-  160deg,
-  rgba(0, 10, 25, 0.55) 0%,
-  rgba(0, 5, 15, 0.40) 50%,
-  rgba(0, 10, 25, 0.60) 100%
-);
-pointer-events: none;
-z-index: 0;
-}
-
-/* Svaga neon-partiklar */
-body::after {
-content: "";
-position: fixed;
-inset: 0;
-background:
-  radial-gradient(1.5px 1.5px at 20% 30%, rgba(0, 200, 255, 0.35), transparent),
-  radial-gradient(1px 1px at 75% 65%, rgba(0, 180, 255, 0.25), transparent),
-  radial-gradient(2px 2px at 50% 88%, rgba(0, 160, 255, 0.20), transparent);
-background-size: 220px 220px, 280px 280px, 260px 260px;
-animation: particleDrift 16s linear infinite;
-pointer-events: none;
-opacity: 0.6;
-z-index: 0;
-}
-
-@keyframes particleDrift {
-0%   { background-position: 0 0, 0 0, 0 0; }
-100% { background-position: 220px 220px, -280px 280px, 260px -260px; }
-}
-
-.app-container { position: relative; z-index: 1; }
-
-/* ── Glassmorphism ────────────────────────────────────────────── */
-.sidebar, .chat-header, .chat-input-area,
-.template-editor-container, .template-list-container {
-backdrop-filter: blur(var(--blur-amount)) saturate(160%);
--webkit-backdrop-filter: blur(var(--blur-amount)) saturate(160%);
-background: var(--bg-frosty-sidebar);
-border: 1px solid var(--border-color);
-box-shadow:
-  0 12px 48px rgba(0, 0, 0, 0.65),
-  inset 0 1px 0 rgba(255, 255, 255, 0.06),
-  0 0 40px rgba(0, 200, 255, 0.08);
-transition: box-shadow var(--transition-slow);
-border-radius: 18px;
-overflow: hidden;
-}
-
-.about-container {
-backdrop-filter: blur(var(--blur-amount)) saturate(160%);
--webkit-backdrop-filter: blur(var(--blur-amount)) saturate(160%);
-background: var(--bg-frosty-sidebar);
-border: 1px solid var(--border-color);
-box-shadow:
-  0 12px 48px rgba(0, 0, 0, 0.65),
-  inset 0 1px 0 rgba(255, 255, 255, 0.06),
-  0 0 40px rgba(0, 200, 255, 0.08);
-border-radius: 18px;
-overflow-y: auto !important;
-}
-
-/* ── Sidebar ──────────────────────────────────────────────────── */
-.sidebar-logo {
-filter: drop-shadow(0 4px 16px rgba(0, 200, 255, 0.4));
-transition: filter var(--transition-slow);
+/* ── Sidomeny (Standard Vision) ────────────────────────────────── */
+.sidebar {
+    background: var(--bg-frosty-sidebar) !important;
+    border-right: 1px solid rgba(0, 225, 255, 0.1) !important;
 }
 
 .menu-item {
-color: var(--text-secondary);
-border-radius: 12px;
-margin: 3px 8px;
-padding: 10px 14px;
-transition: all var(--transition-fast);
-position: relative;
-overflow: hidden;
-}
-
-.menu-item::before {
-content: '';
-position: absolute;
-left: -100%; top: 0;
-width: 100%; height: 100%;
-background: linear-gradient(90deg, transparent, rgba(0, 200, 255, 0.15), transparent);
-transition: left 0.5s;
+    color: #8ab0d0 !important;
+    transition: all 0.2s ease;
 }
 
 .menu-item:hover {
-background: rgba(0, 200, 255, 0.10);
-color: var(--accent-primary);
+    background: rgba(0, 225, 255, 0.08) !important;
+    color: #00e1ff !important;
 }
-
-.menu-item:hover::before { left: 100%; }
 
 .menu-item.active {
-background: linear-gradient(90deg, rgba(0, 200, 255, 0.20), rgba(0, 200, 255, 0.06));
-color: var(--accent-primary);
-border-left: 3px solid var(--accent-primary);
-font-weight: 600;
-box-shadow: var(--glow-soft);
+    background: linear-gradient(90deg, rgba(0, 225, 255, 0.15), transparent) !important;
+    border-left: 3px solid #00e1ff !important;
+    color: #ffffff !important;
 }
 
-/* ── Bubblor ──────────────────────────────────────────────────── */
-.message .bubble {
-border-radius: 16px;
-padding: 12px 16px;
-backdrop-filter: blur(12px);
-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+.menu-item.active svg {
+    color: #00e1ff !important;
+    filter: drop-shadow(0 0 5px #00e1ff);
 }
 
-.message.user .bubble {
-background: var(--bg-frosty-bubble-user) !important;
-color: #ddeeff !important;
-box-shadow: 0 4px 20px rgba(0, 120, 170, 0.45);
+/* ── Garaget & Team Vision ────────────────────────────────────── */
+.team-ticket-card {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.2)) !important;
+    border: 1px solid rgba(0, 225, 255, 0.1) !important;
 }
 
-/* ── Knappar ──────────────────────────────────────────────────── */
-#send-button, .header-button {
-background: linear-gradient(135deg, #0078a8 0%, #00aad4 100%);
-color: #ddeeff;
-border-radius: 12px;
-font-weight: 600;
-box-shadow: 0 4px 18px rgba(0, 200, 255, 0.35);
-transition: all var(--transition-fast);
+.ticket-tag {
+    background: rgba(0, 225, 255, 0.1) !important;
+    border: 1px solid rgba(0, 225, 255, 0.2) !important;
 }
 
-#send-button:hover, .header-button:hover {
-background: linear-gradient(135deg, #0090c8 0%, #00c8ff 100%);
-box-shadow: 0 6px 28px rgba(0, 200, 255, 0.55);
-transform: translateY(-1px);
-}
-
-/* ── Scrollbar ────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-background: rgba(0, 200, 255, 0.30);
-border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-background: rgba(0, 200, 255, 0.55);
-}
-
-/* ── Server-status ────────────────────────────────────────────── */
-#server-status {
-color: var(--accent-primary);
-font-weight: 700;
-animation: breathe 5s ease-in-out infinite;
-}
-
-@keyframes breathe {
-0%, 100% { opacity: 1; }
-50%       { opacity: 0.65; }
-}
-
-/* ── Guide-steg (Om-vyn) ──────────────────────────────────────── */
-.guide-step {
-background: rgba(0, 200, 255, 0.07);
-border-left: 3px solid var(--accent-primary);
-border-radius: 10px;
-box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-transition: background var(--transition-fast), transform var(--transition-fast);
-}
-
-.guide-step:hover {
-background: rgba(0, 200, 255, 0.13);
-transform: translateX(6px);
-}
-
-.step-number {
-background: linear-gradient(135deg, #0078a8, #00aad4);
-color: #ddeeff;
-border-radius: 50%;
-width: 34px; height: 34px;
-display: flex; align-items: center; justify-content: center;
-font-weight: 700;
-box-shadow: var(--glow-soft);
-}
-
-.shortcut-item {
-background: rgba(0, 200, 255, 0.06);
-border-radius: 10px;
-transition: all var(--transition-fast);
-}
-
-.shortcut-item:hover {
-background: rgba(0, 200, 255, 0.14);
-border-left: 2px solid var(--accent-primary);
-transform: translateX(6px);
-}
-
-.shortcut-item kbd {
-background: rgba(0, 200, 255, 0.18);
-color: var(--accent-primary);
-border: 1px solid rgba(0, 200, 255, 0.35);
-border-radius: 6px;
-padding: 4px 10px;
-font-weight: 600;
-font-size: 11px;
-}
-
-/* ── Status-lampa ─────────────────────────────────────────────── */
-.status-lamp-dot.green {
-background-color: var(--accent-primary);
-box-shadow: 0 0 14px var(--accent-primary);
-}
-
-/* ── Template-hover ───────────────────────────────────────────── */
-.template-list-container:hover,
-.template-editor-container:hover {
-box-shadow:
-  0 12px 48px rgba(0, 0, 0, 0.65),
-  0 0 30px rgba(0, 200, 255, 0.12);
-}
-
-/* ── Nav-badge ────────────────────────────────────────────────── */
-.nav-badge {
-background: linear-gradient(135deg, #ff5e57, #ff8a45) !important;
-box-shadow: 0 0 14px rgba(255, 94, 87, 0.55) !important;
-color: white !important;
-font-weight: 700;
-}
-
-/* ── Ticket-taggar ────────────────────────────────────────────── */
-.tag-chatt, .ticket-tag.tag-chatt {
-background: rgba(0, 220, 200, 0.10) !important;
-color: #00dcc8 !important;
-border: 1px solid rgba(0, 220, 200, 0.35) !important;
-}
-
-.tag-form, .ticket-tag.tag-form {
-background: rgba(160, 80, 255, 0.10) !important;
-color: #b87aff !important;
-border: 1px solid rgba(160, 80, 255, 0.35) !important;
-}
-
-.ticket-tag.owner {
-background: rgba(0, 200, 255, 0.18) !important;
-color: var(--accent-primary) !important;
-border: 1px solid rgba(0, 200, 255, 0.40) !important;
-}
-
-/* ── Team-kort ────────────────────────────────────────────────── */
-.team-ticket-card.taken {
-border-left-color: #40c8e0;
-background: rgba(0, 200, 255, 0.04);
-}
-
-.team-ticket-card.mine {
-border-left-color: var(--accent-primary);
-background: linear-gradient(90deg, rgba(0, 200, 255, 0.10) 0%, transparent 100%);
-}
-
-/* ── Mini-chatt ───────────────────────────────────────────────── */
-#view-my-tickets .message.agent .bubble {
-background: linear-gradient(135deg, #0078a8, #00aad4) !important;
-color: #ddeeff !important;
-}
-
-#view-my-tickets .mini-chat-input input {
-background: var(--bg-frosty-input-field);
-color: var(--text-primary);
-border: 1px solid rgba(0, 200, 255, 0.25);
-}
-
-#view-my-tickets .mini-chat-input button {
-background: linear-gradient(135deg, #0078a8, #00aad4);
-color: #ddeeff;
-font-weight: 600;
-}
-
-/* ── Chat-input glow ──────────────────────────────────────────── */
-#chat-form:focus-within {
-box-shadow: 0 0 32px rgba(0, 200, 255, 0.35);
-border-color: var(--accent-primary);
+/* Badges */
+#badge-inbox {
+    background: linear-gradient(135deg, #ff3e3e, #ff6b6b) !important;
+    box-shadow: 0 0 15px rgba(255, 62, 62, 0.5) !important;
 }

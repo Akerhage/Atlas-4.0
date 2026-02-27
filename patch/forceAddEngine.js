@@ -1,5 +1,9 @@
-// /forceAddEngine.js
-// VERSION: 1.9.5
+// ============================================
+// forceAddEngine.js
+// VAD DEN GÖR: Tvångsinjicerar relevanta kunskapsblock (chunks) i RAG-kontexten baserat på sökord och intent.
+// ANVÄNDS AV: legacy_engine.js
+// SENAST STÄDAD: 2026-02-27
+// ============================================
 
 class forceAddEngine {
 constructor(allChunks) {
@@ -9,7 +13,7 @@ this.forceHighConfidence = false;
 this.version = "1.9.5"; 
 }
 
-// === HJÄLPFUNKTIONER (oförändrade) ===
+// === HJÄLPFUNKTIONER ===
 qHas(queryLower, ...terms) {
 return terms.some(t => queryLower.includes(t));
 }
@@ -24,7 +28,6 @@ return t === 'basfakta' || t === 'basfak' || t === 'basfacts' || t === 'basfacta
 }
 
 // === CHUNK-HANTERING & PRIORITERING ===
-// (Ersätter funktionen som börjar på rad 28)
 addChunks(chunks, score, prepend = false) {
 
 // 🛑 SÄKERHETSFILTER: Kasta bort pris-chunks som är 0 kr eller "0 SEK"
@@ -71,12 +74,12 @@ findBasfaktaBySource(sourceFilename) {
 const cleanSearch = sourceFilename.toLowerCase()
 .replace('.json', '')
 .replace('basfakta_', '')
-.replace(/_/g, ''); // Normalisera bort understreck [cite: 69]
+.replace(/_/g, ''); // Normalisera bort understreck
 
 return this.allChunks.filter(c => {
 if (!this.isBasfakta(c)) return false;
 const s = (c.source || '').toLowerCase().replace(/_/g, '');
-return s.includes(cleanSearch); // Tolerant matchning [cite: 131]
+return s.includes(cleanSearch); // Tolerant matchning
 });
 }
 
@@ -124,7 +127,7 @@ return 0;
 // --- GRUPP B: KRITISK POLICY/INTRO/TILLSTÅND ---
 
 /**
-* REGEL B1: POLICY (INAKTIVERAD - Hanteras av Nollutrymme Fallback)
+* REGEL B1: Injicerar policy-chunks vid avbokning/ånger/giltighetsfrågor.
 */
 rule_B1_Policy(queryLower, intent, slots) {
 // --- 1. VAKTEN: Blockera endast om det är en ren tillståndsfråga utan policy-ord ---
@@ -304,7 +307,7 @@ return 0;
 
 // --- C4: PAKET BIL---
 rule_C4_Paket_Bil(queryLower, intent, slots) {
-// Borttagen hård return 0 för att tillåta avgifter/appar att visas [cite: 71, 75]
+// Tillåter avgifter/appar att visas (hård return 0 är borttagen)
 const has_paket_keywords = this.qHas(queryLower, 'paket', 'totalpaket', 'minipaket', 'mellanpaket', 'baspaket', 'lektionspaket', 'avgift', 'avgifter');
 
 if (slots.vehicle === 'BIL' || (has_paket_keywords && slots.vehicle === null)) {
@@ -415,7 +418,7 @@ return added;
 
 // --- C9: BILFAKTA GENERELL ---
 rule_C9_BilFakta(queryLower, intent, slots) {
-// FIX för ID 145/142 (Automat/Manuell) 
+// Hanterar Automat/Manuell-körkort
 if (this.qHas(queryLower, 'automat', 'manuell', 'villkor 78', 'kod 78', 'körkort för automat', 'körkort för manuell')) {
 const chunks = this.findBasfaktaBySource('basfakta_personbil_b.json');
 const added = this.addChunks(chunks, 7500, true); 
@@ -528,13 +531,13 @@ return 0;
 rule_Fix_MC_Extra(queryLower) {
 let added = 0;
 
-// FAIL 92: Var finns MC? 
+// Var finns MC? (frågor om orter/tillgänglighet)
 if (this.qHas(queryLower, 'mc', 'motorcykel') && this.qHas(queryLower, 'var', 'erbjuder', 'finns ni', 'orter')) {
 const chunks = this.findBasfaktaBySource('basfakta_mc_a_a1_a2.json');
 added += this.addChunks(chunks, 9700, true);
 }
 
-// FAIL 93: Testlektion MC (Måste prioriteras över bil)
+// Testlektion MC måste prioriteras över bil
 if (this.qHas(queryLower, 'testlektion', 'provlektion') && this.qHas(queryLower, 'mc', 'motorcykel')) {
 const chunks = this.findBasfaktaBySource('basfakta_mc_lektioner_utbildning.json');
 added += this.addChunks(chunks, 9900, true);

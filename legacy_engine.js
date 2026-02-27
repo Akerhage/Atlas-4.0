@@ -1,9 +1,10 @@
-// =============================================================================
-// ATLAS LEGACY ENGINE v.3.4 (Core Wrapped for v3.0)
-// Stateless RAG Engine - Intent Detection, NLU & Knowledge Base Search
-// ARCHITECTURE:
-// Inject State → Execute Logic → Extract State → Return to V3 Server
-// =============================================================================
+// ============================================
+// legacy_engine.js
+// VAD DEN GÖR: Stateless RAG-motor. Laddar kunskapsbas, kör NLU/intent, bygger kontext och anropar OpenAI.
+// ANVÄNDS AV: server.js (via runLegacyFlow + loadKnowledgeBase)
+// SENAST STÄDAD: 2026-02-27
+// ============================================
+// ARKITEKTUR: Inject State → Execute Logic → Extract State → Return till V3 Server
 
 // =============================================================================
 // SECTION 1: ENVIRONMENT & CONFIGURATION
@@ -278,7 +279,7 @@ const CITY_ALIASES = {
 'sodertull': 'Lund',
 'södertull': 'Lund',
 
-// --- Övriga Orter (Baserat på din fullständiga fil-lista) ---
+// --- Övriga Orter ---
 'angelholm': 'Ängelholm',
 'ängelholm': 'Ängelholm',
 'eslov': 'Eslöv',
@@ -322,7 +323,7 @@ const VEHICLE_MAP = {
 };
 
 const UNIFIED_SYNONYMS = {
-// === DINA VIKTIGA BEGREPPS-KOPPLINGAR (BEHÅLLNA) ===
+// === VIKTIGA BEGREPPS-KOPPLINGAR ===
 'behöver gå': ['måste gå', 'krävs', 'genomföra', 'obligatorisk', 'behöver genomföra'],
 'obligatorisk': ['krav', 'måste', 'krävs', 'obligatoriskt moment'],
 'göra om': ['ta om', 'göra om', 'genomföra på nytt', 'underkänd'],
@@ -336,7 +337,7 @@ const UNIFIED_SYNONYMS = {
 'prövotid': ['prövotid', '2 år', 'förarprov', 'göra om prov', 'körkort indraget', 'återkallat körkort'],
 'syntest': ['syntest', 'synundersökning', 'synprov', 'synintyg', 'optiker'],
 
-// === MÅTT & TID (UPPDATERADE & SÄKRADE) ===
+// === MÅTT & TID ===
 '14 år och 9 månader': ['14 år och 9 månader', '14,5 år', '14 år 9 mån', 'övningsköra moped'],
 '15 år': ['15 år', '15-åring', 'myndig moped'],
 '16 år': ['16 år', '16-åring', 'övningsköra bil'],
@@ -350,7 +351,7 @@ const UNIFIED_SYNONYMS = {
 
 // === LEKTIONSLÄNGDER (VIKTIGT FÖR PRISER) ===
 '80 min': ['80 min', '80 minuter', 'standardlektion', 'körlektion'],
-'40 min': ['40 min', '40 minuter', 'halv lektion'], // Om ni har det?
+'40 min': ['40 min', '40 minuter', 'halv lektion'],
 '100 min': ['100 min', '100 minuter', 'dubbel lektion', 'duo'],
 '3,5 timmar': ['3,5 timmar', 'tre och en halv timme', 'riskettan tid'],
 
@@ -1835,7 +1836,7 @@ console.log("topResults.length:", topResults.length);
 console.log("Första resultatet:", topResults[0] ? topResults[0].title : "INGEN");
 console.log("=".repeat(80));
 
-// === NYTT STÄDAT OCH FUNGERANDE BLOCK ===
+// Konfidenstjänst: Returnera klarifieringsfråga om resultaten är för svaga
 if (!forceHighConfidence) {
 const hasBasfakta = topResults.some(r => isBasfaktaType(r));
 const bestScore = topResults[0]?.score || 0;
@@ -1904,7 +1905,7 @@ return chunk;
 }
 }
 
-// --- FIX: Rensa dubbletter och förhindra hängning ---
+// Rensa dubbletter från topResults
 const uniqueMap = new Map();
 filteredResults.forEach(r => {
 if (!uniqueMap.has(r.id)) {
@@ -1915,9 +1916,9 @@ uniqueMap.set(r.id, r);
 const uniqueTopResults = Array.from(uniqueMap.values());
 
 // ============================================================
-// 🔧 PRIS-FIXEN (PriceResolver Injection)
+// PriceResolver: Slå upp exakt pris om intent är price_lookup
 // ============================================================
-// 🔥 FIX: Kör INTE PriceResolver om vi letar efter Betalning eller Säsong
+// Kör INTE PriceResolver om vi letar efter Betalning eller Säsong
 const isSeasonQuery = queryLower.includes('säsong');
 if (!hasSniperMatch && !isSeasonQuery && (nluResult.intent === 'price_lookup' || /(?:kostar|pris|avgift)/i.test(query))) {
 
@@ -2346,4 +2347,4 @@ messages: session.messages
 };
 }
 
-module.exports = { runLegacyFlow };
+module.exports = { runLegacyFlow, loadKnowledgeBase };

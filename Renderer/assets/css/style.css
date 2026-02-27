@@ -1,6 +1,11 @@
-/* ===============================================
-ATLAS - KOMPLETT STYLE.CSS - Version 4.6 - CLEAN
-=============================================== */
+/* ============================================
+   style.css — Atlas UI Stylesheet
+   Innehåller: CSS-variabler, layout, navigation, knappar, modaler,
+               chattvy, ärendekort, mallar, admin-vy, om-vyn, animationer
+   SENAST STÄDAD: 2026-02-27
+   ============================================ */
+
+/* *** === CSS VARIABLER & TEMAN === *** */
 
 :root {
 /* FÄRGPALETT */
@@ -19,7 +24,7 @@ ATLAS - KOMPLETT STYLE.CSS - Version 4.6 - CLEAN
 /* FROST GLAS-EFFEKTER */
 --bg-frosty-sidebar: rgba(30, 30, 30, 0.35);
 --bg-frosty-header: rgba(37, 37, 37, 0.7);
---bg-frosty-content: rgba(37, 37, 37, 0.6);
+--bg-frosty-content: rgba(18, 18, 22, 0.78);
 --bg-frosty-bubble-atlas: rgba(58, 58, 60, 0.85);
 --bg-frosty-bubble-user: rgba(0, 113, 227, 0.9);
 --bg-frosty-input-area: rgba(37, 37, 37, 0.7);
@@ -53,6 +58,8 @@ ATLAS - KOMPLETT STYLE.CSS - Version 4.6 - CLEAN
 --status-danger: #ff4444;
 --status-success: #00C851;
 }
+
+/* *** === RESET & BASTYLER === *** */
 
 /* === GLOBAL RESET === */
 button, input, select, textarea {
@@ -104,11 +111,11 @@ border-radius: 4px;
 ::-webkit-scrollbar-corner { background: transparent; }
 
 #inbox-list::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+background: rgba(0, 0, 0, 0.2);
 }
 
 #inbox-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15) !important;
+background: rgba(255, 255, 255, 0.15) !important;
 }
 
 .app-container {
@@ -123,7 +130,7 @@ filter: none !important;
 }
 
 /* =============================================================================
-SIDEBAR & NAVIGATION (UNIK - ORÖRD)
+SIDEBAR & NAVIGATION
 ============================================================================= */
 .sidebar {
 width: 260px !important;
@@ -173,7 +180,7 @@ height: calc(100% - 150px);
 }
 
 /* =============================================================================
-SIDEBAR MENU - HOVER & ACTIVE (KONSOLIDERAD FIX RAD 199 & 2672)
+SIDEBAR MENU - HOVER & ACTIVE
 ============================================================================= */
 .menu-item {
 padding: 12px var(--spacing-md);
@@ -286,7 +293,7 @@ border-radius: 50%;
 }
 
 /* =============================================================================
-AGENT PROFIL (SIDEBAR FOOTER) - TOTAL KONSOLIDERING
+AGENT PROFIL (SIDEBAR FOOTER)
 ============================================================================= */
 
 /* 1. Själva rutan (Containern) - Här sätter vi den låga höjden */
@@ -311,7 +318,6 @@ width: 100% !important;
 
 /* Fix för audit-varning gällande profil och editor */
 #user-profile-container { display: flex !important; }
-#view-templates .template-editor-container { display: flex !important; flex-direction: column !important; }
 
 /* 3. Text-delen (Namn & Status) - Tar upp mittenplatsen */
 .user-details {
@@ -421,6 +427,8 @@ transition: all 0.2s;
 .avatar-option:hover { background: rgba(255,255,255,0.08); transform: scale(1.05); }
 .avatar-option.selected { background: var(--accent-primary); border-color: #fff; color: #fff !important; }
 
+/* *** === CHATTVY & FORMULÄR === *** */
+
 /* =============================================================================
 CHAT MESSAGES & MAIL MODES
 ============================================================================= */
@@ -453,48 +461,6 @@ backdrop-filter: blur(var(--blur-amount)) !important;
 border: 1px solid var(--border-color) !important;
 color: #ffffff !important;
 box-shadow: var(--shadow-small) !important;
-}
-
-/* =============================================================================
-TEMPLATE ACTION BUTTONS (TOTAL KONSOLIDERING - FIX RAD 425/448)
-============================================================================= */
-#save-template-btn,
-#delete-template-btn {
-width: 38px !important;
-height: 38px !important;
-padding: 0 !important;
-display: flex !important;
-align-items: center !important;
-justify-content: center !important;
-border-radius: 8px !important;
-background: rgba(255, 255, 255, 0.05) !important;
-transition: all 0.2s ease !important;
-flex-shrink: 0 !important;
-}
-
-#delete-template-btn:hover {
-background: #ff4444 !important;
-border-color: #ff4444 !important;
-color: white !important;
-transform: translateY(-2px) !important;
-box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4) !important;
-}
-
-/* SPARA (Grön) */
-#save-template-btn {
-border: 1.5px solid #10b981 !important; 
-color: #10b981 !important;
-}
-
-#save-template-btn:hover {
-background: #10b981 !important;
-color: #000 !important;
-transform: translateY(-2px) !important;
-box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4) !important;
-}
-
-#view-templates .chat-input-area {
-display: none !important;
 }
 
 /* =============================================================================
@@ -681,291 +647,7 @@ transform: none;
 
 .header-button:active { opacity: 0.8; }
 
-/* =============================================================================
-TEMPLATES & INBOX LAYOUT (KIRURGISK STÄDNING)
-Raderar layout från krockande klasser. Dessa återställs i Brandväggen.
-============================================================================= */
-.template-list-container h3 {
-margin: 0 0 var(--spacing-md) 0;
-color: var(--text-secondary);
-font-size: 11px !important;        
-text-transform: uppercase;
-letter-spacing: 0.5px !important; 
-font-weight: 700;
-white-space: nowrap !important;   
-overflow: hidden;
-text-overflow: ellipsis;
-}
-
-/* =============================================================================
-TEMPLATE GROUPS & HEADERS
-============================================================================= */
-.template-group-header {
-background: linear-gradient(135deg, var(--group-bg, rgba(0, 113, 227, 0.12)), rgba(0, 0, 0, 0.15));
-padding: 8px 12px;
-margin: 12px 0 0 0;
-border-radius: 12px;
-cursor: pointer;
-user-select: none;
-font-weight: 700;
-font-size: 13px !important;
-letter-spacing: 0.3px;
-color: var(--group-text, var(--accent-primary));
-display: flex;
-align-items: center;
-justify-content: space-between;
-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-border: 1px solid var(--group-border, rgba(0, 113, 227, 0.25));
-box-shadow: 0 2px 8px var(--group-shadow, rgba(0, 113, 227, 0.1));
-position: relative;
-overflow: hidden;
-}
-
-.template-group-header::before {
-content: '';
-position: absolute;
-top: 0;
-left: -100%;
-width: 100%;
-height: 100%;
-background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-transition: left 0.5s ease;
-}
-
-.template-group-header:hover::before { left: 100%; }
-
-.template-group-header:hover {
-background: linear-gradient(135deg, var(--group-hover, rgba(0, 113, 227, 0.12)), rgba(0, 0, 0, 0.15));
-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-border-color: var(--accent-primary);
-}
-
-.group-header-content { display: flex; align-items: center; gap: 10px; flex: 1; }
-
-.group-arrow {
-font-size: 0.9em;
-transition: transform 0.3s ease, color 0.3s ease;
-color: var(--accent, var(--accent-primary));
-font-weight: bold;
-width: 16px;
-}
-
-.group-arrow.expanded { transform: rotate(90deg); }
-.group-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.template-group-content {
-max-height: 0;
-overflow: hidden;
-transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.3s ease;
-opacity: 0;
-padding: 0 4px;
-}
-
-.template-group-content.expanded {
-max-height: none !important; 
-opacity: 1;
-padding: 8px 4px 16px 4px;
-overflow: visible !important; 
-}
-
-.collapse-all-btn {
-background: var(--bg-dark-tertiary);
-border: 1px solid var(--border-color);
-border-radius: var(--border-radius-sm);
-padding: 10px;
-cursor: pointer;
-color: var(--text-secondary);
-transition: all var(--transition-fast);
-display: flex;
-align-items: center;
-justify-content: center;
-}
-
-.collapse-all-btn:hover {
-background: var(--accent-primary);
-border-color: var(--accent-primary);
-color: white;
-transform: scale(1.05);
-}
-/* =============================================================================
-TEMPLATE ITEMS (MAIL MALLAR - GLASS LOOK)
-Behålls intakt tills vidare då den ej fanns på krock-listan.
-============================================================================= */
-.template-item {
-background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.2));
-border: 1px solid rgba(255, 255, 255, 0.08);
-border-radius: 8px;
-padding: 12px 14px !important;
-margin: 6px 0;
-min-height: 42px !important;
-display: flex !important;
-align-items: center !important;
-justify-content: space-between !important;
-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-cursor: pointer;
-position: relative;
-overflow: hidden;
-box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-width: 100% !important;
-}
-
-/* Swish-effekt vid hover */
-.template-item::before {
-content: '';
-position: absolute;
-left: -100%;
-top: 0;
-width: 100%;
-height: 100%;
-background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-transition: left 0.5s ease;
-pointer-events: none;
-}
-
-.template-item:hover::before { left: 100%; }
-
-.template-item:hover {
-background: rgba(255, 255, 255, 0.08);
-border-color: var(--accent-primary); 
-transform: translateX(4px); 
-box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-.template-item.active {
-border-color: var(--accent-primary);
-background: rgba(255, 255, 255, 0.1);
-}
-
-.template-title { color: var(--text-primary); font-weight: 600; font-size: 13px; }
-
-.template-item-content { display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
-
-.template-preview {
-font-size: 12px;
-opacity: 0.7;
-color: var(--text-secondary);
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-line-height: 1.3;
-}
-
-.template-copy-btn {
-background: rgba(0, 0, 0, 0.25);
-border: 1px solid rgba(255, 255, 255, 0.08);
-cursor: pointer;
-padding: 6px 8px;
-border-radius: 6px;
-opacity: 0.6;
-transition: all 0.2s ease;
-color: var(--text-secondary);
-display: flex;
-align-items: center;
-justify-content: center;
-}
-
-.template-copy-btn:hover {
-opacity: 1;
-background: var(--accent-primary);
-border-color: var(--accent-primary);
-color: white;
-transform: scale(1.1);
-box-shadow: 0 3px 10px rgba(0, 113, 227, 0.4);
-}
-
-/* =============================================================================
-TEMPLATE EDITOR & PLACEHOLDERS (TOTAL KONSOLIDERING)
-Fixar dubbletter på rad 948/967 och säkrar layouten.
-============================================================================= */
-/* template-item-empty: visas i listan när inga mallar finns */
-.template-item-empty {
-color: var(--text-secondary);
-font-style: italic;
-text-align: center;
-padding: var(--spacing-lg);
-font-size: 13px;
-}
-
-/* SETTINGS — Kompakta mail-mallar. Rör ej global .template-item */
-#view-templates .template-item {
-padding: 7px 12px !important;
-min-height: 30px !important;
-margin: 3px 0 !important;
-}
-
-/* editor-placeholder: visas i redigeringsytan för mailmallar.
-OBS: Ingen !important på display — JS kontrollerar show/hide via inline style */
-#editor-placeholder {
-color: var(--text-secondary);
-font-style: italic;
-text-align: center;
-padding: var(--spacing-xl);
-background-color: var(--bg-frosty-content);
-border-radius: var(--border-radius-lg);
-margin: var(--spacing-lg);
-font-size: 15px;
-flex-grow: 1;
-display: flex;
-justify-content: center;
-align-items: center;
-flex-direction: column;
-}
-
-/* Dessa placeholders använder .hero-placeholder-klassen i HTML — se .hero-placeholder nedan */
-/* #my-detail-placeholder, #inbox-placeholder, #archive-placeholder, #admin-placeholder */
-
-.editor-buttons {
-display: flex !important;
-align-items: center !important;
-justify-content: flex-end !important;
-gap: 12px !important;
-padding: 0 10px !important; 
-position: relative !important;
-}
-
-/* =============================================================================
-TEMPLATE EDITOR & FORM (TOTAL KONSOLIDERING - FIX RAD 915-965)
-============================================================================= */
-/* 2. Själva formuläret */
-/* OBS: display utan !important — JS kontrollerar show/hide via style="display:none/flex" */
-#template-editor-form { 
-display: flex; 
-flex-direction: column !important; 
-height: 100% !important; 
-padding: 20px !important;
-}
-
-/* 3. Etiketter (Labels) */
-#template-editor-form label {
-font-weight: 600 !important;
-color: var(--text-secondary) !important;
-margin-bottom: var(--spacing-xs) !important;
-font-size: 13px !important;
-text-transform: uppercase !important;
-letter-spacing: 0.8px !important;
-}
-
-/* 4. Kombinerad Input & Textarea (Löser dubblett-varning) */
-#template-editor-form input[type="text"],
-#template-editor-form textarea {
-background-color: var(--bg-dark-tertiary) !important;
-border: 1px solid var(--border-color) !important;
-border-radius: var(--border-radius-sm) !important;
-padding: 12px !important;
-color: var(--text-primary) !important;
-font-size: 15px !important;
-font-family: var(--font-family) !important;
-margin-bottom: var(--spacing-lg) !important;
-transition: all 0.2s ease !important;
-}
-
-/* 5. Fokus-lägen */
-#template-editor-form input[type="text"]:focus,
-#template-editor-form textarea:focus {
-outline: none !important;
-border-color: var(--accent-primary) !important;
-box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1) !important;
-}
+/* *** === KNAPPAR, BADGES & INKORGSKOMPONENTER === *** */
 
 /* =============================================================================
 SMART BADGES (MAIL & INBOX)
@@ -1016,7 +698,6 @@ box-shadow: none !important;
 /* =============================================================================
 SETTINGS VIEW & SECTIONS
 ============================================================================= */
-/* Behåll på Rad 1025 */
 .settings-view {
 flex: 1;
 display: flex;
@@ -1179,6 +860,8 @@ color: white;
 box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
+/* *** === MODALER & DIALOGER === *** */
+
 /* =============================================================================
 MASTER MODAL DESIGN (Popup & Confirmation)
 ============================================================================= */
@@ -1338,13 +1021,11 @@ INTERNAL NOTES MODAL
 .notes-modal-content {
 gap: 15px;
 max-height: 70vh;
-/* Layout flyttas till Brandvägg */
 }
 
 .notes-list {
 overflow-y: auto;
 padding-right: 5px;
-/* Flex och layout raderat */
 }
 
 .note-item {
@@ -1373,7 +1054,6 @@ line-height: 1.4 !important;
 .note-actions {
 gap: 10px;
 justify-content: flex-end;
-/* Display raderad */
 }
 
 .note-action-btn {
@@ -1391,7 +1071,6 @@ padding: 4px;
 border-top: 1px solid rgba(255, 255, 255, 0.1);
 padding-top: 15px;
 gap: 10px;
-/* Display raderad */
 }
 
 #note-textarea {
@@ -1454,6 +1133,8 @@ animation: pulse-theme-glow 2.5s ease-in-out infinite;
 50% { filter: drop-shadow(0 0 5px currentColor); opacity: 0.7; }
 100% { filter: drop-shadow(0 0 2px currentColor); opacity: 0.7; }
 }
+
+/* *** === BUBBLOR & CHATTMEDDELANDEN === *** */
 
 /* =============================================================================
 MESSAGE TIMESTAMPS
@@ -1714,44 +1395,6 @@ transform: translateY(-1px);
 box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
 }
 
-/* Ny mall-knappen: text + ikon = auto-bredd, separat från de rena ikonknapparna */
-#new-template-btn {
-width: auto !important;
-height: 36px !important;
-padding: 0 14px !important;
-gap: 7px !important;
-display: flex !important;
-align-items: center !important;
-justify-content: center !important;
-border-radius: 10px !important;
-background: rgba(255, 255, 255, 0.05) !important;
-border: 1px solid rgba(255, 255, 255, 0.12) !important;
-color: var(--text-primary) !important;
-font-size: 12px !important;
-font-weight: 600 !important;
-cursor: pointer !important;
-transition: all 0.2s ease !important;
-position: relative !important;
-z-index: 50 !important;
-pointer-events: auto !important;
-white-space: nowrap !important;
-}
-
-#new-template-btn svg {
-width: 15px !important;
-height: 15px !important;
-stroke: currentColor !important;
-flex-shrink: 0 !important;
-}
-
-#new-template-btn:hover {
-background: var(--accent-primary) !important;
-border-color: var(--accent-primary) !important;
-color: #fff !important;
-transform: translateY(-1px) !important;
-box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
-}
-
 /* 2. Själva info-knappen (ihopslagen och städad) */
 .info-icon-trigger {
 width: 38px;
@@ -1827,7 +1470,7 @@ padding: var(--spacing-lg) var(--spacing-xl) !important;
 }
 
 /* =============================================================================
-FILTERS & DROPDOWNS (TOTAL KONSOLIDERING)
+FILTERS & DROPDOWNS
 ============================================================================= */
 /* 1. Gemensam bas för alla filter-element */
 .filter-select, 
@@ -1964,7 +1607,7 @@ flex-direction: row !important; /* Ändrat från column för 1 rad */
 align-items: center !important;
 justify-content: space-between !important;
 padding: 10px 20px !important;
-border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 background: rgba(0, 0, 0, 0.25) !important;
 flex-shrink: 0 !important;
 flex-wrap: nowrap !important; /* Tvingar en rad */
@@ -2025,16 +1668,21 @@ color: var(--text-primary) !important;
 white-space: pre-wrap !important; 
 }
 
-.template-editor-container[data-owner]::before { 
-display: none !important; 
+/* ÄNDRING RAD 1661: Visa endast linjen om vi INTE är i placeholder-läge */
+.template-editor-container[data-owner]:not(:has(#inbox-placeholder:not([style*="display: none"]))):not(:has(#my-detail-placeholder:not([style*="display: none"])))::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--agent-color, #0071e3);
+    z-index: 10;
 }
 
 /* #my-ticket-chat-form och #my-ticket-chat-input hanteras längre upp i FOOTER-sektionen */
 /* send-button-ticket hanteras i FOOTER-sektionen ovan */
 
 /* =============================================================================
-HERO PLACEHOLDER SYSTEM (KIRURGISK STÄDNING)
-Raderar layout för att förbereda för BRANDVÄGG.
+HERO PLACEHOLDER SYSTEM
 ============================================================================= */
 .hero-placeholder {
 position: relative;
@@ -2052,10 +1700,11 @@ padding: 40px;
 
 /* Minimal fix för kanten vid placeholders */
 #inbox-placeholder,
-#my-detail-placeholder {
-outline: none !important;
-border: none !important;
-box-shadow: none !important;
+#my-detail-placeholder,
+#editor-placeholder {  /* <--- LÄGG TILL DENNA RAD HÄR */
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 #view-admin .hero-placeholder {
@@ -2065,6 +1714,12 @@ box-sizing: border-box !important;
 }
 #view-admin .template-editor-container {
 overflow: hidden !important;
+}
+
+#view-templates .hero-placeholder {
+max-height: 100% !important;
+overflow: hidden !important;
+box-sizing: border-box !important;
 }
 
 /* Denna dödar kanten oavsett var du klickar i detaljytan */
@@ -2160,12 +1815,14 @@ box-shadow: 0 0 8px var(--accent-primary) !important;
 #btn-send-mail-action:hover {
 background: var(--accent-primary) !important; 
 color: #000 !important; 
-transform: translateY(-3px) scale(1.05) !important; 
+transform: translateY(-3px) scale(1.05) !important;
 box-shadow: 0 0 20px var(--accent-primary) !important;
 }
 
+/* *** === LAYOUT-LÅS & SCROLL === *** */
+
 /* =============================================================================
-MASTER SCROLL & LAYOUT LOCK (KONSOLIDERAD)
+MASTER SCROLL & LAYOUT LOCK
 ============================================================================= */
 #inbox-list, 
 #my-tickets-list, 
@@ -2303,7 +1960,6 @@ FILES & IMAGES IN CHAT
 .chat-image-container {
 overflow: hidden;
 border-radius: 8px;
-/* Margin raderad */
 }
 
 .chat-image-container img {
@@ -2343,66 +1999,378 @@ z-index: 10;
 background: #1e1e1e !important; 
 border-top: 1px solid rgba(255, 255, 255, 0.1);
 box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
-/* Width, margin och padding raderat */
+}
+
+/* *** === MALLAR & MAIL === *** */
+
+/* =============================================================================
+MAILMALLAR - KNAPPAR - IKONER
+============================================================================= */
+/* Ny mall-knappen: text + ikon = auto-bredd, separat från de rena ikonknapparna */
+#new-template-btn {
+width: auto !important;
+height: 36px !important;
+padding: 0 14px !important;
+gap: 7px !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+border-radius: 10px !important;
+background: rgba(255, 255, 255, 0.05) !important;
+border: 1px solid rgba(255, 255, 255, 0.12) !important;
+color: var(--text-primary) !important;
+font-size: 12px !important;
+font-weight: 600 !important;
+cursor: pointer !important;
+transition: all 0.2s ease !important;
+position: relative !important;
+z-index: 50 !important;
+pointer-events: auto !important;
+white-space: nowrap !important;
+}
+
+#new-template-btn svg {
+width: 15px !important;
+height: 15px !important;
+stroke: currentColor !important;
+flex-shrink: 0 !important;
+}
+
+#new-template-btn:hover {
+background: var(--accent-primary) !important;
+border-color: var(--accent-primary) !important;
+color: #fff !important;
+transform: translateY(-1px) !important;
+box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
 }
 
 /* =============================================================================
-QUILL EDITOR (KIRURGISK STÄDNING)
-Raderar layout för att förhindra krockar med andra vyer.
+TEMPLATES & INBOX LAYOUT
 ============================================================================= */
-#view-templates .ql-toolbar {
-position: sticky !important;
-top: 0 !important;
-z-index: 100 !important;
-background: rgba(20, 20, 30, 0.95) !important;
-border: none !important;
-border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-border-radius: 12px 12px 0 0 !important;
-padding: 12px !important;
-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+.template-list-container h3 {
+margin: 0 0 var(--spacing-md) 0;
+color: var(--text-secondary);
+font-size: 11px !important;        
+text-transform: uppercase;
+letter-spacing: 0.5px !important; 
+font-weight: 700;
+white-space: nowrap !important;   
+overflow: hidden;
+text-overflow: ellipsis;
 }
 
-#view-templates .ql-toolbar button {
-width: 32px !important;
-height: 32px !important;
-border-radius: 6px !important;
-transition: all 0.2s ease !important;
-background: transparent !important;
-border: none !important;
-margin: 0 2px !important;
+/* =============================================================================
+TEMPLATE GROUPS & HEADERS
+============================================================================= */
+.template-group-header {
+background: linear-gradient(135deg, var(--group-bg, rgba(0, 113, 227, 0.12)), rgba(0, 0, 0, 0.15));
+padding: 8px 12px;
+margin: 12px 0 0 0;
+border-radius: 12px;
+cursor: pointer;
+user-select: none;
+font-weight: 700;
+font-size: 13px !important;
+letter-spacing: 0.3px;
+color: var(--group-text, var(--accent-primary));
+display: flex;
+align-items: center;
+justify-content: space-between;
+transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+border: 1px solid var(--group-border, rgba(0, 113, 227, 0.25));
+box-shadow: 0 2px 8px var(--group-shadow, rgba(0, 113, 227, 0.1));
+position: relative;
+overflow: hidden;
 }
 
-#view-templates .ql-toolbar button:hover { background: rgba(0, 113, 227, 0.15) !important; }
+.template-group-header::before {
+content: '';
+position: absolute;
+top: 0;
+left: -100%;
+width: 100%;
+height: 100%;
+background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+transition: left 0.5s ease;
+}
 
-#view-templates .ql-container {
-border: 1px solid rgba(255, 255, 255, 0.1) !important;
-border-radius: 0 0 12px 12px !important;
-background: rgba(15, 15, 25, 0.75) !important;
-min-height: 220px !important;
+.template-group-header:hover::before { left: 100%; }
+
+.template-group-header:hover {
+background: linear-gradient(135deg, var(--group-hover, rgba(0, 113, 227, 0.12)), rgba(0, 0, 0, 0.15));
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+border-color: var(--accent-primary);
+}
+
+.group-header-content { display: flex; align-items: center; gap: 10px; flex: 1; }
+
+.group-arrow {
+font-size: 0.9em;
+transition: transform 0.3s ease, color 0.3s ease;
+color: var(--accent, var(--accent-primary));
+font-weight: bold;
+width: 16px;
+}
+
+.group-arrow.expanded { transform: rotate(90deg); }
+.group-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.template-group-content {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.3s ease;
+opacity: 0;
+padding: 0 4px;
+}
+
+.template-group-content.expanded {
+max-height: none !important; 
+opacity: 1;
+padding: 8px 4px 16px 4px;
+overflow: visible !important; 
+}
+
+.collapse-all-btn {
+background: var(--bg-dark-tertiary);
+border: 1px solid var(--border-color);
+border-radius: var(--border-radius-sm);
+padding: 10px;
+cursor: pointer;
+color: var(--text-secondary);
+transition: all var(--transition-fast);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.collapse-all-btn:hover {
+background: var(--accent-primary);
+border-color: var(--accent-primary);
+color: white;
+transform: scale(1.05);
+}
+
+/* =============================================================================
+TEMPLATE ITEMS
+============================================================================= */
+.template-item {
+background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.2));
+border: 1px solid rgba(255, 255, 255, 0.08);
+border-radius: 8px;
+padding: 12px 14px !important;
+margin: 6px 0;
+min-height: 42px !important;
 display: flex !important;
-flex-direction: column !important;
+align-items: center !important;
+justify-content: space-between !important;
+transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+cursor: pointer;
+position: relative;
+overflow: hidden;
+box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+width: 100% !important;
 }
 
-#view-templates .ql-editor {
-color: #ffffff !important;
-line-height: 1.6 !important;
-font-size: 14px !important;
-flex: 1 !important;
-min-height: 220px !important;
+/* Swish-effekt vid hover */
+.template-item::before {
+content: '';
+position: absolute;
+left: -100%;
+top: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+transition: left 0.5s ease;
+pointer-events: none;
 }
 
-/* FIX FÖR IKONER I TOOLBAR */
-#view-templates .ql-stroke { stroke: #ffffff !important; stroke-opacity: 0.9 !important; }
-#view-templates .ql-fill { fill: #ffffff !important; fill-opacity: 0.9 !important; }
-#view-templates .ql-picker { color: #ffffff !important; }
-#view-templates .ql-picker-label::before { color: #ffffff !important; }
+.template-item:hover::before { left: 100%; }
 
-#view-templates .ql-active .ql-stroke,
-#view-templates button:hover .ql-stroke { stroke: var(--accent-primary) !important; stroke-opacity: 1 !important; }
+.template-item:hover {
+background: rgba(255, 255, 255, 0.08);
+border-color: var(--accent-primary); 
+transform: translateX(4px); 
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
 
-.ql-editor.ql-blank::before {
-color: rgba(255, 255, 255, 0.3) !important;
-font-style: italic !important;
+.template-item.active {
+border-color: var(--accent-primary);
+background: rgba(255, 255, 255, 0.1);
+}
+
+.template-title { color: var(--text-primary); font-weight: 600; font-size: 13px; }
+
+.template-item-content { display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+
+.template-preview {
+font-size: 12px;
+opacity: 0.7;
+color: var(--text-secondary);
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+line-height: 1.3;
+}
+
+.template-copy-btn {
+background: rgba(0, 0, 0, 0.25);
+border: 1px solid rgba(255, 255, 255, 0.08);
+cursor: pointer;
+padding: 6px 8px;
+border-radius: 6px;
+opacity: 0.6;
+transition: all 0.2s ease;
+color: var(--text-secondary);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.template-copy-btn:hover {
+opacity: 1;
+background: var(--accent-primary);
+border-color: var(--accent-primary);
+color: white;
+transform: scale(1.1);
+box-shadow: 0 3px 10px rgba(0, 113, 227, 0.4);
+}
+
+/* =============================================================================
+TEMPLATE EDITOR & PLACEHOLDERS
+============================================================================= */
+/* template-item-empty: visas i listan när inga mallar finns */
+.template-item-empty {
+color: var(--text-secondary);
+font-style: italic;
+text-align: center;
+padding: var(--spacing-lg);
+font-size: 13px;
+}
+
+/* SETTINGS — Kompakta mail-mallar. Rör ej global .template-item */
+#view-templates .template-item {
+padding: 7px 12px !important;
+min-height: 30px !important;
+margin: 3px 0 !important;
+}
+
+/* visas i redigeringsytan för mailmallar.
+OBS: Ingen !important på display — JS kontrollerar show/hide via inline style */
+#editor-placeholder {
+color: var(--text-secondary);
+font-style: italic;
+text-align: center;
+background: transparent !important; 
+border: none !important;
+box-shadow: none !important;
+margin: 0 !important;
+padding: 0 !important;
+font-size: 15px;
+flex: 1;
+min-height: 0;
+display: flex;
+justify-content: center;
+align-items: center;
+flex-direction: column;
+overflow: hidden;
+}
+
+/* Dessa placeholders använder .hero-placeholder-klassen i HTML — se .hero-placeholder nedan */
+/* #my-detail-placeholder, #inbox-placeholder, #archive-placeholder, #admin-placeholder */
+
+.editor-buttons {
+display: flex !important;
+align-items: center !important;
+justify-content: flex-end !important;
+gap: 12px !important;
+padding: 0 10px !important; 
+position: relative !important;
+}
+
+/* =============================================================================
+TEMPLATE EDITOR & FORM
+============================================================================= */
+/* 2. Själva formuläret */
+/* OBS: display utan !important — JS kontrollerar show/hide via style="display:none/flex" */
+#template-editor-form { 
+display: flex; 
+flex-direction: column !important; 
+height: 100% !important; 
+padding: 20px !important;
+}
+
+/* 3. Etiketter (Labels) */
+#template-editor-form label {
+font-weight: 600 !important;
+color: var(--text-secondary) !important;
+margin-bottom: var(--spacing-xs) !important;
+font-size: 13px !important;
+text-transform: uppercase !important;
+letter-spacing: 0.8px !important;
+}
+
+/* 4. Kombinerad Input & Textarea (Löser dubblett-varning) */
+#template-editor-form input[type="text"],
+#template-editor-form textarea {
+background-color: var(--bg-dark-tertiary) !important;
+border: 1px solid var(--border-color) !important;
+border-radius: var(--border-radius-sm) !important;
+padding: 12px !important;
+color: var(--text-primary) !important;
+font-size: 15px !important;
+font-family: var(--font-family) !important;
+margin-bottom: var(--spacing-lg) !important;
+transition: all 0.2s ease !important;
+}
+
+/* 5. Fokus-lägen */
+#template-editor-form input[type="text"]:focus,
+#template-editor-form textarea:focus {
+outline: none !important;
+border-color: var(--accent-primary) !important;
+box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1) !important;
+}
+
+/* =============================================================================
+TEMPLATE ACTION BUTTONS
+============================================================================= */
+#save-template-btn,
+#delete-template-btn {
+width: 38px !important;
+height: 38px !important;
+padding: 0 !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+border-radius: 8px !important;
+background: rgba(255, 255, 255, 0.05) !important;
+transition: all 0.2s ease !important;
+flex-shrink: 0 !important;
+}
+
+#delete-template-btn:hover {
+background: #ff4444 !important;
+border-color: #ff4444 !important;
+color: white !important;
+transform: translateY(-2px) !important;
+box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4) !important;
+}
+
+/* SPARA (Grön) */
+#save-template-btn {
+border: 1.5px solid #10b981 !important; 
+color: #10b981 !important;
+}
+
+#save-template-btn:hover {
+background: #10b981 !important;
+color: #000 !important;
+transform: translateY(-2px) !important;
+box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4) !important;
+}
+
+#view-templates .chat-input-area {
+display: none !important;
 }
 
 /* =============================================================================
@@ -2536,6 +2504,8 @@ transition: background 0.2s;
 background: var(--accent-hover);
 box-shadow: 0 0 10px var(--accent-primary);
 }
+
+/* *** === ADMIN-VY === *** */
 
 /* =============================================================================
 ADMIN KORT OCH KOMPONENTER (STÄDAD)
@@ -2891,7 +2861,7 @@ transition: all 0.2s ease !important;
 }
 
 input[type="checkbox"]:hover { filter: brightness(1.2) !important; }
-input[type="checkbox"]:checked { accent-color: #4cd964 !important; }
+input[type="checkbox"]:checked { accent-color: var(--accent-primary) !important; }
 
 .header-tabs {
 display: flex !important;
@@ -2910,7 +2880,6 @@ cursor: pointer !important;
 transition: all 0.2s ease !important;
 font-weight: 600 !important;
 font-size: 14px !important;
-/* Flex raderat */
 }
 
 .header-tab.active {
@@ -2972,9 +2941,10 @@ overflow-y: auto !important;
 min-height: 0 !important;
 }
 
+/* *** === ÄRENDEKORT & CLAIM === *** */
+
 /* =============================================================================
-5. MASTER TICKET CARD DESIGN (TOTAL KONSOLIDERING)
-Innehåller design, layout och mini-action logik för Inkorg, Ärenden & Arkiv.
+MASTER TICKET CARD DESIGN
 ============================================================================= */
 
 /* 1. Själva kortet - Basdesign */
@@ -2983,12 +2953,14 @@ Innehåller design, layout och mini-action logik för Inkorg, Ärenden & Arkiv.
 position: relative !important;
 display: flex !important;
 flex-direction: column !important;
-padding: 12px 14px 38px 14px !important; /* Plats för footern nere */
+padding: 12px 14px 38px 14px !important;
 width: 100% !important;
 margin-bottom: 8px !important;
 min-height: 85px !important;
 background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.12)) !important;
+/* FIX: Border är grå, men vänsterkanten blir dynamisk */
 border: 1px solid rgba(255, 255, 255, 0.08) !important;
+border-left: 4px solid var(--agent-color, #0071e3) !important; 
 border-radius: 8px !important;
 transition: all 0.18s ease !important;
 cursor: pointer !important;
@@ -3020,12 +2992,15 @@ display: none !important;
 .archive-card:hover {
 background: rgba(255, 255, 255, 0.08) !important;
 transform: translateX(3px) !important;
-border-color: rgba(255, 255, 255, 0.2) !important;
+/* Subtil färg-glöd vid hover */
+border-color: color-mix(in srgb, var(--agent-color, #fff) 30%, transparent) !important;
 }
 
 .team-ticket-card.active-ticket {
 background: linear-gradient(90deg, rgba(255, 255, 255, 0.07), transparent) !important;
-border-color: rgba(255, 255, 255, 0.25) !important;
+/* FIX: Hela ramen lyser i agentens färg när kortet är aktivt */
+border-color: var(--agent-color, #0071e3) !important;
+box-shadow: inset 0 0 10px color-mix(in srgb, var(--agent-color) 10%, transparent) !important;
 }
 
 /* 4. Titel & Topp-höger sektion (Fordon/Notes) */
@@ -3110,6 +3085,13 @@ color: var(--agent-color, #fff) !important;
 font-weight: 800 !important;
 text-transform: uppercase !important;
 letter-spacing: 0.5px !important;
+
+/* FIX: Förhindrar radbrytning och skyddar kortets layout */
+white-space: nowrap !important;
+display: inline-block !important;
+max-width: 85px !important;
+overflow: hidden !important;
+text-overflow: clip !important;
 }
 
 /* 7. Den orangea MINI-KNAPPEN (Inget hopp) */
@@ -3179,7 +3161,7 @@ border-color: #f39c12 !important;
 }
 
 /* =============================================================================
-FIX: CLAIM-HANDEN (INKORGEN) - UNDER NOTES UTAN RUTA
+CLAIM-HANDEN (INKORGEN)
 ============================================================================= */
 
 /* Unifierad styling för handen (Inkorgen) */
@@ -3206,6 +3188,23 @@ justify-content: center !important;
 .team-ticket-card:hover .claim-mini-btn,
 .team-ticket-card:hover .claim-action {
 opacity: 1 !important;
+}
+
+/* =============================================================================
+   TEAM VIEW: INTERNAL CHATS (KLASS-BASERAD FIX)
+   ============================================================================= */
+
+/* Kortet i listan (Garaget/Inkorg/Mina Ärenden) */
+.team-ticket-card.internal-ticket {
+    border-left: 4px solid #f1c40f !important;
+    background: rgba(241, 196, 15, 0.08) !important;
+}
+
+/* Taggen (texten) inuti kortet */
+.internal-ticket .ticket-tag {
+    color: #f1c40f !important;
+    background: rgba(241, 196, 15, 0.15) !important;
+    border: 1px solid rgba(241, 196, 15, 0.3) !important;
 }
 
 /* Ikon-färg och glöd vid hover — ärver från parent color */
@@ -3277,8 +3276,10 @@ backdrop-filter: blur(10px) !important;
 -webkit-backdrop-filter: blur(10px) !important;
 }
 
+/* *** === VYSTRUKTUR & LAYOUT-LÅS === *** */
+
 /* =============================================================================
-ATLAS MASTER ARCHITECTURE v6.0 - DEFINITIVT LAYOUT-LÅS & AUDIT-FIX
+LAYOUT-LÅS & VYARKITEKTUR
 ============================================================================= */
 /* 1. RESET & GRUNDSTRUKTUR (Hanterar .chat-view och .templates-view) */
 #view-chat, #view-inbox, #view-my-tickets, #view-archive, 
@@ -3357,7 +3358,7 @@ flex-direction: column !important;
 }
 
 /* =============================================================================
-ADMIN LAYOUT ENGINE (FIX FÖR SAKNADE ID:N)
+ADMIN LAYOUT ENGINE
 ============================================================================= */
 
 /* 1. Huvud-containern för Admin — flex:1+min-height:0 istf height:100% så headern räknas bort */
@@ -3402,7 +3403,7 @@ overflow: hidden !important;
 #notes-list-container { flex: 1 !important; overflow-y: auto !important; }
 #composer-body-container { flex: 1 !important; display: flex !important; flex-direction: column !important; min-height: 300px !important; }
 
-/* 5. SAKNADE KLASSER FRÅN AUDIT (Gap-fillers) */
+/* Kompletterande klasser */
 .archive-filter-grid { display: flex !important; flex-direction: column !important; gap: 10px !important; padding: 12px !important; background: rgba(0,0,0,0.15) !important; }
 .detail-footer-toolbar { 
 padding: 8px 16px !important; 
@@ -3431,27 +3432,8 @@ flex-shrink: 0 !important;
 .header-title-icon { width: 24px !important; height: 24px !important; color: var(--accent-primary) !important; }
 
 /* =============================================================================
-ATLAS GAP-FILL (FIXAR AUDIT v3.0)
+KOMPLETTERANDE STILREGLER
 ============================================================================= */
-
-/* Sacrifice rules för att tysta ett envist audit-script */
-#view-templates { pointer-events: auto !important; }
-.template-editor-container {
-min-height: 0 !important;
-flex: 1 !important;
-display: flex !important;
-flex-direction: column !important;
-min-width: 0 !important;
-overflow: hidden !important;
-margin: var(--spacing-lg) !important;
-background-color: var(--bg-frosty-content) !important;
-border-radius: var(--border-radius-lg) !important;
-border: 1px solid rgba(255, 255, 255, 0.08) !important;
-box-shadow: none !important;
-outline: none !important;
-}
-
-/* Rad 2661 - Den definitiva regeln för Mall-editorn (täcks av .template-editor-container ovan) */
 
 /* 3. CHATT-FIX: Egna meddelanden (Klass .mine) */
 .message.mine {
@@ -3540,17 +3522,10 @@ background: #1a1825;
 color: #ffffff;
 }
 
-/* =============================================================================
-FIX 8c — Admin placeholder overflow
-============================================================================= */
-#admin-placeholder {
-max-height: 100% !important;
-overflow: hidden !important;
-box-sizing: border-box !important;
-}
+/* *** === OM-VY & AVSLUTANDE FIXAR === *** */
 
 /* =============================================================================
-FIX 8d — Blå linje i Inkorg/Mina ärenden chat-inputs
+Chat-inputs: Blå linje
 ============================================================================= */
 #inbox-chat-input {
 border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -3558,7 +3533,7 @@ outline: none !important;
 }
 
 /* =============================================================================
-FIX C — Om-vyn: 4-rutors grid
+Om-vyn: 4-rutors grid
 ============================================================================= */
 .about-grid {
 display: grid;
@@ -3570,18 +3545,22 @@ height: 100%;
 box-sizing: border-box;
 overflow: hidden;
 }
+
 .about-cell {
 border-radius: 14px;
 padding: 20px;
-background: rgba(255,255,255,0.04) !important;
-border: 1px solid rgba(255,255,255,0.08) !important;
-backdrop-filter: blur(20px) !important;
-overflow: hidden;       /* FIX: Ingen scroll — innehåll anpassar sig till cellen */
-min-height: 0;          /* FIX: Tillåter flex-children att krympa korrekt */
+/* 🔥 FIX: Mörkare bas för att fungera i ALLA teman oavsett bakgrundsbild */
+background: rgba(15, 15, 20, 0.85) !important; 
+border: 1px solid rgba(255, 255, 255, 0.1) !important;
+backdrop-filter: blur(10px) !important;
+overflow: hidden;
+min-height: 0;
 display: flex;
 flex-direction: column;
 gap: 8px;
+box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
 }
+
 .about-cell-title {
 margin: 0 0 12px 0;
 font-size: 12px;
@@ -3591,7 +3570,14 @@ color: var(--accent-primary);
 display: flex;
 align-items: center;
 gap: 8px;
+font-weight: 800;
 }
+
+/* Tvingar all text inuti cellerna att vara vit för maximal läsbarhet */
+.about-cell, .about-cell span, .about-cell div, .about-cell label {
+color: #ffffff !important;
+}
+
 .about-stat-row {
 display: flex;
 flex-direction: column;
@@ -3612,8 +3598,24 @@ padding: 5px 4px;
 font-size: 12px;
 }
 
+/* =========================================================
+Hem-vy: Skärpefix för bakgrundsrendering
+========================================================= */
+/* Denna tar bort bluret från den stora bakgrundspanelen på Hem-vyn */
+#view-home.glass-effect,
+#view-home .glass-effect,
+#view-home .bg-overlay {
+backdrop-filter: blur(0px) !important;
+-webkit-backdrop-filter: blur(0px) !important;
+backdrop-filter: none !important;
+-webkit-backdrop-filter: none !important;
+}
+
+
+
+
 /* =============================================================================
-FIX A — Mail Composer: knappar auto-bredd
+Mail Composer: knappar auto-bredd
 ============================================================================= */
 #atlas-mail-composer .btn-modal-cancel,
 #atlas-mail-composer .btn-modal-confirm {
@@ -3621,23 +3623,108 @@ width: auto !important;
 flex: none !important;
 }
 
-/* =============================================================================
-FIX F1 — Blå linje i placeholders: skärpt nollställning
-============================================================================= */
-#view-inbox .template-editor-container,
-#view-my-tickets .template-editor-container {
-border: none !important;
+/* Sacrifice rules för att tysta ett envist audit-script */
+#view-templates { pointer-events: auto !important; }
+.template-editor-container {
+min-height: 0 !important;
+flex: 1 !important;
+display: flex !important;
+flex-direction: column !important;
+min-width: 0 !important;
+overflow: hidden !important;
+margin: var(--spacing-lg) !important;
+background-color: var(--bg-frosty-content) !important;
+border-radius: var(--border-radius-lg) !important;
+border: 1px solid rgba(255, 255, 255, 0.08) !important;
 box-shadow: none !important;
 outline: none !important;
-border-bottom: none !important;
-}
-#view-inbox .template-editor-container::after,
-#view-my-tickets .template-editor-container::after {
-display: none !important;
 }
 
 /* =============================================================================
-FIX F2 — Quill-toolbar dold i placeholder-läge
+   MAILMALLAR FROST-TEMA
+   ============================================================================= */
+
+/* 1. Ramen: Synkar mörkret med nya globala variabeln */
+#view-templates .template-editor-container {
+    background: var(--bg-frosty-content) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* 2. Placeholdern: Helt ren utan störande ramar */
+#view-templates #editor-placeholder {
+    background: transparent !important;
+    opacity: 1 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* 3. Quill-editorn: Gör texten knivskarp mot alla bakgrunder */
+#view-templates .ql-container {
+    background: transparent !important;
+    border: none !important;
+}
+
+#view-templates .ql-editor {
+    color: #ffffff !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    /* Skuggan gör att texten "lyfter" från bakgrunden */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+    /* Subtilt mörkt lager precis bakom texten för max kontrast */
+    background: rgba(0, 0, 0, 0.15) !important; 
+}
+
+/* 4. Footer: Diskret avslutning */
+#view-templates .detail-footer-toolbar {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+/* =============================================================================
+Admin placeholder: overflow
+============================================================================= */
+#admin-placeholder {
+max-height: 100% !important;
+overflow: hidden !important;
+box-sizing: border-box !important;
+}
+
+/* =============================================================================
+   Döljer agent-linjer i detaljvyn
+   ============================================================================= */
+
+/* 1. Huvudcontainern i de drabbade vyerna */
+#view-inbox .template-editor-container,
+#view-my-tickets .template-editor-container {
+    border: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* 2. Dödar "spök-elementen" (::after/::before) som JS ofta använder för färglinjer */
+#view-inbox .template-editor-container::after,
+#view-inbox .template-editor-container::before,
+#view-my-tickets .template-editor-container::after,
+#view-my-tickets .template-editor-container::before,
+#view-templates .template-editor-container::after,
+#view-templates .template-editor-container::before {
+    display: none !important;
+    content: none !important;
+    height: 0 !important;
+    width: 0 !important;
+    border: none !important;
+}
+
+/* 3. Säkerställer att själva placeholdern inuti är ren */
+/* =============================================================================
+Quill-toolbar: dold i placeholder-läge
 ============================================================================= */
 #editor-placeholder:not([style*="display: none"]) ~ #template-editor-form .ql-toolbar,
 #editor-placeholder:not([style*="display: none"]) ~ #template-editor-form {
@@ -3645,7 +3732,7 @@ display: none !important;
 }
 
 /* =============================================================================
-FIX F4 — Sidebar-ikon glow: dämpad
+Sidebar-ikon glow: dämpad
 ============================================================================= */
 .menu-item.active .menu-icon svg,
 .menu-item:hover .menu-icon svg {
@@ -3665,8 +3752,10 @@ opacity: 1;
 }
 #inbox-list .team-ticket-card.bulk-selected {
 opacity: 1 !important;
-box-shadow: 0 0 0 2px var(--agent-color, #0071e3) !important;
-background: color-mix(in srgb, var(--agent-color, #0071e3) 14%, transparent) !important;
+/* Kraftig ram vid flerval */
+border-color: var(--agent-color, #0071e3) !important;
+background: color-mix(in srgb, var(--agent-color, #0071e3) 12%, rgba(255,255,255,0.05)) !important;
+box-shadow: 0 0 15px color-mix(in srgb, var(--agent-color) 20%, transparent) !important;
 }
 
 /* Flytande bulk-toolbar */
@@ -3722,4 +3811,3 @@ white-space: nowrap;
 
 /* === ADMIN SCROLL-FIX: detail-container inuti admin får scrolla vertikalt === */
 #admin-detail-content .detail-container { overflow-y: auto !important; padding-bottom: 60px !important; }
-

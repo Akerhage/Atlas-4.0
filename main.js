@@ -1,7 +1,11 @@
-// =============================================================================
-// ATLAS MAIN PROCESS v.3.4
-// Electron Main Process - Hanterar app lifecycle, server, IPC & databas
-// =============================================================================
+// ============================================
+// main.js — Electron Main Process
+// VAD DEN GÖR: Startar Electron-fönstret,
+//              laddar renderer, hanterar
+//              app-livscykel
+// ANVÄNDS AV: Electron runtime
+// SENAST STÄDAD: 2026-02-27
+// ============================================
 
 const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, session, nativeImage } = require('electron');
 const path = require('path');
@@ -82,6 +86,7 @@ config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 const envPath = getResourcePath('.env');
 if (fs.existsSync(envPath)) dotenv.config({ path: envPath });
 
+// killPort3001 - Dödar ngrok och frigör port 3001 innan serverstart.
 function killPort3001() {
 return new Promise(resolve => {
 // 1. REPLIKERA .BAT: Döda ALLA ngrok-processer först (viktigt för fasta domäner)
@@ -169,7 +174,7 @@ callback({
 responseHeaders: {
 ...details.responseHeaders,
 'Content-Security-Policy': [
-// 🔥 FIX: Lade till "img-src 'self' data: http: https:;" för att tillåta bilder
+// Tillåter externa bilder och Socket.IO via CSP
 "default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:3001; connect-src 'self' http://localhost:* ws://localhost:* https://*.ngrok-free.dev wss://*.ngrok-free.dev; img-src 'self' data: http: https:;"
 ]
 }
@@ -196,7 +201,7 @@ app.quit();
 }
 
 // =========================================================================
-// 🎹 APP LIFECYCLE & SERVER STARTUP MANAGEMENT
+// APP LIFECYCLE & SERVER STARTUP
 // =========================================================================
 app.whenReady().then(async () => {
 if (isServerProcess) return;
@@ -204,9 +209,7 @@ if (isServerProcess) return;
 createLoaderWindow();
 await killPort3001(); // Denna kör taskkill /F /IM ngrok.exe /T
 
-// ==========================================================
-// 🌐 STARTA NGROK (med rätt felhantering)
-// ==========================================================
+// Starta ngrok-tunnel mot port 3001
 const TOKEN = process.env.NGROK_TOKEN;
 const DOMAIN = process.env.NGROK_DOMAIN;
 const NGROK_BIN = app.isPackaged
@@ -239,7 +242,6 @@ console.log("✅ [NGROK] Tunnel-process startad");
 } else {
 console.log("⚠️  [NGROK] NGROK_TOKEN eller NGROK_DOMAIN saknas - Atlas körs på localhost");
 }
-// ==========================================================
 
 // Spawn Node.js Server Process
 const serverPath = path.join(__dirname, 'server.js');
@@ -263,7 +265,7 @@ serverProcess.stdout.on('data', d => {
 const out = d.toString().trim();
 console.log(`[Server]: ${out}`);
 
-// 🔍 DEBUG: Kontrollera alla strängar för att hitta ordet för server-ready
+// Detekterar "ONLINE"-signal från server och informerar loader-fönstret
 if (out.includes("ONLINE")) {
 console.log("🟢 BINGO! Server är redo - skickar signal till loader...");
 serverReady = true;
@@ -401,9 +403,7 @@ return { success: false, error: err.message };
 }
 });
 
-// ==========================================================
 // INKORG & LOKAL HISTORIK (SQLite)
-// ==========================================================
 
 // save-qa - Save Message to Local Inbox
 ipcMain.handle('save-qa', async (_, qaItem) => {
@@ -450,9 +450,7 @@ return { success: false, error: err.message };
 }
 });
 
-// ==========================================================
 // TEAM-FUNKTIONER (Live-kö mot Server)
-// ==========================================================
 
 // team:fetch-inbox - Fetch Pending Customer Tickets from Server
 ipcMain.handle('team:fetch-inbox', async () => {
@@ -491,9 +489,7 @@ throw err;
 }
 });
 
-// ==========================================================
-// ÖVRIGA VERKTYG/VÄNTA PÅ LOADER
-// ==========================================================
+// ÖVRIGA VERKTYG
 
 // Skriv text till datorns urklipp
 ipcMain.handle('clipboard:write', (_, text) => { 
@@ -501,18 +497,18 @@ clipboard.writeText(text);
 return true; 
 });
 
+// get-system-username - Hämtar inloggat OS-användarnamn
 ipcMain.handle('get-system-username', () => {
-// Hämtar inloggat användarnamn från Windows/OS
 return os.userInfo().username || 'Agent';
 });
 
-// 🔥 TVINGAD KOPIERING (LÖSER FOKUS-FELET VID MAIL) - RAD 345
+// force-copy-to-clipboard - Tvingad kopiering (fokus-oberoende)
 ipcMain.on('force-copy-to-clipboard', (event, text) => {
 clipboard.writeText(text);
 console.log("📋 [MAIN] Text tvingad till systemets urklipp (fokus-oberoende)");
 });
 
-// 🔥 NY: Hanterar Rich Text (HTML) kopiering för mailmallar
+// force-copy-html-to-clipboard - Kopierar Rich Text (HTML) till urklipp
 ipcMain.on('force-copy-html-to-clipboard', (event, { html, text }) => {
 clipboard.write({
 html: html,
@@ -521,9 +517,7 @@ text: text
 console.log("📋 [MAIN] Rich Text (HTML) tvingad till systemets urklipp");
 });
 
-// ==========================================================
-// 🔔 TASKBAR BADGE (WINDOWS OVERLAY)
-// ==========================================================
+// TASKBAR BADGE (WINDOWS OVERLAY)
 ipcMain.on('set-taskbar-icon', (event, dataUrl, text) => {
 if (!mainWindow) return;
 

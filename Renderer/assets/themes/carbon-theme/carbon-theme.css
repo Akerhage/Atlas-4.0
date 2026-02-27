@@ -1,0 +1,81 @@
+/* ═══════════════════════════════════════════════════════════════
+   ATLAS CARBON — Refined Framing Edition (Deep Matte)
+   Design: Blackened Headers/Footers, High-Contrast Textures
+═══════════════════════════════════════════════════════════════ */
+
+:root {
+    --bg-image: url("./carbon-theme-bg.jpg");
+    --bg-color: #000000;
+    --bg-dark-primary: #050505;
+    --bg-dark-secondary: #080808;
+    --bg-dark-tertiary: #101010;
+    --text-primary: #ffffff;
+    --text-secondary: #777777;
+    --accent-primary: #ffffff; 
+    --accent-hover: #dddddd;
+    --border-color: #1a1a1a;
+
+    /* Glassmorphism (Matte & Deep) */
+    /* Vi sänker opaciteten men mörkar färgen för att "rama in" */
+    --bg-frosty-sidebar: rgba(2, 2, 2, 0.97);
+    --bg-frosty-header: rgba(0, 0, 0, 0.94);   /* Kolsvart men anar bakgrunden */
+    --bg-frosty-content: rgba(10, 10, 10, 0.82); /* Låter texturen synas mer */
+    --blur-amount: 4px; /* Minimal blur för att behålla texturens skärpa */
+}
+
+/* 1. KONTRAST-BOOST FÖR BAKGRUNDEN */
+body {
+    background: var(--bg-image) center/cover no-repeat fixed !important;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    /* Vi lägger på ett extremt svagt vinjettfilter för att mörka kanterna ytterligare */
+    box-shadow: inset 0 0 200px rgba(0,0,0,0.9) !important;
+}
+
+/* 2. INRAMNING: MÖRKARE HEADERS & FOOTERS */
+.chat-header, 
+.detail-header-top,
+.sidebar-header {
+    background: rgba(0, 0, 0, 0.98) !important;
+    border-bottom: 1px solid #222 !important;
+}
+
+/* Footers i ärendevyn och admin */
+.detail-footer-toolbar, 
+.ticket-footer-bar,
+.sidebar-footer {
+    background: rgba(0, 0, 0, 0.98) !important;
+    border-top: 1px solid #222 !important;
+}
+
+/* 3. MEDDELANDERUTOR: Ökad transparens för att se texturen */
+.bubble {
+    background: rgba(25, 25, 25, 0.6) !important; /* Mycket mer genomskinlig */
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(2px) !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+}
+
+/* Kundens bubbla får en extremt svag vit kant för att poppa */
+.message.user .bubble {
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(35, 35, 35, 0.7) !important;
+}
+
+/* 4. RENSA EFFEKTER (Carbon-DNA) */
+* {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+.sidebar { border-right: 1px solid #1a1a1a !important; }
+.menu-item.active { background: #1a1a1a !important; border-left: 4px solid #ffffff !important; }
+
+/* Industristruktur för celler och huvudytor */
+.about-cell, 
+.detail-body, 
+#my-chat-scroll-area {
+    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 1px, transparent 1px, transparent 15px) !important;
+}
+

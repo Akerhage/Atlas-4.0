@@ -1,7 +1,9 @@
-// =============================================================================
-// ATLAS DATABASE MODULE v.3.8
-// SQLite Database Management - Tables, Migrations & Query Functions
-// =============================================================================
+// ============================================
+// db.js
+// VAD DEN GÖR: SQLite-hantering — tabellinitiering, migrationer och alla query-funktioner.
+// ANVÄNDS AV: server.js
+// SENAST STÄDAD: 2026-02-27
+// ============================================
 
 const sqlite3 = require('sqlite3');
 const path = require('path');
@@ -163,8 +165,8 @@ updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`, (err) => {
 if (err) console.error('❌ Could not create ticket_notes table:', err);
 else { 
-console.log('✅ Table "ticket_notes" ready'); 
-checkAllTablesCreated(); // 🔧 F1.6: Åttonde och sista tabellen — räknaren når 8/8
+console.log('✅ Table "ticket_notes" ready');
+checkAllTablesCreated(); // Åttonde och sista tabellen — räknaren når 8/8
 }
 });
 
@@ -265,7 +267,7 @@ console.log('✅ Table "users" ready (Atlas 3.8 Clean Start)');
 checkAllTablesCreated();
 });
 
-// Migration: Add Team Management Columns to QA History 24/2-FIX
+// Migration: Add Team Management Columns to QA History
 // Dessa ligger kvar för att säkra att historik-tabellen har rätt fält för din vision.
 const alterColumns = [
 "ALTER TABLE local_qa_history ADD COLUMN handled_by INTEGER",
@@ -419,20 +421,8 @@ else resolve();
 
 
 /**
-* Försöker ta ägarskap för en biljett (Concurrency Safe).
-* 
-* RACE CONDITION FIX:
-* Använder två-stegs process för att garantera atomicitet:
-* 1. Säkerställ att raden finns (INSERT OR IGNORE)
-* 2. Uppdatera endast om owner är NULL (atomic UPDATE)
-* 
-* @param {string} conversationId - Chat ID
-* @param {string} ownerUser - Agent som försöker claima
-* @returns {Promise<boolean>} - True om claim lyckades, false om redan tagen
-*/
-/**
-* UPPDATERAD: Tillåter "Take Over" (övertagande) av ärenden.
-* Tar bort kravet på att owner måste vara NULL.
+* claimTicket - Tar ägarskap för ett ärende (tillåter Take Over).
+* Atomic två-stegs process: INSERT OR IGNORE → UPDATE (owner IS NULL-kravet borttaget).
 */
 function claimTicket(conversationId, ownerUser) {
 const now = Math.floor(Date.now() / 1000);
@@ -449,7 +439,7 @@ console.error(`[DB] claimTicket step 1 failed for ${conversationId}:`, err);
 return reject(err);
 }
 
-// Steg 1.5: 🔒 F3.3 — Hämta nuvarande ägare för audit-loggning
+// Steg 1.5: Hämta nuvarande ägare för audit-loggning
 db.get(
 `SELECT owner FROM chat_v2_state WHERE conversation_id = ?`,
 [conversationId],
@@ -468,7 +458,7 @@ if (err) {
 console.error(`[DB] claimTicket step 2 failed for ${conversationId}:`, err);
 return reject(err);
 }
-// 🔒 F3.3: Permanent audit-logg vid ägarskifte
+// Permanent audit-logg vid ägarskifte
 if (previousOwner && previousOwner !== ownerUser) {
 console.log(`[AUDIT] Ärende överfört: ${conversationId} bytte ägare från "${previousOwner}" till "${ownerUser}"`);
 } else if (!previousOwner) {
@@ -562,7 +552,7 @@ else resolve(rows);
 });
 }
 
-// saveLocalQA - Save or Update QA Entry
+// saveTemplate - Save or Replace Template
 function saveTemplate(template) {
 return new Promise((resolve, reject) => {
 db.run(
@@ -586,7 +576,7 @@ else resolve();
 });
 }
 
-// getLocalQAHistory - Fetch All QA Entries (Inbox + Archive)
+// saveLocalQA - Save or Replace QA Entry
 function saveLocalQA(qaItem) {
 return new Promise((resolve, reject) => {
 db.run(

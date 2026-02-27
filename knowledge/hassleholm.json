@@ -209,5 +209,6 @@
     "AM": null
   },
   "type": "kontor_info",
-  "area": ""
+  "area": "",
+  "office_color": "#e600d2"
 }

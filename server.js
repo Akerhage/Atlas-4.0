@@ -1,6 +1,9 @@
-// =============================================================================
-// ATLAS V.3.8 SERVER - CONFIGURATION & DEPENDENCIES
-// =============================================================================
+// ============================================
+// server.js
+// VAD DEN GÖR: Express HTTP-server + Socket.io. Hanterar auth, ärenden, templates, mail och RAG-pipeline.
+// ANVÄNDS AV: main.js (Electron entry point)
+// SENAST STÄDAD: 2026-02-27
+// ============================================
 const path = require('path');
 const isPackaged = process.env.IS_PACKAGED === 'true';
 
@@ -77,7 +80,7 @@ let data = (typeof raw === 'string') ? JSON.parse(raw) : raw;
 // Säkerställ att vi faktiskt har ett objekt efter parsing
 if (!data || typeof data !== 'object') data = {};
 
-// 3. Sanitering: Tvinga fram korrekt struktur på underobjekten (Dina regler)
+// 3. Sanitering: Tvinga fram korrekt struktur på underobjekten
 if (!Array.isArray(data.messages)) {
 data.messages = [];
 }
@@ -192,7 +195,7 @@ const HUMAN_TRIGGERS = [
 "människa"
 ];
 const HUMAN_RESPONSE_TEXT = "Jag kopplar dig till en mänsklig kollega.";
-const { runLegacyFlow } = require('./legacy_engine');
+const { runLegacyFlow, loadKnowledgeBase } = require('./legacy_engine');
 const OpenAI = require('openai');
 
 // ==================================================
@@ -776,7 +779,7 @@ hash,
 role || 'agent',
 display_name || username.toLowerCase(),
 agent_color || '#0071e3',
-avatar_id ?? 1,
+avatar_id ?? 0,
 routing_tag || null
 ], function(err) {
 if (err) return res.status(400).json({ error: "Användarnamnet upptaget" });
@@ -784,6 +787,41 @@ res.json({ success: true, userId: this.lastID });
 });
 } catch (e) { res.status(500).json({ error: "Kunde inte skapa användare" }); }
 });
+
+// 3B: Uppdatera befintlig användarprofil (Universal)
+app.post('/api/admin/update-user-profile', authenticateToken, async (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+
+// ÄNDRING: Vi hämtar userId istället för id från req.body
+const { userId, username, password, role, display_name, agent_color, avatar_id, routing_tag } = req.body;
+
+try {
+// SQL-frågan använder fortfarande kolumnnamnet "id", men vi mappar in variabeln "userId"
+let sql = `UPDATE users SET role = ?, display_name = ?, agent_color = ?, avatar_id = ?, routing_tag = ? WHERE id = ?`;
+let params = [role, display_name, agent_color, avatar_id, routing_tag, userId];
+
+// Om lösenord skickats med, inkludera det i uppdateringen
+if (password && password.trim().length >= 6) {
+const hash = await bcrypt.hash(password, 10);
+sql = `UPDATE users SET role = ?, display_name = ?, agent_color = ?, avatar_id = ?, routing_tag = ?, password_hash = ? WHERE id = ?`;
+params = [role, display_name, agent_color, avatar_id, routing_tag, hash, userId];
+}
+
+db.run(sql, params, function(err) {
+if (err) {
+console.error("Update profile error:", err);
+return res.status(500).json({ error: "Kunde inte uppdatera profil" });
+}
+// Loggar med userId så det matchar dina andra admin-loggar
+console.log(`👤 [ADMIN] Uppdaterade profil för @${username} (ID: ${userId})`);
+res.json({ success: true });
+});
+} catch (e) { 
+console.error("System error during update:", e);
+res.status(500).json({ error: "Systemfel vid uppdatering" }); 
+}
+});
+
 
 // 4. POST: Uppdatera roll (Gör till Admin / Ta bort Admin)
 app.post('/api/admin/update-role', authenticateToken, (req, res) => {
@@ -1608,6 +1646,15 @@ console.log(`🎨 [ADMIN-UPDATE] office_color synkad till SQL för ${routingTag}
 }
 
 console.log(`✅ [ADMIN-UPDATE] ${routingTag}.json sparad och SEO-säkrad.`);
+
+// 🔄 HOT-RELOAD AV RAG-MOTORN FÖR KONTORSFILER
+try {
+loadKnowledgeBase();
+console.log(`🔄 [RAG] Kunskapsdatabasen omladdad efter att kontoret uppdaterats!`);
+} catch(e) {
+console.error(`⚠️ [RAG] Kunde inte ladda om databasen:`, e);
+}
+
 res.json({ success: true, message: "Kontoret uppdaterat utan att skada RAG-strukturen." });
 
 } catch (err) {
@@ -1703,11 +1750,9 @@ io.emit('team:client_typing', { sessionId });
 
 // 👇 AGENT SKRIVER (SKICKA TILL KUND + GLOBAL BROADCAST FÖR INTERNA CHATTAR)
 socket.on('team:agent_typing', (payload) => {
-const { sessionId } = payload;
-// Skicka till kundens frontend
-io.to(sessionId).emit('client:agent_typing', { sessionId });
-// Broadcast globalt till teamet — fångas av team:client_typing-lyssnaren för interna chattar
-io.emit('team:client_typing', { sessionId });
+    const sessionId = payload?.sessionId;
+    if (!sessionId) return;
+    socket.to(sessionId).emit('client:agent_typing', { sessionId });
 });
 
 // Vidarebefordra agentens skriv-status till kundens fönster
@@ -2686,6 +2731,10 @@ io.emit('team:update', {
 type: 'ticket_claimed',
 sessionId: conversationId,
 owner: finalAgentName
+});
+io.emit('team:ticket_taken', {
+conversationId: conversationId,
+takenBy: finalAgentName
 });
 }
 
@@ -4156,6 +4205,10 @@ res.status(500).json({ error: 'Kunde inte läsa kunskapsbanken.' });
 }
 });
 
+
+// =====================================================================
+// 🛠️ ADMIN — GET - BASFAKTA-SKAPA/TA BORT SEKTIONER/AI KEYWORD VALIDERING
+// =====================================================================
 app.get('/api/admin/basfakta/:filename', authenticateToken, (req, res) => {
 if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 
@@ -4175,6 +4228,9 @@ res.status(500).json({ error: 'Kunde inte läsa filen.' });
 }
 });
 
+// =====================================================================
+// 🛠️ ADMIN — PUT BASFAKTA-SKAPA/TA BORT SEKTIONER/AI KEYWORD VALIDERING
+// =====================================================================
 app.put('/api/admin/basfakta/:filename', authenticateToken, async (req, res) => {
 if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 
@@ -4193,25 +4249,57 @@ if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Fil hittades
 
 try {
 const originalData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-if (sections.length < originalData.sections.length) {
-return res.status(400).json({
-error: `Antalet sektioner får inte minska. Original: ${originalData.sections.length}, Förslag: ${sections.length}`
+// Bygg en map från title -> original sektion för snabb uppslagning
+const originalByTitle = {};
+(originalData.sections || []).forEach(s => {
+originalByTitle[s.title] = s;
 });
+
+// Bygg uppdaterade sektioner
+const updatedSections = [];
+for (const proposed of sections) {
+const orig = originalByTitle[proposed.title];
+if (orig) {
+// Befintlig sektion – bevara keywords och alla extra fält exakt
+updatedSections.push({ ...orig, title: proposed.title, answer: proposed.answer });
+} else {
+// Ny sektion – generera keywords via AI
+let keywords = [];
+try {
+const kwRes = await openai.chat.completions.create({
+model: 'gpt-4o-mini',
+messages: [
+{
+role: 'system',
+content: 'Du är ett system som genererar sökord för en trafikskolas kunskapsbas. Svara ENBART med en kommaseparerad lista med 5-10 korta, relevanta sökord på svenska i lowercase. Inga punkter, inga förklaringar, inga radbrytningar – bara orden separerade med komma.'
+},
+{
+role: 'user',
+content: `Rubrik: ${proposed.title}\nText: ${proposed.answer}`
 }
-
-// Bygg uppdaterat objekt (bevara keywords och extra fält per sektion)
-const updatedSections = originalData.sections.map((orig, i) => {
-const proposed = sections[i];
-if (!proposed) return orig;
-return { ...orig, title: proposed.title || orig.title, answer: proposed.answer || orig.answer };
+],
+max_tokens: 100,
+temperature: 0
 });
+const raw = kwRes.choices[0]?.message?.content?.trim() || '';
+keywords = raw
+.split(',')
+.map(k => k.trim().toLowerCase())
+.filter(k => k.length > 0);
+} catch (kwErr) {
+console.warn('[BASFAKTA KEYWORDS] AI-generering misslyckades:', kwErr.message);
+keywords = [];
+}
+updatedSections.push({ title: proposed.title, answer: proposed.answer, keywords });
+}
+}
 
 const proposedData = { ...originalData, sections: updatedSections };
 
-// AI-validering
+// AI JSON-validering (befintlig logik bevarad)
 try {
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const validation = await openai.chat.completions.create({
 model: 'gpt-4o-mini',
 messages: [
@@ -4230,7 +4318,16 @@ console.warn('[BASFAKTA AI-VALIDATION] AI-validering misslyckades, sparar ändå
 }
 
 fs.writeFileSync(filePath, JSON.stringify(proposedData, null, 2), 'utf8');
-console.log(`✅ [BASFAKTA] ${filename} uppdaterad.`);
+console.log(`✅ [BASFAKTA] ${filename} uppdaterad. Sektioner: ${updatedSections.length}`);
+
+// 🔄 HOT-RELOAD AV RAG-MOTORN
+try {
+loadKnowledgeBase();
+console.log(`🔄 [RAG] Kunskapsdatabasen omladdad i minnet efter uppdatering!`);
+} catch(e) {
+console.error(`⚠️ [RAG] Kunde inte ladda om databasen:`, e);
+}
+
 res.json({ success: true, message: 'Filen sparad och validerad.' });
 
 } catch (err) {
@@ -4245,23 +4342,24 @@ res.status(500).json({ error: 'Kunde inte spara filen.' });
 app.get('/api/admin/available-services', authenticateToken, (req, res) => {
 if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 
-const knowledgePath = getFilePaths().knowledgePath;
-const serviceFiles = ['basfakta_lektioner_paket_bil.json', 'basfakta_lektioner_paket_mc.json'];
-const serviceNames = new Set();
-
-serviceFiles.forEach(filename => {
-const filePath = path.join(knowledgePath, filename);
-if (fs.existsSync(filePath)) {
 try {
-const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-if (data.sections) data.sections.forEach(s => { if (s.title) serviceNames.add(s.title); });
-} catch (e) {
-console.warn('[SERVICES] Kunde inte läsa', filename);
-}
-}
-});
+// Hämta från den nya filen i assets/js
+const templatePath = isPackaged 
+? path.join(process.resourcesPath, 'Renderer', 'assets', 'js', 'service_templates.json') 
+: path.join(__dirname, 'Renderer', 'assets', 'js', 'service_templates.json');
 
-res.json([...serviceNames].sort((a, b) => a.localeCompare(b, 'sv')));
+if (fs.existsSync(templatePath)) {
+const data = JSON.parse(fs.readFileSync(templatePath, 'utf8'));
+// Returnerar hela arrayen (inklusive keywords)
+res.json(data);
+} else {
+console.warn('[SERVICES] Hittade inte service_templates.json på:', templatePath);
+res.json([]);
+}
+} catch (e) {
+console.error('[SERVICES] Kunde inte läsa service_templates.json:', e);
+res.status(500).json({ error: 'Kunde inte läsa tjänstemallar' });
+}
 });
 
 // =====================================================================

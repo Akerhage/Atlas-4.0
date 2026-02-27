@@ -1,8 +1,10 @@
-/* ═══════════════════════════════════════════════════════════════
-ATLAS RENDERER v.3.14
-Hanterar: Chatt, Mallar (SQLite), Inkorg (SQLite) & Inställningar
-═══════════════════════════════════════════════════════════════ */
-const ATLAS_VERSION = '3.14'; // 🔧 F4.4: Centralt versionsnummer — uppdatera ENDAST här
+// ============================================
+// renderer.js
+// VAD DEN GÖR: All UI-logik för Atlas — chatt, inkorg, ärendehantering, mallar, arkiv, profil och inloggning.
+// ANVÄNDS AV: index.html (Electron renderer process)
+// SENAST STÄDAD: 2026-02-27
+// ============================================
+const ATLAS_VERSION = '3.14'; // Centralt versionsnummer — uppdatera ENDAST här
 // 1. Bibliotek med 15 valbara SVG-avatarer
 const AVATAR_ICONS = [
 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>', // Person
@@ -22,7 +24,7 @@ const AVATAR_ICONS = [
 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>' // Glad gubbe
 ];
 
-// Centralt bibliotek för alla UI-ikoner i Atlas (OPTIMERAD v4.0)
+// Centralt bibliotek för alla UI-ikoner i Atlas
 const UI_ICONS = {
 // FORDON (14px)
 CAR: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>`,
@@ -159,7 +161,17 @@ inputs: {},
 menuItems: null
 };
 
-// 2. NY HJÄLPFUNKTION: Genererar snygga avatar-bubblor
+// Tvinga rätt färg direkt vid uppstart för att undvika "blå-buggen"
+(function initGlobalTheme() {
+const savedUser = JSON.parse(localStorage.getItem('atlas_user'));
+if (savedUser && savedUser.agent_color) {
+document.documentElement.style.setProperty('--accent-primary', savedUser.agent_color);
+}
+})();
+
+// =============================================================================
+//=========ÄNRA AVATAR BUBBLANS FÄRGER OCH BILD=================================
+// =============================================================================
 function getAvatarBubbleHTML(user, size = "32px") {
 if (!user) return `<div class="user-avatar" style="width:${size}; height:${size}; background:#333; border-radius:50%;"></div>`;
 
@@ -175,10 +187,10 @@ const displayName = user.display_name || (typeof formatName === 'function' ? for
 content = displayName.charAt(0).toUpperCase();
 }
 
-// Returera HTML som fungerar med din style.css
+// Returnera HTML - Notera klassen "avatar-inner-icon" för live-uppdatering
 return `
 <div class="user-avatar" style="width: ${size}; height: ${size}; border: 2px solid ${color}; position: relative; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); overflow: hidden;">
-<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: ${color}; fill: currentColor;">
+<div class="avatar-inner-icon" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: ${color}; fill: currentColor;">
 ${content}
 </div>
 ${user.is_online !== undefined ? `<span class="status-indicator ${user.is_online ? 'online' : ''}" style="position: absolute; bottom: 0; right: 0; width: 25%; height: 25%; border-radius: 50%; background: ${user.is_online ? '#2ecc71' : '#95a5a6'}; border: 2px solid #1e1e1e;"></span>` : ''}
@@ -198,6 +210,7 @@ let usersCache = []; // Lagrar alla användare för agentfärger
 let isBulkMode = false;
 let selectedBulkTickets = new Set();
 
+// Hämtar alla kontor från servern och lagrar dem i officeData för snabb uppslag
 async function preloadOffices() {
 try {
 const res = await fetch(`${SERVER_URL}/api/public/offices`);
@@ -209,6 +222,7 @@ console.log(`✅ Laddat ${officeData.length} kontor från SQL.`);
 console.log('📋 officeData:', JSON.stringify(officeData.map(o => ({ tag: o.routing_tag, area: o.area, city: o.city }))));
 
 
+// Hämtar alla användare från servern och lagrar dem i usersCache för agentfärger och namnuppslag
 async function preloadUsers() {
 try {
 const res = await fetch(`${SERVER_URL}/api/auth/users`, { headers: fetchHeaders });
@@ -219,8 +233,24 @@ if (res.ok) usersCache = await res.json();
 // Kompakt ersättare för resolveLabel
 function resolveLabel(tag) {
 const office = officeData.find(o => o.routing_tag === tag);
-if (office) return (office.area || office.city).toUpperCase();
-return tag ? tag.toUpperCase() : "ÄRENDE";
+if (!office) return tag ? tag.toUpperCase() : "ÄRENDE";
+
+const city = office.city || "";
+const area = office.area || "";
+
+// 1. Hantera City-specialfall (Malmö/Stockholm)
+if (area.toUpperCase() === 'CITY') {
+if (city.toUpperCase().includes('MALMÖ')) return 'M-CITY';
+if (city.toUpperCase().includes('STOCKHOLM')) return 'S-CITY';
+}
+
+// 2. Förkorta långa namn (t.ex. Västra Hamnen -> V-Hamnen)
+let finalLabel = area || city;
+if (finalLabel.toUpperCase().startsWith('VÄSTRA ')) {
+finalLabel = 'V-' + finalLabel.substring(7);
+}
+
+return finalLabel.toUpperCase();
 }
 
 
@@ -240,6 +270,7 @@ return office ? office.city : "Support";
 // Säkra att window.currentUser finns (för legacy-stöd)
 if (currentUser) window.currentUser = currentUser;
 
+// Returnerar true om inloggad användare har rollen 'admin' eller 'support'
 function isSupportAgent() {
 // Atlas: Vi litar på rollen som hämtats från databasen vid inloggning.
 // Vi kollar efter både 'admin' och 'support' för att vara framtidssäkrade.
@@ -277,7 +308,7 @@ throw err;
 };
 
 const isElectron = (typeof window.electronAPI !== 'undefined');
-// 🔥 NYTT: Ljudfil (Base64 - Ett mjukt "Pling")
+// Ljudfil för notifieringar
 const NOTIFICATION_SOUND = "assets/js/pling.mp3";
 
 // ==========================================================
@@ -295,7 +326,7 @@ let SERVER_URL = (isElectron || window.location.hostname === 'localhost' || wind
 console.log(`🌍 Miljö: ${isElectron ? 'ELECTRON' : 'WEBB'}`);
 console.log(`🔗 Server URL: ${SERVER_URL}`);
 
-// === 2. AUTHENTICATION & LOGIN UI (Master Glass Design) ===
+// === 2. AUTHENTICATION & LOGIN UI ===
 const loginModalHTML = `
 <div id="login-modal" class="custom-modal-overlay" style="display:none;">
 <div class="glass-modal-box glass-effect">
@@ -360,7 +391,7 @@ modal.className = 'custom-modal-overlay glass-effect';
 modal.style.display = 'none';
 modal.style.zIndex = '30000';
 
-// SÄKRAD: Kolla UI_ICONS innan användning
+// Kolla UI_ICONS innan användning
 const sendIcon = (typeof UI_ICONS !== 'undefined' && UI_ICONS.SEND) ? UI_ICONS.SEND : '';
 
 modal.innerHTML = `
@@ -393,7 +424,7 @@ newCancel.onclick = () => { modal.style.display = 'none'; resolve(false); };
 
 // CHANGE THEME =================================================================
 function changeTheme(themeName) {
-// SÄKRAD: Kolla både globala DOM-objektet och stylesheet-referensen
+// Kolla både globala DOM-objektet och stylesheet-referensen
 const stylesheet = (typeof DOM !== 'undefined' && DOM.themeStylesheet) 
 ? DOM.themeStylesheet 
 : document.getElementById('theme-link');
@@ -490,39 +521,46 @@ console.log("🔧 updateProfileUI() körs");
 const container = document.getElementById('user-profile-container');
 const loginBtn = document.getElementById('login-btn-sidebar');
 const nameEl = document.getElementById('current-user-name');
-const initialEl = document.querySelector('.user-initial');
+const initialContainer = document.querySelector('.user-initial');
+const avatarRing = document.querySelector('.user-avatar');
 
 if (authToken && currentUser) {
 if (container) {
 container.style.display = 'flex';
 container.style.cursor = 'pointer';
-
-// 🔥 KOPPLA KLICK PÅ PROFILEN TILL INSTÄLLNINGAR (Nu säkrad inuti funktionen)
-container.onclick = () => {
-showProfileSettings();
-};
+container.onclick = () => { showProfileSettings(); };
 }
 if (loginBtn) loginBtn.style.display = 'none';
 
+const color = currentUser.agent_color || '#0071e3';
 const displayName = currentUser.display_name || currentUser.username || 'Agent';
-if (nameEl) nameEl.textContent = displayName.charAt(0).toUpperCase() + displayName.slice(1);
-if (initialEl) initialEl.textContent = displayName.charAt(0).toUpperCase();
+
+// 1. Sätt global färg (Säkrar mot Ctrl+R buggen)
+document.documentElement.style.setProperty('--accent-primary', color);
+
+// 2. Namn och Status (innerHTML rensar gamla spänner automatiskt = ingen dubbeltext)
+if (nameEl) {
+nameEl.innerHTML = `
+<span style="display:block; font-weight:600; color:white;">${displayName.charAt(0).toUpperCase() + displayName.slice(1)}</span>
+${currentUser.status_text ? `<span class="user-status-text" style="display:block; font-size:10px; color:${color}; opacity:0.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;" title="${currentUser.status_text}">💬 ${currentUser.status_text}</span>` : ''}
+`;
+}
+
+// 3. Avatar & Färg
+if (initialContainer) {
+initialContainer.style.backgroundColor = color;
+initialContainer.innerHTML = AVATAR_ICONS[currentUser.avatar_id || 0];
+const svg = initialContainer.querySelector('svg');
+if (svg) { svg.style.width = '20px'; svg.style.height = '20px'; }
+}
+if (avatarRing) avatarRing.style.borderColor = color;
+
 } else {
 if (container) container.style.display = 'none';
 if (loginBtn) loginBtn.style.display = 'flex';
 }
 
-// Uppdatera synlighet för menyn (Inkorg/Admin)
-const inboxBtn = document.querySelector('.menu-item[data-view="inbox"]');
-if (inboxBtn) {
-if (isSupportAgent()) {
-inboxBtn.style.display = 'flex';
-} else {
-inboxBtn.style.setProperty('display', 'none', 'important'); 
-}
-}
-
-updateInboxVisibility(); 
+updateInboxVisibility();
 }
 
 //=======check auth =========//////
@@ -563,6 +601,7 @@ updateProfileUI();
 return true;
 }
 
+// Rensar token och användarsession och laddar om sidan för att nollställa allt state
 function handleLogout() {
 console.log("🚪 Loggar ut...");
 localStorage.removeItem('atlas_token');
@@ -582,6 +621,7 @@ emit: () => console.warn("Socket not ready yet"),
 on: () => {}
 };
 
+// Initierar Socket.IO-anslutningen mot servern och sätter upp det globala socketAPI-objektet
 function initializeSocket() {
 if (typeof io === 'undefined' || !authToken) return;
 console.log("🔌 Initializing Socket.io connection...");
@@ -624,6 +664,7 @@ handleLogout();
 setupSocketListeners();
 }
 
+// Uppdaterar server-statusindikatorn i UI med grön/röd status
 function updateServerStatusUI(connected) {
 const statusEl = document.getElementById('server-status');
 if (statusEl) {
@@ -821,7 +862,7 @@ const { conversationId, message, sender, isEmail } = data;
 updateInboxBadge();
 if (sender === 'user' && State.soundEnabled) playNotificationSound();
 
-// FIX: Kolla BÅDA detaljvyerna oberoende — båda existerar alltid i DOM (display togglas, ej remove)
+// Kolla BÅDA detaljvyerna oberoende — båda existerar alltid i DOM (display togglas, ej remove)
 const myDetail    = document.getElementById('my-ticket-detail');
 const inboxDetail = document.getElementById('inbox-detail');
 const isMyTicketOpen = myDetail?.getAttribute('data-current-id') === conversationId;
@@ -891,7 +932,7 @@ wrapper.innerHTML = `
 
 chatContainer.appendChild(wrapper);
 
-// FIX: Auto-scroll bara om agenten inte scrollat upp manuellt (läser data-auto-scroll)
+// Auto-scroll bara om agenten inte scrollat upp manuellt (läser data-auto-scroll)
 const shouldAutoScroll = chatContainer.getAttribute('data-auto-scroll') === 'true';
 const isNearBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < 100;
 
@@ -951,6 +992,19 @@ checkAndResetDetail('my-ticket-detail', conversationId);
 // Visa toast endast om agenten faktiskt hade ärendet öppet
 if (wasOpen) {
 showToast('🗑️ Ärendet togs bort av en kollega');
+}
+});
+
+window.socketAPI.on('team:ticket_taken', (data) => {
+const { conversationId, takenBy } = data;
+const wasOpen = ['inbox-detail', 'my-ticket-detail'].some(id => {
+const el = document.getElementById(id);
+return el && el.getAttribute('data-current-id') === conversationId;
+});
+checkAndResetDetail('my-ticket-detail', conversationId);
+renderMyTickets?.();
+if (wasOpen) {
+showToast(`⚠️ ${takenBy} tog över detta ärende`);
 }
 });
 
@@ -1088,7 +1142,7 @@ inboxExpanded: {
 "Inkomna MAIL": false,
 "Plockade Ärenden": false
 },
-// NYTT: Sparar tiden när man lämnade respektive vy
+// Sparar tiden när man lämnade respektive vy
 lastSeen: {
 inbox: Date.now(),
 'my-tickets': Date.now(),
@@ -1106,7 +1160,7 @@ let isLoadingTemplate = false;
 // ==========================================================
 class ChatSession {
 constructor() {
-// 🔥 FIX: Lägg till unik random-del för att undvika kollisioner
+// Lägg till unik random-del för att undvika kollisioner
 this.id = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 this.messages = [];
 this.startTime = new Date();
@@ -1213,7 +1267,7 @@ if (!text.trim()) return;
 if (State.currentSession) State.currentSession.add('user', text);
 addBubble(text, 'user');
 
-// SÄKRAD: Töm endast om fältet existerar
+// Töm endast om fältet existerar
 if (DOM.messageInput) {
 DOM.messageInput.value = '';
 }
@@ -1256,7 +1310,7 @@ console.error("Socket not connected.");
 //---------ADD BUBBLE----------------//
 //----------------------------------------------
 function addBubble(text, role) {
-// SÄKRAD: Avbryt direkt om chatt-containern saknas
+// Avbryt direkt om chatt-containern saknas
 if (!DOM.chatMessages) {
 console.warn("⚠️ DOM.chatMessages saknas. Kan inte rita bubbla:", text);
 return;
@@ -1277,7 +1331,7 @@ let html = text
 bubble.innerHTML = html;
 wrapper.appendChild(bubble);
 
-// SÄKRAD: Append och scroll
+// Append och scroll
 DOM.chatMessages.appendChild(wrapper);
 DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
 }
@@ -1462,9 +1516,10 @@ content.innerHTML = `<div style="padding:15px; text-align:center; opacity:0.5; f
 } else {
 tickets.forEach(t => {
 const card = document.createElement('div');
-const styles = getAgentStyles(t.routing_tag || t.owner);
+const isInternal = (t.session_type === 'internal' || t.routing_tag === 'INTERNAL');
+const styles = isInternal ? { main: '#f1c40f', bg: 'transparent', border: 'rgba(241,196,15,0.3)', bubbleBg: 'rgba(241,196,15,0.15)' } : getAgentStyles(t.routing_tag || t.owner);
 
-// 🔥 FIX: Deklarera variablerna innan de används i HTML
+// Deklarera variablerna innan de används i HTML
 const timeStr = new Date(t.updated_at * 1000).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
 const dateStr = new Date(t.updated_at * 1000).toLocaleDateString('sv-SE');
 const actionIcon = UI_ICONS.CLAIM;
@@ -1473,14 +1528,19 @@ let tagText = t.routing_tag ? resolveLabel(t.routing_tag) : (t.owner ? resolveLa
 const isMail = t.session_type === 'message';
 const typeIcon = isMail ? `${UI_ICONS.MAIL}` : `${UI_ICONS.CHAT}`;
 
-card.className = 'team-ticket-card';
+card.className = `team-ticket-card${isInternal ? ' internal-ticket' : ''}`;
 card.setAttribute('data-id', t.conversation_id);
+card.setAttribute('data-owner', (t.owner || '').toUpperCase());
+
+// KIRURGISK FIX: Uppdatera båda variablerna och tvinga kanten direkt
+card.style.borderLeft = `4px solid ${styles.main}`;
 card.style.setProperty('--agent-color', styles.main);
+card.style.setProperty('--atp-color', styles.main);
 
 // Variabler deklareras INNAN de används i sökindex och HTML
 const displayTitle = esc(resolveTicketTitle(t));
 
-// SÄKRAD TEXT: Hämtar text från context_data för att slippa "Ingen text"
+// Hämtar text från context_data för att slippa "Ingen text"
 let rawPreview = t.last_message || t.question || t.subject;
 if (!rawPreview && t.context_data) {
 try {
@@ -1614,9 +1674,7 @@ detail.removeAttribute('data-current-id');
 } // Slut på async function renderInbox()
 
 // ============================================================================
-// renderInboxFromTickets — Ritar om inkorgslistan med sökresultat (MED MULTISELECT)
-// ============================================================================
-// renderInboxFromTickets — Ritar om inkorgslistan med sökresultat (MED MULTISELECT)
+// renderInboxFromTickets — Ritar om inkorgslistan med sökresultat (MED BULK + SELECT ALL)
 // ============================================================================
 function renderInboxFromTickets(tickets, searchTerm) {
 const container = DOM.inboxList;
@@ -1633,13 +1691,23 @@ Inga ärenden matchade <strong>"${esc(searchTerm)}"</strong>
 return;
 }
 
+// 1. SKAPA HEADER (Med "Markera alla"-knappen)
 const header = document.createElement('div');
 header.className = 'template-group-header';
+header.style.display = 'flex';
+header.style.justifyContent = 'space-between';
+header.style.alignItems = 'center';
+
 header.innerHTML = `
 <div class="group-header-content">
 <span class="group-name" style="opacity:0.7;">Sökresultat för "${esc(searchTerm)}"</span>
+<span class="group-badge live-badge" style="margin-left:8px;">${tickets.length}</span>
 </div>
-<span class="group-badge live-badge">${tickets.length}</span>`;
+<button id="btn-select-all-search" class="claim-mini-btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; font-size:10px; padding:4px 8px; border-radius:4px; cursor:pointer;">
+Markera alla
+</button>`;
+
+// Samma ordning som i din kod
 container.appendChild(header);
 
 const content = document.createElement('div');
@@ -1667,7 +1735,10 @@ const vehicleHtml = vIcon ? `<span style="color:${styles.main}; display:flex; al
 
 card.className = 'team-ticket-card';
 card.setAttribute('data-id', t.conversation_id);
+// KIRURGISK FIX: Uppdatera båda variablerna och tvinga kanten direkt
+card.style.borderLeft = `4px solid ${styles.main}`;
 card.style.setProperty('--agent-color', styles.main);
+card.style.setProperty('--atp-color', styles.main);
 
 // Om kortet redan är valt i en pågående bulk-session
 if (typeof selectedTicketIds !== 'undefined' && selectedTicketIds.has(t.conversation_id)) {
@@ -1696,7 +1767,7 @@ ${UI_ICONS.NOTES}
 ${UI_ICONS.CLAIM}
 </button>`;
 
-// --- MULTISELECT LOGIK ---
+// --- MULTISELECT / LONG-PRESS LOGIK ---
 let _lpTimer = null;
 let _lpFired = false;
 
@@ -1750,7 +1821,44 @@ if (searchEl) searchEl.value = '';
 content.appendChild(card);
 });
 
+// 2. APPEND CONTENT (Samma plats som i din kod)
 container.appendChild(content);
+
+// 3. LOGIK FÖR "MARKERA ALLA" (Ligger sist i funktionen)
+const selectAllBtn = document.getElementById('btn-select-all-search');
+if (selectAllBtn) {
+selectAllBtn.onclick = (e) => {
+e.stopPropagation();
+if (!isBulkMode) {
+isBulkMode = true;
+container.classList.add('bulk-mode-active');
+showBulkToolbar();
+}
+
+const currentlySelectedInSearch = tickets.filter(t => selectedTicketIds.has(t.conversation_id));
+const shouldSelectAll = currentlySelectedInSearch.length < tickets.length;
+
+tickets.forEach(t => {
+const cardEl = content.querySelector(`.team-ticket-card[data-id="${t.conversation_id}"]`);
+if (shouldSelectAll) {
+if (!selectedTicketIds.has(t.conversation_id)) {
+selectedTicketIds.add(t.conversation_id);
+if (cardEl) cardEl.classList.add('bulk-selected');
+}
+} else {
+selectedTicketIds.delete(t.conversation_id);
+if (cardEl) cardEl.classList.remove('bulk-selected');
+}
+});
+
+if (typeof updateBulkCount === 'function') updateBulkCount();
+if (selectedTicketIds.size === 0) {
+isBulkMode = false;
+container.classList.remove('bulk-mode-active');
+hideBulkToolbar();
+}
+};
+}
 }
 
 // ============================================================================
@@ -1769,7 +1877,7 @@ detailView.setAttribute('data-current-id', ticket.conversation_id);
 const styles = getAgentStyles(ticket.routing_tag || ticket.owner);
 detailView.className = 'template-editor-container';
 detailView.setAttribute('data-owner', ticket.owner || 'unclaimed');
-detailView.style.setProperty('border-top', `4px solid ${styles.main}`, 'important');
+detailView.style.setProperty('border-top', 'none', 'important');
 detailView.style.setProperty('background', `linear-gradient(to bottom, ${styles.bg}, transparent)`, 'important');
 detailView.innerHTML = '';
 
@@ -1877,8 +1985,7 @@ bodyContent = `<div class="inbox-chat-history" style="padding:10px 5px;">${chatH
 
 // Villkor för Snabbsvar: admin/agent + chattärende (customer) + ej plockat
 const canQuickReply = ['admin', 'agent'].includes(currentUser?.role)
-&& ticket.session_type === 'customer'
-&& !ticket.owner;
+&& ticket.session_type === 'customer';
 
 const content = document.createElement('div');
 content.className = 'detail-container';
@@ -2131,9 +2238,10 @@ return;
 
 tickets.forEach((t, index) => {
 const myName = currentUser.username;
-const styles = getAgentStyles(t.routing_tag || t.owner || myName);
+const isInternal = (t.session_type === 'internal' || t.routing_tag === 'INTERNAL');
+const styles = isInternal ? { main: '#f1c40f', bg: 'transparent', border: 'rgba(241,196,15,0.3)', bubbleBg: 'rgba(241,196,15,0.15)' } : getAgentStyles(t.routing_tag || t.owner || myName);
 
-// FIX: Visa kontoret (routing_tag) på kortet. Interna ärenden visar avsändarens visningsnamn.
+// Visa kontoret (routing_tag) på kortet. Interna ärenden visar avsändarens visningsnamn.
 const tagText = (t.session_type === 'internal')
 ? (() => { const u = usersCache.find(u => u.username === (t.sender || t.owner)); return (u?.display_name || t.sender || t.owner || 'INTERN').toUpperCase(); })()
 : resolveLabel(t.routing_tag || t.owner || myName);
@@ -2146,7 +2254,7 @@ if (t.session_type === 'internal' && t.sender) {
 displayTitle = (typeof formatName === 'function') ? formatName(t.sender) : t.sender;
 }
 
-// SÄKRAD TEXT (Löser "Ingen text")
+// Hämtar text från context_data
 let myRawPreview = t.last_message || t.question || t.subject;
 if (!myRawPreview && t.context_data) {
 try {
@@ -2174,17 +2282,22 @@ const isNew = !card;
 
 if (isNew) {
 card = document.createElement('div');
-card.className = 'team-ticket-card mine';
+card.className = `team-ticket-card mine${isInternal ? ' internal-ticket' : ''}`;
 card.setAttribute('data-id', t.conversation_id);
-card.style.setProperty('--agent-color', styles.main);
+card.setAttribute('data-owner', (t.owner || '').toUpperCase());
 }
+
+// Tvinga uppdatering av färg och kant vid varje rendering (Dubbel-säkrad för alla vyer)
+card.style.borderLeft = `4px solid ${styles.main}`;
+card.style.setProperty('--agent-color', styles.main);
+card.style.setProperty('--atp-color', styles.main);
 
 if (currentId === t.conversation_id) {
 card.classList.add('active-ticket');
 card.style.background = "rgba(255,255,255,0.1)";
 }
 
-// FIX: Rensat dubbel-taggar och trasiga knappar
+// Rensat dubbel-taggar och trasiga knappar
 // ERSÄTT card.innerHTML i renderMyTickets med detta:
 card.innerHTML = `
 <div class="ticket-header-row">
@@ -2264,7 +2377,7 @@ detail.removeAttribute('data-current-id');
 }
 
 // =========================================================
-// 🧹 MINA ÄRENDEN - FUNKTIONEN (Startar högst upp)
+// 🧹 MINA ÄRENDEN - FUNKTIONEN (KOMPLETT VERSION)
 // =========================================================
 function openMyTicketDetail(ticket) {
 const detail = document.getElementById('my-ticket-detail');
@@ -2276,142 +2389,132 @@ placeholder.style.display = 'none';
 detail.style.display = 'flex';
 detail.setAttribute('data-current-id', ticket.conversation_id);
 
-// Agent-färg
-const currentUser = window.currentUser || { username: 'Agent' };
-const styles = getAgentStyles(ticket.routing_tag || ticket.owner);
+// 1. STILAR & FÄRG (FIX FÖR GULT & INGEN LINJE)
+// Vi inkluderar _isLocal här så att dina egna Ida-chattar blir gula
+const isInternal = (ticket.session_type === 'internal' || ticket.routing_tag === 'INTERNAL' || ticket._isLocal);
+
+const internalYellow = {
+main: '#f1c40f',
+bg: 'transparent', // Ingen bakgrundsfärg som kan läcka
+border: 'rgba(241, 196, 15, 0.3)',
+bubbleBg: 'rgba(241, 196, 15, 0.15)'
+};
+
+let styles = isInternal ? internalYellow : getAgentStyles(ticket.routing_tag || ticket.owner);
+
 detail.classList.add('template-editor-container');
-detail.setAttribute('data-owner', ticket.owner || 'unclaimed'); // Viktig för bubbel-färg!
-detail.style.setProperty('border-top', `4px solid ${styles.main}`, 'important');
-detail.style.setProperty('background', `linear-gradient(to bottom, ${styles.bg}, transparent)`, 'important');
+detail.setAttribute('data-owner', ticket.owner || 'unclaimed');
+
+// HÄR DÖDAR VI LINJERNA HELT
+detail.style.setProperty('border-top', 'none', 'important');
+detail.style.setProperty('border-bottom', 'none', 'important');
+detail.style.setProperty('background', 'none', 'important');
+detail.style.setProperty('box-shadow', 'none', 'important');
+
 detail.innerHTML = '';
 
-// --- DATA-PREPP ---
+// 2. DATA-PREPP (KIRURGISK FIX FÖR MAIL-TYP)
 const displayTitle = resolveTicketTitle(ticket);
-const isMail = ticket.session_type === 'message';
+const isMail = ticket.session_type === 'mail' || ticket.session_type === 'message' || ticket.routing_tag === 'MAIL';
 
-// --- CHATT / MAIL  ---
+// --- CHATT / MAIL ---
 let bodyContent = '';
 
 if (isMail) {
-const messages = ticket.messages || []; //openMyTicketDetail /MAIL-Ärende
+const messages = ticket.messages || [];
 
+// Oscar Berg-fix: Om historik saknas, använd ticket.last_message
 if (messages.length === 0) {
-bodyContent = '<div style="padding:40px; opacity:0.5;">Ingen historik ännu.</div>';
+const raw = ticket.last_message || ticket.content || "Inget innehåll...";
+const clean = raw.replace(/^📧\s*(\((Mail|Svar)\):)?\s*/i, '');
+bodyContent = `
+<div class="msg-row user" style="display:flex; width:100%; margin-bottom:12px; justify-content:flex-start;">
+<div class="msg-avatar" style="background:${styles.main}; color:white; margin-right:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold;">K</div>
+<div style="display:flex; flex-direction:column; max-width:75%;">
+<div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px;"><b>Inkommet Mail</b></div>
+<div class="bubble" style="background:${styles.bubbleBg} !important; border:1px solid ${styles.border} !important; color:var(--text-primary) !important;">${formatAtlasMessage(clean)}</div>
+</div>
+</div>`;
 } else {
 messages.forEach(m => {
 const isUser = m.role === 'user';
 const clean = (m.content || m.text || '').replace(/^📧\s*(\((Mail|Svar)\):)?\s*/i, '');
 
 bodyContent += `
-<div class="msg-row ${isUser ? 'user' : 'atlas'}">
-${isUser ? '<div class="msg-avatar">K</div>' : ''}
-<div class="bubble" style="background: ${isUser ? styles.bubbleBg : 'var(--bg-dark-tertiary)'} !important; border: 1px solid ${isUser ? styles.border : 'rgba(255,255,255,0.1)'} !important; color: var(--text-primary) !important;">${formatAtlasMessage(clean)}</div>
-${!isUser ? '<div class="msg-avatar">🤖</div>' : ''}
+<div class="msg-row ${isUser ? 'user' : 'atlas'}" style="display:flex; width:100%; margin-bottom:12px; justify-content:${isUser ? 'flex-start' : 'flex-end'};">
+${isUser ? `<div class="msg-avatar" style="background:${styles.main}; color:white; margin-right:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold;">K</div>` : ''}
+<div class="bubble" style="background: ${isUser ? styles.bubbleBg : 'rgba(255,255,255,0.05)'} !important; border: 1px solid ${isUser ? styles.border : 'rgba(255,255,255,0.1)'} !important; color: var(--text-primary) !important; max-width:75%;">${formatAtlasMessage(clean)}</div>
+${!isUser ? '<div class="msg-avatar" style="background:#3a3a3c; margin-left:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%;">🤖</div>' : ''}
 </div>`;
 });
 }
 } else {
-
-// --- CHATT (MINA ÄRENDEN) --- (OpenMyTickeDetail - CHATT)
+// --- CHATT (MINA ÄRENDEN) ---
 const messages = ticket.messages || []; 
 messages.forEach(m => {
-
-// 1. DATA PREPP
 const time = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }) : '';
 const dateStrMsg = m.timestamp ? new Date(m.timestamp).toLocaleDateString('sv-SE') : '';
 
-// 2. LOGIK: VEM ÄR VEM?
 let isUser = (m.role === 'user');
 let rowDisplayTitle = displayTitle; 
-const isInternal = (ticket.session_type === 'internal');
 
 if (isInternal) {
-
-// Vi tvingar båda till små bokstäver så Nathalie == nathalie
 if (m.sender && m.sender.toLowerCase() !== currentUser.username.toLowerCase()) {
 isUser = true;
 rowDisplayTitle = (typeof formatName === 'function') ? formatName(m.sender) : m.sender;
 } else {
-
-// Det är jag (Höger sida)
 isUser = false;
 }
 }
 
-// Beräkna avsändarens färg för vänsterbubblan i internchatt
-const senderStyles = (isInternal && isUser)
-? getAgentStyles(m.sender)
-: styles;
-
-// 3. AVATARER & NAMN
+const senderStyles = isInternal ? internalYellow : (isUser ? getAgentStyles(m.sender) : styles);
 const leftInitial = rowDisplayTitle ? rowDisplayTitle.charAt(0).toUpperCase() : 'K';
 const userAvatar = `<div class="msg-avatar" style="background:${senderStyles.main}; color:white; margin-right:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; flex-shrink:0;">${leftInitial}</div>`;
 
-// Höger Avatar: Om internt -> Min bokstav. Annars -> Robot.
 let rightAvatarContent = '🤖';
 let rightAvatarStyle = 'background:#3a3a3c;';
 
-// NY (RÄTT) - VISAR DIN AVATAR OM BUBBLAN LIGGER TILL HÖGER
 if (isInternal && !isUser) {
 rightAvatarContent = currentUser.username.charAt(0).toUpperCase();
 rightAvatarStyle = `background:${styles.main}; color:white; font-weight:bold;`;
 }
 
 const atlasAvatar = `<div class="msg-avatar" style="${rightAvatarStyle} margin-left:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0;">${rightAvatarContent}</div>`;
-
-// 4. INNEHÅLL (TRIMMA FÖR ATT SLIPPA EXTRA RAD)
-const rawContent = m.text || m.content || "";
-const content = formatAtlasMessage(rawContent).trim(); // <--- .trim() är viktigt här!
+const content = formatAtlasMessage(m.text || m.content || "").trim();
 
 if (isUser) {
-// VÄNSTER (Kollega/Kund)
 bodyContent += `<div class="msg-row user" style="display:flex; width:100% !important; margin-bottom:12px; justify-content:flex-start;">${userAvatar}<div style="display:flex; flex-direction:column; align-items:flex-start; max-width:75%;"><div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-left:4px;"><b>${rowDisplayTitle || 'Kund'}</b> • ${dateStrMsg} ${time}</div><div class="bubble" style="background:${senderStyles.bubbleBg} !important; border:1px solid ${senderStyles.border} !important; color:var(--text-primary) !important;">${content}</div></div></div>`;
 } else {
-// HÖGER (Jag/Atlas)
 const senderLabel = isInternal ? 'Du' : 'Atlas';
-bodyContent += `<div class="msg-row atlas" style="display:flex; width:100% !important; margin-bottom:12px; justify-content:flex-end;"><div style="display:flex; flex-direction:column; align-items:flex-end; max-width:75%;"><div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-right:4px;">${senderLabel} • ${time}</div><div class="bubble" style="background:var(--bg-dark-tertiary) !important; border:1px solid rgba(255,255,255,0.1) !important; color:var(--text-primary) !important;">${content}</div></div>${atlasAvatar}</div>`;
+bodyContent += `<div class="msg-row atlas" style="display:flex; width:100% !important; margin-bottom:12px; justify-content:flex-end;"><div style="display:flex; flex-direction:column; align-items:flex-end; max-width:75%;"><div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-right:4px;">${senderLabel} • ${time}</div><div class="bubble" style="background:${styles.bubbleBg} !important; border:1px solid ${styles.border} !important; color:var(--text-primary) !important;">${content}</div></div>${atlasAvatar}</div>`;
 }
 });
-
-// Typing indicator (Visa rätt text om det är kollega)
-const typingText = (ticket.session_type === 'internal') ? '✍️ Kollegan skriver...' : '✍️ Kunden skriver...';
-bodyContent += `<div id="typing-indicator-${ticket.conversation_id}" style="display:none; padding:5px 15px; font-size:12px; color:#00ff88; font-style:italic; margin-top:5px; text-align:left;">${typingText}</div>`;
 }
 
-// --- TEMPLATE OPTIONS ---
+const typingText = isInternal ? '✍️ Kollegan skriver...' : '✍️ Kunden skriver...';
+bodyContent += `<div id="typing-indicator-${ticket.conversation_id}" style="display:none; padding:5px 15px; font-size:12px; color:${styles.main}; font-style:italic; margin-top:5px; text-align:left;">${typingText}</div>`;
+
 let templateOptions = `<option value="">📋 Välj mall att kopiera...</option>`;
 if (State.templates) {
-State.templates.forEach(t => {
-templateOptions += `<option value="${t.id}">${t.title}</option>`;
-});
+State.templates.forEach(t => { templateOptions += `<option value="${t.id}">${t.title}</option>`; });
 }
 
-// --- BYGG HTML (Städad och synkad) ---
-const content = document.createElement('div');
-content.className = 'detail-container';
-
-content.innerHTML = `
+const contentBox = document.createElement('div');
+contentBox.className = 'detail-container';
+contentBox.innerHTML = `
 ${renderDetailHeader(ticket, styles)}
-
 <div class="detail-body scroll-list" id="my-chat-scroll-area">
 ${bodyContent}
 </div>
-
 <div class="detail-footer-area">
 <form id="my-ticket-chat-form">
-<textarea id="my-ticket-chat-input" 
-placeholder="${ticket.is_archived ? 'Ärendet är arkiverat' : 'Skriv ett meddelande...'}" 
-${ticket.is_archived ? 'disabled' : ''}></textarea>
-
+<textarea id="my-ticket-chat-input" placeholder="${ticket.is_archived ? 'Ärendet är arkiverat' : 'Skriv ett meddelande...'}" ${ticket.is_archived ? 'disabled' : ''}></textarea>
 <button type="submit" id="${isMail ? 'btn-send-mail-action' : 'btn-reply-action'}" class="send-button-ticket">
 ${UI_ICONS.SEND}
 </button>
 </form>
-
 <div style="display:flex; justify-content: space-between; align-items:center; padding: 0 20px 15px 20px;">
-<div style="flex:1; max-width:60%;">
-<select id="quick-template-select" class="filter-select">${templateOptions}</select>
-</div>
+<div style="flex:1; max-width:60%;"><select id="quick-template-select" class="filter-select">${templateOptions}</select></div>
 <div style="display:flex; gap:10px;">
 ${isMail ? `<button type="button" class="footer-icon-btn" id="btn-ai-draft" title="AI Förslag">${UI_ICONS.AI}</button>` : ''}
 <button type="button" class="footer-icon-btn btn-archive-red" id="btn-archive-my" title="Arkivera">${UI_ICONS.ARCHIVE}</button>
@@ -2421,35 +2524,30 @@ ${isMail ? `<button type="button" class="footer-icon-btn" id="btn-ai-draft" titl
 </div>
 `;
 
-// Rensa föräldern helt från marginaler
 detail.style.padding = '0';
 detail.style.background = 'transparent';
 detail.innerHTML = '';
-detail.appendChild(content);
+detail.appendChild(contentBox);
 
 refreshNotesGlow(ticket.conversation_id);
 
-// FIX: Byta ärendekort → toppen direkt (ingen animation = inget "hopp" syns)
 const scrollArea = document.getElementById('my-chat-scroll-area');
 if (scrollArea) {
-scrollArea.style.scrollBehavior = 'auto'; // Omedelbar, ingen animation
-scrollArea.scrollTop = 0;
-
-// Håll scroll längst ner när nytt meddelande kommer in (hanteras av team:customer_reply)
-// Markera att vi vill auto-scrolla nedåt för DETTA ärende
+scrollArea.style.scrollBehavior = 'auto';
+scrollArea.scrollTop = scrollArea.scrollHeight; // Scrolla till botten direkt
 scrollArea.setAttribute('data-auto-scroll', 'true');
 }
 
 if (!isMail) {
 const chatInput = document.getElementById('my-ticket-chat-input');
-let lastAgentTypingTime = 0;
+let typingTimer;
 if (chatInput) {
 chatInput.addEventListener('input', () => {
-const now = Date.now();
-if (now - lastAgentTypingTime > 2000) {
-window.socketAPI.emit('team:agent_typing', { sessionId: ticket.conversation_id });
-lastAgentTypingTime = now;
-}
+window.socketAPI.emit('team:agent_typing', { sessionId: ticket.conversation_id, is_typing: true });
+clearTimeout(typingTimer);
+typingTimer = setTimeout(() => {
+window.socketAPI.emit('team:agent_typing', { sessionId: ticket.conversation_id, is_typing: false });
+}, 2500);
 });
 setTimeout(() => chatInput.focus(), 50);
 }
@@ -2468,27 +2566,30 @@ let activeTemplateHtml = null;
 
 // 1. VÄLJ MALL -> SPARA HTML & VISA TEXT
 const tSelect = document.getElementById('quick-template-select');
-if(tSelect) {
+if (tSelect) {
 tSelect.onchange = () => {
 const tId = tSelect.value;
-if(!tId) return;
+if (!tId) return;
 const t = State.templates.find(x => x.id == tId);
 
-if(t) {
+if (t) {
 const inp = document.getElementById('my-ticket-chat-input');
-if(inp) {
+if (inp) {
 // Spara original-HTML (med bilder etc) i minnet
 activeTemplateHtml = t.content;
 
-// Visa ren text i rutan så du ser vad du skickar (och kan läsa det)
+// Visa ren text i rutan så du ser vad du skickar
 const tempDiv = document.createElement('div');
 tempDiv.innerHTML = t.content;
-const cleanText = tempDiv.innerText || tempDiv.textContent;
+const cleanText = (tempDiv.innerText || tempDiv.textContent || '').trim();
 
 inp.value = cleanText; 
-inp.focus();           
+inp.focus(); 
 
-tSelect.value = "";    
+// Trigga input-eventet så att rutan kan auto-expandera om det behövs
+inp.dispatchEvent(new Event('input'));
+
+tSelect.value = ""; 
 }
 }
 };
@@ -2627,11 +2728,11 @@ showToast("❌ Kunde inte radera ärendet");
 }
 };
 }
-}
-} // End of attachMyTicketListeners function
+} // End of attachMyTicketListeners function -- stänger if(btnDel) + funktionen
+} // stänger attachMyTicketListeners
 
 // ============================================================================
-// FIX: Ersättare för window.prompt (Master Glass Design)
+// Ersättare för window.prompt med glassmorphism-design
 // ============================================================================
 function atlasPrompt(title, message, defaultValue = '') {
 return new Promise((resolve) => {
@@ -2774,12 +2875,20 @@ const typeVal = document.getElementById('filter-type')?.value || 'all';
 const agentVal = document.getElementById('filter-agent')?.value || 'all';
 const vehicleVal = document.getElementById('filter-vehicle')?.value || 'all';
 const cityVal = document.getElementById('filter-city')?.value || 'all';
-const officeVal = document.getElementById('filter-office')?.value || 'all'; // Nytt fält
+const officeVal = document.getElementById('filter-office')?.value || 'all';
 const dateStart = document.getElementById('filter-date-start')?.value;
 const dateEnd = document.getElementById('filter-date-end')?.value;
 const searchText = document.getElementById('filter-search')?.value.toLowerCase().trim() || '';
 
+// Hämta värdet från AI-checkboxen
+const showAI = document.getElementById('archive-show-ai')?.checked || false;
+
 let filtered = State.archiveItems.filter(item => {
+
+// --- 🔥 H. AI-FILTER (MÅSTE VARA FÖRST FÖR ATT REAGERA DIREKT) ---
+// Om ärendet är ett rent AI-svar (human_mode === 0) och checkboxen INTE är ikryssad -> Dölj det.
+if (item.human_mode === 0 && !showAI) return false;
+
 // A. TYP (Mail/Chatt)
 const itemType = item.session_type === 'message' ? 'mail' : 'chat';
 if (typeVal !== 'all' && itemType !== typeVal) return false;
@@ -2852,15 +2961,18 @@ return;
 // 3. RENDERA LISTAN
 filtered.forEach(item => {
 const el = document.createElement('div');
-const styles = getAgentStyles(item.routing_tag || item.owner || (item._isLocal ? currentUser.username : 'unclaimed'));
+
+// Identifiera interna ärenden och skapa en CSS-klass för dem
+const isInternal = (item.routing_tag === 'INTERNAL' || item.session_type === 'internal' || item._isLocal);
+const internalClass = isInternal ? 'internal-ticket' : '';
+
+const styles = isInternal ? { main: '#f1c40f' } : getAgentStyles(item.routing_tag || item.owner || (item._isLocal ? currentUser.username : 'unclaimed'));
 
 const isMail = item.session_type === 'message';
-const typeLabel = item._isLocal ? 'PRIVAT' : (item.owner ? resolveLabel(item.owner) : (isMail ? 'MAIL' : 'OPLOCKAD'));
-
 const typeIcon = isMail ? `${UI_ICONS.MAIL}` : `${UI_ICONS.CHAT}`;
 
 let displayTitle = resolveTicketTitle(item) || "Ärende utan titel";
-if (item.session_type === 'internal' && item.sender) {
+if (isInternal && item.sender) {
 displayTitle = (typeof formatName === 'function') ? formatName(item.sender) : item.sender;
 }
 
@@ -2876,41 +2988,46 @@ rawPreview = ctx.messages[0].content || ctx.messages[0].text;
 }
 
 const vIcon = getVehicleIcon(item.vehicle);
-const vehicleHtml = vIcon ? `<span style="color: ${styles.main}; display: flex; align-items: center; opacity: 0.9;" title="${item.vehicle}">${vIcon}</span>` : '';
-
 const fullDateStr = new Date(item.timestamp).toLocaleString('sv-SE', { 
 year: 'numeric', month: 'numeric', day: 'numeric', 
 hour: '2-digit', minute: '2-digit' 
 });
 
-let previewDisplay = (item._isLocal || item.session_type === 'internal') 
+let previewDisplay = (item._isLocal || isInternal) 
 ? `<span style="opacity: 0.6; font-style: italic;">🔒 Privat internt meddelande</span>` 
 : stripHtml(rawPreview || '...');
 
 const isAI = item.human_mode === 0; // 0 = AI-besvarat
-el.className = `team-ticket-card archive-card ${isAI ? 'is-ai-chat' : 'is-human-chat'} ${item._isLocal ? 'mine' : (item.owner ? 'archived' : 'unclaimed')}`;
-el.style.setProperty('--agent-color', styles.main);
 
-// ERSÄTT el.innerHTML i renderArchive med detta:
+// Sätt Master-klasserna för layout - NU MED internal-ticket KLASSEN
+el.className = `team-ticket-card ${internalClass} archive-card ${isAI ? 'is-ai-chat' : 'is-human-chat'}`;
+el.style.setProperty('border-left', `4px solid ${styles.main}`, 'important');
+el.style.setProperty('--agent-color', styles.main); // För hover/glöd
+
+// Rendera kortets HTML
 el.innerHTML = `
 <div class="ticket-header-row">
-<div class="ticket-title">
+<div class="ticket-title" style="color: ${isInternal ? styles.main : 'var(--text-primary)'} !important;">
 <span style="opacity:0.7; margin-right:6px; display:flex; align-items:center;">${typeIcon}</span>
-<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:${styles.main};">${displayTitle}</span>
+<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${displayTitle}</span>
 </div>
-<div class="ticket-top-right">
-${vehicleHtml}
-<button class="notes-trigger-btn" data-id="${item.conversation_id || item.id}" title="Interna anteckningar" style="color:${styles.main};" onclick="event.stopPropagation(); openNotesModal('${item.conversation_id || item.id}')">
+<div class="ticket-top-right" style="color: ${styles.main} !important;">
+${vIcon ? `<span style="display:flex; align-items:center; opacity:0.9;" title="${item.vehicle}">${vIcon}</span>` : ''}
+<button class="notes-trigger-btn" data-id="${item.conversation_id || item.id}" title="Interna anteckningar" style="color:inherit;" onclick="event.stopPropagation(); openNotesModal('${item.conversation_id || item.id}')">
 ${UI_ICONS.NOTES}
 </button>
 </div>
 </div>
+
 <div class="ticket-preview">${previewDisplay}</div>
 
 <div class="ticket-footer-bar">
 <div class="ticket-time">${fullDateStr}</div>
-<div class="ticket-tag" style="color:${styles.main}">${(item.routing_tag || item.office) ? resolveLabel(item.routing_tag || item.office) : (item.city ? item.city.toUpperCase() : '—')}</div>
-</div>`;
+<div class="ticket-tag" style="background: ${isInternal ? styles.main + '22' : 'rgba(255,255,255,0.05)'}; color: ${styles.main}; border: 1px solid ${styles.main}44;">
+${(item.routing_tag || item.office) ? resolveLabel(item.routing_tag || item.office) : (item.city ? item.city.toUpperCase() : '—')}
+</div>
+</div>
+`;
 
 // 6. Klick-händelse (Öppnar detaljvy)
 el.onclick = () => {
@@ -2919,9 +3036,29 @@ el.classList.add('active-ticket');
 
 const placeholder = document.getElementById('archive-placeholder');
 const detail = document.getElementById('archive-detail');
-placeholder.style.display = 'none';
+
+if (placeholder) placeholder.style.display = 'none';
+if (detail) {
 detail.style.display = 'flex';
 detail.innerHTML = '';
+
+// KIRURGISK FIX: Tvinga gult om det är privat (_isLocal) eller internt
+const isInternalItem = (item.routing_tag === 'INTERNAL' || item.session_type === 'internal' || item._isLocal);
+const internalYellow = {
+main: '#f1c40f',
+bg: 'transparent',
+border: 'rgba(241, 196, 15, 0.3)',
+bubbleBg: 'rgba(241, 196, 15, 0.15)'
+};
+
+const themeStyles = isInternalItem ? internalYellow : getAgentStyles(item.routing_tag || item.owner || 'unclaimed');
+
+// DÖDAR LINJEN OCH BAKGRUNDEN HÄR
+detail.className = 'detail-container';
+detail.style.borderTop = 'none';
+detail.style.borderBottom = 'none';
+detail.style.background = 'none';
+detail.style.boxShadow = 'none';
 
 let historyHtml = '<div class="inbox-chat-history" style="padding:20px;">';
 let messages = [];
@@ -2932,11 +3069,6 @@ messages = JSON.parse(item.answer);
 } else { messages = [{ role: 'user', content: item.answer || "..." }]; }
 } catch(e) { messages = []; }
 
-const themeStyles = getAgentStyles(item.routing_tag || item.owner || 'unclaimed');
-detail.className = 'detail-container';
-detail.style.borderTop = `4px solid ${themeStyles.main}`;
-detail.style.background = `linear-gradient(to bottom, ${themeStyles.bg}, transparent)`;
-
 messages.forEach(m => {
 const isUser = m.role === 'user';
 const clean = (m.content || m.text || '').replace(/^📧\s*(\((Mail|Svar)\):)?\s*/i, '');
@@ -2945,43 +3077,48 @@ const avatarInitial = isUser ? (item.contact_name ? item.contact_name.charAt(0).
 if (isUser) {
 historyHtml += `
 <div class="msg-row user" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-start;">
-<div class="msg-avatar" style="background:${themeStyles.main}; color:white; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; margin-right:12px; flex-shrink:0;">${avatarInitial}</div>
-<div class="bubble" style="background:${themeStyles.bubbleBg} !important; border:1px solid ${themeStyles.border} !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
-${formatAtlasMessage(clean)}
-</div>
+	<div class="msg-avatar" style="background:${themeStyles.main}; color:white; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; margin-right:12px; flex-shrink:0;">${avatarInitial}</div>
+	<div class="bubble" style="background:${themeStyles.bubbleBg} !important; border:1px solid ${themeStyles.border} !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
+		${formatAtlasMessage(clean)}
+	</div>
 </div>`;
 } else {
 historyHtml += `
 <div class="msg-row atlas" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-end;">
-<div class="bubble" style="background:var(--bg-dark-tertiary) !important; border:1px solid rgba(255,255,255,0.1) !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
-${formatAtlasMessage(clean)}
-</div>
-<div class="msg-avatar" style="background:#3a3a3c; margin-left:12px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0; font-size:18px;">🤖</div>
+	<div class="bubble" style="background:var(--bg-dark-tertiary) !important; border:1px solid rgba(255,255,255,0.1) !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
+		${formatAtlasMessage(clean)}
+	</div>
+	<div class="msg-avatar" style="background:#3a3a3c; margin-left:12px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0; font-size:18px;">🤖</div>
 </div>`;
 }
 });
 
 historyHtml += '</div>';
-const isMail = item.session_type === 'message';
+
 const restoreBtn = isMail ? `<button class="footer-icon-btn" id="archive-restore-btn" title="Återaktivera">${UI_ICONS.RESTORE}</button>` : '';
 const fullView = document.createElement('div');
 fullView.className = 'detail-container';
 
 fullView.innerHTML = `
 ${renderDetailHeader(item, themeStyles)}
-
 <div class="detail-body" style="flex:1; overflow-y:auto;">
 ${historyHtml}
 </div>
-
 <div class="detail-footer-toolbar" style="padding: 15px 20px; background: rgba(0, 0, 0, 0.4); display: flex; justify-content: flex-end; gap: 10px;">
 ${restoreBtn}
 <button class="footer-icon-btn danger" id="archive-delete-btn" title="Radera permanent">${UI_ICONS.TRASH}</button>
 </div>
 `;
 
+// 🎯 DÖDAR LINJEN PÅ DET NYA ELEMENTET INNAN DET APPENDAS
+fullView.style.setProperty('border-top', 'none', 'important');
+fullView.style.setProperty('border-bottom', 'none', 'important');
+fullView.style.setProperty('box-shadow', 'none', 'important');
+fullView.style.setProperty('background', 'none', 'important');
+
 detail.appendChild(fullView);
-refreshNotesGlow(item.conversation_id);
+
+if (typeof refreshNotesGlow === 'function') refreshNotesGlow(item.conversation_id);
 
 const delBtn = fullView.querySelector('#archive-delete-btn');
 if (delBtn) delBtn.onclick = async () => {
@@ -2998,25 +3135,14 @@ const resBtn = fullView.querySelector('#archive-restore-btn');
 if (resBtn) resBtn.onclick = async () => {
 await fetch(`${SERVER_URL}/team/claim`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ conversationId: item.conversation_id, agentName: currentUser.username }) });
 showToast('✅ Ärendet återaktiverat!');
-switchView('my-tickets');
+if (typeof switchView === 'function') switchView('my-tickets');
 };
+}
 };
 
 container.appendChild(el);
 });
-
-// FIX: Koppla checkboxen 19/2 fix till listan (Använder ID:t från din HTML)
-const aiToggle = document.getElementById('archive-show-ai');
-if (aiToggle) {
-// Om checkboxen ändras, lägg till/ta bort klassen på containern
-container.classList.toggle('hide-ai-chats', !aiToggle.checked);
-
-// Ta bort gamla lyssnare för att undvika dubbel-trigg
-aiToggle.replaceWith(aiToggle.cloneNode(true));
-document.getElementById('archive-show-ai').addEventListener('change', (e) => {
-container.classList.toggle('hide-ai-chats', !e.target.checked);
-});
-}
+// Event listener är borta härifrån eftersom filtreringen nu sker i toppen!
 }
 
 // ============================================================================
@@ -3083,8 +3209,9 @@ if (!DOM.templateList) console.warn("⚠️ DOM.templateList saknas - kan inte r
 return;
 }
 
-// Hämta kontors-färg för att färga mallarna konsekvent
-const styles = getAgentStyles(currentUser.routing_tag || currentUser.username);
+// KIRURGISK FIX: Hämta stilar baserat på agentens profilfärg (istället för routing_tag)
+// Detta utrotar de 52 blåa träffarna och synkar mallarna med ditt lila tema.
+const styles = getAgentStyles(currentUser.username);
 DOM.templateList.innerHTML = '';
 
 if (list.length === 0) {
@@ -3113,10 +3240,10 @@ header.style.setProperty('border-left', `4px solid ${styles.main}`, 'important')
 
 header.innerHTML = `
 <div class="group-header-content">
-<span class="group-arrow">▶</span>
-<span class="group-name">${gName}</span>
+<span class="group-arrow" style="color:${styles.main} !important;">▶</span>
+<span class="group-name" style="color:${styles.main} !important;">${gName}</span>
 </div>
-<span class="group-count" style="background:${styles.main} !important;">${groups[gName].length}</span>
+<span class="group-count" style="background:${styles.main} !important; color: white !important;">${groups[gName].length}</span>
 `;
 
 const content = document.createElement('div');
@@ -3171,7 +3298,7 @@ function openTemplateEditor(t) {
 console.log("📂 Öppnar mall:", t.title);
 isLoadingTemplate = true;
 
-// --- VISUELL FIX (LUFT & FÄRG) ---
+// Använd currentUser.username för att garantera rätt färgtema
 const styles = getAgentStyles(window.currentUser?.username || 'Agent');
 const editorContainer = document.querySelector('#view-templates .template-editor-container');
 
@@ -3180,19 +3307,21 @@ if (editorContainer) {
 editorContainer.style.setProperty('border-top', `4px solid ${styles.main}`, 'important');
 editorContainer.style.setProperty('background', `linear-gradient(to bottom, ${styles.bg}, transparent)`, 'important');
 
-// 3. SYMMETRI-FIX: Luft mellan etikett och rutor (Drar upp fälten i linje med knapparna)
+// 2. SYMMETRI-FIX: Luft mellan etikett och rutor (Drar upp fälten i linje med knapparna)
 editorContainer.querySelectorAll('#template-editor-form label').forEach(label => {
-label.style.setProperty('margin-bottom', '4px', 'important'); // Ändrad från 10px till 4px för perfekt linje
+label.style.setProperty('margin-bottom', '4px', 'important'); 
 label.style.setProperty('display', 'block', 'important');
 label.style.setProperty('padding-left', '2px', 'important');
-label.style.setProperty('font-size', '11px', 'important'); // Gör texten lite nättare
+label.style.setProperty('font-size', '11px', 'important'); 
 });
 }
 
 // --- SÄKRAD LOGIK FÖR DETALJVY ---
-if (DOM.editorPlaceholder) DOM.editorPlaceholder.style.display = 'none';
-if (DOM.editorForm) DOM.editorForm.style.display = 'flex';
+// Gömmer placeholdern och visar formuläret
+if (DOM.editorPlaceholder) DOM.editorPlaceholder.style.setProperty('display', 'none', 'important');
+if (DOM.editorForm) DOM.editorForm.style.setProperty('display', 'flex', 'important');
 
+// Fyller i fälten
 if (DOM.inputs.id) DOM.inputs.id.value = t.id;
 if (DOM.inputs.title) DOM.inputs.title.value = t.title;
 if (DOM.inputs.group) DOM.inputs.group.value = t.group_name || '';
@@ -3215,12 +3344,13 @@ isLoadingTemplate = false;
 }, 50);
 }
 
+// ==========================================================
+// VY-HANTERARE (SwitchView)
+// ==========================================================
 function switchView(viewId) {
 const now = Date.now();
-const timeout = 5 * 60 * 1000; 
 
 // A. Hitta vyn vi lämnar
-// Säkrad vy-hantering (Checkar att DOM.views och DOM.menuItems existerar)
 const previousView = DOM.views ? Object.keys(DOM.views).find(key => DOM.views[key] && DOM.views[key].style.display === 'flex') : null;
 
 if (previousView) {
@@ -3228,7 +3358,7 @@ State.lastSeen[previousView] = now;
 resetToPlaceholder(previousView);
 }
 
-// 1. Dölj alla vyer (Säkrad)
+// 1. Dölj alla vyer
 if (DOM.views) {
 Object.values(DOM.views).forEach(v => {
 if (v) v.style.display = 'none';
@@ -3240,7 +3370,15 @@ if (DOM.views && DOM.views[viewId]) {
 DOM.views[viewId].style.display = 'flex';
 }
 
-// 3. Uppdatera menyn (Säkrad)
+// 🔥 KRITISK FIX: Låser höjden för mall-containern så CSS-centrering fungerar
+if (viewId === 'templates') {
+const tc = document.querySelector('#view-templates .templates-container');
+if (tc) {
+tc.style.height = 'calc(100vh - 71px)';
+}
+}
+
+// 3. Uppdatera menyn
 if (DOM.menuItems) {
 DOM.menuItems.forEach(item => {
 item.classList.toggle('active', item.dataset.view === viewId);
@@ -3268,6 +3406,7 @@ renderAboutGrid();
 }
 }
 
+// Renderar Om-vyn med systeminformation, temainställningar och ljudkontroll
 async function renderAboutGrid() {
 const grid = document.getElementById('about-grid');
 if (!grid) return;
@@ -3277,8 +3416,9 @@ const soundOn = State.soundEnabled !== false;
 const themeOptions = [
 ['standard-theme', 'Standard Vision ⚡'],
 ['onyx-ultradark', 'Atlas Onyx ⚫'],
+['carbon-theme', 'Atlas Carbon ⬛'], // 🔥 LÄGG TILL DENNA RAD HÄR
 ['apple-dark', 'Apple Dark 🍏'],
-['apple-road', 'Apple Road 🛣️'],
+['apple-road', 'Apple Road 		'],
 ['atlas-nebula', 'Atlas Nebula 🌌'],
 ['sunset-horizon', 'Sunset Horizon 🌅'],
 ['atlas-navigator', 'Atlas Navigator 🧭'],
@@ -3420,6 +3560,7 @@ localStorage.setItem('atlas-sound-enabled', checked);
 if (checked && typeof playNotificationSound === 'function') playNotificationSound();
 };
 
+// Stänger detaljvyn och visar tillbaka hero-platshållaren för angiven vy
 function resetToPlaceholder(viewId) {
 const mapping = {
 'inbox':      { ph: 'inbox-placeholder',    det: 'inbox-detail' },
@@ -3545,7 +3686,7 @@ async function handleEmailReply(ticket) {
 console.log("📩 Direkt-hantering av e-post för:", ticket.contact_name);
 
 // 1. Extrahera data
-const customerEmail = ticket.contact_email || "";
+const customerEmail = ticket.contact_email || ticket.email || "";
 const mailSubject = ticket.subject || "Ärende från Atlas";
 const originalMsg = ticket.last_message || "Ingen meddelandetext hittades";
 
@@ -3610,7 +3751,7 @@ const originalMsg = ticket.last_message || (ticket.messages && ticket.messages[0
 const originalMsgHtml = originalMsg.replace(/\n/g, '<br>');
 
 // 3. Sätt ihop Rich Text-versionen (HTML)
-// FIX: Inkluderar <style> för att nollställa marginaler i Outlook/Word
+// Inkluderar <style> för att nollställa marginaler i Outlook/Word
 const finalHtml = `
 <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.2;">
 <style>
@@ -3668,7 +3809,7 @@ playNotificationSound();
 const originalText = templateSelect.options[templateSelect.selectedIndex].text;
 templateSelect.options[templateSelect.selectedIndex].text = "✅ Rich Text kopierad!";
 
-const customerEmail = ticket.contact_email || (ticket.locked_context ? ticket.locked_context.email : "");
+const customerEmail = ticket.contact_email || ticket.email || (ticket.locked_context ? ticket.locked_context.email : "") || "";
 const mailSubject = ticket.subject || "Ärende från Atlas";
 const mailtoLink = `mailto:${customerEmail}?subject=${encodeURIComponent(mailSubject)}`;
 
@@ -3975,7 +4116,6 @@ return text.length > 60 ? text.substring(0, 60) + "..." : text;
 // MASTER HEADER ENGINE - SYNCHRONIZED
 // ============================================================================
 function renderDetailHeader(item, styles, extraActions = '') {
-// Säkra datumformat
 const timestamp = item.timestamp || (item.updated_at ? item.updated_at * 1000 : Date.now());
 const dateStr = new Date(timestamp).toLocaleString('sv-SE', { 
 year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' 
@@ -3983,67 +4123,71 @@ year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-d
 
 const vIcon = getVehicleIcon(item.vehicle || item.vehicle_type);
 
-// Bygg "Pills"
+// 1. Grund-pills (Datum)
 let pills = `<span class="pill">${UI_ICONS.CALENDAR} ${dateStr}</span>`;
 
-// Stad/Kontor — routing_tag har prio, annars kolla om owner är ett kontor, annars city
+// 2. MOTTAGARE (Destination) - Fullständigt namn
 const _officeMatch = officeData.find(o =>
 o.routing_tag === item.routing_tag || o.routing_tag === item.owner
 );
-const officeLabel = _officeMatch
-? (_officeMatch.area || _officeMatch.city).toUpperCase()
-: (item.city ? item.city.toUpperCase() : null);
+let officeLabel = null;
+if (_officeMatch) {
+officeLabel = (_officeMatch.name || `${_officeMatch.city} ${_officeMatch.area}`).toUpperCase();
+} else if (item.city || item.destination) {
+officeLabel = (item.city || item.destination).toUpperCase();
+}
+
 if (officeLabel) {
 pills += `<span class="pill" style="color:${styles.main}; border-color:${styles.border}; font-weight:700;">${UI_ICONS.CITY_SMALL} ${officeLabel}</span>`;
 }
 
-// Agent/Ägare
+// 3. AGENT (Om tilldelat)
 if (item.owner) {
 pills += `<span class="pill">${UI_ICONS.AGENT_SMALL} ${formatName(item.owner)}</span>`;
 }
 
-// Fordon
-if (vIcon && item.vehicle) {
-pills += `<span class="pill" title="${item.vehicle}">${vIcon} ${item.vehicle.toUpperCase()}</span>`;
+// 4. FORDONSTYP
+const vehicleName = item.vehicle || item.vehicle_type;
+if (vehicleName) {
+pills += `<span class="pill" title="Fordon">${vIcon || ''} ${vehicleName.toUpperCase()}</span>`;
 }
 
-// Kontaktvägar (Namn, Mail, Mobil)
-if (item.email || item.contact_email) {
-pills += `<span class="pill">${UI_ICONS.MAIL} ${item.email || item.contact_email}</span>`;
-}
-if (item.phone || item.contact_phone) {
-pills += `<span class="pill">${UI_ICONS.PHONE} ${item.phone || item.contact_phone}</span>`;
+// 5. EPOST
+const email = item.email || item.contact_email;
+if (email) {
+pills += `<span class="pill">${UI_ICONS.MAIL} ${email}</span>`;
 }
 
-// AI-Badge för oeskalerade ärenden i Arkivet
-const aiBadge = item.human_mode === 0 ? `<span class="ai-badge" style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px; border:1px solid rgba(255,255,255,0.2); vertical-align:middle;">AI</span>` : '';
+// 6. MOBIL (Chatt-specifikt fält)
+const phone = item.phone || item.contact_phone;
+if (phone) {
+pills += `<span class="pill">${UI_ICONS.PHONE} ${phone}</span>`;
+}
+
+const aiBadge = item.human_mode === 0 ? `<span class="ai-badge">AI</span>` : '';
 
 return `
-<div class="detail-header-top">
+<div class="detail-header-top" style="background: linear-gradient(90deg, ${styles.bg || styles.main + '1a'}, transparent); border-bottom: 2px solid ${styles.main} !important;">
 <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
 <div style="flex: 1; overflow: hidden;">
 <div class="detail-subject">
 ${resolveTicketTitle(item)} ${aiBadge}
 </div>
-<div style="display: flex; gap: 6px; flex-wrap: wrap; font-size:12px; margin-top:6px;">
+<div style="display: flex; gap: 6px; flex-wrap: wrap; font-size:11px; margin-top:6px;">
 ${pills}
 </div>
 </div>
-
 <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: 20px;">
 ${extraActions} 
 <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div> 
 <button class="notes-trigger-btn header-button icon-only-btn"
 data-id="${item.conversation_id || item.id}"
-title="Interna anteckningar"
-style="color:${styles.main}"
-onclick="event.stopPropagation(); openNotesModal('${item.conversation_id || item.id}')">
+onclick="openNotesModal('${item.conversation_id || item.id}')">
 ${UI_ICONS.NOTES}
 </button>
 </div>
 </div>
-</div>
-`;
+</div>`;
 }
 
 //---------------------------------------
@@ -4168,11 +4312,11 @@ console.error("Assign error:", err);
 }
 
 /* ==========================================================
-FUNKTION: PROFIL & LÖSENORD (Master Glass Design v3.1)
+FUNKTION: PROFIL & LÖSENORD
 Inkluderar: Live Preview, Direkt-UI-update & Logga ut
 ========================================================== */
 async function showProfileSettings() {
-// 1. Hämta färsk data från servern
+// 1. Hämta data
 const res = await fetch(`${SERVER_URL}/api/auth/users`, { headers: fetchHeaders });
 const users = await res.json();
 const me = users.find(u => u.username === currentUser.username) || currentUser;
@@ -4185,196 +4329,228 @@ overlay.className = 'custom-modal-overlay';
 document.body.appendChild(overlay);
 }
 
-// Vi förbereder variabler för live-preview
 let selectedAvatarId = me.avatar_id || 0;
 const initialColor = me.agent_color || '#0071e3';
 
+// TAJTAD LAYOUT - Optimerad för att slippa scroll
 overlay.innerHTML = `
-<div class="glass-modal-box glass-effect">
-<div class="glass-modal-header" style="flex-shrink: 0; display: flex; align-items: center; gap: 15px; padding: 20px;">
-<div id="profile-preview-avatar" style="width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 2px solid ${initialColor}; color: ${initialColor}; transition: all 0.2s;">
+<div class="glass-modal-box glass-effect" style="width: 400px; max-height: 92vh; display: flex; flex-direction: column; padding: 0 !important;">
+<div class="glass-modal-header" style="flex-shrink: 0; display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+<div id="profile-preview-avatar" style="width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 2px solid ${initialColor}; color: ${initialColor}; transition: all 0.2s;">
 ${AVATAR_ICONS[selectedAvatarId]}
 </div>
 <div style="flex: 1;">
-<h3 style="margin:0; display: flex; align-items: center; gap: 8px;">
-Min Profil
-</h3>
-<div style="font-size: 11px; opacity: 0.6;">Inloggad som @${me.username}</div>
+<h3 style="margin:0; font-size: 15px; letter-spacing: 0.5px;">MIN PROFIL</h3>
+<div style="font-size: 10px; opacity: 0.5;">Inloggad som @${me.username}</div>
 </div>
 </div>
 
-<div class="glass-modal-body" style="padding: 20px; overflow-y: auto; flex: 1; border-top: 1px solid rgba(255,255,255,0.1);">
-
+<div class="glass-modal-body" style="padding: 15px 20px; overflow-y: auto; flex: 1;">
 <div class="settings-group">
-<label>Visningsnamn</label>
-<input type="text" id="pref-display-name" value="${me.display_name || ''}" placeholder="${formatName(me.username)}">
+<label style="font-size: 10px; text-transform: uppercase; opacity: 0.4; margin-bottom: 4px;">Visningsnamn</label>
+<input type="text" id="pref-display-name" value="${me.display_name || ''}" placeholder="${formatName(me.username)}" style="padding: 8px 12px; font-size: 13px;">
 
-<label style="margin-top: 15px;">Statusmeddelande</label>
-<input type="text" id="pref-status-text" value="${me.status_text || ''}" placeholder="Vad gör du just nu?">
+<label style="margin-top: 10px; font-size: 10px; text-transform: uppercase; opacity: 0.4; margin-bottom: 4px;">Statusmeddelande</label>
+<input type="text" id="pref-status-text" value="${me.status_text || ''}" placeholder="Vad gör du just nu?" maxlength="40" style="padding: 8px 12px; font-size: 13px;">
 </div>
 
-<div class="settings-group" style="margin-top: 20px;">
-<label>Profilfärg</label>
-<input type="color" id="pref-color" value="${initialColor}" style="width: 100%; height: 40px; cursor: pointer; background: none; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
+<div class="settings-group" style="margin-top: 15px;">
+<label style="font-size: 10px; text-transform: uppercase; opacity: 0.4; margin-bottom: 6px;">Profilfärg & Ikon</label>
+<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+<div id="pref-color-line" style="flex: 1; height: 2px; background-color: ${initialColor} !important; border-radius: 2px; opacity: 0.8;"></div>
+<div style="display: flex; align-items: center; gap: 8px;">
+<input type="color" id="pref-color" value="${initialColor}" style="width: 38px; height: 28px; cursor: pointer; background: none; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 0;">
+<span id="pref-color-hex" style="font-family: monospace; font-size: 10px; opacity: 0.4; min-width: 55px;">${initialColor.toUpperCase()}</span>
+</div>
+</div>
 
-<label style="margin-top: 20px;">Välj Ikon</label>
-<div class="avatar-picker-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 10px;">
+<div class="avatar-picker-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 5px;">
 ${AVATAR_ICONS.map((svg, index) => `
 <div class="avatar-option ${selectedAvatarId == index ? 'selected' : ''}" 
 data-id="${index}"
-style="color: ${initialColor}; cursor: pointer; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: center; transition: all 0.2s;">
+style="color: ${initialColor}; cursor: pointer; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: center; transition: all 0.2s; height: 32px;">
 ${svg}
 </div>
 `).join('')}
 </div>
 </div>
 
-<hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 25px 0;">
+<hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin: 15px 0;">
 
 <div class="settings-group">
-<label style="color:#888;">Byt Lösenord (valfritt)</label>
-<input type="password" id="old-pass" placeholder="Nuvarande lösenord" style="margin-top:5px;">
-<input type="password" id="new-pass" placeholder="Nytt lösenord" style="margin-top:10px;">
-<input type="password" id="confirm-pass" placeholder="Bekräfta nytt lösenord" style="margin-top:10px;">
+<label style="color:#888; font-size: 10px; text-transform: uppercase; margin-bottom: 6px;">Byt Lösenord</label>
+<input type="password" id="old-pass" placeholder="Nuvarande" style="margin-top:0; font-size: 12px; padding: 8px 12px;">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+<input type="password" id="new-pass" placeholder="Nytt" style="font-size: 12px; padding: 8px 12px;">
+<input type="password" id="confirm-pass" placeholder="Bekräfta" style="font-size: 12px; padding: 8px 12px;">
+</div>
 </div>
 </div>
 
-<div class="glass-modal-footer" style="flex-shrink: 0; padding: 15px 20px; background: rgba(0,0,0,0.2); display: flex; align-items: center; gap: 10px;">
-<button id="prof-logout" class="btn-modal-logout">Logga ut</button>
+<div class="glass-modal-footer" style="flex-shrink: 0; padding: 12px 20px; background: rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
+<button id="prof-logout-btn" title="Logga ut" style="background: rgba(255,69,58,0.1); border: 1px solid rgba(255,69,58,0.2); color: #ff453a; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0 !important;">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+</button>
 <div style="flex:1"></div>
-<button class="btn-modal-cancel" onclick="document.getElementById('atlas-profile-modal').style.display='none'">Avbryt</button>
-<button class="btn-modal-confirm" id="prof-save">Spara ändringar</button>
+<button class="btn-glass-icon" title="Avbryt" style="width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0;" onclick="document.getElementById('atlas-profile-modal').style.display='none'">
+${ADMIN_UI_ICONS.CANCEL}
+</button>
+<button class="btn-glass-icon" id="prof-save-btn" title="Spara ändringar" 
+style="width: 36px; height: 36px; border-radius: 8px; color: ${currentUser.agent_color || '#4cd964'}; border-color: ${currentUser.agent_color ? currentUser.agent_color + '4d' : 'rgba(76,217,100,0.3)'}; background: ${currentUser.agent_color ? currentUser.agent_color + '1a' : 'rgba(76,217,100,0.05)'}; display: flex; align-items: center; justify-content: center; padding: 0;">
+${ADMIN_UI_ICONS.SAVE}
+</button>
 </div>
 </div>`;
 
 overlay.style.display = 'flex';
 
-// --- INTERAKTIV LOGIK ---
 const colorInput = overlay.querySelector('#pref-color');
+const colorLine = overlay.querySelector('#pref-color-line');
+const colorHexDisplay = overlay.querySelector('#pref-color-hex');
 const previewContainer = overlay.querySelector('#profile-preview-avatar');
 const avatarOptions = overlay.querySelectorAll('.avatar-option');
 
-// Funktion för att uppdatera preview i realtid
-const updateHeaderPreview = () => {
-const color = colorInput.value;
+// LIVE SYNC LOGIK (KOMPLETT: Realtid, Inga dubbletter & Korrekt Logik)
+const syncProfileUI = (color, avatarId, statusText) => {
+// 0. Global färgvariabel för CSS (kryssrutor, scrollbars etc)
+document.documentElement.style.setProperty('--accent-primary', color);
+
+// 1. Modal-preview (Uppe i modalen)
+if (previewContainer) {
 previewContainer.style.borderColor = color;
 previewContainer.style.color = color;
-previewContainer.innerHTML = AVATAR_ICONS[selectedAvatarId];
-
-// Uppdatera även färg på alla ikoner i väljaren
+previewContainer.innerHTML = AVATAR_ICONS[avatarId];
+}
+if (colorLine) colorLine.style.setProperty('background-color', color, 'important');
+if (colorHexDisplay) colorHexDisplay.innerText = color.toUpperCase();
 avatarOptions.forEach(opt => opt.style.color = color);
+
+// 2. Sidofältet (Footer) - Färg & Avatar
+const sideAvatarRing = document.querySelector('.sidebar-footer .user-avatar');
+const sideIconContainer = document.querySelector('.sidebar-footer .user-initial');
+
+if (sideAvatarRing) sideAvatarRing.style.setProperty('border-color', color, 'important');
+if (sideIconContainer) {
+sideIconContainer.style.setProperty('background-color', color, 'important');
+sideIconContainer.innerHTML = AVATAR_ICONS[avatarId];
+const svg = sideIconContainer.querySelector('svg');
+if (svg) { svg.style.width = '20px'; svg.style.height = '20px'; }
+}
+
+// 3. Statustext — skriv om nameEl med innerHTML precis som updateProfileUI gör (undviker dubbla spans)
+const nameEl = document.getElementById('current-user-name');
+if (nameEl) {
+const displayName = currentUser.display_name || currentUser.username || 'Agent';
+const statusHtml = statusText ? '<span class="user-status-text" style="display:block; font-size:10px; color:' + color + '; opacity:0.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;">💬 ' + statusText + '</span>' : '';
+nameEl.innerHTML = '<span style="display:block; font-weight:600; color:white;">' + (displayName.charAt(0).toUpperCase() + displayName.slice(1)) + '</span>' + statusHtml;
+}
+
+// 4. Ärendekort - Live-uppdatera kort som tillhör Agenten/ADMIN
+const myName = currentUser.username.toUpperCase();
+document.querySelectorAll('.team-ticket-card:not(.internal-ticket)').forEach(card => {
+const owner = (card.getAttribute('data-owner') || '').toUpperCase();
+const tagEl = card.querySelector('.ticket-tag');
+if (owner === myName || owner === 'ADMIN' || (tagEl && (tagEl.innerText === myName || tagEl.innerText === 'ADMIN'))) {
+card.style.setProperty('--agent-color', color);
+card.style.borderLeft = `4px solid ${color}`;
+card.querySelectorAll('.ticket-tag, .atp-note-btn, .notes-trigger-btn, .claim-mini-btn, .ticket-title span, .ticket-vehicle-icon, svg').forEach(el => {
+el.style.color = color;
+if (el.classList.contains('ticket-tag')) el.style.borderColor = color;
+if (el.tagName === 'svg' || el.closest('svg')) {
+el.style.fill = 'currentColor';
+el.style.color = color;
+}
+});
+}
+});
+
+// 5. Spara-knappen (Döda det hårdkodade gröna)
+const saveBtn = document.getElementById('prof-save-btn');
+if (saveBtn) {
+saveBtn.style.setProperty('color', color, 'important');
+saveBtn.style.setProperty('border-color', color + '4d', 'important');
+saveBtn.style.setProperty('background', color + '1a', 'important');
+}
+
+// 6. Ärendevyn (Den öppna vyn till höger i realtid)
+const openHeader = document.querySelector('.detail-header-top');
+const detailContainer = document.getElementById('my-ticket-detail');
+const activeCard = document.querySelector('.active-ticket');
+const activeOwner = (activeCard?.getAttribute('data-owner') || '').toUpperCase();
+
+if (activeOwner === myName || activeOwner === 'ADMIN') {
+if (openHeader) {
+openHeader.style.borderBottomColor = color;
+openHeader.style.background = `linear-gradient(90deg, ${color}1a, transparent)`;
+openHeader.querySelectorAll('.notes-trigger-btn, .detail-subject').forEach(el => {
+el.style.color = color;
+});
+}
+if (detailContainer) {
+detailContainer.style.setProperty('border-top-color', color, 'important');
+detailContainer.querySelectorAll('.message.atlas .bubble, .msg-row.atlas .bubble').forEach(b => {
+b.style.setProperty('background-color', color + '1a', 'important');
+b.style.setProperty('border-color', color, 'important');
+});
+}
+}
+
+// 7. Mallar-listan
+const templatesView = document.getElementById('view-templates');
+if (templatesView && templatesView.style.display === 'flex') {
+if (typeof renderTemplates === 'function') {
+renderTemplates();
+}
+}
+}; // Slut på syncProfileUI
+
+// --- EVENTLYSSNARE FÖR REALTIDSUPPDATERING ---
+colorInput.oninput = (e) => {
+syncProfileUI(e.target.value, selectedAvatarId, document.getElementById('pref-status-text').value.trim());
 };
 
-// Hantera val av ikon
+document.getElementById('pref-status-text').oninput = (e) => {
+syncProfileUI(colorInput.value, selectedAvatarId, e.target.value.trim());
+};
+
 avatarOptions.forEach(opt => {
 opt.onclick = () => {
 avatarOptions.forEach(o => o.classList.remove('selected'));
 opt.classList.add('selected');
 selectedAvatarId = parseInt(opt.dataset.id);
-updateHeaderPreview();
+syncProfileUI(colorInput.value, selectedAvatarId, document.getElementById('pref-status-text').value.trim());
 };
 });
 
-// Hantera färgändring
-colorInput.oninput = updateHeaderPreview;
-
-// Logga ut
-overlay.querySelector('#prof-logout').onclick = async () => {
+overlay.querySelector('#prof-logout-btn').onclick = async () => {
 overlay.style.display = 'none';
-if (await atlasConfirm("Logga ut", "Vill du verkligen logga ut från Atlas?")) {
-handleLogout();
-}
+if (await atlasConfirm("Logga ut", "Vill du verkligen logga ut från Atlas?")) handleLogout();
 };
 
-// Spara allt
-overlay.querySelector('#prof-save').onclick = async () => {
-const saveBtn = document.getElementById('prof-save');
-const oldP = document.getElementById('old-pass').value;
-const newP = document.getElementById('new-pass').value;
-const confP = document.getElementById('confirm-pass').value;
-
+overlay.querySelector('#prof-save-btn').onclick = async () => {
 const profileData = {
 display_name: document.getElementById('pref-display-name').value.trim(),
 status_text: document.getElementById('pref-status-text').value.trim(),
 agent_color: colorInput.value,
 avatar_id: selectedAvatarId
 };
-
-saveBtn.innerText = "Sparar...";
-saveBtn.disabled = true;
-
 try {
-// 1. Spara Profil
 const profRes = await fetch(`${SERVER_URL}/api/auth/update-profile`, {
 method: 'POST',
 headers: fetchHeaders,
 body: JSON.stringify(profileData)
 });
-if (!profRes.ok) throw new Error("Kunde inte spara profil");
-
-// 2. Spara Lösenord om det finns data
-if (oldP || newP) {
-if(newP !== confP) throw new Error("Nya lösenorden matchar inte.");
-if(!oldP) throw new Error("Du måste ange nuvarande lösenord.");
-
-const passRes = await fetch(`${SERVER_URL}/api/auth/change-password`, {
-method: 'POST',
-headers: fetchHeaders,
-body: JSON.stringify({ oldPassword: oldP, newPassword: newP })
-});
-if(!passRes.ok) throw new Error("Fel vid lösenordsbyte (fel nuvarande lösenord?)");
-}
-
-// --- DIREKT UPPDATERING AV UI (OPTIMERAD FÖR SIDEBAR) ---
-currentUser.display_name = profileData.display_name;
-currentUser.status_text = profileData.status_text;
-currentUser.agent_color = profileData.agent_color;
-currentUser.avatar_id = profileData.avatar_id;
-
-const sideAvatar = document.querySelector('.user-avatar');
-const sideInitial = document.querySelector('.user-initial');
+if (!profRes.ok) throw new Error("Kunde inte spara");
+currentUser = { ...currentUser, ...profileData };
+localStorage.setItem('atlas_user', JSON.stringify(currentUser));
 const sideName = document.getElementById('current-user-name');
-const statusIndicator = document.querySelector('.status-indicator');
-
-// 1. Ramen runt gubben (matchar din CSS .user-avatar)
-if (sideAvatar) {
-sideAvatar.style.border = `2px solid ${profileData.agent_color}`;
-}
-
-// 2. Själva ikonen
-if (sideInitial) {
-sideInitial.innerHTML = AVATAR_ICONS[profileData.avatar_id];
-sideInitial.style.color = profileData.agent_color;
-
-// Tvinga SVG:n att passa sidebarens lilla cirkel
-const svg = sideInitial.querySelector('svg');
-if (svg) {
-svg.style.width = '20px';  // Justerad för 32px container
-svg.style.height = '20px';
-svg.style.display = 'block';
-}
-}
-
-// 3. Namnet
-if (sideName) {
-sideName.innerText = profileData.display_name || formatName(currentUser.username);
-}
-
-// 4. Status (Grön prick)
-if (statusIndicator) {
-statusIndicator.style.backgroundColor = '#2ecc71';
-}
-
+if (sideName) sideName.innerText = profileData.display_name || formatName(currentUser.username);
 overlay.style.display = 'none';
-if (typeof showToast === 'function') showToast("✅ Profilen uppdaterad!");
-
-} catch (e) {
-alert("Något gick fel: " + e.message);
-saveBtn.innerText = "Spara ändringar";
-saveBtn.disabled = false;
-}
+if (typeof showToast === 'function') showToast("✅ Profilen sparad!");
+} catch (e) { alert("Fel: " + e.message); }
 };
 }
+
 
 /* ==========================================================
 FAS 3: ADMIN MASTER MODE - KONSOLIDERAD v4.0
@@ -4419,13 +4595,13 @@ actionContainer.innerHTML = '';
 if (tab === 'users') {
 listTitle.innerText = "Personal";
 if (isSupportAgent()) {
-actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewAgentForm()" title="Ny Agent"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></button>`;
+actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewAgentForm()" title="Ny Agent" style="margin-right: 24px !important;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></button>`;
 }
 renderAdminUserList();
 } else if (tab === 'offices') {
 listTitle.innerText = "Kontorsnätverk";
 if (isSupportAgent()) {
-actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewOfficeForm()" title="Nytt Kontor"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="13" height="18"/><path d="M21 15V9"/><path d="M21 3v3"/><line x1="19" y1="6" x2="23" y2="6"/><line x1="9" y1="9" x2="9" y2="9"/><line x1="13" y1="9" x2="13" y2="9"/><line x1="9" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="13" y2="14"/></svg></button>`;
+actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewOfficeForm()" title="Nytt Kontor" style="margin-right: 24px !important;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="13" height="18"/><path d="M21 15V9"/><path d="M21 3v3"/><line x1="19" y1="6" x2="23" y2="6"/><line x1="9" y1="9" x2="9" y2="9"/><line x1="13" y1="9" x2="13" y2="9"/><line x1="9" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="13" y2="14"/></svg></button>`;
 }
 renderAdminOfficeList();
 } else if (tab === 'config') {
@@ -4509,36 +4685,33 @@ Intern support: <strong style="color:var(--text-primary); opacity:1;">it@atlas.s
 async function renderAdminUserList() {
 const listContainer = document.getElementById('admin-main-list');
 listContainer.innerHTML = '<div class="spinner-small"></div>';
-
 try {
 const res = await fetch(`${SERVER_URL}/api/admin/users`, { headers: fetchHeaders });
-
 if (!res.ok) throw new Error(`Serverfel: ${res.status}`);
-
 const users = await res.json();
-
-// Sortera: A-Ö
 users.sort((a, b) => (a.display_name || a.username).localeCompare(b.display_name || b.username, 'sv'));
-
 listContainer.innerHTML = users.map(u => {
+
 const isAdmin = (u.role === 'support' || u.role === 'admin');
 const agentColor = u.agent_color || '#0071e3';
 const displayName = u.display_name || formatName(u.username);
 
 return `
-<div class="admin-mini-card" onclick="openAdminUserDetail('${u.username}', this)" style="--agent-color: ${agentColor}">
-<div class="msg-avatar" style="width:32px; height:32px; border: 2px solid ${agentColor};">
+<div class="admin-mini-card" onclick="openAdminUserDetail('${u.username}', this)" 
+style="--agent-color: ${agentColor}; position: relative;">
+<div style="width:32px; height:32px; position:relative; flex-shrink:0;">
 ${getAvatarBubbleHTML(u, "100%")}
+${u.is_online ? '<div style="position:absolute; bottom:0; right:0; width:8px; height:8px; border-radius:50%; background:#4cd964; box-shadow:0 0 5px #4cd964; border:1px solid #1e1e1e; z-index:1;"></div>' : ''}
 </div>
-<div style="flex: 1; overflow: hidden;">
-<div style="font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-${displayName}
+<div style="flex: 1; overflow: hidden; padding-left: 6px;">
+<div style="display:flex; align-items:center; gap:6px;">
+<span style="font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${displayName}</span>
+${u.status_text ? `<span style="font-size:10px; color:var(--accent-primary); opacity:0.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;" title="${u.status_text}">💬 ${u.status_text.substring(0, 40)}</span>` : ''}
 </div>
-<div style="font-size: 10px; color: var(--text-secondary); opacity: 0.7;">
+<div style="font-size:10px; color:var(--text-secondary); opacity:0.7;">
 ${isAdmin ? '★ ADMIN' : 'AGENT'} • @${u.username}
 </div>
 </div>
-${u.is_online ? '<div style="width:8px; height:8px; border-radius:50%; background:#4cd964; box-shadow: 0 0 5px #4cd964;"></div>' : ''}
 </div>`;
 }).join('');
 } catch (e) {
@@ -4592,7 +4765,7 @@ const readOnly = !isSupportAgent(); // Agent ser i läsläge
 
 // --- ADMIN ACTIONS (HEADERN) ---
 const actionsHTML = readOnly ? `
-<button class="notes-trigger-btn footer-icon-btn"
+<button id="agent-detail-notes-btn" class="notes-trigger-btn footer-icon-btn"
 data-id="agent_${u.username}"
 onclick="openNotesModal('agent_${u.username}')"
 style="color:${styles.main}"
@@ -4600,15 +4773,27 @@ title="Interna anteckningar om agenten">
 ${UI_ICONS.NOTES}
 </button>
 ` : `
-<button class="notes-trigger-btn footer-icon-btn"
+<button id="agent-detail-notes-btn" class="notes-trigger-btn footer-icon-btn"
 data-id="agent_${u.username}"
 onclick="openNotesModal('agent_${u.username}')"
 style="color:${styles.main}"
 title="Interna anteckningar om agenten">
 ${UI_ICONS.NOTES}
 </button>
-<button class="footer-icon-btn" onclick="resetUserPassword('${u.id}', '${u.username}')" title="Återställ lösenord">🔑</button>
-<button class="footer-icon-btn danger" onclick="deleteUser('${u.id}', '${u.username}')" title="Radera användare">🗑️</button>
+
+<button id="agent-detail-edit-btn" class="footer-icon-btn" 
+onclick='openNewAgentForm(${JSON.stringify(u)})' 
+title="Redigera profil" 
+style="color:${styles.main}">
+${ADMIN_UI_ICONS.EDIT}
+</button>
+
+<button class="footer-icon-btn danger" 
+onclick="deleteUser('${u.id}', '${u.username}')" 
+title="Radera användare" 
+style="color:#ff453a; border-color:rgba(255,69,58,0.3);">
+${UI_ICONS.TRASH}
+</button>
 `;
 
 // --- TITEL & PILLS ---
@@ -4636,7 +4821,11 @@ ${getAvatarBubbleHTML(u, "100%")}
 <div class="detail-footer-toolbar" style="background:transparent; border:none; padding:0; gap:10px;">
 <div style="margin-right:15px; text-align:right;">
 <div style="font-size:9px; opacity:0.5; color:var(--text-secondary);">PROFILFÄRG</div>
-<input type="color" value="${styles.main}" ${readOnly ? 'disabled style="width:28px; height:28px; pointer-events:none; opacity:0.4; background:none; border:none;"' : 'onchange="updateAgentColor(\'' + u.username + '\', this.value)" style="width:28px; height:28px; cursor:pointer; background:none; border:none;"'}>
+<input type="color" value="${styles.main}" 
+${readOnly ? 
+'disabled style="width:28px; height:28px; pointer-events:none; opacity:0.4; background:none; border:none;"' : 
+`oninput="(function(c){const h=document.querySelector('#admin-detail-content .detail-header-top');if(h){h.style.borderBottomColor=c;h.style.background='linear-gradient(90deg,'+c+'22,transparent)';}const a=document.querySelector('#admin-detail-content .msg-avatar');if(a)a.style.borderColor=c;clearTimeout(window._agentColorTimer);window._agentColorTimer=setTimeout(()=>updateAgentColor('${u.username}',c),700);})(this.value)" style="width:28px; height:28px; cursor:pointer; background:none; border:none;"`
+}>
 </div>
 ${actionsHTML}
 </div>
@@ -4646,7 +4835,7 @@ ${actionsHTML}
 
 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
 <div class="admin-stat-card">
-<div style="font-size:32px; font-weight:800; color:#4cd964;">${stats.active || 0}</div>
+<div style="font-size:32px; font-weight:800; color:${styles.main};">${stats.active || 0}</div>
 <div style="font-size:11px; opacity:0.5; text-transform:uppercase;">AKTIVA ÄRENDEN</div>
 </div>
 
@@ -4676,14 +4865,14 @@ ${adminEscapeHtml(displayName)}
 <h4 style="margin:0 0 12px 0; font-size:10px; opacity:0.5; text-transform:uppercase;">Pågående ärenden för agent</h4>
 <div class="scroll-list" style="background:rgba(0,0,0,0.1); border-radius:12px; padding:10px; border:1px solid var(--border-color);">
 ${tickets.length ? tickets.map((t, idx) => `
-<div class="admin-ticket-preview" onclick="openTicketReader(${idx})"
-style="--atp-color: ${styles.main}">
+<div class="admin-ticket-preview" onclick="openTicketReader(${idx}, '${username}')"
+style="border-left: 3px solid ${styles.main} !important; --atp-color: ${styles.main} !important;">
 <div style="flex:1; min-width:0;">
 <div class="atp-sender">${t.sender || 'Okänd kund'}</div>
 <div class="atp-subject">${t.subject || 'Inget ämne'}</div>
 </div>
-<button class="atp-note-btn"
-onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')"
+<button class="atp-note-btn" 
+onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')" 
 title="Intern anteckning">
 ${UI_ICONS.NOTES}
 </button>
@@ -4693,6 +4882,7 @@ ${UI_ICONS.NOTES}
 </div>
 </div>
 </div>`;
+
 detailBox.querySelectorAll('.atp-note-btn').forEach(btn => {
 btn.style.setProperty('color', 'var(--atp-color, #0071e3)', 'important');
 });
@@ -4701,6 +4891,7 @@ console.error("Admin Agent Detail Error:", e);
 detailBox.innerHTML = '<div class="template-item-empty" style="color:#ff453a;">Kunde inte ladda agentprofilen.</div>';
 }
 }
+
 // ===================================================
 // ADMIN - RENDER OFFICE LIST
 // ===================================================
@@ -4786,53 +4977,46 @@ const readOnly = !isSupportAgent(); // Agent ser i läsläge
 detailBox.innerHTML = `
 <div class="detail-container" id="box-office-master">
 
-<div class="detail-header-top" id="office-detail-header" style="border-bottom: 1px solid ${oc}; background: linear-gradient(90deg, ${oc}1a, transparent);">
+<div class="detail-header-top" id="office-detail-header" style="border-bottom: 2px solid ${oc}; background: linear-gradient(90deg, ${oc}1a, transparent); padding: 15px 20px;">
 <div style="display:flex; align-items:center; gap:20px;">
-<div class="profile-avatar" id="office-avatar-circle" style="width: 70px; height: 70px; background: ${oc}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+<div class="profile-avatar" id="office-avatar-circle" style="width: 54px; height: 54px; background: ${oc}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; font-weight: 800; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
 ${data.city ? data.city.substring(0,1) : 'K'}
 </div>
 <div>
-<h2 class="detail-subject">${data.city} ${data.area ? '- ' + data.area : ''}</h2>
-<div class="header-pills-row">
-<div class="pill office-pill-accent" style="border-color:${oc}; color:${oc};">KONTOR</div>
-<div class="pill">ID: ${tag}</div>
+<h2 class="detail-subject" style="margin-bottom: 4px;">${data.city} ${data.area ? '- ' + data.area : ''}</h2>
+<div class="header-pills-row" style="display:flex; align-items:center; gap:8px;">
+<div class="pill office-pill-accent" style="border-color:${oc}; color:${oc}; font-weight: 800;">KONTOR</div>
+
+<div class="pill" style="border-color:${oc}66; color:${oc}; opacity: 0.8; font-family: monospace;">ID: ${tag}</div>
+
+<button class="notes-trigger-btn footer-icon-btn"
+data-id="office_${tag}"
+onclick="openNotesModal('office_${tag}')"
+style="color:${oc}; padding: 4px 8px;"
+title="Interna anteckningar om kontoret">
+${UI_ICONS.NOTES}
+</button>
 </div>
 </div>
 </div>
 
 <div class="detail-footer-toolbar" style="background:transparent; border:none; padding:0; gap:10px;">
-<button class="notes-trigger-btn footer-icon-btn"
-data-id="office_${tag}"
-onclick="openNotesModal('office_${tag}')"
-style="color:${oc}"
-title="Interna anteckningar om kontoret">
-${UI_ICONS.NOTES}
-</button>
-
-<button class="btn-glass-icon" onclick="toggleEditMode('box-office-master')" id="edit-mode-trigger" title="Redigera kontorsuppgifter" style="display:${readOnly ? 'none' : 'flex'}">
-${ADMIN_UI_ICONS.EDIT}
-</button>
-<div class="save-actions" style="display: none; gap: 8px;">
-<button class="btn-glass-icon" data-action="cancel" onclick="cancelEdit('box-office-master')" title="Avbryt">
-${ADMIN_UI_ICONS.CANCEL}
-</button>
-<button class="btn-glass-icon" data-action="save" onclick="saveOfficeSection('${tag}', 'all')" title="Spara allt">
-${ADMIN_UI_ICONS.SAVE}
-</button>
-</div>
 <button class="btn-glass-icon" onclick="deleteOffice('${tag}')" title="Radera kontor permanent"
 style="color:#ff453a; border-color:rgba(255,69,58,0.3); display:${readOnly ? 'none' : 'flex'}">
 ${ADMIN_UI_ICONS.DELETE}
 </button>
+</button>
 </div>
 </div>
-
 <div class="detail-body" style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; padding:25px; overflow-y:auto; flex:1; min-height:0;">
 
 <div style="display: flex; flex-direction: column; gap: 20px;">
 
 <div class="glass-panel" id="box-contact" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
-<h4 style="margin: 0 0 15px 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Kontaktuppgifter</h4>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+<h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Kontaktuppgifter</h4>
+<button class="admin-lock-btn" onclick="unlockOfficeSection('box-contact', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
+</div>
 <div style="display: grid; gap: 12px;">
 <input type="text" id="inp-phone" class="filter-input" value="${data.contact?.phone || ''}" disabled placeholder="Telefon">
 <input type="text" id="inp-email" class="filter-input" value="${data.contact?.email || ''}" disabled placeholder="E-post">
@@ -4855,7 +5039,10 @@ ${data.office_color || '#0071e3'}
 </div>
 
 <div class="glass-panel" id="box-prices" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
-<h4 style="margin:0 0 15px 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Tjänster & Priser</h4>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+<h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Tjänster & Priser</h4>
+<button class="admin-lock-btn" onclick="unlockOfficeSection('box-prices', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
+</div>
 <div class="price-list" style="display: grid; gap: 8px;" id="price-list-grid">
 ${data.prices ? data.prices.map((p, idx) => `
 <div class="price-row" data-service-idx="${idx}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
@@ -4889,7 +5076,10 @@ onclick="this.closest('.price-row').remove(); window._adminFormDirty=true;">×</
 </div>
 
 <div class="glass-panel" id="box-booking" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
-<h4 style="margin: 0 0 15px 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Bokningslänkar</h4>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+<h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Bokningslänkar</h4>
+<button class="admin-lock-btn" onclick="unlockOfficeSection('box-booking', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
+</div>
 <div style="display:grid; gap:10px;">
 ${[['CAR','Bil'], ['MC','MC'], ['AM','AM/Moped']].map(([key, label]) => `
 <div style="display:flex; align-items:center; gap:10px;">
@@ -4903,9 +5093,12 @@ style="flex:1;">
 </div>
 
 <div class="glass-panel" id="box-desc" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
-<h4 style="margin: 0 0 10px 0; color: ${oc}; font-size:11px; text-transform:uppercase;">AI Kunskap (Beskrivning)</h4>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+<h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase;">AI Kunskap (Beskrivning)</h4>
+<button class="admin-lock-btn" onclick="unlockOfficeSection('box-desc', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
+</div>
 <textarea id="inp-desc" class="filter-input" style="width: 100%; height: 120px; resize: none;" disabled>${data.description || ''}</textarea>
-<div style="font-size: 10px; opacity: 0.4; margin-top: 8px;">💡 Denna text används av Atlas för att svara på frågor om kontoret.</div>
+<div style="font-size: 12px; opacity: 0.4; margin-top: 8px;">💡 Denna text används av Atlas AI för att svara på frågor om kontoret.</div>
 </div>
 </div>
 
@@ -4914,15 +5107,16 @@ style="flex:1;">
 <h4 style="margin: 0 0 15px 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Aktiva Ärenden (${tickets.length})</h4>
 <div class="scroll-list">
 ${tickets.length ? tickets.map((t, idx) => `
-<div class="admin-ticket-preview" onclick="openTicketReader(${idx})"
-style="--atp-color: ${oc}">
+<div class="admin-ticket-preview" onclick="openTicketReader(${idx}, '${tag}')" 
+style="border-left: 3px solid ${oc} !important; --atp-color: ${oc} !important;">
 <div style="flex:1; min-width:0;">
 <div class="atp-sender">${t.sender || 'Okänd kund'}</div>
 <div class="atp-subject">${t.subject || 'Inget ämne'}</div>
 </div>
-<button class="atp-note-btn"
-onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')"
-title="Intern anteckning">
+<button class="atp-note-btn" 
+onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')" 
+title="Intern anteckning"
+style="color:${oc} !important;">
 ${UI_ICONS.NOTES}
 </button>
 </div>
@@ -5059,13 +5253,18 @@ renderMyTickets?.();         // Ärendekort i Mina Ärenden
 renderInbox?.();             // Ärendekort i Inkorg
 showToast('🎨 Kontorsfärg sparad');
 }
+
 } catch (e) {
 console.error('[OfficeColor] Auto-spara misslyckades:', e);
 }
 }, 700);
 };
 
-window.saveOfficeSection = async (tag, section) => {
+
+// =============================================================================
+// SPARA SEKTION NÄR DU REDIGERAR ETT KONTORS INFO
+// =============================================================================
+window.saveOfficeSection = async (tag) => {
 try {
 const res = await fetch(`${SERVER_URL}/api/knowledge/${tag}`, { headers: fetchHeaders });
 const currentData = await res.json();
@@ -5093,11 +5292,16 @@ const inp = row.querySelector('.price-inp');
 if (!inp) return;
 const newService = inp.getAttribute('data-new-service');
 const idx = inp.getAttribute('data-idx');
+
 if (newService) {
-// Ny tjänst tillagd i editläge
-remainingPrices.push({ service_name: newService, price: parseInt(inp.value) || 0, keywords: [] });
+// NY TJÄNST: Läs in de inbakade keywordsen från HTML-raden
+let kw = [];
+try {
+kw = JSON.parse(row.getAttribute('data-keywords') || '[]');
+} catch(e) {}
+remainingPrices.push({ service_name: newService, price: parseInt(inp.value) || 0, currency: "SEK", keywords: kw });
 } else if (idx !== null && currentData.prices[idx]) {
-// Existerande tjänst — bevara keywords, uppdatera pris
+// EXISTERANDE TJÄNST: bevara keywords från filen, uppdatera bara pris
 remainingPrices.push({ ...currentData.prices[idx], price: parseInt(inp.value) || 0 });
 }
 });
@@ -5110,13 +5314,17 @@ body: JSON.stringify(currentData)
 });
 
 if (saveRes.ok) {
+window._adminFormDirty = false; // Markerar formuläret som sparat
 showToast("✅ Kontorsdata sparad!");
 await preloadOffices();
 renderMyTickets?.();
 renderInbox?.();
-openAdminOfficeDetail(tag);
+openAdminOfficeDetail(tag, null); // Laddar om och låser vyn automatiskt
 }
-} catch (e) { console.error("Admin Save Error:", e); }
+} catch (e) { 
+console.error("Admin Save Error:", e); 
+showToast("❌ Ett fel uppstod vid sparning.");
+}
 };
 
 } catch (e) {
@@ -5126,33 +5334,77 @@ detailBox.innerHTML = '<div class="template-item-empty">Kunde inte ladda kontors
 }
 
 // =============================================================================
-// ADMIN — TILLÄGG B: LÄGG TILL TJÄNST PÅ KONTOR
+// NY FUNKTION: Lås upp specifik sektion i Kontorsvyn
+// =============================================================================
+window.unlockOfficeSection = function(sectionId, tag, btnElement) {
+const box = document.getElementById(sectionId);
+if (!box) return;
+
+// Lås upp alla fält i denna sektion (utom färgväljaren som redan är klickbar)
+box.querySelectorAll('input, textarea').forEach(el => {
+if (el.id === 'inp-office-color') return;
+el.disabled = false;
+el.style.borderColor = 'var(--accent-primary)';
+el.style.background = 'rgba(255,255,255,0.08)';
+});
+
+// Om det är pris-sektionen, visa lägg-till-knappen och papperskorgarna
+if (sectionId === 'box-prices') {
+const addBtn = document.getElementById('add-service-btn');
+if (addBtn) addBtn.style.display = 'block';
+box.querySelectorAll('.price-delete-btn').forEach(btn => btn.style.display = 'flex');
+}
+
+// Ändra knappen till "Spara" och gör den aktiv
+btnElement.innerHTML = '💾 Spara';
+btnElement.classList.add('unlocked');
+
+// Byt onclick till att anropa spar-funktionen
+btnElement.onclick = () => {
+window.saveOfficeSection(tag);
+btnElement.innerHTML = '⏳ Sparar...'; // Visuell laddnings-feedback
+};
+};
+
+// =============================================================================
+// ADMIN — TILLÄGG B: LÄGG TILL TJÄNST PÅ KONTOR (Uppdaterad)
 // =============================================================================
 async function openAddServicePanel() {
 const panel = document.getElementById('add-service-panel');
 const select = document.getElementById('new-service-select');
+const priceInput = document.getElementById('new-service-price');
 if (!panel || !select) return;
 
 panel.style.display = 'block';
 select.innerHTML = '<option value="">Hämtar tjänster...</option>';
+if (priceInput) priceInput.value = ''; // Nollställ prisfältet!
 
 try {
 const res = await fetch(`${SERVER_URL}/api/admin/available-services`, { headers: fetchHeaders });
 const services = await res.json();
 
-// Filtrera bort tjänster som redan finns
+// Spara globalt så confirmAddService kan läsa keywords senare
+window._availableServiceTemplates = services; 
+
+// Filtrera bort tjänster som redan finns på kontoret
 const existing = new Set(
 Array.from(document.querySelectorAll('#price-list-grid [data-service-name]'))
 .map(el => el.getAttribute('data-service-name'))
 );
 
-const available = services.filter(s => !existing.has(s));
+const available = services.filter(s => !existing.has(s.service_name));
 if (!available.length) {
 select.innerHTML = '<option value="">Inga nya tillgängliga tjänster</option>';
 } else {
 select.innerHTML = '<option value="">— Välj tjänst —</option>' +
-available.map(s => `<option value="${s}">${s}</option>`).join('');
+available.map(s => `<option value="${adminEscapeHtml(s.service_name)}">${adminEscapeHtml(s.service_name)}</option>`).join('');
 }
+
+// Tvinga prisrutan att bli tom om man byter tjänst
+select.onchange = () => {
+if (priceInput) priceInput.value = '';
+};
+
 } catch (e) {
 select.innerHTML = '<option value="">Kunde inte hämta tjänster</option>';
 }
@@ -5168,21 +5420,30 @@ const price = parseInt(priceInput.value) || 0;
 
 if (!serviceName) { showToast('Välj en tjänst i listan.'); return; }
 
+// Hitta tjänsten i vår globala template-lista för att få ut dess keywords
+const template = (window._availableServiceTemplates || []).find(s => s.service_name === serviceName);
+const keywords = template ? template.keywords : [];
+
 const grid = document.getElementById('price-list-grid');
 if (!grid) return;
 
-const newIdx = `new-${Date.now()}`;
 const row = document.createElement('div');
 row.className = 'price-row';
-row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(0,100,0,0.15); border-radius:8px; border:1px solid rgba(0,200,100,0.2);';
+row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(0,100,0,0.15); border-radius:8px; border:1px solid rgba(0,200,100,0.2); margin-bottom:4px;';
+
+// BAKAR IN KEYWORDS i DOM:en så vi kan plocka dem när vi sparar
+row.setAttribute('data-keywords', JSON.stringify(keywords));
+
 row.innerHTML = `
-<span style="font-size:13px;" data-service-name="${serviceName}">${serviceName} <span style="font-size:10px; opacity:0.5;">(ny)</span></span>
+<span style="font-size:13px;" data-service-name="${adminEscapeHtml(serviceName)}">${adminEscapeHtml(serviceName)} <span style="font-size:10px; opacity:0.5;">(ny)</span></span>
 <div style="display:flex; align-items:center; gap:8px;">
-<input type="number" class="price-inp" data-new-service="${serviceName}" value="${price}" style="width:80px; text-align:right; border-color:rgba(0,200,100,0.4); background:rgba(0,200,100,0.05);">
+<input type="number" class="price-inp" data-new-service="${adminEscapeHtml(serviceName)}" value="${price}" style="width:80px; text-align:right; border-color:rgba(0,200,100,0.4); background:rgba(0,200,100,0.05); color:white; padding:4px; border-radius:4px;">
 <span style="font-size:11px; opacity:0.6;">SEK</span>
+<button class="price-delete-btn" onclick="this.closest('.price-row').remove(); window._adminFormDirty=true;" style="width:22px; height:22px; border-radius:50%; background:rgba(255,69,58,0.15); border:1px solid rgba(255,69,58,0.3); color:#ff453a; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; padding:0; line-height:1;">×</button>
 </div>
 `;
 grid.appendChild(row);
+window._adminFormDirty = true;
 
 // Stäng panelen
 document.getElementById('add-service-panel').style.display = 'none';
@@ -5572,7 +5833,7 @@ const sectionsHtml = data.sections.map((s, idx) => `
 <div class="admin-kb-section-card" id="kb-section-${idx}">
 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;">
 <input type="text" class="admin-kb-title-field" id="kb-title-${idx}" value="${adminEscapeHtml(s.title)}" readonly>
-<button class="admin-lock-btn" onclick="unlockBasfaktaSection(${idx})" id="kb-lock-${idx}" style="flex-shrink:0;">🔒 Lås upp</button>
+<button class="admin-lock-btn" onclick="unlockBasfaktaSection(${idx})" id="kb-lock-${idx}" style="flex-shrink:0;">🔒 Lås upp</button><button id="kb-delete-${idx}" onclick="deleteBasfaktaSection(${idx})" style="flex-shrink:0; background:transparent; border:1px solid rgba(255,69,58,0.3); color:rgba(255,69,58,0.6); border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer;" title="Ta bort sektion">🗑</button>
 </div>
 <textarea class="admin-kb-answer-field" id="kb-answer-${idx}" rows="3" readonly>${adminEscapeHtml(s.answer)}</textarea>
 <div class="admin-kb-keywords">
@@ -5592,6 +5853,9 @@ detailBox.innerHTML = `
 <button class="header-button icon-only-btn" title="Spara fil" onclick="saveBasfaktaFile('${adminEscapeHtml(filename)}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
 </div>
 <div id="kb-sections-container">${sectionsHtml}</div>
+<div style="margin-top:16px; text-align:center;">
+<button onclick="addNewBasfaktaSection()" style="background:transparent; border:1px dashed rgba(0,113,227,0.4); color:rgba(0,113,227,0.7); border-radius:8px; padding:8px 20px; font-size:12px; cursor:pointer; width:100%;" title="Lägg till ny sektion">＋ Lägg till sektion</button>
+</div>
 </div>
 </div>
 `;
@@ -5600,6 +5864,9 @@ detailBox.innerHTML = `<div style="padding:20px; color:#ff6b6b;">Kunde inte ladd
 }
 }
 
+// =============================================================================
+// unlockBasfaktaSection (lägger till inline Spara-knapp)
+// =============================================================================
 function unlockBasfaktaSection(idx) {
 const card = document.getElementById(`kb-section-${idx}`);
 const titleField = document.getElementById(`kb-title-${idx}`);
@@ -5612,18 +5879,83 @@ titleField.removeAttribute('readonly');
 answerField.removeAttribute('readonly');
 answerField.style.height = 'auto';
 answerField.style.height = answerField.scrollHeight + 'px';
-lockBtn.textContent = '🔓 Upplåst';
+lockBtn.textContent = '💾 Spara';
 lockBtn.classList.add('unlocked');
 
 lockBtn.onclick = () => {
-card.classList.remove('unlocked');
-titleField.setAttribute('readonly', '');
-answerField.setAttribute('readonly', '');
-lockBtn.textContent = '🔒 Lås upp';
-lockBtn.classList.remove('unlocked');
-lockBtn.onclick = () => unlockBasfaktaSection(idx);
+const detailBox = document.getElementById('admin-detail-content');
+const filenameAttr = detailBox ? detailBox.getAttribute('data-kb-file') : null;
+if (filenameAttr) saveBasfaktaFile(filenameAttr);
 };
 }
+
+// =============================================================================
+// NY FUNKTION: deleteBasfaktaSection — tar bort en sektion från DOM och sparar
+// =============================================================================
+function deleteBasfaktaSection(idx) {
+const card = document.getElementById(`kb-section-${idx}`);
+if (!card) return;
+
+if (!confirm('Är du säker på att du vill ta bort denna sektion permanent?')) return;
+
+card.remove();
+
+// Omindexera kvarvarande sektioner (uppdatera id:n)
+const container = document.getElementById('kb-sections-container');
+if (!container) return;
+const remaining = container.querySelectorAll('.admin-kb-section-card');
+remaining.forEach((c, newIdx) => {
+c.id = `kb-section-${newIdx}`;
+const t = c.querySelector('[id^="kb-title-"]');
+const a = c.querySelector('[id^="kb-answer-"]');
+const l = c.querySelector('[id^="kb-lock-"]');
+const d = c.querySelector('[id^="kb-delete-"]');
+if (t) t.id = `kb-title-${newIdx}`;
+if (a) a.id = `kb-answer-${newIdx}`;
+if (l) { l.id = `kb-lock-${newIdx}`; l.onclick = () => unlockBasfaktaSection(newIdx); }
+if (d) { d.id = `kb-delete-${newIdx}`; d.onclick = () => deleteBasfaktaSection(newIdx); }
+});
+
+// Spara direkt
+const detailBox = document.getElementById('admin-detail-content');
+const filenameAttr = detailBox ? detailBox.getAttribute('data-kb-file') : null;
+if (filenameAttr) saveBasfaktaFile(filenameAttr);
+}
+
+// =============================================================================
+// NY FUNKTION: addNewBasfaktaSection — lägger till ny sektionskort längst ner
+// =============================================================================
+function addNewBasfaktaSection() {
+const container = document.getElementById('kb-sections-container');
+if (!container) return;
+
+const existing = container.querySelectorAll('.admin-kb-section-card');
+const newIdx = existing.length;
+
+const newCard = document.createElement('div');
+newCard.className = 'admin-kb-section-card unlocked';
+newCard.id = `kb-section-${newIdx}`;
+newCard.style.cssText = 'border: 1px solid rgba(0,113,227,0.4); background: rgba(0,113,227,0.06);';
+newCard.innerHTML = `
+<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;">
+<input type="text" class="admin-kb-title-field" id="kb-title-${newIdx}" placeholder="Rubrik / Fråga..." style="flex:1;">
+<button class="admin-lock-btn unlocked" id="kb-lock-${newIdx}" style="flex-shrink:0;" onclick="
+(function(){
+const detailBox = document.getElementById('admin-detail-content');
+const fn = detailBox ? detailBox.getAttribute('data-kb-file') : null;
+if(fn) saveBasfaktaFile(fn);
+})()
+">💾 Spara</button>
+</div>
+<textarea class="admin-kb-answer-field" id="kb-answer-${newIdx}" rows="3" placeholder="Skriv svaret här..."></textarea>
+<div class="admin-kb-keywords" style="opacity:0.4; font-size:11px; margin-top:6px;">Keywords genereras automatiskt av AI vid sparning</div>
+`;
+
+container.appendChild(newCard);
+newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+document.getElementById(`kb-title-${newIdx}`)?.focus();
+}
+
 
 async function saveBasfaktaFile(filename) {
 const detailBox = document.getElementById('admin-detail-content');
@@ -5672,11 +6004,16 @@ if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = `<svg width="18" he
 }
 
 //=============================================
-//======OPEN TICKET READER CONTENT admin
+//====== OPEN TICKET READER CONTENT admin
 //=============================================
-function openTicketReader(idx) {
+function openTicketReader(idx, overrideTag = null) {
+// 1. Spara index och den valda färg-taggen globalt
 currentTicketIdx = idx;
+window._currentAdminOverrideTag = overrideTag; 
+
 let modal = document.getElementById('atlas-reader-modal');
+
+// 2. Skapa modalen om den inte finns
 if (!modal) { 
 modal = document.createElement('div');
 modal.id = 'atlas-reader-modal';
@@ -5684,39 +6021,80 @@ modal.className = 'custom-modal-overlay';
 modal.style.zIndex = '10000';
 document.body.appendChild(modal);
 }
+
+// 3. Rendera innehållet (nu med kännedom om overrideTag)
 renderReaderContent();
+
+// 4. Visa modalen och aktivera stängning vid klick utanför
 modal.style.display = 'flex';
 modal.style.pointerEvents = 'all';
-modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+modal.onclick = (e) => { 
+if (e.target === modal) modal.style.display = 'none'; 
+};
 }
 
 // =============================================
-// ======RENDER READER CONTENT admin
+// ====== RENDER READER CONTENT admin
 // =============================================
 function renderReaderContent() {
-const t = currentTicketList[currentTicketIdx];
+// 1. Säkra att vi har ett ärende och en modal att skriva till
+const list = (typeof currentTicketList !== 'undefined') ? currentTicketList : (window._currentAdminTickets || []);
+const t = list[currentTicketIdx];
 if (!t) return;
 
 const modal = document.getElementById('atlas-reader-modal');
 if (!modal) return;
 
-// Kontorsfärger för bubblor och avatar
-const rStyles = getAgentStyles(t.routing_tag || t.owner);
+// 2. BRANDING: Använd sparad overrideTag (t.ex. Patric/Gävle) om den finns
+const brandingTag = window._currentAdminOverrideTag || t.routing_tag || t.owner;
+const rStyles = getAgentStyles(brandingTag);
+
 const readerTitle = resolveTicketTitle(t);
 const readerSubtitle = resolveLabel(t.routing_tag || t.owner);
 
+// 3. OSCAR BERG-FIX: Förbered meddelandehistoriken
+let messageHistoryHtml = '';
+const messages = t.messages || [];
+
+if (messages.length === 0) {
+// Om historiken är tom, använd last_message
+const raw = t.last_message || t.content || "Ingen historik ännu.";
+const clean = raw.replace(/^📧\s*(\((Mail|Svar)\):)?\s*/i, '');
+messageHistoryHtml = `
+<div style="display:flex; flex-direction:column; align-items:flex-start;">
+<div style="font-size:9px; font-weight:700; letter-spacing:0.8px; opacity:0.4; margin-bottom:3px; color:${rStyles.main};">INKOMMET MEDDELANDE</div>
+<div style="max-width:78%; padding:9px 13px; border-radius:3px 12px 12px 12px; background:${rStyles.bubbleBg}; border:1px solid ${rStyles.border}; font-size:13px; line-height:1.55; color:var(--text-primary); word-break:break-word;">
+${clean}
+</div>
+</div>`;
+} else {
+// Om historik finns, loopa igenom meddelandena
+messageHistoryHtml = messages.map(m => {
+const isUser = m.role === 'user'; 
+const cleanText = (m.content || m.text || '').replace(/^📧\s*(\((Mail|Svar)\):)?\s*/i, '');
+return `
+<div style="display:flex; flex-direction:column; align-items:${isUser ? 'flex-start' : 'flex-end'};">
+<div style="font-size:9px; font-weight:700; letter-spacing:0.8px; opacity:0.4; margin-bottom:3px; color:${isUser ? rStyles.main : 'rgba(255,255,255,0.7)'};">
+${isUser ? 'KUND' : 'AGENT'}
+</div>
+<div style="max-width:78%; padding:9px 13px; border-radius:${isUser ? '3px 12px 12px 12px' : '12px 3px 12px 12px'}; background:${isUser ? rStyles.bubbleBg : 'rgba(255,255,255,0.05)'}; border:1px solid ${isUser ? rStyles.border : 'rgba(255,255,255,0.07)'}; font-size:13px; line-height:1.55; color:var(--text-primary); word-break:break-word;">
+${cleanText}
+</div>
+</div>`;
+}).join('');
+}
+
+// 4. BYGG MODALENS HTML
 modal.innerHTML = `
 <div class="glass-modal-box glass-effect" style="width:680px; max-width:92vw; border-top:3px solid ${rStyles.main}; position:relative; display:flex; flex-direction:column; max-height:82vh; overflow:hidden;">
 
-<!-- Stängknapp -->
-<button onclick="document.getElementById('atlas-reader-modal').style.display='none'"
+<button id="reader-close-btn"
 style="position:absolute; top:10px; right:10px; z-index:10; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.4); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;"
 onmouseover="this.style.background='rgba(255,69,58,0.45)';this.style.color='white'"
 onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='rgba(255,255,255,0.4)'">
 ${ADMIN_UI_ICONS.CANCEL}
 </button>
 
-<!-- Header: Avatar + Titel + Notes-ikon + Nav-pilar -->
 <div style="padding:14px 48px 14px 16px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; background:linear-gradient(90deg, ${rStyles.main}14, transparent);">
 <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
 <div style="width:40px; height:40px; border-radius:10px; background:${rStyles.main}; color:black; font-weight:800; font-size:17px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 12px ${rStyles.main}55;">
@@ -5728,7 +6106,6 @@ ${(readerTitle || 'U').substring(0,1).toUpperCase()}
 </div>
 </div>
 
-<!-- Verktyg: Notes + separator + Nav -->
 <div style="display:flex; align-items:center; gap:5px; flex-shrink:0; margin-left:10px;">
 <button class="btn-glass-icon notes-trigger-btn"
 onclick="openNotesModal('${t.conversation_id}')"
@@ -5737,14 +6114,14 @@ style="color:${rStyles.main}; border-color:${rStyles.border};">
 ${UI_ICONS.NOTES}
 </button>
 <div style="width:1px; height:16px; background:rgba(255,255,255,0.1); margin:0 3px;"></div>
-<button class="btn-glass-icon" onclick="navigateReader(-1)"
+<button class="btn-glass-icon" id="reader-prev"
 ${currentTicketIdx === 0 ? 'disabled' : ''}
 style="${currentTicketIdx === 0 ? 'opacity:0.22; pointer-events:none;' : ''}"
 title="Föregående ärende">
 ${ADMIN_UI_ICONS.ARROW_LEFT}
 </button>
 <span style="font-size:11px; font-weight:700; opacity:0.55; font-family:monospace; color:white; min-width:32px; text-align:center;">${currentTicketIdx + 1}/${currentTicketList.length}</span>
-<button class="btn-glass-icon" onclick="navigateReader(1)"
+<button class="btn-glass-icon" id="reader-next"
 ${currentTicketIdx === currentTicketList.length - 1 ? 'disabled' : ''}
 style="${currentTicketIdx === currentTicketList.length - 1 ? 'opacity:0.22; pointer-events:none;' : ''}"
 title="Nästa ärende">
@@ -5753,25 +6130,10 @@ ${ADMIN_UI_ICONS.ARROW_RIGHT}
 </div>
 </div>
 
-<!-- Meddelandehistorik med scroll -->
 <div style="flex:1; overflow-y:auto; padding:16px 18px; display:flex; flex-direction:column; gap:10px; min-height:0;">
-${(t.messages || []).length === 0
-? `<div style="text-align:center; padding:40px 0; opacity:0.35; font-size:13px;">Ingen historik ännu.</div>`
-: (t.messages || []).map(m => {
-const isUser = m.role === 'user';
-return `
-<div style="display:flex; flex-direction:column; align-items:${isUser ? 'flex-start' : 'flex-end'};">
-<div style="font-size:9px; font-weight:700; letter-spacing:0.8px; opacity:0.4; margin-bottom:3px; color:${isUser ? rStyles.main : 'rgba(255,255,255,0.7)'};">
-${isUser ? 'KUND' : 'AGENT'}
-</div>
-<div style="max-width:78%; padding:9px 13px; border-radius:${isUser ? '3px 12px 12px 12px' : '12px 3px 12px 12px'}; background:${isUser ? rStyles.bubbleBg : 'rgba(255,255,255,0.05)'}; border:1px solid ${isUser ? rStyles.border : 'rgba(255,255,255,0.07)'}; font-size:13px; line-height:1.55; color:var(--text-primary); word-break:break-word;">
-${m.content || m.text || ''}
-</div>
-</div>`;
-}).join('')}
+${messageHistoryHtml}
 </div>
 
-<!-- Footer: Ikon-knappar -->
 <div style="padding:9px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.3); display:flex; justify-content:flex-end; align-items:center; gap:8px; flex-shrink:0;">
 <button class="btn-glass-icon" onclick="assignTicketFromReader('${t.conversation_id}')"
 title="Tilldela ärende till agent"
@@ -5785,11 +6147,11 @@ ${UI_ICONS.CLAIM}
 </button>
 </div>
 
-</div>`;
+</div>`; // Slut på modal.innerHTML
 
+// --- 5. LOGIK FÖR KNAPPAR (Kopplas efter att HTML injicerats) ---
 modal.style.pointerEvents = 'all';
 
-// Logiken måste ligga KVAR inuti funktionen för att hitta knapparna!
 const closeBtn = modal.querySelector('#reader-close-btn');
 if (closeBtn) {
 closeBtn.style.pointerEvents = 'all';
@@ -5808,7 +6170,7 @@ if (nextBtn && currentTicketIdx < currentTicketList.length - 1) {
 nextBtn.style.pointerEvents = 'all';
 nextBtn.onclick = () => navigateReader(1);
 }
-} // <--- 🟢 HÄR ska den stängas! ENDAST EN klammer här.
+} // <--- Denna stänger hela funktionen renderReaderContent
 
 // ===================================================
 // ADMIN - NAVIGERA READER
@@ -5825,12 +6187,15 @@ renderReaderContent();
 // ADMIN: WINDOW FUNKTIONER & HJÄLPLOGIK
 // =============================================================================
 // =============================================================================
-// FIX 1b — openNewAgentForm (inline i detaljvyn)
+// OpenNewAgentForm (inline i detaljvyn) 25/2
 // =============================================================================
-window.openNewAgentForm = async function() {
+window.openNewAgentForm = async function(editUser = null) {
 window._adminFormDirty = false;
-// Lokalt state för formuläret (closure)
-let _avatarId = 0;
+const isEdit = !!editUser;
+
+// Lokalt state för formuläret (closure) - anpassas om vi redigerar
+let _avatarId = isEdit ? (editUser.avatar_id ?? 0) : 0;
+const activeColor = isEdit ? editUser.agent_color : '#0071e3';
 
 document.querySelectorAll('.admin-mini-card').forEach(c => c.classList.remove('active'));
 const detailBox = document.getElementById('admin-detail-content');
@@ -5847,25 +6212,30 @@ if (r.ok) offices = await r.json();
 } catch (_) {}
 
 // Bygg avatar-grid HTML
-const avatarGridHTML = AVATAR_ICONS.map((svg, i) => `
-<div class="new-agent-avatar-opt" data-id="${i}" style="cursor:pointer;padding:8px;border-radius:10px;border:2px solid ${i===0?'#0071e3':'rgba(255,255,255,0.08)'};background:${i===0?'rgba(0,113,227,0.15)':'rgba(255,255,255,0.03)'};display:flex;align-items:center;justify-content:center;color:${i===0?'#0071e3':'rgba(255,255,255,0.35)'};transition:all 0.15s;width:36px;height:36px;box-sizing:border-box;">
+const avatarGridHTML = AVATAR_ICONS.map((svg, i) => {
+const isSelected = i === _avatarId;
+const color = isEdit ? editUser.agent_color : '#0071e3';
+return `
+<div class="new-agent-avatar-opt ${isSelected ? 'nao-selected' : ''}" data-id="${i}" style="cursor:pointer;padding:8px;border-radius:10px;border:2px solid ${isSelected ? color : 'rgba(255,255,255,0.08)'};background:${isSelected ? color + '15' : 'rgba(255,255,255,0.03)'};display:flex;align-items:center;justify-content:center;color:${isSelected ? color : 'rgba(255,255,255,0.35)'};transition:all 0.15s;width:36px;height:36px;box-sizing:border-box;">
 <span style="display:flex;width:20px;height:20px;">${svg}</span>
-</div>`).join('');
+</div>`}).join('');
 
 // Bygg kontors-badges HTML
-const officeBadgesHTML = offices.map(o => `
-<label class="new-agent-office-label" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);transition:all 0.15s;">
-<input type="checkbox" class="new-agent-office-cb" value="${adminEscapeHtml(o.routing_tag)}" data-city="${adminEscapeHtml(o.city)}" style="accent-color:var(--accent-primary);width:14px;height:14px;" onchange="window._toggleNewAgentOffice(this);">
+const officeBadgesHTML = offices.map(o => {
+const isChecked = isEdit && editUser.routing_tag && editUser.routing_tag.split(',').map(t => t.trim()).includes(o.routing_tag);
+const color = isEdit ? editUser.agent_color : '#0071e3';
+return `
+<label class="new-agent-office-label" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 10px;border-radius:8px;background:${isChecked ? color + '22' : 'rgba(255,255,255,0.03)'};border:1px solid ${isChecked ? color : 'rgba(255,255,255,0.07)'};transition:all 0.15s; color:${isChecked ? 'white' : 'inherit'};">
+<input type="checkbox" class="new-agent-office-cb" value="${adminEscapeHtml(o.routing_tag)}" data-city="${adminEscapeHtml(o.city)}" ${isChecked ? 'checked' : ''} style="accent-color:${color};width:14px;height:14px;" onchange="window._toggleNewAgentOffice(this);">
 <span>${adminEscapeHtml(o.city)}${o.area ? ' – ' + adminEscapeHtml(o.area) : ''}</span>
-</label>`).join('');
+</label>`}).join('');
 
 detailBox.innerHTML = `
 <div class="detail-container" style="padding:24px;width:100%;overflow-y:auto;box-sizing:border-box;">
-<!-- Header -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:16px;">
-<h2 style="margin:0;font-size:18px;color:white;font-weight:700;">Skapa ny agent</h2>
+<h2 style="margin:0;font-size:18px;color:white;font-weight:700;">${isEdit ? 'Redigera agent' : 'Skapa ny agent'}</h2>
 <div style="display:flex;gap:8px;">
-<button class="btn-glass-icon" style="color:#4cd964;border-color:rgba(76,217,100,0.4);" onclick="saveNewAgent()" title="Spara agent">${ADMIN_UI_ICONS.SAVE}</button>
+<button class="btn-glass-icon" style="color: ${styles.main}; border-color: ${styles.main}66;" onclick="saveNewAgent(${isEdit ? "'" + editUser.id + "'" : 'null'})" title="Spara agent">${ADMIN_UI_ICONS.SAVE}</button>
 <button class="btn-glass-icon" style="color:#ff453a;border-color:rgba(255,69,58,0.4);" onclick="renderAdminUserList();document.getElementById('admin-placeholder').style.display='flex';document.getElementById('admin-detail-content').style.display='none';" title="Avbryt">${ADMIN_UI_ICONS.CANCEL}</button>
 </div>
 </div>
@@ -5878,44 +6248,45 @@ detailBox.innerHTML = `
 
 <!-- Live avatar-preview (med inbyggd färgväljare) -->
 <div style="display:flex;align-items:center;gap:16px;padding:14px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);">
-<div id="new-agent-avatar-preview" style="width:64px;height:64px;border-radius:50%;background:#0071e3;display:flex;align-items:center;justify-content:center;color:white;font-size:26px;font-weight:700;box-shadow:0 0 20px rgba(0,113,227,0.45);flex-shrink:0;transition:background 0.2s,box-shadow 0.2s;">A</div>
-<div style="flex:1;min-width:0;">
-<div id="new-agent-preview-name" style="font-size:14px;font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ny agent</div>
-<div id="new-agent-preview-role" style="font-size:11px;opacity:0.5;margin-top:2px;">Agent</div>
+<div id="new-agent-avatar-preview" style="width:64px;height:64px;border-radius:50%;background:${activeColor};display:flex;align-items:center;justify-content:center;color:white;font-size:26px;font-weight:700;box-shadow:0 0 20px ${activeColor}66;flex-shrink:0;transition:background 0.2s,box-shadow 0.2s;">
+${isEdit ? `<span style="display:flex;width:32px;height:32px;color:white;">${AVATAR_ICONS[_avatarId]}</span>` : 'A'}
 </div>
-<!-- Färgväljare inbyggd i preview-kortet -->
+<div style="flex:1;min-width:0;">
+<div id="new-agent-preview-name" style="font-size:14px;font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${isEdit ? (editUser.display_name || editUser.username) : 'Ny agent'}</div>
+<div id="new-agent-preview-role" style="font-size:11px;opacity:0.5;margin-top:2px;">${isEdit ? editUser.role.toUpperCase() : 'Agent'}</div>
+</div>
 <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
-<input type="color" id="new-agent-color" value="#0071e3"
+<input type="color" id="new-agent-color" value="${activeColor}"
 style="width:34px;height:34px;border:none;background:transparent;cursor:pointer;border-radius:8px;padding:2px;"
 title="Välj accentfärg" oninput="window._updateNewAgentColor(this.value);">
-<span id="new-agent-color-hex" style="font-family:monospace;font-size:10px;opacity:0.5;">#0071e3</span>
+<span id="new-agent-color-hex" style="font-family:monospace;font-size:10px;opacity:0.5;">${activeColor}</span>
 </div>
 </div>
 
 <!-- Användarnamn -->
 <div>
 <label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Användarnamn *</label>
-<input id="new-agent-username" class="filter-input" type="text" placeholder="t.ex. anna.karlsson"
+<input id="new-agent-username" class="filter-input" type="text" value="${isEdit ? editUser.username : ''}" ${isEdit ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : 'placeholder="t.ex. anna.karlsson"'}
 oninput="window._adminFormDirty=true; const prev=document.getElementById('new-agent-avatar-preview'); if(prev&&!prev.querySelector('svg'))prev.textContent=this.value.charAt(0).toUpperCase()||'A'; const dn=document.getElementById('new-agent-displayname'); if(dn&&!dn._touched){dn.placeholder='t.ex. Anna Karlsson'; document.getElementById('new-agent-preview-name').textContent=this.value||'Ny agent';}">
 </div>
 
 <!-- Visningsnamn -->
 <div>
 <label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Visningsnamn</label>
-<input id="new-agent-displayname" class="filter-input" type="text" placeholder="t.ex. Anna Karlsson"
+<input id="new-agent-displayname" class="filter-input" type="text" value="${isEdit ? (editUser.display_name || '') : ''}" placeholder="t.ex. Anna Karlsson"
 oninput="window._adminFormDirty=true; this._touched=true; document.getElementById('new-agent-preview-name').textContent=this.value||document.getElementById('new-agent-username').value||'Ny agent';">
 </div>
 
 <!-- Lösenord -->
 <div>
-<label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Lösenord *</label>
-<input id="new-agent-password" class="filter-input" type="password" placeholder="Välj ett starkt lösenord"
+<label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Lösenord ${isEdit ? '(lämna tomt för att behålla)' : '*'}</label>
+<input id="new-agent-password" class="filter-input" type="password" placeholder="${isEdit ? 'Nytt lösenord' : 'Välj ett starkt lösenord'}"
 oninput="window._adminFormDirty=true; window._checkNewAgentPw();">
 </div>
 
 <!-- Bekräfta lösenord -->
 <div>
-<label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Bekräfta lösenord *</label>
+<label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Bekräfta lösenord ${isEdit ? '' : '*'}</label>
 <input id="new-agent-password2" class="filter-input" type="password" placeholder="Upprepa lösenordet"
 oninput="window._adminFormDirty=true; window._checkNewAgentPw();">
 <div id="pw-match-indicator" style="font-size:11px;margin-top:5px;height:14px;"></div>
@@ -5926,8 +6297,8 @@ oninput="window._adminFormDirty=true; window._checkNewAgentPw();">
 <label style="font-size:10px;text-transform:uppercase;opacity:0.5;display:block;margin-bottom:6px;letter-spacing:0.05em;">Roll</label>
 <select id="new-agent-role" class="filter-input" style="cursor:pointer;"
 onchange="document.getElementById('new-agent-preview-role').textContent=this.options[this.selectedIndex].text; window._adminFormDirty=true;">
-<option value="agent">Agent</option>
-<option value="support">Support / Admin</option>
+<option value="agent" ${isEdit && editUser.role === 'agent' ? 'selected' : ''}>Agent</option>
+<option value="support" ${isEdit && (editUser.role === 'support' || editUser.role === 'admin') ? 'selected' : ''}>Support / Admin</option>
 </select>
 </div>
 
@@ -6012,10 +6383,13 @@ if (label) { label.style.background = color + '22'; label.style.borderColor = co
 // Avatar-grid klick-hantering
 const avatarGrid = document.getElementById('new-agent-avatar-grid');
 if (avatarGrid) {
-// Markera första som vald
+// Om vi inte redigerar, markera första som vald som standard. 
+// Om vi redigerar sköts detta redan av avatarGridHTML.
+if (!isEdit) {
 const first = avatarGrid.querySelector('.new-agent-avatar-opt');
 if (first) first.classList.add('nao-selected');
 _avatarId = 0;
+}
 
 avatarGrid.addEventListener('click', function(e) {
 const opt = e.target.closest('.new-agent-avatar-opt');
@@ -6050,47 +6424,101 @@ window._adminFormDirty = true;
 window._newAgentState = { getAvatarId: () => _avatarId };
 };
 
-window.saveNewAgent = async function() {
+// ======================================================
+// SPARA AGENT (Hybrid: Skapa & Uppdatera)
+// ======================================================
+window.saveNewAgent = async function(editUserId = null) {
+const isEdit = !!editUserId;
 const username = (document.getElementById('new-agent-username')?.value || '').trim().toLowerCase();
 const displayNameRaw = (document.getElementById('new-agent-displayname')?.value || '').trim();
-const display_name = displayNameRaw || username; // Fallback: användarnamn om visningsnamn är tomt
+const display_name = displayNameRaw || username;
 const password = document.getElementById('new-agent-password')?.value || '';
 const password2 = document.getElementById('new-agent-password2')?.value || '';
 const role = document.getElementById('new-agent-role')?.value || 'agent';
 const agentColor = document.getElementById('new-agent-color')?.value || '#0071e3';
-const avatarId = window._newAgentState?.getAvatarId() ?? 0;
+
+// Hämta valt avatar-ID direkt från DOM (eftersom det är där vi sparar markeringen)
+const selectedAvatar = document.querySelector('.new-agent-avatar-opt.nao-selected');
+const avatarId = selectedAvatar ? parseInt(selectedAvatar.dataset.id) : 0;
 
 // Samla valda kontor
 const checkedOffices = document.querySelectorAll('.new-agent-office-cb:checked');
 const routingTag = [...checkedOffices].map(cb => cb.value).filter(Boolean).join(',') || null;
 
-// Validering
+// --- VALIDERING ---
 if (!username) { showToast('Ange ett användarnamn.'); return; }
-if (!password) { showToast('Ange ett lösenord.'); return; }
+
+// Lösenord krävs bara vid nyskapande, eller om man faktiskt skrivit något i fältet
+if (!isEdit && !password) { showToast('Ange ett lösenord för den nya agenten.'); return; }
+
+if (password) {
 if (password.length < 6) { showToast('Lösenordet måste vara minst 6 tecken.'); return; }
 if (password !== password2) { showToast('Lösenorden matchar inte.'); return; }
-
-try {
-const res = await fetch(`${SERVER_URL}/api/admin/create-user`, {
-method: 'POST', headers: fetchHeaders,
-body: JSON.stringify({ username, password, role, display_name, agent_color: agentColor, avatar_id: avatarId, routing_tag: routingTag })
-});
-if (res.ok) {
-window._adminFormDirty = false;
-window._newAgentState = null;
-showToast(`✅ Agenten @${username} skapad!`);
-await renderAdminUserList();
-openAdminUserDetail(username, null);
-} else {
-const err = await res.json().catch(() => ({}));
-showToast('Fel: ' + (err.error || 'Kunde inte skapa agent.'));
 }
-} catch (e) { showToast('Anslutningsfel.'); }
+
+// Bestäm endpoint och payload
+const url = isEdit ? `${SERVER_URL}/api/admin/update-user-profile` : `${SERVER_URL}/api/admin/create-user`;
+const payload = { 
+username, 
+role, 
+display_name, 
+agent_color: agentColor, 
+avatar_id: avatarId, 
+routing_tag: routingTag 
 };
 
-// =============================================================================
+// Lägg bara till lösenordet i skicket om det faktiskt har ändrats/fyllts i
+if (password) payload.password = password;
+if (isEdit) payload.userId = editUserId;
+
+try {
+const res = await fetch(url, {
+method: 'POST', 
+headers: fetchHeaders,
+body: JSON.stringify(payload)
+});
+
+if (res.ok) {
+window._adminFormDirty = false;
+
+// --- UPPDATERA LOKAL CACHE (Säkrar att UI:t stämmer direkt) ---
+// Vi letar upp agenten i vår lokala cache och skriver över med de nya värdena
+const cached = usersCache.find(u => u.username === username);
+if (cached) {
+cached.display_name = display_name;
+cached.role = role;
+cached.agent_color = agentColor;
+cached.avatar_id = avatarId;
+cached.routing_tag = routingTag;
+} else if (!isEdit) {
+// Om det är en helt ny agent kan vi behöva hämta hela listan på nytt
+// eller pusha det nya objektet (renderAdminUserList gör oftast detta åt oss)
+}
+
+showToast(isEdit ? `✅ Profilen för @${username} är uppdaterad!` : `✅ Agenten @${username} skapad!`);
+
+// 1. Rendera om listan till vänster (så färg/namn uppdateras där)
+await renderAdminUserList();
+
+renderMyTickets?.();
+renderInbox?.();
+
+// 2. Öppna detaljvyn igen (så headern och ikonerna uppdateras med den nya cachen)
+openAdminUserDetail(username, null);
+
+} else {
+const err = await res.json().catch(() => ({}));
+showToast('Fel: ' + (err.error || 'Kunde inte spara agenten.'));
+}
+} catch (e) { 
+console.error("Save Agent Error:", e);
+showToast('Anslutningsfel vid sparning.'); 
+}
+};
+
+// ======================================================
 // FIX 1c — openNewOfficeForm (inline i detaljvyn)
-// =============================================================================
+// ======================================================
 window.openNewOfficeForm = async function() {
 window._adminFormDirty = false;
 window._newOfficePrices = [];
@@ -6142,7 +6570,7 @@ detailBox.innerHTML = `
 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:16px;">
 <h2 style="margin:0; font-size:18px; color:white;">Nytt kontor</h2>
 <div style="display:flex; gap:8px;">
-<button id="no-save-btn" class="btn-glass-icon" style="color:#4cd964; border-color:rgba(76,217,100,0.4);" onclick="saveNewOffice()" title="Spara">${ADMIN_UI_ICONS.SAVE}</button>
+<button id="no-save-btn" class="btn-glass-icon" style="color: ${oc}; border-color: ${oc}66;" onclick="saveNewOffice()" title="Spara">${ADMIN_UI_ICONS.SAVE}</button>
 <button class="btn-glass-icon" style="color:#ff453a; border-color:rgba(255,69,58,0.4);" onclick="renderAdminOfficeList(); document.getElementById('admin-placeholder').style.display='flex'; document.getElementById('admin-detail-content').style.display='none';" title="Avbryt">${ADMIN_UI_ICONS.CANCEL}</button>
 </div>
 </div>
@@ -6426,42 +6854,83 @@ const res = await fetch(`${SERVER_URL}/api/admin/update-role-by-username`, { met
 if (res.ok) showToast(`Rättigheter uppdaterade för @${username}`);
 };
 
+// =============================================================================
+// UI: UPPDATERA FÄRGER PÅ AGENTER
+// =============================================================================
 window.updateAgentColor = async (username, color) => {
-const res = await fetch(`${SERVER_URL}/api/admin/update-agent-color`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ username, color }) });
+const res = await fetch(`${SERVER_URL}/api/admin/update-agent-color`, { 
+method: 'POST', 
+headers: fetchHeaders, 
+body: JSON.stringify({ username, color }) 
+});
+
 if (res.ok) {
 showToast("Färg sparad");
-// Uppdatera detaljhuvudet live utan att behöva ladda om hela vyn
+
+// --- START PÅ LIVE-UPPDATERING I UI ---
 const detailBox = document.getElementById('admin-detail-content');
 if (detailBox) {
+// 1. Uppdatera Headern
 const headerTop = detailBox.querySelector('.detail-header-top');
 if (headerTop) {
 headerTop.style.borderBottomColor = color;
 headerTop.style.background = `linear-gradient(90deg, ${color}22, transparent)`;
 }
+
+// 2. Uppdatera Avatar-ringen OCH ikonen inuti (Det du störde dig på!)
 const avatar = detailBox.querySelector('.msg-avatar');
 if (avatar) {
 avatar.style.borderColor = color;
-// Uppdatera inner SVG-ikon/initial-bokstavens färg live
-const innerDiv = avatar.querySelector('div');
-if (innerDiv) innerDiv.style.color = color;
+// Här letar vi upp div:en inuti bubblan. 
+// Eftersom din getAvatarBubbleHTML har "color: ${color}" på inner-diven, uppdaterar vi den här:
+const innerIconContainer = avatar.querySelector('.avatar-inner-icon') || avatar.querySelector('.user-avatar div');
+if (innerIconContainer) {
+innerIconContainer.style.color = color;
 }
+}
+
+// 3. Uppdatera de nya SVG-ikonerna (Notes och Pennan)
+const notesBtn = document.getElementById('agent-detail-notes-btn');
+const editBtn = document.getElementById('agent-detail-edit-btn');
+if (notesBtn) notesBtn.style.color = color;
+if (editBtn) editBtn.style.color = color;
+
+// 4. Uppdatera Piller & Ärendekort
 const rolePill = detailBox.querySelector('.header-pills-row .pill');
-if (rolePill) { rolePill.style.borderColor = color; rolePill.style.color = color; }
-// Uppdatera ärendekortens vänsterlinje live
+if (rolePill) { 
+rolePill.style.borderColor = color; 
+rolePill.style.color = color; 
+}
+
 detailBox.querySelectorAll('.admin-ticket-preview').forEach(card => {
 card.style.setProperty('--atp-color', color);
 });
 }
-// Uppdatera usersCache direkt för att getAgentStyles returnerar rätt färg utan reload
+
+// KIRURGISK FIX: Synka med sidofältet om det är JAG (currentUser) som ändras
+if (currentUser && username === currentUser.username) {
+currentUser.agent_color = color;
+localStorage.setItem('atlas_user', JSON.stringify(currentUser));
+
+const sideAvatarRing = document.querySelector('.sidebar-footer .user-avatar');
+const sideIconContainer = document.querySelector('.sidebar-footer .user-initial');
+if (sideAvatarRing) sideAvatarRing.style.setProperty('border-color', color, 'important');
+if (sideIconContainer) sideIconContainer.style.setProperty('background-color', color, 'important');
+}
+
+// --- DIN ORIGINAL-LOGIK (RÖR EJ) ---
 const cached = usersCache.find(u => u.username === username);
 if (cached) cached.agent_color = color;
+
 renderAdminUserList();
-// Uppdatera ärendekort i Inkorg och Mina Ärenden
 renderMyTickets?.();
 renderInbox?.();
 }
 };
 
+// =============================================================================
+// UI: UPPDATERA ROLLER PÅ AGENTER
+// =============================================================================
 window.updateAgentOfficeRole = async (username, tag, isChecked, checkboxEl) => {
 const res = await fetch(`${SERVER_URL}/api/admin/update-agent-offices`, {
 method: 'POST',
@@ -6482,6 +6951,9 @@ label.style.color = isChecked ? '#b09fff' : '';
 }
 };
 
+// =============================================================================
+// UI: SPARA KONTORS FAKTA
+// =============================================================================
 async function saveOfficeKnowledge(tag) {
 try {
 const resGet = await fetch(`${SERVER_URL}/api/knowledge/${tag}`, { headers: fetchHeaders });
@@ -6927,12 +7399,17 @@ missingInHtml.push(`DOM.${key}`);
 }
 }
 
-// 2. Kontrollera om de ID:n vi bytt namn på faktiskt har CSS-regler
+// 2. Kontrollera om de ID:n vi använder faktiskt har CSS-regler
 const criticalIDs = ['#chat-form', '#my-chat-input', '#my-ticket-chat-form', '#my-ticket-chat-input', '#my-chat-scroll-area'];
+
 criticalIDs.forEach(id => {
 const el = document.querySelector(id);
-if (el) {
+
+// Kontrollera endast styling om elementet faktiskt är synligt (inte dolt i en annan vy)
+// offsetParent är null om elementet eller dess förälder har display: none
+if (el && el.offsetParent !== null) { 
 const styles = window.getComputedStyle(el);
+
 // Om elementet inte har någon specifik bakgrund eller padding som vi förväntar oss från style.css
 if (styles.padding === '0px' && styles.display === 'block') {
 missingStyles.push(id);
@@ -7108,7 +7585,7 @@ await loadTemplates();
 // =====================================
 // 5. Tema (SÄKRAD)
 // =====================================
-// FIX: Applicera alltid sparad tema — DOM.themeSelect existerar EJ än (Om-vyn ej rendererad)
+// Applicera alltid sparad tema — DOM.themeSelect existerar EJ än (Om-vyn ej rendererad)
 // changeTheme() använder DOM.themeStylesheet (<link id="theme-stylesheet">) som alltid finns i HTML
 const savedThemeOnLoad = localStorage.getItem('atlas-theme') || 'standard-theme';
 changeTheme(savedThemeOnLoad);
@@ -7194,7 +7671,7 @@ if (DOM.myTicketChatInput) DOM.myTicketChatInput.value = '';
 }
 
 // ==================================================
-// SÄKRAD LADDNING AV FUNKTIONER (DOM CONTENT LOADED)
+// LADDNING AV FUNKTIONER (DOM CONTENT LOADED)
 // ==================================================
 // 1. Sök mallar (SÄKRAD)
 const tSearch = document.getElementById('template-search-input'); 
@@ -7335,7 +7812,7 @@ headers: fetchHeaders
 if (!res.ok) throw new Error("Kunde inte radera mallen via webben");
 }
 
-// SÄKRAD NOLLSTÄLLNING: Kontrollera att elementen finns innan vi rör dem
+// Kontrollera att elementen finns innan vi rör dem
 const editorForm = document.getElementById('template-editor-form');
 if (editorForm) {
 editorForm.reset();
@@ -7383,19 +7860,21 @@ if (input) input.focus();
 }
 
 // 3. BYT TEMA: Ctrl + Alt + T
-// FIX: Använder lokal tema-lista istället för DOM-elementet (som bara finns efter Om-vyn renderats)
+// Använder lokal tema-lista istället för DOM-elementet (som bara finns efter Om-vyn renderats)
 if (cmdKey && e.altKey && e.key.toLowerCase() === 't') {
 e.preventDefault();
 const THEME_CYCLE = [
 'standard-theme',
 'onyx-ultradark',
+'carbon-theme',
 'apple-dark',
 'apple-road',
 'atlas-nebula',
 'sunset-horizon',
 'atlas-navigator'
 ];
-const currentTheme = localStorage.getItem('atlas-theme') || 'standard-theme';
+
+const currentTheme = localStorage.getItem('atlas-theme') || 'atlas-navigator';
 const currentIdx   = THEME_CYCLE.indexOf(currentTheme);
 const nextTheme    = THEME_CYCLE[(currentIdx + 1) % THEME_CYCLE.length];
 changeTheme(nextTheme);
@@ -7681,7 +8160,7 @@ e.target.style.display = 'none';
 });
 document.addEventListener('keydown', (e) => {
 if (e.key === 'Escape') {
-// 🔧 F4.1: Stäng inte modalen om fokus är inne i ett textfält
+// Stäng inte modalen om fokus är inne i ett textfält
 const active = document.activeElement;
 if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
 document.querySelectorAll('.custom-modal-overlay').forEach(m => m.style.display = 'none');
@@ -7744,8 +8223,8 @@ modal.innerHTML = `
 Endast behörig personal bör ändra dessa värden.
 </div>
 <ul style="margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px;">
-<li><strong>Agenter</strong> — Skapa, redigera och ta bort supportpersonal. Klicka på 🔑 för att återställa lösenord med en säker tvåstegsmodal. Klicka på färgväljaren för att ändra agentens profilfärg direkt.</li>
-<li><strong>Kontor &amp; Utbildningar</strong> — Hantera kontor, tjänster och priser. Klicka på pennan för att aktivera redigeringsläge.</li>
+<li><strong>Agenter</strong> — Skapa, redigera och ta bort supportpersonal. Klicka på pennan för att redigera profiluppgifter, behörighet eller lösenord. Klicka på färgväljaren för att ändra agentens profilfärg direkt.</li>
+<li><strong>Kontor &amp; Utbildningar</strong> — Hantera kontor, tjänster och priser. Klicka på de enskilda lås-knapparna på varje sektion för att låsa upp redigeringsläge.</li>
 <li><strong>Systemkonfiguration</strong> — AI-trösklar, nätverksinställningar och säkerhet. Känsliga fält (lösenord, API-nycklar) visas maskerade.</li>
 </ul>
 <div style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08); display:grid; gap:6px; font-size:12px;">
@@ -7759,7 +8238,7 @@ Endast behörig personal bör ändra dessa värden.
 </div>
 </div>`;
 document.body.appendChild(modal);
-modal.style.display = 'flex'; // Kritisk rad som saknades — modal var alltid display:none
+modal.style.display = 'flex'; 
 modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 };
 
@@ -7972,9 +8451,12 @@ const displayName = u.display_name || formatName(u.username);
 const avatarHtml = getAvatarBubbleHTML(u, "30px");
 return `
 <div class="agent-card internal-select" onclick="window.selectInternalAgent(this, '${u.username}')"
-style="border-left: 4px solid ${u.agent_color || '#0071e3'}; cursor: pointer; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 6px; display: flex; align-items: center; gap: 10px; transition: background 0.2s;">
+style="border-left: 4px solid ${u.agent_color || '#0071e3'}; box-shadow: inset 0 0 0 9999px ${(u.agent_color || '#0071e3')}08; cursor: pointer; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 6px; display: flex; align-items: center; gap: 10px; transition: background 0.2s;">
 ${avatarHtml}
+<div style="overflow: hidden;">
 <div style="font-size: 11px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${displayName}</div>
+${u.status_text ? `<div style="font-size: 10px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${u.status_text}">💬 ${u.status_text.substring(0, 40)}</div>` : ''}
+</div>
 </div>`;
 }).join('');
 } catch(e) {

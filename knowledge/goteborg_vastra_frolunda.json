@@ -224,5 +224,6 @@
     "MC": null,
     "AM": null
   },
-  "type": "kontor_info"
+  "type": "kontor_info",
+  "office_color": "#2cdd1e"
 }

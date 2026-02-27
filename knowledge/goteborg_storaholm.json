@@ -174,5 +174,6 @@
     "MC": "https://booking.mydrivingacademy.com/widget?vehicleType=car&productType=Bundle&regionId=200005&locationId=200010",
     "AM": null
   },
-  "type": "kontor_info"
+  "type": "kontor_info",
+  "office_color": "#2cdd1e"
 }
