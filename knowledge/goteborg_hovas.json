@@ -1,6 +1,6 @@
 {
   "id": "my_driving_academy_goteborg_hovas",
-  "name": "My Driving Academy – Göteborg – Hovås",
+  "name": "My Driving Academy - Göteborg Hovås",
   "brand": "My Driving Academy",
   "city": "Göteborg",
   "area": "Hovås",
@@ -20,7 +20,9 @@
     "priser",
     "språk",
     "undervisning",
-    "utbildning"
+    "utbildning",
+    "hovås",
+    "my"
   ],
   "contact": {
     "phone": "031-19 99 99",
@@ -38,7 +40,6 @@
     }
   ],
   "services_offered": [
-    "AM",
     "Bil",
     "MC"
   ],
@@ -57,7 +58,9 @@
         "pris",
         "kostnad",
         "Göteborg",
-        "hovås"
+        "hovås",
+        "göteborg",
+        "my"
       ]
     },
     {
@@ -70,7 +73,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -83,7 +87,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -96,7 +101,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -110,7 +116,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -124,7 +131,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -137,7 +145,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -150,7 +159,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -163,7 +173,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -176,7 +187,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -189,7 +201,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -202,7 +215,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -215,7 +229,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -229,7 +244,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -244,7 +260,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -258,7 +275,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -271,7 +289,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -284,7 +303,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -297,7 +317,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -311,7 +332,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -325,7 +347,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -338,7 +361,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -351,7 +375,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     },
     {
@@ -364,14 +389,15 @@
         "pris",
         "kostnad",
         "göteborg",
-        "hovås"
+        "hovås",
+        "my"
       ]
     }
   ],
   "booking_links": {
     "CAR": "https://booking.mydrivingacademy.com/widget?vehicleType=car&productType=Service&regionId=200005&locationId=200099",
     "MC": "https://booking.mydrivingacademy.com/widget?vehicleType=mc&productType=Service&regionId=200005&locationId=200099",
-    "AM": "https://booking.mydrivingacademy.com/widget?vehicleType=moped&productType=Service&regionId=200005&locationId=200099&serviceId=200833"
+    "AM": null
   },
   "type": "kontor_info",
   "office_color": "#b33da9"

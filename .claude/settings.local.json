@@ -4,7 +4,8 @@
       "Bash(node -c:*)",
       "Bash(node --check:*)",
       "Bash(node -e:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(done)"
     ]
   }
 }
