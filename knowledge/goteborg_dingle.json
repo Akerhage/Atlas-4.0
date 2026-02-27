@@ -160,7 +160,7 @@
     }
   ],
   "booking_links": {
-    "CAR": "https://mydrivingacademy.com/dingle/",
+    "CAR": null,
     "MC": null,
     "AM": null
   },

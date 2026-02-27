@@ -19,6 +19,46 @@
 <link id="theme-stylesheet" rel="stylesheet" href="./assets/themes/atlas-navigator/atlas-navigator.css">
 <!-- Quill Rich Text Editor: logik -->
 <script src="./assets/js/quill.js" defer></script>
+<!-- UI-konstanter: AVATAR_ICONS, UI_ICONS, ADMIN_UI_ICONS -->
+<script src="modules/ui-constants.js" defer></script>
+<!-- Styling-utils: getAgentStyles, resolveLabel, formatName, showToast, stripHtml -->
+<script src="modules/styling-utils.js" defer></script>
+<!-- Detail-ui: renderDetailHeader, getVehicleIcon, checkAndResetDetail -->
+<script src="modules/detail-ui.js" defer></script>
+<!-- Modals: atlasConfirm, atlasPrompt, changeTheme, showAssignModal, showProfileSettings, showAdminInfoModal, showNewMailComposer -->
+<script src="modules/modals.js" defer></script>
+<!-- Socket-client: initializeSocket, loadSocketIoScriptWithRetry, setupSocketListeners, updateServerStatusUI, socketAPI -->
+<script src="modules/socket-client.js" defer></script>
+<!-- IPC-bryggor: claimTicket, saveTemplates, deleteTemplate, getAppInfo, saveQA, deleteQA, esc -->
+<script src="modules/ipc-bridges.js" defer></script>
+<!-- Notes-system: openNotesModal, loadNotes, editNote, saveNoteEdit, deleteNote -->
+<script src="modules/notes-system.js" defer></script>
+<!-- Bulk-ops: toggleBulkCard, showBulkToolbar, updateBulkToolbar, exitBulkMode, bulkClaim, bulkArchive -->
+<script src="modules/bulk-ops.js" defer></script>
+<!-- Templates-view: loadTemplates, renderTemplates, openTemplateEditor -->
+<script src="modules/templates-view.js" defer></script>
+<!-- Chat-engine: ChatSession, initChat, handleUserMessage, addBubble, resolveTicketTitle, saveLocalQA -->
+<script src="modules/chat-engine.js" defer></script>
+<!-- Archive-view: renderArchive, populateArchiveDropdowns -->
+<script src="modules/archive-view.js" defer></script>
+<!-- Inbox-view: updateInboxBadge, renderInbox, renderInboxFromTickets, openInboxDetail -->
+<script src="modules/inbox-view.js" defer></script>
+<!-- Tickets-view: renderMyTickets, openMyTicketDetail, attachMyTicketListeners, archiveTicketFromMyTickets -->
+<script src="modules/tickets-view.js" defer></script>
+<!-- Admin-users: renderAdminUserList, openAdminUserDetail -->
+<script src="modules/admin/admin-users.js" defer></script>
+<!-- Admin-offices: renderAdminOfficeList, openAdminOfficeDetail -->
+<script src="modules/admin/admin-offices.js" defer></script>
+<!-- Admin-forms: openNewAgentForm, saveNewAgent, openNewOfficeForm, saveNewOffice -->
+<script src="modules/admin/admin-forms.js" defer></script>
+<!-- Admin-tools: deleteBasfaktaSection, resetUserPassword, deleteUser, deleteOffice -->
+<script src="modules/admin/admin-tools.js" defer></script>
+<!-- Admin-config: renderSystemConfigNav, openSystemConfigSection, renderConfigSection, buildConfigRow, unlockConfigField, saveSystemConfigField -->
+<script src="modules/admin/admin-config.js" defer></script>
+<!-- Admin-audit: renderAboutGrid, renderAdminAbout, auditDOM, masterSystemAudit -->
+<script src="modules/admin/admin-audit.js" defer></script>
+<!-- Admin-core: switchAdminTab, adminEscapeHtml -->
+<script src="modules/admin/admin-core.js" defer></script>
 <!-- Atlas UI-logik: all rendering, socket-hantering, IPC -->
 <script src="./renderer.js" defer></script>
 </head>

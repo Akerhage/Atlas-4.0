@@ -21,3 +21,5 @@ atlas.db-wal
 external/
 .DS_Store
 Thumbs.db
+.env.bak
+*.bak

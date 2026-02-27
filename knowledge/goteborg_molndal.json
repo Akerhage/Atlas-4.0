@@ -1,6 +1,6 @@
 {
   "id": "my_driving_academy_goteborg_molndal",
-  "name": "My Driving Academy - Göteborg – Mölndal",
+  "name": "My Driving Academy - Göteborg Mölndal",
   "brand": "My Driving Academy",
   "city": "Göteborg",
   "area": "Mölndal",
@@ -19,7 +19,8 @@
     "priser",
     "språk",
     "undervisning",
-    "utbildning"
+    "utbildning",
+    "my"
   ],
   "contact": {
     "phone": "0317305460",
@@ -37,9 +38,7 @@
     }
   ],
   "services_offered": [
-    "AM",
-    "Bil",
-    "Släp"
+    "Bil"
   ],
   "languages": [
     "svenska",
@@ -59,7 +58,10 @@
         "pris",
         "kostnad",
         "Göteborg",
-        "Mölndal"
+        "Mölndal",
+        "göteborg",
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -72,7 +74,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -85,7 +88,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -98,7 +102,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -112,7 +117,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -126,7 +132,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -139,7 +146,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -152,7 +160,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -165,7 +174,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -178,7 +188,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -191,7 +202,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -204,7 +216,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -217,7 +230,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -231,7 +245,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -246,7 +261,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -260,7 +276,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -274,7 +291,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     },
     {
@@ -288,14 +306,15 @@
         "pris",
         "kostnad",
         "göteborg",
-        "mölndal"
+        "mölndal",
+        "my"
       ]
     }
   ],
   "booking_links": {
     "CAR": "https://booking.mydrivingacademy.com/widget?vehicleType=car&productType=Bundle&regionId=200005&locationId=11",
     "MC": null,
-    "AM": "https://booking.mydrivingacademy.com/widget?vehicleType=moped&productType=Bundle&regionId=200005&locationId=10&serviceId=470"
+    "AM": null
   },
   "type": "kontor_info",
   "office_color": "#dc1e1e"

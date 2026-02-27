@@ -635,7 +635,7 @@ FÖRBUD
 - Svara aldrig på faktafrågor om körkort/kurser - dessa hanteras av ett annat system.
 
 FALLBACK
-- Om du är osäker: svar kort och vänligt, t.ex. "Jag kan hjälpa med det — ska jag kolla något specifikt åt dig?"
+- Om du är osäker: svara kort och vänligt, t.ex. "Jag har tyvärr ingen information om detta — du kan alltid  klicka på knappen ovan (headsetet) för att prata med support-teamet?"
 
 Svara alltid på svenska.
 Använd **text** (dubbelstjärnor) för att fetmarkera viktiga fakta när det passar.
@@ -676,7 +676,7 @@ Du MÅSTE presentera svaret EXAKT enligt följande mall:
 📧 ${email}
 ${hoursText ? `🕒 Öppettider: ${hoursText}` : ''}
 
-Ring oss gärna om du har frågor!"
+Ring oss gärna om du har frågor, du kan också fortsätta chatten med ditt lokala kontor!"
 ---------------------------------------------------------------------
 `;
 systemPrompt += "\n" + contactCard;
