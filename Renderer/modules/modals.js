@@ -65,7 +65,7 @@ function changeTheme(themeName) {
 // Kolla både globala DOM-objektet och stylesheet-referensen
 const stylesheet = (typeof DOM !== 'undefined' && DOM.themeStylesheet) 
 ? DOM.themeStylesheet 
-: document.getElementById('theme-link');
+: document.getElementById('theme-stylesheet');
 
 if (stylesheet) {
 stylesheet.href = `./assets/themes/${themeName}/${themeName}.css`;

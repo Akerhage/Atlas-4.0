@@ -2334,12 +2334,24 @@ box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1) !important;
 /* =============================================================================
 TEMPLATE ACTION BUTTONS
 ============================================================================= */
-#save-template-btn,
-#delete-template-btn {
+#save-template-btn {
 width: 38px !important;
 height: 38px !important;
 padding: 0 !important;
 display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+border-radius: 8px !important;
+background: rgba(255, 255, 255, 0.05) !important;
+transition: all 0.2s ease !important;
+flex-shrink: 0 !important;
+}
+/* display utan !important: tillåter JS att dölja knappen med element.style.display = 'none' */
+#delete-template-btn {
+width: 38px !important;
+height: 38px !important;
+padding: 0 !important;
+display: flex;
 align-items: center !important;
 justify-content: center !important;
 border-radius: 8px !important;

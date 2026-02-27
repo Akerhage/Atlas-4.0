@@ -5,7 +5,9 @@
       "Bash(node --check:*)",
       "Bash(node -e:*)",
       "Bash(ls:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(node tests/scripts/audit_diagnose.js:*)",
+      "Bash(node:*)"
     ]
   }
 }

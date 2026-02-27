@@ -273,7 +273,8 @@ el.style.background = 'rgba(255,255,255,0.08)';
 });
 // Visa raderingsknapparna på prisrader
 box.querySelectorAll('.price-delete-btn').forEach(btn => btn.style.display = 'flex');
-document.getElementById('edit-mode-trigger').style.display = 'none';
+const editModeTrigger = document.getElementById('edit-mode-trigger');
+if (editModeTrigger) editModeTrigger.style.display = 'none';
 
 const saveActions = box.querySelector('.save-actions');
 if (saveActions) {
