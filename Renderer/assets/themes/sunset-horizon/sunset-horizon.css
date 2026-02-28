@@ -25,7 +25,7 @@ Fil: sunset-horizon/sunset-horizon.css
 --group-bg: linear-gradient(135deg, rgba(255, 107, 157, 0.12), rgba(255, 160, 122, 0.08));
 --group-hover: linear-gradient(135deg, rgba(255, 107, 157, 0.22), rgba(255, 160, 122, 0.15));
 --group-text: #ff6b9d;
---group-border: rgba(255, 107, 157, 0.35);
+--group-border: rgba(255, 107, 157, 0.15);
 --group-shadow: rgba(255, 107, 157, 0.2);
 --group-shadow-hover: rgba(255, 160, 122, 0.4);
 --item-bg: rgba(61, 34, 85, 0.9);

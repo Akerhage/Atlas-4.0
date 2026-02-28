@@ -105,7 +105,7 @@ return `
 <div class="detail-header-top" style="background: linear-gradient(90deg, ${styles.bg || styles.main + '1a'}, transparent); border-bottom: 2px solid ${styles.main} !important;">
 <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
 <div style="flex: 1; overflow: hidden;">
-<div class="detail-subject">
+<div class="detail-subject" style="color:${styles.main} !important;">
 ${resolveTicketTitle(item)} ${aiBadge}
 </div>
 <div style="display: flex; gap: 6px; flex-wrap: wrap; font-size:11px; margin-top:6px;">

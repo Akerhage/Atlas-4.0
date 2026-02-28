@@ -23,55 +23,89 @@ const soundOn = State.soundEnabled !== false;
 const themeOptions = [
 ['standard-theme', 'Standard Vision ⚡'],
 ['onyx-ultradark', 'Atlas Onyx ⚫'],
-['carbon-theme', 'Atlas Carbon ⬛'], // 🔥 LÄGG TILL DENNA RAD HÄR
+['carbon-theme', 'Atlas Carbon ⬛'],
 ['apple-dark', 'Apple Dark 🍏'],
-['apple-road', 'Apple Road 		'],
+['apple-road', 'Apple Road 🛣️'],
 ['atlas-nebula', 'Atlas Nebula 🌌'],
 ['sunset-horizon', 'Sunset Horizon 🌅'],
 ['atlas-navigator', 'Atlas Navigator 🧭'],
 ].map(([v, l]) => `<option value="${v}"${savedTheme === v ? ' selected' : ''}>${l}</option>`).join('');
 
 grid.innerHTML = `
-<div class="about-cell glass-effect" style="overflow-y: auto;">
-<h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Snabbguide &amp; Genvägar</h3>
+<!-- CELL 1: Tangentbordsgenvägar (övre vänster) -->
+<div class="about-cell glass-effect">
+<h3 class="about-cell-title">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
+Tangentbordsgenvägar
+</h3>
+<div class="about-shortcut-list">
+<div class="about-shortcut-row">
+<div class="about-kbd-group"><kbd>Ctrl</kbd><span class="about-kbd-sep">+</span><kbd>P</kbd></div>
+<span class="about-shortcut-label">Starta ny fråga</span>
+</div>
+<div class="about-shortcut-row">
+<div class="about-kbd-group"><kbd>Ctrl</kbd><span class="about-kbd-sep">+</span><kbd>Alt</kbd><span class="about-kbd-sep">+</span><kbd>P</kbd></div>
+<span class="about-shortcut-label">Ställ följdfråga</span>
+</div>
+<div class="about-shortcut-row">
+<div class="about-kbd-group"><kbd>Ctrl</kbd><span class="about-kbd-sep">+</span><kbd>C</kbd></div>
+<span class="about-shortcut-label">Kopiera markerad text</span>
+</div>
+<div class="about-shortcut-row">
+<div class="about-kbd-group"><kbd>Ctrl</kbd><span class="about-kbd-sep">+</span><kbd>S</kbd></div>
+<span class="about-shortcut-label">Spara mall</span>
+</div>
+<div class="about-shortcut-row">
+<div class="about-kbd-group"><kbd>Ctrl</kbd><span class="about-kbd-sep">+</span><kbd>Alt</kbd><span class="about-kbd-sep">+</span><kbd>T</kbd></div>
+<span class="about-shortcut-label">Byt tema</span>
+</div>
+</div>
+</div>
+
+<!-- CELL 2: Snabbguide / Arbetsflöde (övre höger) -->
+<div class="about-cell glass-effect">
+<h3 class="about-cell-title">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+Snabbguide — Arbetsflöde
+</h3>
 <div class="guide-section">
 <div class="guide-step"><span class="step-number">1</span><div class="step-content"><strong>Markera text</strong> i vilket program som helst</div></div>
 <div class="guide-step"><span class="step-number">2</span><div class="step-content"><strong>Tryck Ctrl+C</strong> för att kopiera</div></div>
 <div class="guide-step"><span class="step-number">3</span><div class="step-content"><strong>Tryck Ctrl+P</strong> för att starta <strong>NY</strong> chatt</div></div>
 <div class="guide-step"><span class="step-number">4</span><div class="step-content"><strong>Ctrl+Alt+P</strong> för att ställa en <strong>följdfråga</strong></div></div>
 </div>
-<div class="shortcut-list" style="margin-top:12px;">
-<div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>P</kbd></div><span>Ny fråga</span></div>
-<div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd></div><span>Följdfråga</span></div>
-<div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>S</kbd></div><span>Spara mall</span></div>
-<div class="shortcut-item"><div><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd></div><span>Byt tema</span></div>
-</div>
 </div>
 
+<!-- CELL 3: Min Statistik (nedre vänster) -->
 <div class="about-cell glass-effect">
-<h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9z"/></svg> Utseende &amp; Ljud</h3>
-<div class="setting-item">
-<label>Välj tema</label>
-<select id="theme-select" class="filter-select" onchange="changeTheme(this.value)">${themeOptions}</select>
-</div>
-<div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; padding-top:15px; border-top:1px solid var(--border-color);">
-<label style="cursor:pointer; display:flex; align-items:center; gap:8px;">🔔 Pling-ljud vid nytt ärende</label>
-<input type="checkbox" id="sound-toggle" ${soundOn ? 'checked' : ''} style="transform:scale(1.3); cursor:pointer; appearance:auto; -webkit-appearance:checkbox; width:16px; height:16px; flex-shrink:0;" onchange="window._handleSoundToggle(this.checked)">
-</div>
-</div>
-
-<div class="about-cell glass-effect">
-<h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Min Statistik</h3>
+<h3 class="about-cell-title">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+Min Statistik
+</h3>
 <div id="about-stats-content" style="flex:1; min-height:0; overflow:hidden; display:flex; align-items:center; justify-content:center;"><div class="spinner-small"></div></div>
 </div>
 
-<div class="about-cell glass-effect no-scroll">
-<h3 class="about-cell-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> System &amp; Status</h3>
+<!-- CELL 4: Utseende & System (nedre höger) -->
+<div class="about-cell glass-effect">
+<h3 class="about-cell-title">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9z"/></svg>
+Utseende &amp; System
+</h3>
+<div class="setting-item">
+<label>🎨 Välj tema</label>
+<select id="theme-select" class="filter-select" onchange="changeTheme(this.value)">${themeOptions}</select>
+</div>
+<div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid var(--border-color);">
+<label style="cursor:pointer; display:flex; align-items:center; gap:8px;">🔔 Pling-ljud vid nytt ärende</label>
+<input type="checkbox" id="sound-toggle" ${soundOn ? 'checked' : ''} style="transform:scale(1.3); cursor:pointer; appearance:auto; -webkit-appearance:checkbox; width:16px; height:16px; flex-shrink:0;" onchange="window._handleSoundToggle(this.checked)">
+</div>
+<div style="border-top:1px solid rgba(255,255,255,0.08); margin-top:6px; padding-top:5px; display:flex; flex-direction:column; gap:1px;">
 <div class="info-item"><span class="info-label">Atlas Version:</span><span id="app-version-display">${ATLAS_VERSION}</span></div>
 <div class="info-item"><span class="info-label">Server Version:</span><span id="server-version-display">Hämtar...</span></div>
 <div class="info-item"><span class="info-label">Serverstatus:</span><span id="server-status" style="color:#f1c40f; font-weight:700;">● Ansluter...</span></div>
 <div class="info-item" id="about-user-info"></div>
 <div class="info-item"><span class="info-label">Skapad av:</span><span>Patrik Åkerhage</span></div>
+</div>
 </div>
 `;
 
@@ -100,10 +134,10 @@ const s = (k) => stats[k] ?? 0;
 const statsEl = document.getElementById('about-stats-content');
 const userEl  = document.getElementById('about-user-info');
 
-// Fix: namn och roll i ett enda span (eliminerar dubblett)
+// Inloggad som: namn + roll-badge (undviker dubbletten "Admin ADMIN")
 if (userEl) userEl.innerHTML = `
 <span class="info-label">Inloggad som:</span>
-<span><strong>${currentUser.display_name || currentUser.username}</strong>&nbsp;<span style="font-size:10px; opacity:0.45;">${(currentUser.role||'').toUpperCase()}</span></span>`;
+<span><strong>${currentUser.display_name || currentUser.username}</strong><span class="about-role-badge">${(currentUser.role||'').toUpperCase()}</span></span>`;
 
 // Mini-ikoner för statistikrader
 const ICO = {
@@ -118,40 +152,40 @@ person:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="cu
 filter:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>`
 };
 
-// Hjälpfunktion: ett stat-kort (siffra + läsbar etikett, centrerat)
+// Hjälpfunktion: stat-kort med siffra till vänster och etikett till höger
 const statCard = (label, val, color = 'var(--text-primary)') =>
-`<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px 6px; background:rgba(255,255,255,0.04); border-radius:8px; border:1px solid var(--border-color); flex:1; min-height:0; text-align:center;">
-<strong style="font-size:18px; font-weight:800; color:${color}; line-height:1.2;">${val}</strong>
-<span style="font-size:11px; color:var(--text-secondary); opacity:0.85; margin-top:1px;">${label}</span>
+`<div style="display:flex; align-items:center; gap:7px; padding:5px 8px; background:rgba(255,255,255,0.04); border-radius:8px; border:1px solid rgba(255,255,255,0.07);">
+<strong style="font-size:18px; font-weight:800; color:${color}; min-width:26px; text-align:center; line-height:1;">${val}</strong>
+<span style="font-size:11px; opacity:0.9; line-height:1.3;">${label}</span>
 </div>`;
 
 // Hjälpfunktion: systemrad (etikett vänster / värde höger)
 const sysRow = (label, val, color = 'var(--text-secondary)') =>
-`<div style="display:flex; align-items:center; justify-content:space-between; gap:4px; padding:3px 6px; border-radius:6px; background:rgba(255,255,255,0.025);">
-<span style="font-size:11px; color:var(--text-secondary); opacity:0.8;">${label}</span>
-<strong style="font-size:14px; font-weight:700; color:${color}; white-space:nowrap;">${val}</strong>
+`<div style="display:flex; align-items:center; justify-content:space-between; gap:4px; padding:2px 5px; border-radius:5px; background:rgba(255,255,255,0.025);">
+<span style="font-size:10px; color:var(--text-secondary); opacity:0.8;">${label}</span>
+<strong style="font-size:12px; font-weight:700; color:${color}; white-space:nowrap;">${val}</strong>
 </div>`;
 
 if (statsEl) statsEl.innerHTML = `
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; height:100%; overflow:hidden;">
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:7px; height:100%; overflow:hidden;">
 
-<!-- Vänster: Egna -->
-<div style="display:flex; flex-direction:column; gap:3px; min-height:0;">
-<div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--accent-primary); margin-bottom:1px;">Egna</div>
-${statCard('Aktiva',     s('active'),         'var(--accent-primary)')}
-${statCard('Arkiverade', s('archived'),       '#4cd964')}
-${statCard('Mail',       s('mail_handled'),   'var(--text-primary)')}
-${statCard('Interna',    s('internals_sent'), 'var(--text-primary)')}
+<!-- Vänster: Egna ärenden -->
+<div style="display:flex; flex-direction:column; gap:3px; min-height:0; overflow:hidden;">
+<div style="font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--accent-primary); padding-bottom:3px; border-bottom:1px solid rgba(255,255,255,0.08);">Egna ärenden</div>
+${statCard('⚡ Aktiva',     s('active'),         'var(--accent-primary)')}
+${statCard('📦 Arkiverade', s('archived'),       '#4cd964')}
+${statCard('✉️ Mail',       s('mail_handled'),   '#7eb8f7')}
+${statCard('🔒 Interna',    s('internals_sent'), '#f1c40f')}
 </div>
 
 <!-- Höger: Systemtotal -->
-<div style="display:flex; flex-direction:column; gap:3px; border-left:1px solid var(--border-color); padding-left:8px; min-height:0;">
-<div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-secondary); opacity:0.7; margin-bottom:1px;">Systemtotal</div>
-${sysRow('Pågående',      s('total_active'),  'var(--text-primary)')}
-${sysRow('Avslutade',     s('total_archived'), 'var(--text-primary)')}
-${sysRow('AI-besvarade',  s('ai_answered'),   'var(--accent-primary)')}
-${sysRow('Agenthandlade', s('human_handled'), '#4cd964')}
-${sysRow('Spam/Tomma',    s('spam_count'),    '#ff453a')}
+<div style="display:flex; flex-direction:column; gap:2px; border-left:1px solid rgba(255,255,255,0.08); padding-left:8px; min-height:0; overflow:hidden;">
+<div style="font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); opacity:0.7; padding-bottom:3px; border-bottom:1px solid rgba(255,255,255,0.08);">Systemtotal</div>
+${sysRow('Pågående',      s('total_active'),   'var(--text-primary)')}
+${sysRow('Avslutade',     s('total_archived'), '#4cd964')}
+${sysRow('AI-besvarade',  s('ai_answered'),    'var(--accent-primary)')}
+${sysRow('Agenthandlade', s('human_handled'),  '#4cd964')}
+${sysRow('Spam/Tomma',    s('spam_count'),     '#ff453a')}
 </div>
 
 </div>`;

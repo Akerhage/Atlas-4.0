@@ -382,6 +382,7 @@ ${bodyContent}
 ${UI_ICONS.SEND}
 </button>
 </form>
+${!ticket.is_archived ? '<p style="font-size:10px; opacity:0.3; text-align:right; padding:2px 20px 0; margin:0; color:var(--text-secondary);">Enter skickar · Shift+Enter ny rad</p>' : ''}
 <div style="display:flex; justify-content: space-between; align-items:center; padding: 0 20px 15px 20px;">
 <div style="flex:1; max-width:60%;"><select id="quick-template-select" class="filter-select">${templateOptions}</select></div>
 <div style="display:flex; gap:10px;">
@@ -470,6 +471,17 @@ if (inpField) {
 inpField.addEventListener('input', () => {
 // Om du ändrar texten manuellt, måste vi släppa mallens HTML
 activeTemplateHtml = null;
+});
+}
+
+// Enter skickar, Shift+Enter ny rad
+const chatInpKb = document.getElementById('my-ticket-chat-input');
+if (chatInpKb && !ticket.is_archived) {
+chatInpKb.addEventListener('keydown', (e) => {
+if (e.key === 'Enter' && !e.shiftKey) {
+e.preventDefault();
+chatInpKb.closest('form')?.requestSubmit();
+}
 });
 }
 

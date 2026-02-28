@@ -1699,7 +1699,8 @@ setInterval(runMonthlyExport, 86400000);
 // 🔧 ADMIN — SYSTEMKONFIGURATION (Del 2)
 // =====================================================================
 
-const BLOCKED_CONFIG_KEYS = ['OPENAI_API_KEY', 'JWT_SECRET', 'CLIENT_API_KEY', 'NGROK_TOKEN', 'LHC_WEBHOOK_SECRET', 'GITHUB_TOKEN'];
+// OPENAI_API_KEY borttagen ur blocklistan — admin kan nu uppdatera via systemkonfig UI
+const BLOCKED_CONFIG_KEYS = ['JWT_SECRET', 'CLIENT_API_KEY', 'NGROK_TOKEN', 'LHC_WEBHOOK_SECRET', 'GITHUB_TOKEN'];
 
 function getEnvPath() {
 return isPackaged ? path.join(process.cwd(), '.env') : path.join(__dirname, '.env');

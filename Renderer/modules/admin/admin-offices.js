@@ -110,7 +110,7 @@ ${data.city ? data.city.substring(0,1) : 'K'}
 <div class="header-pills-row" style="display:flex; align-items:center; gap:8px;">
 <div class="pill office-pill-accent" style="border-color:${oc}; color:${oc}; font-weight: 800;">KONTOR</div>
 
-<div class="pill" style="border-color:${oc}66; color:${oc}; opacity: 0.8; font-family: monospace;">ID: ${tag}</div>
+<div id="office-id-pill" class="pill" style="border-color:${oc}66; color:${oc}; opacity: 0.8; font-family: monospace;">ID: ${tag}</div>
 
 <button class="notes-trigger-btn footer-icon-btn"
 data-id="office_${tag}"
@@ -123,11 +123,18 @@ ${UI_ICONS.NOTES}
 </div>
 </div>
 
-<div class="detail-footer-toolbar" style="background:transparent; border:none; padding:0; gap:10px;">
+<div class="detail-footer-toolbar" style="background:transparent; border:none; padding:0; gap:10px; display:${readOnly ? 'none' : 'flex'}">
+<div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+<span style="font-size:8px; opacity:0.4; text-transform:uppercase; letter-spacing:0.5px;">Färg</span>
+<input type="color" id="inp-office-color" value="${data.office_color || '#0071e3'}"
+oninput="window._updateOfficeLiveColor(this.value)"
+title="Profilfärg — sparas automatiskt"
+style="width:28px; height:28px; cursor:pointer; border:none; background:transparent; border-radius:4px;">
+<span id="inp-office-color-hex" style="font-family:monospace; font-size:9px; opacity:0.45;">${data.office_color || '#0071e3'}</span>
+</div>
 <button class="btn-glass-icon" onclick="deleteOffice('${tag}')" title="Radera kontor permanent"
-style="color:#ff453a; border-color:rgba(255,69,58,0.3); display:${readOnly ? 'none' : 'flex'}">
+style="color:#ff453a; border-color:rgba(255,69,58,0.3);">
 ${ADMIN_UI_ICONS.DELETE}
-</button>
 </button>
 </div>
 </div>
@@ -144,20 +151,6 @@ ${ADMIN_UI_ICONS.DELETE}
 <input type="text" id="inp-phone" class="filter-input" value="${data.contact?.phone || ''}" disabled placeholder="Telefon">
 <input type="text" id="inp-email" class="filter-input" value="${data.contact?.email || ''}" disabled placeholder="E-post">
 <input type="text" id="inp-address" class="filter-input" value="${data.contact?.address || ''}" disabled placeholder="Adress">
-<div style="display:flex; align-items:center; gap:10px; padding:8px 0;
-border-top:1px solid rgba(255,255,255,0.05); margin-top:4px;">
-<label style="font-size:11px; opacity:0.5; text-transform:uppercase; min-width:80px;">
-Profilfärg
-</label>
-<input type="color" id="inp-office-color" value="${data.office_color || '#0071e3'}"
-oninput="window._updateOfficeLiveColor(this.value)"
-style="width:28px; height:28px; cursor:pointer; border:none;
-background:transparent; border-radius:4px;">
-<span id="inp-office-color-hex"
-style="font-family:monospace; font-size:12px; opacity:0.6;">
-${data.office_color || '#0071e3'}
-</span>
-</div>
 </div>
 </div>
 
@@ -343,8 +336,12 @@ if (avatar) avatar.style.background = hex;
 const pill = document.querySelector('.office-pill-accent');
 if (pill) { pill.style.borderColor = hex; pill.style.color = hex; }
 
-// Notes-knapp i headern
-const notesBtn = document.querySelector('.detail-footer-toolbar .notes-trigger-btn');
+// ID-pill
+const idPill = document.getElementById('office-id-pill');
+if (idPill) { idPill.style.borderColor = hex + '66'; idPill.style.color = hex; }
+
+// Notes-knapp i headern (finns i .header-pills-row, ej .detail-footer-toolbar)
+const notesBtn = document.querySelector('.header-pills-row .notes-trigger-btn');
 if (notesBtn) notesBtn.style.color = hex;
 
 // Aktivt kort i listan

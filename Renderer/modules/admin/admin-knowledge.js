@@ -72,7 +72,7 @@ detailBox.innerHTML = `
 <h3 style="margin:0; font-size:14px; color:var(--accent-primary);">${adminEscapeHtml(data.section_title || filename)}</h3>
 <div style="font-size:11px; opacity:0.5; margin-top:4px;">${data.sections.length} sektioner • ${adminEscapeHtml(filename)}</div>
 </div>
-<button class="header-button icon-only-btn" title="Spara fil" onclick="saveBasfaktaFile('${adminEscapeHtml(filename)}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
+<button id="kb-global-save-btn" class="kb-save-icon-btn" title="Spara fil" onclick="saveBasfaktaFile('${adminEscapeHtml(filename)}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
 </div>
 <div id="kb-sections-container">${sectionsHtml}</div>
 <div style="margin-top:16px; text-align:center;">
@@ -103,6 +103,9 @@ answerField.style.height = 'auto';
 answerField.style.height = answerField.scrollHeight + 'px';
 lockBtn.textContent = '💾 Spara';
 lockBtn.classList.add('unlocked');
+// Markera global spara-knapp som dirty
+const kbSaveBtn = document.getElementById('kb-global-save-btn');
+if (kbSaveBtn) kbSaveBtn.classList.add('dirty');
 
 lockBtn.onclick = () => {
 const detailBox = document.getElementById('admin-detail-content');
@@ -145,6 +148,9 @@ if(fn) saveBasfaktaFile(fn);
 container.appendChild(newCard);
 newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
 document.getElementById(`kb-title-${newIdx}`)?.focus();
+// Markera global spara-knapp som dirty
+const kbSaveBtn = document.getElementById('kb-global-save-btn');
+if (kbSaveBtn) kbSaveBtn.classList.add('dirty');
 }
 
 
@@ -161,8 +167,8 @@ sections.push({ title, answer });
 idx++;
 }
 
-const saveBtn = detailBox.querySelector('button[onclick*="saveBasfaktaFile"]');
-if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '⏳ Validerar...'; }
+const saveBtn = document.getElementById('kb-global-save-btn') || detailBox.querySelector('button[onclick*="saveBasfaktaFile"]');
+if (saveBtn) { saveBtn.disabled = true; saveBtn.style.opacity = '0.35'; }
 
 try {
 const res = await fetch(`${SERVER_URL}/api/admin/basfakta/${encodeURIComponent(filename)}`, {

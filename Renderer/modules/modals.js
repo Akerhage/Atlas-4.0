@@ -180,22 +180,22 @@ ${avatarHtml}
 }).join('')}
 </div>
 </div>
-<div class="glass-modal-footer" style="margin-top: 15px;">
-<button id="assign-cancel" class="btn-modal-cancel" style="width: 100%;">Avbryt</button>
 </div>
 </div>`;
 
 document.body.appendChild(modal);
 
+// Stäng via klick utanför eller ESC
+const closeAssign = () => { if (document.body.contains(modal)) document.body.removeChild(modal); document.removeEventListener('keydown', escAssign); };
+const escAssign = (e) => { if (e.key === 'Escape') closeAssign(); };
+modal.onclick = (e) => { if (e.target === modal) closeAssign(); };
+document.addEventListener('keydown', escAssign);
+
 // Stabil global referens för klicket
 window.executeAssign = async (convId, username, displayName) => {
-if (document.body.contains(modal)) document.body.removeChild(modal);
+closeAssign();
 await performAssign(convId, username);
 showToast(`✅ Ärende tilldelat till ${displayName}`);
-};
-
-modal.querySelector('#assign-cancel').onclick = () => {
-if (document.body.contains(modal)) document.body.removeChild(modal);
 };
 }
 
@@ -344,9 +344,6 @@ const avatarOptions = overlay.querySelectorAll('.avatar-option');
 
 // LIVE SYNC LOGIK (KOMPLETT: Realtid, Inga dubbletter & Korrekt Logik)
 const syncProfileUI = (color, avatarId, statusText) => {
-// 0. Global färgvariabel för CSS (kryssrutor, scrollbars etc)
-document.documentElement.style.setProperty('--accent-primary', color);
-
 // 1. Modal-preview (Uppe i modalen)
 if (previewContainer) {
 previewContainer.style.borderColor = color;
@@ -377,26 +374,7 @@ const statusHtml = statusText ? '<span class="user-status-text" style="display:b
 nameEl.innerHTML = '<span style="display:block; font-weight:600; color:white;">' + (displayName.charAt(0).toUpperCase() + displayName.slice(1)) + '</span>' + statusHtml;
 }
 
-// 4. Ärendekort - Live-uppdatera kort som tillhör Agenten/ADMIN
-const myName = currentUser.username.toUpperCase();
-document.querySelectorAll('.team-ticket-card:not(.internal-ticket)').forEach(card => {
-const owner = (card.getAttribute('data-owner') || '').toUpperCase();
-const tagEl = card.querySelector('.ticket-tag');
-if (owner === myName || owner === 'ADMIN' || (tagEl && (tagEl.innerText === myName || tagEl.innerText === 'ADMIN'))) {
-card.style.setProperty('--agent-color', color);
-card.style.borderLeft = `4px solid ${color}`;
-card.querySelectorAll('.ticket-tag, .atp-note-btn, .notes-trigger-btn, .claim-mini-btn, .ticket-title span, .ticket-vehicle-icon, svg').forEach(el => {
-el.style.color = color;
-if (el.classList.contains('ticket-tag')) el.style.borderColor = color;
-if (el.tagName === 'svg' || el.closest('svg')) {
-el.style.fill = 'currentColor';
-el.style.color = color;
-}
-});
-}
-});
-
-// 5. Spara-knappen (Döda det hårdkodade gröna)
+// 4. Spara-knappen (Döda det hårdkodade gröna)
 const saveBtn = document.getElementById('prof-save-btn');
 if (saveBtn) {
 saveBtn.style.setProperty('color', color, 'important');
@@ -404,30 +382,7 @@ saveBtn.style.setProperty('border-color', color + '4d', 'important');
 saveBtn.style.setProperty('background', color + '1a', 'important');
 }
 
-// 6. Ärendevyn (Den öppna vyn till höger i realtid)
-const openHeader = document.querySelector('.detail-header-top');
-const detailContainer = document.getElementById('my-ticket-detail');
-const activeCard = document.querySelector('.active-ticket');
-const activeOwner = (activeCard?.getAttribute('data-owner') || '').toUpperCase();
-
-if (activeOwner === myName || activeOwner === 'ADMIN') {
-if (openHeader) {
-openHeader.style.borderBottomColor = color;
-openHeader.style.background = `linear-gradient(90deg, ${color}1a, transparent)`;
-openHeader.querySelectorAll('.notes-trigger-btn, .detail-subject').forEach(el => {
-el.style.color = color;
-});
-}
-if (detailContainer) {
-detailContainer.style.setProperty('border-top-color', color, 'important');
-detailContainer.querySelectorAll('.message.atlas .bubble, .msg-row.atlas .bubble').forEach(b => {
-b.style.setProperty('background-color', color + '1a', 'important');
-b.style.setProperty('border-color', color, 'important');
-});
-}
-}
-
-// 7. Mallar-listan
+// 5. Mallar-listan
 const templatesView = document.getElementById('view-templates');
 if (templatesView && templatesView.style.display === 'flex') {
 if (typeof renderTemplates === 'function') {
@@ -552,37 +507,39 @@ const internalIconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="n
 
 modal.innerHTML = `
 <div class="glass-modal-box glass-effect">
-<div class="glass-modal-header" style="flex-direction: column; align-items: flex-start; gap: 10px;">
-<h3 style="display:flex; align-items:center; gap:12px; margin:0; font-size:1.2rem;">Nytt meddelande</h3>
+<div class="glass-modal-header" style="flex-direction: column; align-items: flex-start; gap: 8px; padding:12px 18px;">
+<h3 style="display:flex; align-items:center; gap:12px; margin:0; font-size:1rem;">Nytt meddelande</h3>
 <div style="display:flex; background:rgba(255,255,255,0.1); border-radius:8px; padding:3px; width:100%;">
-<button id="btn-mode-external" class="toggle-mode-btn active" style="flex:1; border:none; background:var(--accent-primary); color:white; padding:8px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+<button id="btn-mode-external" class="toggle-mode-btn active" style="flex:1; border:none; background:var(--accent-primary); color:white; padding:6px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px;">
 ${mailIconSvg} Externt Mail
 </button>
-<button id="btn-mode-internal" class="toggle-mode-btn" style="flex:1; border:none; background:transparent; color:#aaa; padding:8px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+<button id="btn-mode-internal" class="toggle-mode-btn" style="flex:1; border:none; background:transparent; color:#aaa; padding:6px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px;">
 ${internalIconSvg} Internt
 </button>
 </div>
 </div>
-<div class="glass-modal-body" style="padding-top:15px;">
-<div style="margin-bottom:15px;">
-<label id="label-recipient" style="display:block; color:#aaa; font-size:11px; text-transform:uppercase; margin-bottom:5px; font-weight:bold;">Mottagare:</label>
-<input type="text" id="composer-to" placeholder="kund@exempel.se" style="width:100%; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white;">
-<div id="composer-agent-grid" class="agent-grid" style="display:none; max-height: 220px; overflow-y: auto; grid-template-columns: 1fr 1fr; gap: 10px; padding: 5px;"></div>
+<div class="glass-modal-body" style="padding:10px 18px;">
+<div style="margin-bottom:10px;">
+<label id="label-recipient" style="display:block; color:#aaa; font-size:10px; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Mottagare:</label>
+<input type="text" id="composer-to" placeholder="kund@exempel.se" style="width:100%; padding:7px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; font-size:13px;">
+<div id="composer-agent-grid" class="agent-grid" style="display:none; max-height: 120px; overflow-y: auto; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px;"></div>
 <input type="hidden" id="selected-internal-agent">
 </div>
-<div style="margin-bottom:15px;">
-<label style="display:block; color:#aaa; font-size:11px; text-transform:uppercase; margin-bottom:5px; font-weight:bold;">Ämne / Rubrik:</label>
-<input type="text" id="composer-subject" placeholder="Vad gäller ärendet?" style="width:100%; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white;">
+<div style="margin-bottom:10px;">
+<label style="display:block; color:#aaa; font-size:10px; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Ämne / Rubrik:</label>
+<input type="text" id="composer-subject" placeholder="Vad gäller ärendet?" style="width:100%; padding:7px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; font-size:13px;">
 </div>
 <div style="margin-bottom:0;">
-<label style="display:block; color:#aaa; font-size:11px; text-transform:uppercase; margin-bottom:5px; font-weight:bold;">Meddelande:</label>
-<textarea id="composer-body" placeholder="Skriv ditt meddelande här..." style="width:100%; height:180px; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; resize:none; font-family:inherit; font-size:14px; line-height:1.5;"></textarea>
+<label style="display:block; color:#aaa; font-size:10px; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Meddelande:</label>
+<textarea id="composer-body" placeholder="Skriv ditt meddelande här..." style="width:100%; height:95px; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; resize:none; font-family:inherit; font-size:13px; line-height:1.5;"></textarea>
 </div>
 </div>
-<div class="glass-modal-footer">
-<button id="composer-cancel" class="btn-modal-cancel">Avbryt</button>
-<button id="composer-send" class="btn-modal-confirm">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>Skicka
+<div class="glass-modal-footer" style="gap:8px;">
+<button id="composer-cancel" class="btn-glass-icon" style="width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; padding:0; color:rgba(255,255,255,0.45); flex-shrink:0;" title="Stäng">
+${ADMIN_UI_ICONS.CANCEL}
+</button>
+<button id="composer-send" class="btn-modal-confirm" style="width:38px; height:38px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:10px; flex-shrink:0;" title="Skicka">
+${UI_ICONS.SEND}
 </button>
 </div>
 </div>`;
@@ -729,8 +686,8 @@ agentGrid.innerHTML = agents.map(u => {
 const displayName = u.display_name || formatName(u.username);
 const avatarHtml = getAvatarBubbleHTML(u, "30px");
 return `
-<div class="agent-card internal-select" onclick="window.selectInternalAgent(this, '${u.username}')"
-style="border-left: 4px solid ${u.agent_color || '#0071e3'}; box-shadow: inset 0 0 0 9999px ${(u.agent_color || '#0071e3')}08; cursor: pointer; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 6px; display: flex; align-items: center; gap: 10px; transition: background 0.2s;">
+<div class="agent-card internal-select" onclick="window.selectInternalAgent(this, '${u.username}', '${u.agent_color || '#0071e3'}')"
+style="border-left: 4px solid ${u.agent_color || '#0071e3'}; cursor: pointer; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 6px; display: flex; align-items: center; gap: 10px; transition: all 0.15s;" data-color="${u.agent_color || '#0071e3'}">
 ${avatarHtml}
 <div style="overflow: hidden;">
 <div style="font-size: 11px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${displayName}</div>
@@ -744,8 +701,15 @@ agentGrid.innerHTML = '<div style="color: #ff6b6b; padding: 10px;">Kunde inte la
 }
 }
 
-window.selectInternalAgent = (el, username) => {
-document.querySelectorAll('.internal-select').forEach(card => card.style.background = 'rgba(255,255,255,0.03)');
-el.style.background = 'rgba(255,255,255,0.15)';
+window.selectInternalAgent = (el, username, color) => {
+const c = color || '#0071e3';
+document.querySelectorAll('.internal-select').forEach(card => {
+card.style.background = 'rgba(255,255,255,0.03)';
+card.style.outline = 'none';
+card.style.boxShadow = 'none';
+});
+el.style.background = c + '22';
+el.style.outline = `2px solid ${c}`;
+el.style.boxShadow = `0 0 10px ${c}33`;
 document.getElementById('selected-internal-agent').value = username;
 };
