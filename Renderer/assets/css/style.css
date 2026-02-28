@@ -1781,7 +1781,7 @@ align-items: center;
 .hero-fg-icon {
 color: var(--accent-primary);
 margin-bottom: 24px;
-filter: drop-shadow(0 0 20px rgba(0, 210, 255, 0.3));
+filter: drop-shadow(0 0 16px color-mix(in srgb, var(--accent-primary) 35%, transparent));
 }
 
 .hero-title {
@@ -3450,7 +3450,7 @@ overflow: hidden !important;
 
 /* 4. ADMIN & MODAL LAYOUT-FIXAR (Audit-röd lista) */
 #admin-list-title { padding: 20px !important; border-bottom: 1px solid var(--border-color) !important; }
-#admin-list-actions { padding: 10px 20px !important; display: flex !important; gap: 10px !important; }
+#admin-list-actions { padding: 10px 10px 10px 4px !important; display: flex !important; gap: 10px !important; }
 #notes-list-container { flex: 1 !important; overflow-y: auto !important; }
 #composer-body-container { flex: 1 !important; display: flex !important; flex-direction: column !important; min-height: 300px !important; }
 

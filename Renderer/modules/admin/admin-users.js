@@ -90,8 +90,10 @@ const stats = await statsRes.json();
 const tickets = await ticketsRes.json();
 const u = users.find(user => user.username === username);
 
-// Sparas för Ticket Reader-modalen
+// Sparas för Ticket Reader-modalen (alla tickets — listan nedanför)
 currentTicketList = tickets;
+// Endast agentens egna ärenden — för stat-kortets ärendebläddare
+window._agentOwnerTickets = tickets.filter(t => t.owner === username);
 const styles = getAgentStyles(username);
 const readOnly = !isSupportAgent(); // Agent ser i läsläge
 
@@ -120,10 +122,10 @@ style="color:${styles.main}">
 ${ADMIN_UI_ICONS.EDIT}
 </button>
 
-<button class="footer-icon-btn danger" 
-onclick="deleteUser('${u.id}', '${u.username}')" 
-title="Radera användare" 
-style="color:#ff453a; border-color:rgba(255,69,58,0.3);">
+<button class="footer-icon-btn danger"
+onclick="deleteUser('${u.id}', '${u.username}')"
+title="Radera användare"
+style="color:#ff453a; border:none; background:transparent;">
 ${UI_ICONS.TRASH}
 </button>
 `;
@@ -132,7 +134,7 @@ ${UI_ICONS.TRASH}
 const displayTitle = u.display_name || u.username;
 const pillsHTML = `
 <div class="pill" style="border-color:${styles.main}; color:${styles.main}; font-weight:800;">${u.role.toUpperCase()}</div>
-<div class="pill">@${u.username}</div>
+<div class="pill" style="color:${styles.main}bb; border-color:${styles.main}35;">@${u.username}</div>
 ${readOnly ? '<div class="pill">👁️ Läsläge</div>' : ''}
 `;
 
@@ -156,7 +158,7 @@ ${getAvatarBubbleHTML(u, "100%")}
 <input type="color" value="${styles.main}" 
 ${readOnly ? 
 'disabled style="width:28px; height:28px; pointer-events:none; opacity:0.4; background:none; border:none;"' : 
-`oninput="(function(c){const h=document.querySelector('#admin-detail-content .detail-header-top');if(h){h.style.borderBottomColor=c;h.style.background='linear-gradient(90deg,'+c+'22,transparent)';}const a=document.querySelector('#admin-detail-content .msg-avatar');if(a){a.style.borderColor=c;const ua=a.querySelector('.user-avatar');if(ua)ua.style.borderColor=c;const ai=a.querySelector('.avatar-inner-icon');if(ai)ai.style.color=c;}const pills=document.querySelectorAll('#admin-detail-content .header-pills-row .pill');pills.forEach(p=>{p.style.borderColor=c+'66';p.style.color=c;});const stat=document.querySelector('#admin-detail-content .admin-stat-card');if(stat){stat.style.borderColor=c+'44';const num=stat.querySelector('div[style*=font-size]');if(num)num.style.color=c;}document.querySelectorAll('#admin-detail-content .admin-ticket-preview').forEach(tp=>{tp.style.setProperty('--atp-color',c);tp.style.borderLeftColor=c;});const mc=document.querySelector('#admin-main-list .admin-mini-card.active');if(mc){mc.style.setProperty('--agent-color',c);const mua=mc.querySelector('.user-avatar');if(mua)mua.style.borderColor=c;const mai=mc.querySelector('.avatar-inner-icon');if(mai)mai.style.color=c;}clearTimeout(window._agentColorTimer);window._agentColorTimer=setTimeout(()=>updateAgentColor('${u.username}',c),700);})(this.value)" style="width:28px; height:28px; cursor:pointer; background:none; border:none;"`
+`oninput="(function(c){const h=document.querySelector('#admin-detail-content .detail-header-top');if(h){h.style.borderBottomColor=c;h.style.background='linear-gradient(90deg,'+c+'22,transparent)';}const a=document.querySelector('#admin-detail-content .msg-avatar');if(a){a.style.borderColor=c;const ua=a.querySelector('.user-avatar');if(ua)ua.style.borderColor=c;const ai=a.querySelector('.avatar-inner-icon');if(ai)ai.style.color=c;}const pills=document.querySelectorAll('#admin-detail-content .header-pills-row .pill');pills.forEach(p=>{p.style.borderColor=c+'66';p.style.color=c;});const stat=document.querySelector('#admin-detail-content .admin-stat-card');if(stat){stat.style.borderColor=c+'44';const num=stat.querySelector('div[style*=font-size]');if(num)num.style.color=c;}document.querySelectorAll('#admin-detail-content .admin-ticket-preview').forEach(tp=>{tp.style.setProperty('--atp-color',c);tp.style.borderLeftColor=c;});const title=document.querySelector('#admin-detail-content .detail-subject');if(title)title.style.color=c;const mc=document.querySelector('#admin-main-list .admin-mini-card.active');if(mc){mc.style.setProperty('--agent-color',c);const mua=mc.querySelector('.user-avatar');if(mua)mua.style.borderColor=c;const mai=mc.querySelector('.avatar-inner-icon');if(mai)mai.style.color=c;const mcSpan=mc.querySelector('span[style*=font-weight]');if(mcSpan)mcSpan.style.color=c;}clearTimeout(window._agentColorTimer);window._agentColorTimer=setTimeout(()=>updateAgentColor('${u.username}',c),700);})(this.value)" style="width:28px; height:28px; cursor:pointer; background:none; border:none;"`
 }>
 </div>
 ${actionsHTML}
@@ -166,9 +168,16 @@ ${actionsHTML}
 <div class="detail-body" style="padding:25px; display:flex; flex-direction:column; gap:20px; overflow-y:auto; flex:1; min-height:0;">
 
 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-<div class="admin-stat-card">
-<div style="font-size:32px; font-weight:800; color:${styles.main};">${stats.active || 0}</div>
-<div style="font-size:11px; opacity:0.5; text-transform:uppercase;">AKTIVA ÄRENDEN</div>
+<div class="admin-stat-card"
+${window._agentOwnerTickets?.length > 0 ? `onclick="(function(){window._savedTicketList=currentTicketList;currentTicketList=window._agentOwnerTickets||[];openTicketReader(0,'${username}');})()" title="Öppna ärendebläddaren — ${u.display_name || u.username}s egna ärenden"` : ''}
+style="${window._agentOwnerTickets?.length > 0 ? 'cursor:pointer;' : ''}"
+onmouseover="${window._agentOwnerTickets?.length > 0 ? `this.style.borderColor='${styles.main}66'; this.style.background='${styles.main}08'` : ''}"
+onmouseout="${window._agentOwnerTickets?.length > 0 ? `this.style.borderColor=''; this.style.background=''` : ''}">
+<div style="font-size:38px; font-weight:800; color:${styles.main}; line-height:1;">${stats.active || 0}</div>
+<div style="font-size:11px; opacity:0.5; text-transform:uppercase; margin-top:6px; display:flex; align-items:center; justify-content:center; gap:5px;">
+AKTIVA ÄRENDEN
+${window._agentOwnerTickets?.length > 0 ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${styles.main}" stroke-width="2" opacity="0.6"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>` : ''}
+</div>
 </div>
 
 <div class="glass-panel" style="padding:15px; border-radius:12px; border:1px solid var(--border-color); background:rgba(255,255,255,0.02);">

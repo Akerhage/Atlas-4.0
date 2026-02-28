@@ -48,13 +48,13 @@ actionContainer.innerHTML = '';
 if (tab === 'users') {
 listTitle.innerText = "Personal";
 if (isSupportAgent()) {
-actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewAgentForm()" title="Ny Agent" style="margin-right: 24px !important;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></button>`;
+actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewAgentForm()" title="Ny Agent"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></button>`;
 }
 renderAdminUserList();
 } else if (tab === 'offices') {
 listTitle.innerText = "Kontorsnätverk";
 if (isSupportAgent()) {
-actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewOfficeForm()" title="Nytt Kontor" style="margin-right: 24px !important;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="13" height="18"/><path d="M21 15V9"/><path d="M21 3v3"/><line x1="19" y1="6" x2="23" y2="6"/><line x1="9" y1="9" x2="9" y2="9"/><line x1="13" y1="9" x2="13" y2="9"/><line x1="9" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="13" y2="14"/></svg></button>`;
+actionContainer.innerHTML = `<button class="btn-glass-icon" onclick="openNewOfficeForm()" title="Nytt Kontor"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="13" height="18"/><path d="M21 15V9"/><path d="M21 3v3"/><line x1="19" y1="6" x2="23" y2="6"/><line x1="9" y1="9" x2="9" y2="9"/><line x1="13" y1="9" x2="13" y2="9"/><line x1="9" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="13" y2="14"/></svg></button>`;
 }
 renderAdminOfficeList();
 } else if (tab === 'config') {

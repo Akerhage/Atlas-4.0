@@ -8,12 +8,12 @@
 // --- IPC BRYGGOR (Kopplar knappar i UI till main.js/db.js) ---
 
 window.claimTicket = async (conversationId) => {
-// Mappar mot main.js:144 -> ipcMain.handle('team:claim-ticket')
-if (window.electronAPI && window.electronAPI['team:claim-ticket']) {
+// Exponeras via preload.js som window.atlasTeam.claimTicket (INTE window.electronAPI)
+if (window.atlasTeam && window.atlasTeam.claimTicket) {
 try {
-await window.electronAPI['team:claim-ticket'](conversationId, currentUser.username);
-if (typeof showToast === 'function') showToast("Ärende plockat!");
+await window.atlasTeam.claimTicket(conversationId, currentUser.username);
 if (typeof renderInbox === 'function') renderInbox();
+if (typeof renderMyTickets === 'function') renderMyTickets(); // Uppdatera Mina Ärenden
 } catch (err) { console.error("❌ IPC Claim Error:", err); }
 }
 };

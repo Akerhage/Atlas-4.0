@@ -37,11 +37,20 @@ document.body.appendChild(modal);
 // 3. Rendera innehållet (nu med kännedom om overrideTag)
 renderReaderContent();
 
+// Hjälpfunktion: stäng reader och återställ eventuellt filtrerad ticketlista
+const _closeReader = () => {
+modal.style.display = 'none';
+if (window._savedTicketList !== undefined) {
+currentTicketList = window._savedTicketList;
+delete window._savedTicketList;
+}
+};
+
 // 4. Visa modalen och aktivera stängning vid klick utanför
 modal.style.display = 'flex';
 modal.style.pointerEvents = 'all';
-modal.onclick = (e) => { 
-if (e.target === modal) modal.style.display = 'none'; 
+modal.onclick = (e) => {
+if (e.target === modal) _closeReader();
 };
 }
 
@@ -146,6 +155,21 @@ ${ADMIN_UI_ICONS.ARROW_RIGHT}
 ${messageHistoryHtml}
 </div>
 
+<div style="padding:10px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.18); flex-shrink:0;">
+<div style="display:flex; gap:8px; align-items:flex-end;">
+<textarea id="reader-quick-reply"
+placeholder="Snabbsvar till kunden... (Ctrl+Enter för att skicka)"
+style="flex:1; height:58px; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:var(--text-primary); resize:none; font-family:inherit; font-size:13px; line-height:1.5; outline:none; transition:border-color 0.2s;"
+onfocus="this.style.borderColor='${rStyles.main}66'"
+onblur="this.style.borderColor='rgba(255,255,255,0.12)'"></textarea>
+<button id="reader-send-btn" class="btn-glass-icon"
+style="width:38px; height:38px; flex-shrink:0; color:${rStyles.main}; border-color:${rStyles.border}; background:${rStyles.main}1a;"
+title="Skicka svar och ta ärendet (Ctrl+Enter)">
+${UI_ICONS.SEND}
+</button>
+</div>
+</div>
+
 <div style="padding:9px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.3); display:flex; justify-content:flex-end; align-items:center; gap:8px; flex-shrink:0;">
 <button class="btn-glass-icon" onclick="assignTicketFromReader('${t.conversation_id}')"
 title="Tilldela ärende till agent"
@@ -167,7 +191,7 @@ modal.style.pointerEvents = 'all';
 const closeBtn = modal.querySelector('#reader-close-btn');
 if (closeBtn) {
 closeBtn.style.pointerEvents = 'all';
-closeBtn.onclick = () => { modal.style.display = 'none'; };
+closeBtn.onclick = () => _closeReader();
 }
 
 const prevBtn = modal.querySelector('#reader-prev');
@@ -181,6 +205,34 @@ prevBtn.onclick = () => navigateReader(-1);
 if (nextBtn && currentTicketIdx < currentTicketList.length - 1) {
 nextBtn.style.pointerEvents = 'all';
 nextBtn.onclick = () => navigateReader(1);
+}
+
+// --- Snabbsvar-logik ---
+const sendBtn = modal.querySelector('#reader-send-btn');
+const replyTA = modal.querySelector('#reader-quick-reply');
+const convId = t.conversation_id;
+
+if (sendBtn && replyTA) {
+const doSend = async () => {
+const msg = replyTA.value.trim();
+if (!msg) return;
+sendBtn.disabled = true;
+sendBtn.style.opacity = '0.45';
+try {
+if (window.socketAPI) {
+window.socketAPI.emit('team:agent_reply', { conversationId: convId, message: msg });
+}
+await window.claimTicket(convId);
+modal.style.display = 'none';
+showToast('✅ Meddelande skickat — ärendet tillhör nu dig!');
+} catch (err) {
+console.error('Snabbsvar-fel:', err);
+sendBtn.disabled = false;
+sendBtn.style.opacity = '';
+}
+};
+sendBtn.onclick = doSend;
+replyTA.onkeydown = (e) => { if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); doSend(); } };
 }
 } // <--- Denna stänger hela funktionen renderReaderContent
 

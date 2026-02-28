@@ -71,7 +71,7 @@ detailBox.innerHTML = `
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:16px;">
 <h2 style="margin:0;font-size:18px;color:white;font-weight:700;">${isEdit ? 'Redigera agent' : 'Skapa ny agent'}</h2>
 <div style="display:flex;gap:8px;">
-<button class="btn-glass-icon" style="color: ${styles.main}; border-color: ${styles.main}66;" onclick="saveNewAgent(${isEdit ? "'" + editUser.id + "'" : 'null'})" title="Spara agent">${ADMIN_UI_ICONS.SAVE}</button>
+<button class="btn-glass-icon" style="color:#4cd964; border-color:rgba(76,217,100,0.45); background:rgba(76,217,100,0.08);" onclick="saveNewAgent(${isEdit ? "'" + editUser.id + "'" : 'null'})" title="Spara agent">${ADMIN_UI_ICONS.SAVE}</button>
 <button class="btn-glass-icon" style="color:#ff453a;border-color:rgba(255,69,58,0.4);" onclick="renderAdminUserList();document.getElementById('admin-placeholder').style.display='flex';document.getElementById('admin-detail-content').style.display='none';" title="Avbryt">${ADMIN_UI_ICONS.CANCEL}</button>
 </div>
 </div>
@@ -399,6 +399,8 @@ const allOffices = await r.json();
 templateOptions += allOffices.map(o => `<option value="${o.routing_tag}">${o.city}${o.area ? ' – ' + o.area : ''}</option>`).join('');
 }
 } catch (_) {}
+
+const oc = window._newOfficeColor || '#0071e3';
 
 detailBox.innerHTML = `
 <div class="detail-container" style="padding:25px; width:100%; overflow-y:auto; box-sizing:border-box;">

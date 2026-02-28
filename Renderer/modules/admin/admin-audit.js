@@ -40,16 +40,16 @@ Tangentbordsgenvägar
 </h3>
 <div class="about-shortcut-list">
 <div class="about-shortcut-row">
+<div class="about-kbd-group"><kbd>Ctrl</kbd><span class="about-kbd-sep">+</span><kbd>C</kbd></div>
+<span class="about-shortcut-label">Kopiera markerad text → klistras in i AI</span>
+</div>
+<div class="about-shortcut-row">
 <div class="about-kbd-group"><kbd>Ctrl</kbd><span class="about-kbd-sep">+</span><kbd>P</kbd></div>
-<span class="about-shortcut-label">Starta ny fråga</span>
+<span class="about-shortcut-label">Starta ny AI-fråga (klistrar in kopierad text)</span>
 </div>
 <div class="about-shortcut-row">
 <div class="about-kbd-group"><kbd>Ctrl</kbd><span class="about-kbd-sep">+</span><kbd>Alt</kbd><span class="about-kbd-sep">+</span><kbd>P</kbd></div>
-<span class="about-shortcut-label">Ställ följdfråga</span>
-</div>
-<div class="about-shortcut-row">
-<div class="about-kbd-group"><kbd>Ctrl</kbd><span class="about-kbd-sep">+</span><kbd>C</kbd></div>
-<span class="about-shortcut-label">Kopiera markerad text</span>
+<span class="about-shortcut-label">Ställ följdfråga i pågående session</span>
 </div>
 <div class="about-shortcut-row">
 <div class="about-kbd-group"><kbd>Ctrl</kbd><span class="about-kbd-sep">+</span><kbd>S</kbd></div>
@@ -70,9 +70,9 @@ Snabbguide — Arbetsflöde
 </h3>
 <div class="guide-section">
 <div class="guide-step"><span class="step-number">1</span><div class="step-content"><strong>Markera text</strong> i vilket program som helst</div></div>
-<div class="guide-step"><span class="step-number">2</span><div class="step-content"><strong>Tryck Ctrl+C</strong> för att kopiera</div></div>
-<div class="guide-step"><span class="step-number">3</span><div class="step-content"><strong>Tryck Ctrl+P</strong> för att starta <strong>NY</strong> chatt</div></div>
-<div class="guide-step"><span class="step-number">4</span><div class="step-content"><strong>Ctrl+Alt+P</strong> för att ställa en <strong>följdfråga</strong></div></div>
+<div class="guide-step"><span class="step-number">2</span><div class="step-content"><strong>Ctrl+C</strong> — kopiera den markerade texten</div></div>
+<div class="guide-step"><span class="step-number">3</span><div class="step-content"><strong>Ctrl+P</strong> — klistrar in &amp; startar <strong>NY</strong> AI-fråga</div></div>
+<div class="guide-step"><span class="step-number">4</span><div class="step-content"><strong>Ctrl+Alt+P</strong> — ställ en <strong>följdfråga</strong> i samma session</div></div>
 </div>
 </div>
 
@@ -137,7 +137,7 @@ const userEl  = document.getElementById('about-user-info');
 // Inloggad som: namn + roll-badge (undviker dubbletten "Admin ADMIN")
 if (userEl) userEl.innerHTML = `
 <span class="info-label">Inloggad som:</span>
-<span><strong>${currentUser.display_name || currentUser.username}</strong><span class="about-role-badge">${(currentUser.role||'').toUpperCase()}</span></span>`;
+<span><strong>${currentUser.display_name || currentUser.username}</strong></span>`;
 
 // Mini-ikoner för statistikrader
 const ICO = {
@@ -154,16 +154,16 @@ filter:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="cu
 
 // Hjälpfunktion: stat-kort med siffra till vänster och etikett till höger
 const statCard = (label, val, color = 'var(--text-primary)') =>
-`<div style="display:flex; align-items:center; gap:7px; padding:5px 8px; background:rgba(255,255,255,0.04); border-radius:8px; border:1px solid rgba(255,255,255,0.07);">
-<strong style="font-size:18px; font-weight:800; color:${color}; min-width:26px; text-align:center; line-height:1;">${val}</strong>
-<span style="font-size:11px; opacity:0.9; line-height:1.3;">${label}</span>
+`<div style="display:flex; align-items:center; gap:10px; padding:10px 12px; background:rgba(255,255,255,0.04); border-radius:10px; border:1px solid rgba(255,255,255,0.07);">
+<strong style="font-size:28px; font-weight:800; color:${color}; min-width:34px; text-align:center; line-height:1;">${val}</strong>
+<span style="font-size:13px; opacity:0.9; line-height:1.3;">${label}</span>
 </div>`;
 
 // Hjälpfunktion: systemrad (etikett vänster / värde höger)
 const sysRow = (label, val, color = 'var(--text-secondary)') =>
-`<div style="display:flex; align-items:center; justify-content:space-between; gap:4px; padding:2px 5px; border-radius:5px; background:rgba(255,255,255,0.025);">
-<span style="font-size:10px; color:var(--text-secondary); opacity:0.8;">${label}</span>
-<strong style="font-size:12px; font-weight:700; color:${color}; white-space:nowrap;">${val}</strong>
+`<div style="display:flex; align-items:center; justify-content:space-between; gap:4px; padding:4px 7px; border-radius:6px; background:rgba(255,255,255,0.025);">
+<span style="font-size:11px; color:var(--text-secondary); opacity:0.8;">${label}</span>
+<strong style="font-size:14px; font-weight:700; color:${color}; white-space:nowrap;">${val}</strong>
 </div>`;
 
 if (statsEl) statsEl.innerHTML = `
@@ -346,4 +346,118 @@ console.log("✅ CSS-SYNCH: Alla kritiska element verkar ha stilregler.");
 }
 
 console.groupEnd();
+}
+
+// =============================================================================
+// ATLAS INFO-MODAL — visas via ?-knappen i Om-vyn
+// =============================================================================
+function showAtlasInfoModal() {
+const existing = document.getElementById('atlas-info-modal');
+if (existing) { existing.style.display = 'flex'; return; }
+
+const overlay = document.createElement('div');
+overlay.id = 'atlas-info-modal';
+overlay.className = 'custom-modal-overlay';
+overlay.style.cssText = 'z-index:10001;';
+overlay.onclick = (e) => { if (e.target === overlay) overlay.style.display = 'none'; };
+
+overlay.innerHTML = `
+<div class="glass-modal-box glass-effect" style="width:540px; max-width:92vw; border-top:3px solid var(--accent-primary); position:relative; display:flex; flex-direction:column; max-height:82vh; overflow:hidden;">
+
+  <!-- Stäng-knapp -->
+  <button id="atlas-info-close"
+    style="position:absolute; top:10px; right:10px; z-index:10; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.4); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;"
+    onmouseover="this.style.background='rgba(255,69,58,0.45)';this.style.color='white'"
+    onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='rgba(255,255,255,0.4)'">
+    ${typeof ADMIN_UI_ICONS !== 'undefined' ? ADMIN_UI_ICONS.CANCEL : '✕'}
+  </button>
+
+  <!-- Header -->
+  <div style="padding:16px 48px 14px 18px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; gap:12px; flex-shrink:0; background:linear-gradient(90deg, var(--accent-primary)14, transparent);">
+    <div style="width:38px; height:38px; border-radius:10px; background:var(--accent-primary); color:black; font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 12px var(--accent-primary)55;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    </div>
+    <div>
+      <div style="font-size:15px; font-weight:700; color:white;">Om Atlas</div>
+      <div style="font-size:10px; opacity:0.4; color:white; letter-spacing:0.3px;">Intelligent kundsupport-plattform • v${typeof ATLAS_VERSION !== 'undefined' ? ATLAS_VERSION : '3.14'}</div>
+    </div>
+  </div>
+
+  <!-- Body (scrollbar) -->
+  <div style="flex:1; overflow-y:auto; padding:18px 20px; display:flex; flex-direction:column; gap:14px; min-height:0;">
+
+    <!-- Vad är Atlas? -->
+    <div style="padding:14px 16px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);">
+      <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--accent-primary); margin-bottom:8px;">Vad är Atlas?</div>
+      <p style="margin:0; font-size:13px; line-height:1.7; color:var(--text-primary); opacity:0.85;">
+        Atlas är en AI-driven kundsupport-plattform byggd för körskolebranschen. Systemet hanterar inkommande kundförfrågningar via chatt och e-post, och låter AI:n besvara vanliga frågor automatiskt medan agenter kan ta över när det behövs.
+      </p>
+    </div>
+
+    <!-- Kärnfunktioner -->
+    <div style="padding:14px 16px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);">
+      <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--accent-primary); margin-bottom:10px;">Kärnfunktioner</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        ${[
+          ['🤖', 'AI-svar', 'Automatisk svarsgenerering via RAG-motor och kunskapsbas'],
+          ['📥', 'Inkorg', 'Centraliserad hantering av chatt- och mailärenden'],
+          ['🏢', 'Kontorsrouting', 'Ärenden dirigeras automatiskt till rätt kontor och agent'],
+          ['📧', 'Mailintegration', 'Inkommande mail skapar ärenden direkt i systemet'],
+          ['🔒', 'Interna meddelanden', 'Säker kommunikation mellan agenter utan kundinblandning'],
+          ['📊', 'Statistik', 'Realtidsöversikt av ärendevolymer och agentprestanda'],
+        ].map(([icon, title, desc]) => `
+          <div style="display:flex; align-items:flex-start; gap:10px; padding:6px 8px; border-radius:7px; background:rgba(255,255,255,0.025);">
+            <span style="font-size:15px; flex-shrink:0; line-height:1.4;">${icon}</span>
+            <div>
+              <strong style="font-size:12px; color:var(--text-primary);">${title}</strong>
+              <div style="font-size:11px; opacity:0.55; margin-top:1px; line-height:1.4;">${desc}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Teknisk info -->
+    <div style="padding:14px 16px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);">
+      <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--accent-primary); margin-bottom:8px;">Teknisk plattform</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+        ${[
+          ['Frontend', 'Electron / HTML / JS'],
+          ['Backend', 'Node.js / Express'],
+          ['Databas', 'SQLite (lokalt)'],
+          ['AI-motor', 'RAG + vektorembeddings'],
+          ['Realtid', 'Socket.IO'],
+          ['Version', typeof ATLAS_VERSION !== 'undefined' ? `Atlas v${ATLAS_VERSION}` : 'Atlas v3.14'],
+        ].map(([lbl, val]) => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 7px; border-radius:6px; background:rgba(255,255,255,0.025);">
+            <span style="font-size:10px; opacity:0.5;">${lbl}</span>
+            <strong style="font-size:11px; color:var(--text-primary);">${val}</strong>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div style="padding:10px 18px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.18); display:flex; justify-content:space-between; align-items:center; gap:8px; flex-shrink:0;">
+    <span style="font-size:11px; opacity:0.35; color:var(--text-secondary);">Utvecklad med ❤ för körskolebranschen</span>
+    <button class="btn-glass-icon" onclick="document.getElementById('atlas-info-modal').style.display='none'"
+      style="padding:5px 14px; width:auto; height:28px; font-size:11px; border-radius:7px; color:var(--text-secondary);">
+      Stäng
+    </button>
+  </div>
+
+</div>`;
+
+document.body.appendChild(overlay);
+overlay.style.display = 'flex';
+
+// Stäng-knapp
+const closeBtn = overlay.querySelector('#atlas-info-close');
+if (closeBtn) closeBtn.onclick = () => overlay.style.display = 'none';
+
+// ESC-tangent stänger
+const onEsc = (e) => { if (e.key === 'Escape') { overlay.style.display = 'none'; document.removeEventListener('keydown', onEsc); } };
+document.addEventListener('keydown', onEsc);
 }

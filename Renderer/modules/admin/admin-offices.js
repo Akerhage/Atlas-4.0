@@ -133,7 +133,7 @@ style="width:28px; height:28px; cursor:pointer; border:none; background:transpar
 <span id="inp-office-color-hex" style="font-family:monospace; font-size:9px; opacity:0.45;">${data.office_color || '#0071e3'}</span>
 </div>
 <button class="btn-glass-icon" onclick="deleteOffice('${tag}')" title="Radera kontor permanent"
-style="color:#ff453a; border-color:rgba(255,69,58,0.3);">
+style="color:#ff453a; border:none; background:transparent;">
 ${ADMIN_UI_ICONS.DELETE}
 </button>
 </div>
@@ -142,7 +142,7 @@ ${ADMIN_UI_ICONS.DELETE}
 
 <div style="display: flex; flex-direction: column; gap: 20px;">
 
-<div class="glass-panel" id="box-contact" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
+<div class="glass-panel" id="box-contact" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid ${oc}44;">
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
 <h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Kontaktuppgifter</h4>
 <button class="admin-lock-btn" onclick="unlockOfficeSection('box-contact', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
@@ -154,7 +154,7 @@ ${ADMIN_UI_ICONS.DELETE}
 </div>
 </div>
 
-<div class="glass-panel" id="box-prices" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
+<div class="glass-panel" id="box-prices" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid ${oc}44;">
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
 <h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Tjänster & Priser</h4>
 <button class="admin-lock-btn" onclick="unlockOfficeSection('box-prices', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
@@ -191,7 +191,7 @@ onclick="this.closest('.price-row').remove(); window._adminFormDirty=true;">×</
 </div>
 </div>
 
-<div class="glass-panel" id="box-booking" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
+<div class="glass-panel" id="box-booking" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid ${oc}44;">
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
 <h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Bokningslänkar</h4>
 <button class="admin-lock-btn" onclick="unlockOfficeSection('box-booking', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
@@ -208,7 +208,7 @@ style="flex:1;">
 </div>
 </div>
 
-<div class="glass-panel" id="box-desc" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
+<div class="glass-panel" id="box-desc" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid ${oc}44;">
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
 <h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase;">AI Kunskap (Beskrivning)</h4>
 <button class="admin-lock-btn" onclick="unlockOfficeSection('box-desc', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
@@ -219,7 +219,7 @@ style="flex:1;">
 </div>
 
 <div style="display: flex; flex-direction: column;">
-<div class="glass-panel" style="padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); height: 100%; display: flex; flex-direction: column; overflow:hidden;">
+<div class="glass-panel" id="box-tickets" style="padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid ${oc}44; height: 100%; display: flex; flex-direction: column; overflow:hidden;">
 <h4 style="margin: 0 0 15px 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Aktiva Ärenden (${tickets.length})</h4>
 <div class="scroll-list">
 ${tickets.length ? tickets.map((t, idx) => `
@@ -358,6 +358,21 @@ if (sub) sub.style.color = hex;
 document.querySelectorAll('#admin-detail-content .admin-ticket-preview').forEach(card => {
 card.style.setProperty('--atp-color', hex);
 });
+
+// Section-panelernas borders (glass-panel med id)
+['box-contact', 'box-prices', 'box-booking', 'box-desc', 'box-tickets'].forEach(id => {
+const panel = document.getElementById(id);
+if (panel) panel.style.borderColor = hex + '44';
+});
+
+// Section-titlar (h4 med kontorets färg)
+document.querySelectorAll('#admin-detail-content .glass-panel h4').forEach(h4 => {
+h4.style.color = hex;
+});
+
+// Rubrikens titel
+const detailTitle = document.querySelector('#admin-detail-content .detail-subject');
+if (detailTitle) detailTitle.style.color = hex;
 
 // Auto-spara med debounce — snabb endpoint, ingen AI-validering
 clearTimeout(window._colorSaveTimer);

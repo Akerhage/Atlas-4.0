@@ -467,12 +467,9 @@ Endast behörig personal bör ändra dessa värden.
 <div style="display:flex; justify-content:space-between;"><span style="opacity:0.5;">Skapad av</span><span>Patrik Åkerhage</span></div>
 </div>
 </div>
-<div class="glass-modal-footer">
-<button class="btn-modal-cancel" onclick="this.closest('.custom-modal-overlay').remove()">Stäng</button>
-</div>
 </div>`;
 document.body.appendChild(modal);
-modal.style.display = 'flex'; 
+modal.style.display = 'flex';
 modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 };
 
@@ -534,6 +531,7 @@ ${internalIconSvg} Internt
 <textarea id="composer-body" placeholder="Skriv ditt meddelande här..." style="width:100%; height:95px; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; resize:none; font-family:inherit; font-size:13px; line-height:1.5;"></textarea>
 </div>
 </div>
+<div id="composer-info-box" style="margin-bottom:8px; padding:8px 12px; border-radius:8px; font-size:11px; line-height:1.5; background:rgba(0,113,227,0.07); border:1px solid rgba(0,113,227,0.2); color:rgba(255,255,255,0.5); display:none;"></div>
 <div class="glass-modal-footer" style="gap:8px;">
 <button id="composer-cancel" class="btn-glass-icon" style="width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; padding:0; color:rgba(255,255,255,0.45); flex-shrink:0;" title="Stäng">
 ${ADMIN_UI_ICONS.CANCEL}
@@ -634,6 +632,7 @@ const btnInt = document.getElementById('btn-mode-internal');
 const toInp = document.getElementById('composer-to');
 const agentGrid = document.getElementById('composer-agent-grid');
 const labelRec = document.getElementById('label-recipient');
+const infoBox = document.getElementById('composer-info-box');
 isInternalMode = internal;
 if (internal) {
 btnInt.style.background = 'var(--accent-primary)';
@@ -643,6 +642,7 @@ btnExt.style.color = '#aaa';
 toInp.style.display = 'none';
 agentGrid.style.display = 'grid';
 labelRec.innerText = "MOTTAGARE (INTERN):";
+if (infoBox) { infoBox.style.display = 'block'; infoBox.textContent = '🔒 Dessa ärenden kan ej läsas av andra i systemet och syns endast lokalt för dig i Garaget vid arkivering.'; }
 loadAgents();
 } else {
 btnExt.style.background = 'var(--accent-primary)';
@@ -652,6 +652,7 @@ btnInt.style.color = '#aaa';
 agentGrid.style.display = 'none';
 toInp.style.display = 'block';
 labelRec.innerText = "MOTTAGARE (E-POST):";
+if (infoBox) { infoBox.style.display = 'block'; infoBox.textContent = '📧 Nytt ärende skapas via e-post och hamnar i kundens inkorg. Ärendet syns för hela teamet i systemet.'; }
 }
 }
 }

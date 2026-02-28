@@ -188,7 +188,7 @@ field.disabled = false;
 field.focus();
 lockBtn.textContent = '🔓 Låst upp';
 lockBtn.classList.add('unlocked');
-if (saveBtn) saveBtn.style.display = 'inline-block';
+if (saveBtn) saveBtn.style.display = 'inline-flex';
 
 lockBtn.onclick = () => {
 field.disabled = true;

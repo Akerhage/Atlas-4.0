@@ -271,6 +271,7 @@ FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag
 WHERE s.human_mode = 1
 AND (s.is_archived IS NULL OR s.is_archived = 0)
+AND (s.session_type IS NULL OR s.session_type != 'internal')
 AND (
 s.owner = ?
 OR
@@ -400,6 +401,7 @@ FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag -- ✅ JOIN KRÄVS HÄR OCKSÅ
 WHERE s.office = ?
 AND (s.is_archived IS NULL OR s.is_archived = 0)
+AND (s.session_type IS NULL OR s.session_type != 'internal')
 ORDER BY s.updated_at DESC
 `;
 
