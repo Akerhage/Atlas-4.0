@@ -215,6 +215,41 @@ if (sideAvatarRing) sideAvatarRing.style.setProperty('border-color', color, 'imp
 if (sideIconContainer) sideIconContainer.style.setProperty('background-color', color, 'important');
 }
 
+// KIRURGISK TILLÄGG: Live-uppdatering av kundvyn (customers-view.js)
+// Körs bara om det är den inloggade agentens egna färg som ändras
+if (currentUser && username === currentUser.username) {
+// 1. Kundkortslistan — vänsterbård och --agent-color på varje kort
+document.querySelectorAll('#customer-list .team-ticket-card').forEach(card => {
+card.style.setProperty('border-left', `4px solid ${color}`, 'important');
+card.style.setProperty('--agent-color', color);
+const tag = card.querySelector('.ticket-tag');
+if (tag) { tag.style.color = color; tag.style.borderColor = color + '44'; }
+const badge = card.querySelector('.ticket-top-right span');
+if (badge) { badge.style.color = color; badge.style.background = color + '22'; badge.style.borderColor = color + '44'; }
+});
+
+// 2. Ärendekorten i kunddetaljvyn (listan under statistikrutorna)
+document.querySelectorAll('#customer-ticket-list-body .team-ticket-card').forEach(card => {
+card.style.setProperty('border-left', `3px solid ${color}`, 'important');
+card.style.setProperty('--agent-color', color);
+const tag = card.querySelector('.ticket-tag');
+if (tag) { tag.style.color = color; tag.style.borderColor = color + '44'; }
+});
+
+// 3. Modal-bläddaren — om den råkar vara öppen just nu
+const readerModal = document.getElementById('customer-reader-modal');
+if (readerModal && readerModal.style.display !== 'none') {
+const topBorder = readerModal.querySelector('.glass-modal-box');
+if (topBorder) topBorder.style.borderTopColor = color;
+const headerBg = readerModal.querySelector('.glass-modal-box > div');
+if (headerBg) headerBg.style.background = `linear-gradient(90deg, ${color}14, transparent)`;
+const avatarBox = readerModal.querySelector('.glass-modal-box > div div[style*="border-radius:9px"]');
+if (avatarBox) { avatarBox.style.background = color; avatarBox.style.boxShadow = `0 2px 10px ${color}55`; }
+const notesBtn = readerModal.querySelector('.notes-trigger-btn');
+if (notesBtn) notesBtn.style.color = color;
+}
+}
+
 // --- DIN ORIGINAL-LOGIK (RÖR EJ) ---
 const cached = usersCache.find(u => u.username === username);
 if (cached) cached.agent_color = color;

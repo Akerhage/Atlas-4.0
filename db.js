@@ -28,7 +28,7 @@ console.log('✅ SQLite WAL mode enabled');
 
 // Table Creation Tracker
 let tablesCreated = 0;
-const REQUIRED_TABLES = 9;
+const REQUIRED_TABLES = 10;
 
 function checkAllTablesCreated() {
 tablesCreated++;
@@ -235,6 +235,25 @@ if (err) console.error('⚠️ Could not create local_qa_history table:', err);
 else {
 console.log('✅ Table "local_qa_history" ready with archive support');
 checkAllTablesCreated(); 
+}
+});
+
+// -----------------------------------------------------------------------
+// KUNDANTECKNINGAR — Interna anteckningar per kundprofil (email-baserat)
+// ÄNDRING 4: Ny tabell för customer notes
+// -----------------------------------------------------------------------
+db.run(`CREATE TABLE IF NOT EXISTS customer_notes (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+customer_email TEXT NOT NULL,
+agent_name TEXT NOT NULL,
+content TEXT NOT NULL,
+created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`, (err) => {
+if (err) console.error('⚠️ Could not create customer_notes table:', err);
+else {
+console.log('✅ Table "customer_notes" ready');
+checkAllTablesCreated();
 }
 });
 

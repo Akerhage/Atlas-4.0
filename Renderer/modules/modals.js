@@ -430,6 +430,34 @@ body: JSON.stringify(profileData)
 if (!profRes.ok) throw new Error("Kunde inte spara");
 currentUser = { ...currentUser, ...profileData };
 localStorage.setItem('atlas_user', JSON.stringify(currentUser));
+
+// KIRURGISK TILLÄGG: Live-uppdatering av kundvyn vid profilfärgsändring
+const _newColor = colorInput.value;
+document.querySelectorAll('#customer-list .team-ticket-card').forEach(card => {
+card.style.setProperty('border-left', `4px solid ${_newColor}`, 'important');
+card.style.setProperty('--agent-color', _newColor);
+const tag = card.querySelector('.ticket-tag');
+if (tag) { tag.style.color = _newColor; tag.style.borderColor = _newColor + '44'; }
+const badge = card.querySelector('.ticket-top-right span');
+if (badge) { badge.style.color = _newColor; badge.style.background = _newColor + '22'; badge.style.borderColor = _newColor + '44'; }
+});
+document.querySelectorAll('#customer-ticket-list-body .team-ticket-card').forEach(card => {
+card.style.setProperty('border-left', `3px solid ${_newColor}`, 'important');
+card.style.setProperty('--agent-color', _newColor);
+const tag = card.querySelector('.ticket-tag');
+if (tag) { tag.style.color = _newColor; tag.style.borderColor = _newColor + '44'; }
+});
+const readerModal = document.getElementById('customer-reader-modal');
+if (readerModal && readerModal.style.display !== 'none') {
+const topBorder = readerModal.querySelector('.glass-modal-box');
+if (topBorder) topBorder.style.borderTopColor = _newColor;
+const headerBg = readerModal.querySelector('.glass-modal-box > div');
+if (headerBg) headerBg.style.background = `linear-gradient(90deg, ${_newColor}14, transparent)`;
+const avatarBox = readerModal.querySelector('.glass-modal-box > div div[style*="border-radius:9px"]');
+if (avatarBox) { avatarBox.style.background = _newColor; avatarBox.style.boxShadow = `0 2px 10px ${_newColor}55`; }
+const notesBtn = readerModal.querySelector('.notes-trigger-btn');
+if (notesBtn) notesBtn.style.color = _newColor;
+}
 const sideName = document.getElementById('current-user-name');
 if (sideName) sideName.innerText = profileData.display_name || formatName(currentUser.username);
 overlay.style.display = 'none';
