@@ -69,6 +69,8 @@
 <script src="modules/admin/admin-drift.js" defer></script>
 <!-- Admin-agents: unlockOfficeSection, openAddServicePanel, confirmAddService, createNewUser, toggleAdminStatus, updateAgentColor, updateAgentOfficeRole, saveOfficeKnowledge -->
 <script src="modules/admin/admin-agents.js" defer></script>
+<!-- Customers-view: renderCustomerList, openCustomerDetail -->
+<script src="modules/customers-view.js" defer></script>
 <!-- Atlas UI-logik: all rendering, socket-hantering, IPC -->
 <script src="./renderer.js" defer></script>
 </head>
@@ -99,6 +101,10 @@
 <li class="menu-item" data-view="archive">
 <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
 <span class="menu-text">Garaget</span>
+</li>
+<li class="menu-item" data-view="customers">
+<svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+<span class="menu-text">Kunder</span>
 </li>
 <li class="menu-item" data-view="admin" id="menu-admin" style="display: none;">
 <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -366,6 +372,43 @@ Garaget
 </div>
 </div>
 <div id="archive-detail" style="display: none; flex-direction: column; height: 100%;"></div>
+</div>
+</div>
+</main>
+
+<main class="templates-view layout-split" id="view-customers" style="display: none;">
+<header class="chat-header glass-effect">
+<h2>
+<svg class="header-title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+</svg>
+Kunder
+</h2>
+<div class="header-actions"></div>
+</header>
+<div class="templates-container">
+<div class="template-list-container">
+<h3>Kundregister</h3>
+<div style="padding:8px 12px 4px 12px;">
+<input type="text" id="customer-search-top" class="filter-input" placeholder="Sök kund..." autocomplete="off" style="width:100%; box-sizing:border-box;">
+</div>
+<div id="customer-list"></div>
+</div>
+<div class="template-editor-container glass-effect">
+<div id="customer-placeholder" class="hero-placeholder">
+<svg class="hero-bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+<div class="hero-content">
+<svg class="hero-fg-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+<h2 class="hero-title">KUNDER</h2>
+<p class="hero-subtitle">Sök på namn, email eller telefon</p>
+<input type="text" id="customer-search-main" placeholder="Skriv minst 3 tecken..." autocomplete="off"
+  style="margin-top:16px; width:280px; padding:10px 16px; border-radius:12px;
+         background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+         color:var(--text-primary); font-size:14px; text-align:center;
+         outline:none; font-family:inherit;">
+</div>
+</div>
+<div id="customer-detail" style="display: none; flex-direction: column; height: 100%;"></div>
 </div>
 </div>
 </main>

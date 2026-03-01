@@ -487,6 +487,9 @@ renderArchive();
 else if (viewId === 'admin') {
 switchAdminTab('users');
 }
+else if (viewId === 'customers') {
+renderCustomerList();
+}
 else if (viewId === 'about') {
 renderAboutGrid();
 }
@@ -506,6 +509,7 @@ const mapping = {
 'inbox':      { ph: 'inbox-placeholder',    det: 'inbox-detail' },
 'my-tickets': { ph: 'my-detail-placeholder',  det: 'my-ticket-detail' },
 'archive':    { ph: 'archive-placeholder',    det: 'archive-detail' },
+'customers':  { ph: 'customer-placeholder',   det: 'customer-detail' },
 'templates':  { ph: 'editor-placeholder',      det: 'template-editor-form' }
 };
 
@@ -1100,6 +1104,7 @@ templates: document.getElementById('view-templates'),
 inbox: document.getElementById('view-inbox'),
 'my-tickets': document.getElementById('view-my-tickets'),
 archive: document.getElementById('view-archive'),
+customers: document.getElementById('view-customers'),
 about: document.getElementById('view-about'),
 admin: document.getElementById('view-admin')
 },

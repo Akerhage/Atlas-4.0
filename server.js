@@ -1339,6 +1339,10 @@ const customerRoutes = require('./routes/customer');
 app.use('/api', customerRoutes);
 customerRoutes.init({ io, handleChatMessage });
 
+// Kundprofil-routes (GET /api/customers, GET /api/customers/tickets)
+const customerProfileRoutes = require('./routes/customers');
+app.use('/api', customerProfileRoutes);
+customerProfileRoutes.init({});
 
 // Antecknings-routes (GET/POST/PUT/DELETE /api/notes/*)
 const notesRoutes = require('./routes/notes');

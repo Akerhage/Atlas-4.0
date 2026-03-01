@@ -37,15 +37,6 @@ document.body.appendChild(modal);
 // 3. Rendera innehållet (nu med kännedom om overrideTag)
 renderReaderContent();
 
-// Hjälpfunktion: stäng reader och återställ eventuellt filtrerad ticketlista
-const _closeReader = () => {
-modal.style.display = 'none';
-if (window._savedTicketList !== undefined) {
-currentTicketList = window._savedTicketList;
-delete window._savedTicketList;
-}
-};
-
 // 4. Visa modalen och aktivera stängning vid klick utanför
 modal.style.display = 'flex';
 modal.style.pointerEvents = 'all';
@@ -191,7 +182,7 @@ modal.style.pointerEvents = 'all';
 const closeBtn = modal.querySelector('#reader-close-btn');
 if (closeBtn) {
 closeBtn.style.pointerEvents = 'all';
-closeBtn.onclick = () => _closeReader();
+closeBtn.onclick = _closeReader;
 }
 
 const prevBtn = modal.querySelector('#reader-prev');
@@ -245,4 +236,20 @@ if (newIdx >= 0 && newIdx < currentTicketList.length) {
 currentTicketIdx = newIdx;
 renderReaderContent();
 }
+}
+
+// ===================================================
+// HELPER - CLOSE READER (Global scope)
+// ===================================================
+function _closeReader() {
+  const modal = document.getElementById('atlas-reader-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.style.pointerEvents = 'none'; // Säkra att klick inte registreras när den är dolda
+  }
+
+  if (window._savedTicketList !== undefined) {
+    currentTicketList = window._savedTicketList;
+    delete window._savedTicketList;
+  }
 }
