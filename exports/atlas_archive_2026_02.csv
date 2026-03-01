@@ -1,0 +1,51 @@
+ID;Datum;Agent;Stad;Fordon;Ämne;Antal_Meddelanden
+DEMO_BIL_ESLOV_a58a;2026-02-27;madeleine;Eslöv;BIL;Handledarkurs info;1
+DEMO_MC_HELSINGBORG_CITY_4767;2026-02-27;admin;Helsingborg;MC;A2 till A uppgradering;1
+DEMO_AM_VASTERAS_0a5c;2026-02-27;admin;Västerås;AM;Mopedkurs start;2
+DEMO_BIL_GOTEBORG_VASTRA_FROLUNDA_3a71;2026-02-27;ida;Göteborg;BIL;Handledarkurs info;1
+DEMO_MC_MALMO_SODERVARN_78b3;2026-02-27;Ingen;Malmö;MC;Risk 2 MC;1
+MAIL_GOTEBORG_MOLNDAL_9ff2;2026-02-28;admin;Göteborg;BIL;Reklamation;3
+ARKIV_MAIL_GOTEBORG_VASTRA_FROLUNDA_6b7f;2026-02-23;nathalie;Göteborg;MC;Fakturafråga;1
+ARKIV_MAIL_GOTEBORG_MOLNDAL_5518;2026-02-24;rebecka;Göteborg;MC;Fakturafråga;1
+ARKIV_MAIL_LUND_KATEDRAL_af4e;2026-02-23;admin;Lund;BIL;Presentkort;1
+ARKIV_CHATT_STOCKHOLM_SOLNA_10a9;2026-02-23;madeleine;Stockholm;BIL;Uppkörning bil;1
+ARKIV_CHATT_LANDSKRONA_6c7d;2026-02-23;admin;Landskrona;MC;Risk 2 MC;1
+ARKIV_CHATT_MALMO_CITY_ac56;2026-02-24;madeleine;Malmö;MC;Risk 2 MC;1
+ARKIV_MAIL_MALMO_LIMHAMN_1d48;2026-02-23;nathalie;Malmö;MC;Ansökan om jobb;1
+ARKIV_MAIL_KRISTIANSTAD_f1e3;2026-02-27;admin;Kristianstad;BIL;Gruppbokning förfrågan;1
+ARKIV_CHATT_STOCKHOLM_ENSKEDEDALEN_f276;2026-02-23;admin;Stockholm;BIL;Pris körlektioner;1
+ARKIV_CHATT_MALMO_BULLTOFTA_6490;2026-02-23;nathalie;Malmö;MC;Risk 2 MC;1
+ARKIV_MAIL_HOLLVIKEN_df9a;2026-02-23;nathalie;Höllviken;AM;Gruppbokning förfrågan;1
+ARKIV_CHATT_ESLOV_c217;2026-02-24;admin;Eslöv;MC;MC intensivkurs;1
+ARKIV_CHATT_MALMO_VARNHEM_9100;2026-02-23;rebecka;Malmö;BIL;Uppkörning bil;1
+ARKIV_CHATT_KALMAR_5a4b;2026-02-23;patric;Kalmar;MC;Risk 2 MC;1
+ARKIV_MAIL_STOCKHOLM_OSTERAKER_6cba;2026-02-23;nathalie;Stockholm;AM;Ansökan om jobb;1
+session_1772221808221_zobzc2a7k;2026-02-27;admin;Okänd;BIL;Inget ämne;5
+6ec91f2c-05a2-43d8-8df3-b84d778949d7;2026-02-28;admin;Göteborg;mc;Fråga om priser;2
+b9760af4-0f6f-4db4-9d64-c74efd625aad;2026-02-28;admin;Vellinge;mc;Fråga om priser;2
+4ec91a55-9911-4737-a0fe-709e4d3b6381;2026-02-28;admin;Kalmar;lastbil;Fråga om MC-körkort;2
+62d68269-c2fa-4423-9dc0-2016b3d826ab;2026-02-28;Ingen;Göteborg;am;Fråga om priser;1
+c14dc5ef-355d-4593-9fc7-00ad6895375e;2026-02-28;Ingen;Göteborg;bil;Behöver hjälp med bokning;1
+0cd50047-5bbe-411d-af86-e670b258ea07;2026-02-28;admin;Lund;bil;Fråga om körkortsprocessen;2
+91ec3295-8dd1-483f-9d5c-e5a997a231b4;2026-02-28;admin;Lund;bil;Vill veta mer om utbildning;2
+023008d6-5d80-4e28-8dec-e50f09bb29da;2026-02-28;Ingen;Göteborg;mc;Vill veta mer om utbildning;1
+21e2be56-27d1-4e35-9b4a-e3ee5b738b79;2026-02-28;Ingen;Lund;mc;Vad kostar det?;1
+487bdefe-da1c-4441-92cf-5824f95f0e87;2026-02-28;admin;Stockholm;am;Vill veta mer om utbildning;2
+21d6c9c1-cb34-424c-aee8-91116b0c088c;2026-02-28;Ingen;Göteborg;bil;Behöver hjälp med bokning;1
+a7b571ee-0d4b-40f2-9d37-4298ee7424f1;2026-02-28;admin;Stockholm;lastbil;Vad kostar det?;2
+09df4f98-147c-47a9-aa3b-deec28f85015;2026-02-28;admin;Malmö;mc;Fråga om priser;2
+b7a9c17a-ac6c-4194-9d11-4e7c4fb41f12;2026-02-28;admin;Lund;lastbil;Behöver hjälp med bokning;2
+daeef20e-3b38-4f32-ba09-5f9c40310549;2026-02-28;Ingen;Malmö;lastbil;Behöver hjälp med bokning;1
+c9294f31-e7ce-4e76-a889-c8db20ab0daf;2026-02-28;admin;Stockholm;mc;Intresserad av intensivkurs;2
+a3d44f81-20e9-4a4d-9baf-24c6bf53cb72;2026-02-28;Ingen;Eslöv;am;Behöver hjälp med bokning;1
+51ac48a3-2f04-423c-b39e-e1f9bb98eeb5;2026-02-28;admin;Kalmar;bil;Intresserad av intensivkurs;2
+d7ee5105-124b-446e-9084-278d6b3a42a7;2026-02-28;admin;Okänd;BIL;Bifogad fil — testärende;2
+bfd4c805-0551-4b37-9fa0-6e2e09ccea34;2026-02-28;admin;Stockholm;lastbil;Fråga om körkortsprocessen;2
+02c1c169-133c-4553-9095-e4c5bed86c97;2026-02-28;Ingen;Stockholm;am;Fråga om körkortsprocessen;1
+d0a0df78-5500-4e9d-b99f-693e297e0824;2026-02-28;admin;Stockholm;mc;Fråga om priser;2
+18efbf0d-f6c0-4f8a-8780-c8441d5acdd2;2026-02-28;admin;Okänd;am;Intresserad av intensivkurs;2
+d39b9b53-7c78-4cfc-9808-deacdeaa695b;2026-02-28;Ingen;Landskrona;mc;Fråga om MC-körkort;1
+32c8ef6f-32c0-4032-975e-9a8f0ea5c7ed;2026-02-28;admin;Göteborg;lastbil;Fråga om MC-körkort;2
+3f9039a6-1425-40d8-986c-f4f4f0320ca5;2026-02-28;admin;Okänd;mc;Fråga om körkortsprocessen;2
+5f621da3-6416-497d-9f6b-8bf0ba98cac4;2026-02-28;ida;Okänd;bil;Vad kostar det?;1
+0d782cc2-3569-4fc9-bd89-e69e63e63175;2026-02-28;admin;Stockholm;lastbil;Fråga om MC-körkort;2

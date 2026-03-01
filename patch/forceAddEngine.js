@@ -167,8 +167,9 @@ return added;
 */
 rule_B2_Finance(queryLower, intent, slots) {
 const has_keywords = this.qHas(queryLower,
-'betalning', 'klarna', 'swish', 'faktura', 'orgnr', 'bankgiro', 
-'delbetala', 'kredit', 'finansiering', 'studentrabatt', 'rabatt'
+'betalning', 'klarna', 'swish', 'faktura', 'orgnr', 'bankgiro',
+'delbetala', 'kredit', 'finansiering', 'studentrabatt', 'rabatt',
+'dyrare', 'billigare', 'olika priser', 'priser skiljer'
 );
 
 if (!has_keywords) return 0;
@@ -637,6 +638,22 @@ const { intent, slots } = intentResult;
 if (this.qHas(queryLower, 'support', 'kundtjänst', 'hjälp', 'ring', 'kontakta', 'kontakt')) {
 totalAdded += this.addChunks(this.findBasfaktaBySource('basfakta_om_foretaget.json'), 18000, true);
 if (highConfCount++ < 2) this.forceHighConfidence = true;
+}
+
+// 1a. META-PRISFRÅGOR (t.ex. "Varför skiljer sig priserna åt i landet?")
+if (this.qHas(queryLower, 'skiljer') ||
+    (this.qHas(queryLower, 'dyrare', 'billigare', 'olika priser') &&
+     this.qHas(queryLower, 'ort', 'stad', 'land', 'landet', 'region'))) {
+  const metaChunks = this.allChunks.filter(c =>
+    this.isBasfakta(c) &&
+    c.source && c.source.includes('basfakta_om_foretaget.json') &&
+    (c.keywords || []).some(k => ['dyrare', 'olika priser', 'varierar'].includes(k))
+  );
+  if (metaChunks.length > 0) {
+    totalAdded += this.addChunks(metaChunks, 18000, true);
+    if (highConfCount++ < 2) this.forceHighConfidence = true;
+    console.log(`[META-PRIS] Lade till ${metaChunks.length} meta-prischunks (score: 18000)`);
+  }
 }
 
 // 1b. FAKTURAADRESS GENERELL (Täcker alla varianter av fakturaadress-frågor)

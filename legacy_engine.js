@@ -315,7 +315,7 @@ const CITY_ALIASES = {
 
 const VEHICLE_MAP = {
 'SLÄP': ['be', 'be-kort', 'be körkort', 'be-körkort', 'b96', 'släp', 'tungt släp', 'utökad b'],
-'LASTBIL': ['lastbil', 'c', 'c1', 'c1e', 'ce', 'c-körkort', 'tung lastbil', 'medeltung lastbil'],
+'LASTBIL': ['lastbil', 'c', 'c1', 'c1e', 'ce', 'c-körkort', 'tung lastbil', 'medeltung lastbil', 'tung trafik', 'tungt fordon', 'tunga fordon'],
 'AM': ['am', 'moped', 'mopedutbildning', 'moppe', 'klass 1'],
 'BIL': ['bil', 'personbil', 'b-körkort', 'b körkort', 'körlektion bil', 'körlektion personbil'],
 'MC': ['mc', 'motorcykel', 'a1', 'a2', 'a-körkort', '125cc', '125 cc', 'lätt motorcykel', 'tung motorcykel'],
