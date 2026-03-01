@@ -995,4 +995,31 @@ res.status(500).json({ error: 'Kunde inte läsa tjänstemallar' });
 }
 });
 
+// ============================================================
+// GET /api/admin/rag-failures — Hämtar RAG-misslyckanden
+// DELETE /api/admin/rag-failures — Töm tabellen
+// ============================================================
+router.get('/api/admin/rag-failures', authenticateToken, (req, res) => {
+const limit = Math.min(parseInt(req.query.limit) || 200, 500);
+db.all(
+`SELECT id, query, session_type, ts_fallback_used, ts_fallback_success, ts_url, created_at
+FROM rag_failures ORDER BY created_at DESC LIMIT ?`,
+[limit],
+(err, rows) => {
+if (err) return res.status(500).json({ error: err.message });
+res.json(rows || []);
+}
+);
+});
+
+router.delete('/api/admin/rag-failures', authenticateToken, (req, res) => {
+if (req.user.role !== 'admin' && req.user.role !== 'support') {
+return res.status(403).json({ error: 'Ej behörig' });
+}
+db.run(`DELETE FROM rag_failures`, (err) => {
+if (err) return res.status(500).json({ error: err.message });
+res.json({ success: true });
+});
+});
+
 module.exports = router;

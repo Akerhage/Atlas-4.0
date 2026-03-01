@@ -400,9 +400,38 @@ if (result.new_context.locked_context) contextData.locked_context = result.new_c
 if (result.new_context.linksSentByVehicle) contextData.linksSentByVehicle = result.new_context.linksSentByVehicle;
 
 // Spara botens svar
-const responseText = typeof result.response_payload === 'string' 
-? result.response_payload 
+let responseText = typeof result.response_payload === 'string'
+? result.response_payload
 : result.response_payload?.answer || "";
+
+// Transportstyrelsen-fallback: kör om RAG inte hittade svar på regelrelaterad fråga
+if (aiEnabled && responseText.includes("hittar ingen information")) {
+const sessionTypeForLog = v2State?.session_type || 'unknown';
+let tsSucceeded = 0;
+let tsUrlUsed = null;
+try {
+const { tryTransportstyrelseFallback, classifyRegulatoryTopic } = require('./utils/transportstyrelsen-fallback');
+tsUrlUsed = classifyRegulatoryTopic(query);
+const tsAnswer = await tryTransportstyrelseFallback(query);
+if (tsAnswer) {
+tsSucceeded = 1;
+responseText = tsAnswer;
+if (typeof result.response_payload === 'string') {
+result.response_payload = tsAnswer;
+} else if (result.response_payload) {
+result.response_payload.answer = tsAnswer;
+}
+}
+} catch (tsErr) {
+console.warn('[TS-Fallback] Fel:', tsErr.message);
+}
+// Logga RAG-miss till databasen (fire-and-forget)
+db.run(
+`INSERT INTO rag_failures (query, session_type, ts_fallback_used, ts_fallback_success, ts_url) VALUES (?, ?, ?, ?, ?)`,
+[query, sessionTypeForLog, tsUrlUsed ? 1 : 0, tsSucceeded, tsUrlUsed],
+(err) => { if (err) console.warn('[RAG-Log] DB-fel:', err.message); }
+);
+}
 
 contextData.messages.push({ role: 'atlas', content: responseText, timestamp: Date.now() });
 
@@ -927,6 +956,35 @@ console.log("------------------------------------------");
 let responseText = (typeof result.response_payload === 'string')
 ? result.response_payload
 : (result.response_payload?.answer || "Inget svar tillgängligt");
+
+// Transportstyrelsen-fallback: kör om RAG inte hittade svar på regelrelaterad fråga
+if (aiEnabled && responseText.includes("hittar ingen information")) {
+const sessionTypeForLog = v2State?.session_type || 'unknown';
+let tsSucceeded = 0;
+let tsUrlUsed = null;
+try {
+const { tryTransportstyrelseFallback, classifyRegulatoryTopic } = require('./utils/transportstyrelsen-fallback');
+tsUrlUsed = classifyRegulatoryTopic(query);
+const tsAnswer = await tryTransportstyrelseFallback(query);
+if (tsAnswer) {
+tsSucceeded = 1;
+responseText = tsAnswer;
+if (typeof result.response_payload === 'string') {
+result.response_payload = tsAnswer;
+} else if (result.response_payload) {
+result.response_payload.answer = tsAnswer;
+}
+}
+} catch (tsErr) {
+console.warn('[TS-Fallback] Fel:', tsErr.message);
+}
+// Logga RAG-miss till databasen (fire-and-forget)
+db.run(
+`INSERT INTO rag_failures (query, session_type, ts_fallback_used, ts_fallback_success, ts_url) VALUES (?, ?, ?, ?, ?)`,
+[query, sessionTypeForLog, tsUrlUsed ? 1 : 0, tsSucceeded, tsUrlUsed],
+(err) => { if (err) console.warn('[RAG-Log] DB-fel:', err.message); }
+);
+}
 
 // DEBUG: Verifiera att vi har ett svar
 console.log("🔍 [DEBUG] responseText extracted:", responseText.substring(0, 100));

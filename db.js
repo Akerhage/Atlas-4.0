@@ -28,7 +28,7 @@ console.log('✅ SQLite WAL mode enabled');
 
 // Table Creation Tracker
 let tablesCreated = 0;
-const REQUIRED_TABLES = 8;
+const REQUIRED_TABLES = 9;
 
 function checkAllTablesCreated() {
 tablesCreated++;
@@ -168,6 +168,21 @@ else {
 console.log('✅ Table "ticket_notes" ready');
 checkAllTablesCreated(); // Åttonde och sista tabellen — räknaren når 8/8
 }
+});
+
+// 9. Tabell för RAG-misslyckanden (Kunskapsluckor)
+db.run(`CREATE TABLE IF NOT EXISTS rag_failures (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+query TEXT NOT NULL,
+session_type TEXT DEFAULT 'unknown',
+ts_fallback_used INTEGER DEFAULT 0,
+ts_fallback_success INTEGER DEFAULT 0,
+ts_url TEXT DEFAULT NULL,
+created_at INTEGER DEFAULT (strftime('%s','now'))
+)`, (err) => {
+if (err) console.error('❌ rag_failures table error:', err);
+else console.log('✅ Table "rag_failures" ready');
+checkAllTablesCreated();
 });
 
 // Migration: Add session_type Column
