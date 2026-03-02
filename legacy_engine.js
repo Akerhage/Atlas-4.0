@@ -1562,7 +1562,7 @@ nluResult.slots.vehicle = originalVehicleSlot;
 // ============================================================
 if (Array.isArray(criticalAnswers) && forceAddResult.mustAddChunks.length === 0) {
 for (const entry of criticalAnswers) {
-const matches = entry.keywords && entry.keywords.some(kw => queryLower.includes(kw));
+const matches = entry.keywords && Array.isArray(entry.keywords) && entry.keywords.some(kw => queryLower.includes(kw));
 if (matches) {
 const timeGreeting = isFirstMessage ? "God morgon! " : "";
 appendToSession(sessionId, 'assistant', timeGreeting + entry.answer);

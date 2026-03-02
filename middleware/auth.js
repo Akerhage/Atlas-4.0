@@ -15,7 +15,7 @@ const apiKey = req.headers['x-api-key']; // Kolla efter API-nyckel
 const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer TOKEN"
 
 // 1. Tillåt interna anrop från main.js via API-nyckel
-if (apiKey && apiKey === process.env.CLIENT_API_KEY) {
+if (apiKey && process.env.CLIENT_API_KEY && apiKey === process.env.CLIENT_API_KEY) {
 req.user = { username: 'System', role: 'admin' };
 return next();
 }

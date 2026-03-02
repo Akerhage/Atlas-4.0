@@ -273,6 +273,28 @@ console.log('✅ Index "idx_inbox_queue" ready');
 });
 
 // -----------------------------------------------------------------------
+// PRESTANDA-INDEX (Audit V1/V2/V3 — saknade index)
+// -----------------------------------------------------------------------
+db.run(`CREATE INDEX IF NOT EXISTS idx_ticket_notes_conv
+ON ticket_notes (conversation_id)`, (err) => {
+if (err) console.error('⚠️ idx_ticket_notes_conv:', err);
+else console.log('✅ Index "idx_ticket_notes_conv" ready');
+});
+
+db.run(`CREATE INDEX IF NOT EXISTS idx_qa_history_archived
+ON local_qa_history (is_archived)`, (err) => {
+if (err) console.error('⚠️ idx_qa_history_archived:', err);
+else console.log('✅ Index "idx_qa_history_archived" ready');
+});
+
+db.run(`CREATE INDEX IF NOT EXISTS idx_rag_failures_created
+ON rag_failures (created_at)`, (err) => {
+if (err) console.error('⚠️ idx_rag_failures_created:', err);
+else console.log('✅ Index "idx_rag_failures_created" ready');
+});
+
+
+// -----------------------------------------------------------------------
 // NY SAAS-LOGIK: AUTH & TEAM (KONSOLIDERAD v.3.8 - UPPDATERAD 2026-02-12)
 // -----------------------------------------------------------------------
 
