@@ -38,6 +38,8 @@ const fs = require('fs');
 const multer = require('multer');
 const imapSimple = require('imap-simple');
 const { simpleParser } = require('mailparser');
+const PDFDocument = require('pdfkit');
+const { Readable } = require('stream');
 const { 
 db, getUserByUsername, 
 createUser, 
@@ -727,9 +729,9 @@ io.emit('team:client_typing', { sessionId });
 
 // 👇 AGENT SKRIVER (SKICKA TILL KUND + GLOBAL BROADCAST FÖR INTERNA CHATTAR)
 socket.on('team:agent_typing', (payload) => {
-    const sessionId = payload?.sessionId;
-    if (!sessionId) return;
-    socket.to(sessionId).emit('client:agent_typing', { sessionId });
+const sessionId = payload?.sessionId;
+if (!sessionId) return;
+socket.to(sessionId).emit('client:agent_typing', { sessionId });
 });
 
 // Vidarebefordra agentens skriv-status till kundens fönster
@@ -1680,82 +1682,88 @@ console.error('❌ [Backup] Fel:', e.message);
 }
 }
 
-// =============================================================================
-// 📅 AUTOMATISK MÅNADSEXPORT (CSV)
-// =============================================================================
-function runMonthlyExport() {
-const today = new Date();
-// Kör bara om det är den 1:a i månaden
-if (today.getDate() !== 1) return; 
+async function runMonthlyExport() {
+const now = new Date();
+const yyyy = now.getFullYear();
+const mm = String(now.getMonth()).padStart(2, '0'); // 01–12
+const exportDir = path.join(__dirname, 'exports');
+if (!fs.existsSync(exportDir)) fs.mkdirSync(exportDir, { recursive: true });
 
-const lastMonth = new Date();
-lastMonth.setMonth(lastMonth.getMonth() - 1);
-const yyyy = lastMonth.getFullYear();
-const mm = String(lastMonth.getMonth() + 1).padStart(2, '0');
-
-const filename = `atlas_archive_${yyyy}_${mm}.csv`;
-// Skapar exports-mappen i samma mapp som server.js
-const exportDir = getWritablePath('exports');
-const exportPath = path.join(exportDir, filename);
-
-// Skapa mapp om den inte finns
-if (!fs.existsSync(exportDir)) {
-fs.mkdirSync(exportDir);
-}
-
-// Kolla om filen redan finns (så vi inte skriver över/dubblerar)
-if (fs.existsSync(exportPath)) return;
-
-console.log(`[EXPORT] Påbörjar månadsexport för ${yyyy}-${mm}...`);
-
-
-
-// Hämta förra månadens arkiverade ärenden från chat_v2_state
+try {
+// 1. Hämta statistik från db (anpassa efter dina tabeller)
+const stats = await new Promise((resolve, reject) => {
 db.all(`
 SELECT 
-s.conversation_id, 
-s.owner, 
-s.updated_at,
-c.context_data
-FROM chat_v2_state s
-LEFT JOIN context_store c ON s.conversation_id = c.conversation_id
-WHERE s.is_archived = 1 
-`, [], (err, rows) => {
-if (err) return console.error("Export Error:", err);
-if (!rows || rows.length === 0) return;
-
-// Skapa CSV-header (Excel-kompatibel semikolon-separator för svensk Excel)
-let csvContent = "ID;Datum;Agent;Stad;Fordon;Ämne;Antal_Meddelanden\n";
-
-rows.forEach(row => {
-const date = new Date(row.updated_at * 1000).toISOString().split('T')[0];
-let ctx = {};
-try { ctx = JSON.parse(row.context_data); } catch(e) {}
-
-const locked = ctx.locked_context || {};
-const msgs = ctx.messages || [];
-
-// Plocka ut data säkert
-const city = locked.city || "Okänd";
-const vehicle = locked.vehicle || "Okänd";
-const subject = locked.subject || "Inget ämne";
-const agent = row.owner || "Ingen";
-
-// Bygg raden
-csvContent += `${row.conversation_id};${date};${agent};${city};${vehicle};${subject};${msgs.length}\n`;
+COUNT(*) as total_tickets,
+SUM(CASE WHEN human_mode = 0 THEN 1 ELSE 0 END) as ai_handled,
+SUM(CASE WHEN human_mode = 1 THEN 1 ELSE 0 END) as human_handled,
+office as kontor,
+AVG((updated_at - strftime('%s', created_at)) / 60.0) as avg_response_min
+FROM chat_v2_state
+WHERE is_archived = 0
+AND updated_at >= strftime('%s', 'now', '-1 month')
+GROUP BY office
+`, (err, rows) => {
+if (err) reject(err);
+else resolve(rows);
+});
 });
 
-// Skriv filen
-fs.writeFileSync(exportPath, csvContent, 'utf8');
-console.log(`[EXPORT] ✅ Sparad till ${exportPath}`);
+// 2. Bygg enkel text för AI
+const rawStats = stats.map(s => 
+`${s.kontor || 'Okänt'}: ${s.total_tickets} ärenden (${s.ai_handled} AI, ${s.human_handled} mänskliga), genomsnittlig svarstid ${Math.round(s.avg_response_min || 0)} min`
+).join('\n');
+
+const prompt = `Sammanfatta senaste månadens supportstatistik kort och professionellt på svenska. Inkludera totalt antal ärenden, AI-andel, genomsnittlig svarstid och rekommendationer för FAQ-uppdateringar.\n\nData:\n${rawStats}`;
+
+// 3. AI-sammanfattning
+let summary = 'Ingen AI-sammanfattning (OpenAI ej aktiverad).';
+if (aiEnabled && process.env.OPENAI_API_KEY) {
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const completion = await openai.chat.completions.create({
+model: 'gpt-4o-mini',
+messages: [{ role: 'user', content: prompt }],
+max_tokens: 600
 });
+summary = completion.choices[0].message.content.trim();
 }
 
-// Kör kollen 5 sekunder efter serverstart
-setTimeout(runMonthlyExport, 5000);
+// 4. Skapa PDF
+const pdfBuffer = await new Promise((resolve, reject) => {
+const doc = new PDFDocument({ margin: 50 });
+const buffers = [];
+doc.on('data', buffers.push.bind(buffers));
+doc.on('end', () => resolve(Buffer.concat(buffers)));
+doc.on('error', reject);
 
-// Kör kollen en gång per dygn (86400000 ms) för att fånga datumskiften om servern står på
-setInterval(runMonthlyExport, 86400000);
+doc.fontSize(20).text(`Atlas Månadsrapport – ${yyyy}-${mm}`, { align: 'center' });
+doc.moveDown();
+doc.fontSize(12).text(summary, { align: 'left', lineGap: 6 });
+doc.end();
+});
+
+const pdfPath = path.join(exportDir, `atlas_rapport_${yyyy}-${mm}.pdf`);
+fs.writeFileSync(pdfPath, pdfBuffer);
+
+// 5. Maila (använd din befintliga mailTransporter)
+const mailOptions = {
+from: process.env.EMAIL_USER,
+to: 'patrik_akerhage@hotmail.com', // ← ändra här till dina adresser
+subject: `Atlas Månadsrapport ${yyyy}-${mm}`,
+text: 'Se bifogad PDF för detaljerad sammanfattning.',
+attachments: [{
+filename: `atlas_rapport_${yyyy}-${mm}.pdf`,
+content: pdfBuffer
+}]
+};
+
+await mailTransporter.sendMail(mailOptions);
+console.log(`✅ Månadsrapport genererad och mailad: ${pdfPath}`);
+
+} catch (err) {
+console.error('❌ Fel i månadsrapport:', err.message);
+}
+}
 
 // =====================================================================
 // 🔧 ADMIN — SYSTEMKONFIGURATION (Del 2)

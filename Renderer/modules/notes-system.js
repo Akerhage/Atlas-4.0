@@ -42,10 +42,10 @@ style="width:100%; height:70px; padding-right:44px; box-sizing:border-box; resiz
 
 modal.style.display = 'flex';
 
-// 1. Ladda anteckningarna (Denna rensar "Laddar..." direkt)
+// 1. Ladda anteckningarna
 loadNotes(conversationId);
 
-// 2. Koppla sparaknappen (onclick skriver över eventuella gamla lyssnare)
+// 2. Koppla sparaknappen
 const saveBtn = document.getElementById('add-note-btn');
 saveBtn.onclick = async () => {
 const textarea = document.getElementById('note-textarea');
@@ -64,8 +64,10 @@ body: JSON.stringify({ conversationId, content })
 
 if (res.ok) {
 textarea.value = '';
-await loadNotes(conversationId); // Ladda om listan
-refreshNotesGlow(conversationId); // Uppdatera lysande ikon i listan
+await loadNotes(conversationId);
+if (typeof refreshNotesGlow === 'function') {
+refreshNotesGlow(conversationId);  // ← bara här
+}
 }
 } catch (err) {
 console.error("Fel vid sparande av notis:", err);

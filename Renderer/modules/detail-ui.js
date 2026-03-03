@@ -100,6 +100,16 @@ pills += `<span class="pill">${UI_ICONS.PHONE} ${phone}</span>`;
 }
 
 const aiBadge = item.human_mode === 0 ? `<span class="ai-badge">AI</span>` : '';
+const profileHTML = email ?
+`<button class="header-button icon-only-btn"
+onclick="showCustomerReaderModal('${email}')"
+title="Visa kundens ärendehistorik"
+style="color:${styles.main}; margin-right:4px;">
+${AVATAR_ICONS[0]}
+</button>` : '';
+
+// Lägg till profile-knappen i extraActions
+extraActions = profileHTML + extraActions;
 
 return `
 <div class="detail-header-top" style="background: linear-gradient(90deg, ${styles.bg || styles.main + '1a'}, transparent); border-bottom: 2px solid ${styles.main} !important;">

@@ -4008,6 +4008,46 @@ Inaktiv tills ändringar görs, grön glow när dirty
   50% { filter: drop-shadow(0 0 8px #4cd964); opacity: 1; }
 }
 
+/* ================================================
+   READER MODAL (Kunder + Admin)
+   Fast storlek, sticky header, scroll bara i meddelanden
+   ================================================ */
+
+#customer-reader-modal .glass-modal-box {
+  width: 680px !important;
+  max-width: 92vw !important;
+  height: 580px !important;           /* Matchar dina skärmbilder */
+  max-height: 78vh !important;
+  overflow: hidden !important;
+}
+
+#customer-reader-modal .glass-modal-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background: rgba(30,30,30,0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  padding: 16px 20px !important;
+}
+
+#customer-reader-modal .glass-modal-body {
+  overflow-y: auto !important;
+  max-height: calc(100% - 68px) !important;   /* Header = 68px */
+  padding: 16px 20px !important;
+}
+
+/* Bredare header så det inte känns hoptryckt */
+#customer-reader-modal .glass-modal-header > div:first-child {
+  gap: 16px !important;
+}
+
+/* Datum syns tydligt i varje ärende (redan i din kod) */
+.ticket-meta {
+  font-size: 11px !important;
+  color: #aaa !important;
+  margin: 4px 0 12px !important;
+}
+
 /* =============================================================================
 Scrollbar-glow: nedbantad mot temaöverdrift
 Teman sätter box-shadow upp till 25px på scrollbar-thumbs — ta bort
