@@ -388,6 +388,33 @@ const PKG_TEMPLATES = {
 { service_name: 'B96 Paket',         price: 0, currency: 'SEK', keywords: ['b96','släp'] },
 { service_name: 'BE Paket',          price: 0, currency: 'SEK', keywords: ['be','släp'] },
 ],
+'Lastbil': [
+{ service_name: 'C Totalpaket 5',                   price: 0, currency: 'SEK', keywords: ['c körkort','c totalpaket 5','lastbil','tung lastbil'] },
+{ service_name: 'C Totalpaket 10',                  price: 0, currency: 'SEK', keywords: ['c körkort','c totalpaket 10','lastbil'] },
+{ service_name: 'C Totalpaket 15',                  price: 0, currency: 'SEK', keywords: ['c körkort','c totalpaket 15','lastbil'] },
+{ service_name: 'C Paket + YKB 140H',               price: 0, currency: 'SEK', keywords: ['c ykb paket','lastbil ykb'] },
+{ service_name: 'C Körlektion (1 st)',               price: 0, currency: 'SEK', keywords: ['c körlektion','lastbil lektion'] },
+{ service_name: 'C Lektionspaket 5',                price: 0, currency: 'SEK', keywords: ['c lektionspaket 5','lastbil'] },
+{ service_name: 'C Lektionspaket 10',               price: 0, currency: 'SEK', keywords: ['c lektionspaket 10','lastbil'] },
+{ service_name: 'C Uppvärmning & ekipage vid prov', price: 0, currency: 'SEK', keywords: ['uppvärmning','ekipage','c körkort'] },
+{ service_name: 'CE Totalpaket 5',                  price: 0, currency: 'SEK', keywords: ['ce körkort','ce totalpaket 5','lastbil med släp'] },
+{ service_name: 'CE Totalpaket 10',                 price: 0, currency: 'SEK', keywords: ['ce körkort','ce totalpaket 10','lastbil med släp'] },
+{ service_name: 'CE Totalpaket 15',                 price: 0, currency: 'SEK', keywords: ['ce körkort','ce totalpaket 15','lastbil med släp'] },
+{ service_name: 'CE Lektionspaket 5',               price: 0, currency: 'SEK', keywords: ['ce lektionspaket 5','lastbil med släp'] },
+{ service_name: 'CE Lektionspaket 10',              price: 0, currency: 'SEK', keywords: ['ce lektionspaket 10','lastbil med släp'] },
+{ service_name: 'CE Lektionspaket 15',              price: 0, currency: 'SEK', keywords: ['ce lektionspaket 15','lastbil med släp'] },
+{ service_name: 'CE Körlektion (1 st)',              price: 0, currency: 'SEK', keywords: ['ce körlektion','lastbil med släp lektion'] },
+{ service_name: 'CE Uppvärmning & ekipage vid prov',price: 0, currency: 'SEK', keywords: ['uppvärmning','ekipage','ce körkort'] },
+{ service_name: 'C1 Paket (3 lektioner)',           price: 0, currency: 'SEK', keywords: ['c1 körkort','c1 paket','medeltung lastbil'] },
+{ service_name: 'C1 Körlektion (1 st)',             price: 0, currency: 'SEK', keywords: ['c1 körlektion','medeltung lastbil'] },
+{ service_name: 'C1 Uppvärmning & ekipage vid prov',price: 0, currency: 'SEK', keywords: ['uppvärmning','ekipage','c1 körkort'] },
+{ service_name: 'D Totalpaket 5 (Buss)',            price: 0, currency: 'SEK', keywords: ['d körkort','buss','busskörkort','d totalpaket'] },
+{ service_name: 'D Körlektion (1 st, Buss)',        price: 0, currency: 'SEK', keywords: ['d körlektion','buss'] },
+{ service_name: 'D Lektionspaket 5 (Buss)',         price: 0, currency: 'SEK', keywords: ['d lektionspaket 5','buss'] },
+{ service_name: 'D Lektionspaket 10 (Buss)',        price: 0, currency: 'SEK', keywords: ['d lektionspaket 10','buss'] },
+{ service_name: 'D Lektionspaket 15 (Buss)',        price: 0, currency: 'SEK', keywords: ['d lektionspaket 15','buss'] },
+{ service_name: 'D Uppvärmning & ekipage vid prov (Buss)', price: 0, currency: 'SEK', keywords: ['uppvärmning','ekipage','d körkort','buss'] },
+],
 };
 
 // Hämta kontorlista för kopiera-dropdown
@@ -500,6 +527,7 @@ style="resize:vertical; font-family:inherit; line-height:1.5;" oninput="window._
 <button class="btn-glass-small" onclick="window._noAddPackage('MC')" style="font-size:12px;">+ MC</button>
 <button class="btn-glass-small" onclick="window._noAddPackage('AM')" style="font-size:12px;">+ AM</button>
 <button class="btn-glass-small" onclick="window._noAddPackage('Släp')" style="font-size:12px;">+ Släp</button>
+<button class="btn-glass-small" onclick="window._noAddPackage('Lastbil')" style="font-size:12px;">+ Lastbil</button>
 </div>
 
 <!-- Kopiera från kontor -->
@@ -639,6 +667,7 @@ if (kw.includes('bil')) sSet.add('Bil');
 if (kw.includes('mc') || kw.includes('motorcykel')) sSet.add('MC');
 if (kw.includes('am') || kw.includes('moped')) sSet.add('AM');
 if (kw.includes('b96') || kw.includes('be') || kw.includes('släp')) sSet.add('Släp');
+if (kw.includes('lastbil') || kw.includes('c körkort') || kw.includes('ce körkort') || kw.includes('c1 körkort') || kw.includes('buss')) sSet.add('Lastbil');
 });
 const services_offered = [...sSet];
 

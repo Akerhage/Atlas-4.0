@@ -62,6 +62,11 @@ const mainEl = document.getElementById('customer-search-main');
 if (topEl)  topEl.value  = '';
 if (mainEl) mainEl.value = '';
 
+// Autofokusera placeholder-sökfältet
+setTimeout(() => {
+  if (mainEl) mainEl.focus();
+}, 50);
+
 // Sync-flagga för att undvika rekursiv loop
 let _syncing = false;
 

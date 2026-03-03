@@ -2,7 +2,7 @@
 // intentEngine.js
 // VAD DEN GÖR: Identifierar användarens avsikt (intent) och extraherar stad/fordon/tjänst från fritext.
 // ANVÄNDS AV: legacy_engine.js
-// SENAST STÄDAD: 2026-02-27
+// SENAST STÄDAD: 2026-03-03
 // ============================================
 
 const INTENT_PATTERNS = {
@@ -12,19 +12,13 @@ booking: /(boka|bokning|bokar|ledig tid|bokningslänk|bokningssida|hur bokar)/i,
 policy: /(avboka|ånger|återbetalning|avbokning|vab|villkor|ångerrätt|avbokningsregler|policy|kundavtal|faktura\s?(adress|till)|vart\s?skicka|skicka\s?till|betala|giltighet)/i,
 risk: /\b(risk ?1|riskettan|risk ?2|risktvåan|halkbana)\b/i,
 intent_info: /(vad är|beskriv|förklara|vad innebär|definition|hur fungerar)/i,
-// Förstärkt: fångar flera varianter av "testlektion"
 testlesson: /(testlektion|provlektion|prova[-\s]?på|prova[-\s]?på-?uppkörning|prov-?lektion|vad kostar(?:.*\s)?testlek(?:tion)?|kostar.*testlek(?:tion)?)/i,
-// Förstärkt handledare-match (fångar ex "har haft körkort i 6 år", "6 år", mm)
 handledare: /(handledare|introduktionskurs|introkurs|handledarkurs)/i,
-// Tillstånd-relaterade triggers (körkortstillstånd mm)
 tillstand: /(körkortstillstånd|tillstånd|körkortstillståndet|körkortstillståndet)/i,
-// Specifik kontakt/adress-trigger
 contact: /(adress|hitta|ligger|karta|telefon|telefonnummer|nummer|numret|kontakt|mail|öppettider|vart|språk)/i,
 weather: /\b(väder|vad är det för väder|temperatur|hur varmt|regn|snö|sol)\b/i,
-
 ykb: /\b(ykb|grundutbildning|fortbildning|140 timmar|35 timmar)\b/i,
 age_limit: /\b(ålder|gammal|fyllt|när får man)\b/i,
-
 };
 
 const SERVICE_KEYWORD_MAP = [
@@ -48,7 +42,7 @@ constructor(knownCities = [], cityAliases = {}, vehicleMap = {}, areas = {}) {
 this.knownCities = knownCities.map(c => c.toLowerCase());
 this.cityAliases = this.flattenAliases(cityAliases);
 this.vehicleMap = vehicleMap;
-this.areas = areas || {}; // Nu kommer CITY_ALIASES in här via argumentet ovan!
+this.areas = areas || {};
 
 this.defaultConfidence = 0.2;
 console.log(`[IntentEngine] Initierad med ${this.knownCities.length} städer och ${Object.keys(this.areas).length} områden.`);
@@ -74,26 +68,38 @@ return (s || "").toString()
 extractCity(queryLower, currentContextCity) {
 const q = (queryLower || "").toLowerCase();
 
-// 1. Prioritera Aliases (t.ex. sthlm -> Stockholm)
 for (const [alias, city] of Object.entries(this.cityAliases)) {
 if (q.includes(alias.toLowerCase())) return city;
 }
 
-// 2. Matcha mot kända städer (Bevarar ÅÄÖ)
 for (const city of this.knownCities) {
 const c = city.toLowerCase();
-// Vi använder includes istället för strikt regex \b för att vara mer förlåtande
 if (q.includes(c)) return city;
 }
 
-// 3. Fallback till kontext
 return currentContextCity || null;
 }
 
 extractVehicle(queryLower, vehicle) {
-// 1. Specifik YKB-check (Tvingar LASTBIL oavsett andra träffar)
+// 1. YKB-check — tvingar alltid LASTBIL
 if (/\b(ykb|grundutbildning|fortbildning|140 timmar|35 timmar)\b/i.test(queryLower)) {
 return 'LASTBIL';
+}
+
+// 🔥 FIX: Om frågan handlar om tung trafik/lastbil, låt inte "b-körkort" eller "b" stjäla vehicle
+// Exempel: "måste jag ha b-körkort innan lastbilsutbildningen" → LASTBIL, inte BIL
+const isHeavyVehicleQuery = /\b(lastbil|c-körkort|ce-körkort|c1-körkort|c1e|tung trafik|lastbilsutbildning|lastbilskörkort|tungt fordon)\b/i.test(queryLower);
+if (isHeavyVehicleQuery) {
+return 'LASTBIL';
+}
+
+// 🔥 FIX: Om kontext redan är LASTBIL och frågan inte explicit nämner ett annat fordon,
+// behåll LASTBIL. "b-körkort" i en fråga är ett krav, inte ett fordonsval.
+if (vehicle === 'LASTBIL') {
+const explicitOtherVehicle = /\b(mc-körkort|motorcykel|moped|am-körkort|personbil)\b/i.test(queryLower);
+if (!explicitOtherVehicle) {
+return 'LASTBIL';
+}
 }
 
 // 2. Standard-matchning mot vehicleMap
@@ -107,11 +113,9 @@ return key;
 }
 }
 
-// 3. Fallback: använd fordon från kontexten om ingen ny matchning hittades
+// 3. Fallback: använd fordon från kontexten
 if (vehicle) {
-const sv = this.norm(vehicle);
-// Här kollar vi om kontext-fordonet nämns, eller returnerar det helt enkelt
-return vehicle.toUpperCase(); 
+return vehicle.toUpperCase();
 }
 
 return null;
@@ -163,7 +167,6 @@ slots.service = this.extractService(ql);
 let intent = 'unknown';
 let confidence = this.defaultConfidence;
 
-// Intent logic (ordning viktig)
 if (INTENT_PATTERNS.weather && INTENT_PATTERNS.weather.test(ql)) {
 intent = 'weather';
 confidence = 0.95;
@@ -201,12 +204,10 @@ confidence = 0.65;
 intent = 'unknown';
 }
 
-// Debug-logg
 try {
 console.log(`[IntentEngine] parseIntent -> query="${ql}", intent="${intent}", confidence=${confidence}, slots=${JSON.stringify(slots)}`);
 } catch (e) {}
 
-// Returnerar slots som redan är normaliserade; fallback till session/context där relevant
 return {
 intent,
 confidence,

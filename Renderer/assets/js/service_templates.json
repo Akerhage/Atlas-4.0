@@ -1,26 +1,617 @@
 [
-  { "service_name": "AM Mopedutbildning", "price": 0, "currency": "SEK", "keywords": ["moped", "am", "pris", "kostnad"] },
-  { "service_name": "Körlektion Bil", "price": 0, "currency": "SEK", "keywords": ["körlektion", "bil", "pris", "kostnad"] },
-  { "service_name": "Testlektion Bil", "price": 0, "currency": "SEK", "keywords": ["testlektion", "bil", "pris", "kostnad"] },
-  { "service_name": "Privat teorilektion BIL", "price": 0, "currency": "SEK", "keywords": ["privat", "teori", "bil", "pris", "kostnad"] },
-  { "service_name": "Körbedömning för sökande till Trafiklärarutbildningen BIL", "price": 0, "currency": "SEK", "keywords": ["körbedömning", "trafiklärarutbildning", "bil", "pris", "kostnad"] },
-  { "service_name": "Totalpaket 5 BIL", "price": 0, "currency": "SEK", "keywords": ["totalpaket 5", "bil", "pris", "kostnad", "paket"] },
-  { "service_name": "Totalpaket 10 BIL", "price": 0, "currency": "SEK", "keywords": ["totalpaket 10", "bil", "pris", "kostnad", "paket"] },
-  { "service_name": "Totalpaket 15 BIL", "price": 0, "currency": "SEK", "keywords": ["totalpaket 15", "bil", "pris", "kostnad", "paket"] },
-  { "service_name": "Minipaket BIL", "price": 0, "currency": "SEK", "keywords": ["minipaket", "bil", "pris", "kostnad", "paket"] },
-  { "service_name": "Mellanpaket BIL", "price": 0, "currency": "SEK", "keywords": ["mellanpaket", "bil", "pris", "kostnad", "paket"] },
-  { "service_name": "Baspaket BIL", "price": 0, "currency": "SEK", "keywords": ["baspaket", "bil", "pris", "kostnad", "paket"] },
-  { "service_name": "Intensivutbildning (2 veckor) BIL", "price": 0, "currency": "SEK", "keywords": ["intensivkurs", "bil", "pris", "kostnad", "paket"] },
-  { "service_name": "Introduktionskurs/Handledarkurs BIL", "price": 0, "currency": "SEK", "keywords": ["introduktionskurs", "handledarkurs", "bil", "pris", "kostnad"] },
-  { "service_name": "Risk 1 BIL", "price": 0, "currency": "SEK", "keywords": ["risk 1", "riskettan", "bil", "pris", "kostnad"] },
-  { "service_name": "Risk 2 BIL", "price": 0, "currency": "SEK", "keywords": ["risk 2", "risktvåan", "halkbana", "bil", "pris", "kostnad"] },
-  { "service_name": "Totalpaket 5 MC", "price": 0, "currency": "SEK", "keywords": ["totalpaket 5", "mc", "pris", "kostnad", "motorcykel", "paket"] },
-  { "service_name": "Totalpaket 10 MC", "price": 0, "currency": "SEK", "keywords": ["totalpaket 10", "mc", "pris", "kostnad", "motorcykel", "paket"] },
-  { "service_name": "Körlektion MC", "price": 0, "currency": "SEK", "keywords": ["körlektion", "mc", "pris", "kostnad", "motorcykel"] },
-  { "service_name": "Lektionspaket 5 MC", "price": 0, "currency": "SEK", "keywords": ["lektionspaket 5", "mc", "pris", "kostnad", "motorcykel", "paket"] },
-  { "service_name": "Lektionspaket 10 MC", "price": 0, "currency": "SEK", "keywords": ["lektionspaket 10", "mc", "pris", "kostnad", "motorcykel", "paket"] },
-  { "service_name": "Risk 1 MC", "price": 0, "currency": "SEK", "keywords": ["risk 1", "riskettan", "mc", "pris", "kostnad", "motorcykel"] },
-  { "service_name": "Risk 2 MC", "price": 0, "currency": "SEK", "keywords": ["risk 2", "risktvåan", "mc", "pris", "kostnad", "motorcykel"] },
-  { "service_name": "BE Paket", "price": 0, "currency": "SEK", "keywords": ["be", "släp", "paket", "pris", "kostnad"] },
-  { "service_name": "B96 Paket", "price": 0, "currency": "SEK", "keywords": ["b96", "släp", "paket", "pris", "kostnad"] }
+{
+"service_name": "AM Mopedutbildning",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"moped",
+"am",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "Körlektion Bil",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"körlektion",
+"bil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "Testlektion Bil",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"testlektion",
+"bil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "Privat teorilektion BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"privat",
+"teori",
+"bil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "Körbedömning för sökande till Trafiklärarutbildningen BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"körbedömning",
+"trafiklärarutbildning",
+"bil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "Totalpaket 5 BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"totalpaket 5",
+"bil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "Totalpaket 10 BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"totalpaket 10",
+"bil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "Totalpaket 15 BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"totalpaket 15",
+"bil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "Minipaket BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"minipaket",
+"bil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "Mellanpaket BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"mellanpaket",
+"bil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "Baspaket BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"baspaket",
+"bil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "Intensivutbildning (2 veckor) BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"intensivkurs",
+"bil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "Introduktionskurs/Handledarkurs BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"introduktionskurs",
+"handledarkurs",
+"bil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "Risk 1 BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"risk 1",
+"riskettan",
+"bil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "Risk 2 BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"risk 2",
+"risktvåan",
+"halkbana",
+"bil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "Totalpaket 5 MC",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"totalpaket 5",
+"mc",
+"pris",
+"kostnad",
+"motorcykel",
+"paket"
+]
+},
+{
+"service_name": "Totalpaket 10 MC",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"totalpaket 10",
+"mc",
+"pris",
+"kostnad",
+"motorcykel",
+"paket"
+]
+},
+{
+"service_name": "Körlektion MC",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"körlektion",
+"mc",
+"pris",
+"kostnad",
+"motorcykel"
+]
+},
+{
+"service_name": "Lektionspaket 5 MC",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"lektionspaket 5",
+"mc",
+"pris",
+"kostnad",
+"motorcykel",
+"paket"
+]
+},
+{
+"service_name": "Lektionspaket 10 MC",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"lektionspaket 10",
+"mc",
+"pris",
+"kostnad",
+"motorcykel",
+"paket"
+]
+},
+{
+"service_name": "Risk 1 MC",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"risk 1",
+"riskettan",
+"mc",
+"pris",
+"kostnad",
+"motorcykel"
+]
+},
+{
+"service_name": "Risk 2 MC",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"risk 2",
+"risktvåan",
+"mc",
+"pris",
+"kostnad",
+"motorcykel"
+]
+},
+{
+"service_name": "BE Paket",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"be",
+"släp",
+"paket",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "B96 Paket",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"b96",
+"släp",
+"paket",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "C Totalpaket 5",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"c körkort",
+"c totalpaket 5",
+"lastbil",
+"tung lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "C Totalpaket 10",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"c körkort",
+"c totalpaket 10",
+"lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "C Totalpaket 15",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"c körkort",
+"c totalpaket 15",
+"lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "C Paket + YKB 140H",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"c körkort",
+"ykb",
+"lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "C Körlektion (1 st)",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"c körkort",
+"körlektion",
+"lastbil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "C Lektionspaket 5",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"c körkort",
+"lektionspaket 5",
+"lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "C Lektionspaket 10",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"c körkort",
+"lektionspaket 10",
+"lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "C Uppvärmning & ekipage vid prov",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"c körkort",
+"uppvärmning",
+"ekipage",
+"lastbil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "CE Totalpaket 5",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"ce körkort",
+"ce totalpaket 5",
+"lastbil",
+"lastbil med släp",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "CE Totalpaket 10",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"ce körkort",
+"ce totalpaket 10",
+"lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "CE Totalpaket 15",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"ce körkort",
+"ce totalpaket 15",
+"lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "CE Lektionspaket 5",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"ce körkort",
+"lektionspaket 5",
+"lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "CE Lektionspaket 10",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"ce körkort",
+"lektionspaket 10",
+"lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "CE Lektionspaket 15",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"ce körkort",
+"lektionspaket 15",
+"lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "CE Körlektion (1 st)",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"ce körkort",
+"körlektion",
+"lastbil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "CE Uppvärmning & ekipage vid prov",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"ce körkort",
+"uppvärmning",
+"ekipage",
+"lastbil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "C1 Paket (3 lektioner)",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"c1 körkort",
+"c1 paket",
+"medeltung lastbil",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "C1 Körlektion (1 st)",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"c1 körkort",
+"körlektion",
+"medeltung lastbil",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "C1 Uppvärmning & ekipage vid prov",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"c1 körkort",
+"uppvärmning",
+"ekipage",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "D Totalpaket 5 (Buss)",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"d körkort",
+"buss",
+"busskörkort",
+"d totalpaket",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "D Körlektion (1 st, Buss)",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"d körkort",
+"körlektion",
+"buss",
+"pris",
+"kostnad"
+]
+},
+{
+"service_name": "D Lektionspaket 5 (Buss)",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"d körkort",
+"lektionspaket 5",
+"buss",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "D Lektionspaket 10 (Buss)",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"d körkort",
+"lektionspaket 10",
+"buss",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "D Lektionspaket 15 (Buss)",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"d körkort",
+"lektionspaket 15",
+"buss",
+"pris",
+"kostnad",
+"paket"
+]
+},
+{
+"service_name": "D Uppvärmning & ekipage vid prov (Buss)",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"d körkort",
+"uppvärmning",
+"ekipage",
+"buss",
+"pris",
+"kostnad"
+]
+}
 ]

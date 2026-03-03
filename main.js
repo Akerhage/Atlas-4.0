@@ -243,14 +243,20 @@ console.log("✅ [NGROK] Tunnel-process startad");
 console.log("⚠️  [NGROK] NGROK_TOKEN eller NGROK_DOMAIN saknas - Atlas körs på localhost");
 }
 
-// Spawn Node.js Server Process
+// 🟢 NYTT OCH KORREKT BLOCK FÖR SERVERSTART
 const serverPath = path.join(__dirname, 'server.js');
+
+// Sätter roten till mappen där .exe-filen ligger (vid bygge) eller projektmappen (vid dev)
+const rootPath = app.isPackaged 
+? path.dirname(app.getPath('exe')) 
+: __dirname;
+
 const serverEnv = {
 ...process.env,
 NODE_ENV: 'production',
 IS_PACKAGED: app.isPackaged ? 'true' : 'false',
 PORT: String(SERVER_PORT),
-ATLAS_ROOT_PATH: app.isPackaged ? process.resourcesPath : __dirname,
+ATLAS_ROOT_PATH: rootPath, // Viktigt för db.js
 ELECTRON_RUN_AS_NODE: '1'
 };
 
@@ -267,12 +273,10 @@ console.log(`[Server]: ${out}`);
 
 // Detekterar "ONLINE"-signal från server och informerar loader-fönstret
 if (out.includes("ONLINE")) {
-console.log("🟢 BINGO! Server är redo - skickar signal till loader...");
+console.log("🟢 BINGO! Server är redo.");
 serverReady = true;
 if (loaderWindow && !loaderWindow.isDestroyed()) {
 loaderWindow.webContents.send('server-status', true);
-} else {
-console.log("⚠️  Loader-window finns inte - kan inte skicka signal");
 }
 } else if (out.includes("error") || out.includes("ERROR") || out.includes("fail")) {
 console.log("🔴 SERVER ERROR: " + out);

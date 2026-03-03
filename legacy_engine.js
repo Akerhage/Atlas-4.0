@@ -2210,6 +2210,7 @@ bookingLinkAdded = true;
 } else if (detectedVehicleType) {
 fallbackType = detectedVehicleType.toUpperCase();
 if (fallbackType === 'BIL') fallbackType = 'CAR';
+if (fallbackType === 'LASTBIL' || fallbackType === 'SLÄP') fallbackType = 'TUNG';
 } else if (/\bam\b/.test(queryLower) || queryLower.includes('moped')) fallbackType = 'AM';
 else if (/\bmc\b/i.test(queryLower) || queryLower.includes('motorcykel')) fallbackType = 'MC';
 else if (queryLower.includes('handledar')) fallbackType = 'INTRO';

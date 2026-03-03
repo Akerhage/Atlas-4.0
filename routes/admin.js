@@ -540,6 +540,8 @@ const kw = p.keywords || [];
 if (kw.includes('bil')) sSet.add('Bil');
 if (kw.includes('mc') || kw.includes('motorcykel')) sSet.add('MC');
 if (kw.includes('am') || kw.includes('moped')) sSet.add('AM');
+if (kw.some(k => ['lastbil','c körkort','ce körkort','c1 körkort','buss','tung lastbil'].includes(k))) sSet.add('Lastbil');
+if (kw.some(k => ['ykb','yrkeskompetensbevis'].includes(k))) sSet.add('YKB');
 });
 templateData.services_offered = [...sSet];
 } else {

@@ -1,6 +1,6 @@
 {
-"section_title": "BASFAKTA - Lastbil (C, C1, CE, YKB)",
-"source_info": "Information om körkortsbehörigheter för lastbil samt YKB (Yrkeskompetensbevis).",
+"section_title": "BASFAKTA - Lastbil (C, C1, CE, D, YKB)",
+"source_info": "Information om körkortsbehörigheter för lastbil och buss samt YKB (Yrkeskompetensbevis).",
 "sections": [
 {
 "title": "Vad är C-körkort (Tung lastbil)?",
@@ -12,24 +12,45 @@
 "tung lastbil",
 "utan viktgräns",
 "vad är",
-"yrkesförare"
+"yrkesförare",
+"vad är c körkort",
+"tung lastbil körkort"
 ]
 },
 {
-"title": "Vad är CE-körkort (Tung lastbil med släp)?",
-"answer": "Med CE-körkort får du köra tung lastbil (samma som C) och dessutom dra en eller flera släpvagnar utan viktgräns. Detta är den högsta behörigheten för lastbil.",
+"title": "Vad är CE-körkort (Tung lastbil med tungt släp)?",
+"answer": "Med CE-körkort får du köra tung lastbil och dessutom dra en eller flera släpvagnar utan viktgräns. Det är den högsta lastbilsbehörigheten.",
 "keywords": [
 "ce",
 "ce-körkort",
 "släpvagn",
 "tung lastbil",
 "tungt släp",
-"vad är"
+"vad är",
+"lastbil med släp",
+"ce körkort"
+]
+},
+{
+"title": "Vad är C1-körkort (Medeltung lastbil)?",
+"answer": "C1-körkort gäller för medeltunga lastbilar med en totalvikt på högst 7 500 kg — till exempel större husbilar och vissa distributionsfordon. Det kräver också B-körkort sedan tidigare.",
+"keywords": [
+"c1",
+"c1-körkort",
+"medeltung lastbil",
+"husbil",
+"7500 kg",
+"vad är c1",
+"c1 körkort",
+"vad ingår i c1",
+"c1-utbildning",
+"vad ingår i c1-utbildningen",
+"c1 utbildning"
 ]
 },
 {
 "title": "Vad är skillnaden på C1 och C? (Medeltung vs Tung)",
-"answer": "Skillnaden är viktgränsen: **C1** är för **medeltung** lastbil med en totalvikt på högst 7 500 kg. **C-körkort** har ingen övre viktgräns och gäller för alla tunga lastbilar.",
+"answer": "Skillnaden är viktgränsen: C1 gäller för medeltunga lastbilar med totalvikt upp till 7 500 kg. C-körkort har ingen övre viktgräns och gäller alla tunga lastbilar. C1 är vanligt för husbilar och mindre distributionsbilar, medan C används för lastbilar i transportbranschen.",
 "keywords": [
 "7500 kg",
 "c",
@@ -38,12 +59,41 @@
 "medeltung",
 "skillnad",
 "tung",
-"viktgräns"
+"viktgräns",
+"skillnad c1 c",
+"c1 eller c",
+"vilken behörighet lastbil"
 ]
 },
 {
-"title": "Krav för att ta lastbilskörkort",
-"answer": "För att ta C eller CE krävs: 1. Att du har ett svenskt **B-körkort** (du **behöver** alltså ha detta **innan** du påbörjar utbildningen). 2. Att du har ett giltigt körkortstillstånd för Grupp 2 (vilket kräver läkarintyg). 3. Att du är 21 år (eller 18 år om du går en YKB-utbildning samtidigt).",
+"title": "Vad är C1E-körkort?",
+"answer": "C1E gäller för medeltunga lastbilar (max 7 500 kg) med tungt släp. Den sammanlagda totalvikten för bil och släp får inte överstiga 12 000 kg.",
+"keywords": [
+"12000 kg",
+"c1e",
+"medeltung med släp",
+"släp",
+"totalvikt",
+"c1e körkort"
+]
+},
+{
+"title": "Vad är D-körkort (Buss)?",
+"answer": "D-körkort krävs för att köra buss med fler än 8 passagerarplatser. Vi erbjuder D-utbildning i Stockholm/Österåker, Göteborg och Malmö.",
+"keywords": [
+"d",
+"d-körkort",
+"buss",
+"bussbehörighet",
+"busskörkort",
+"vad är d körkort",
+"körkort buss",
+"d körkort"
+]
+},
+{
+"title": "Krav för att ta C- eller CE-körkort",
+"answer": "För att ta C eller CE krävs: 1. Att du har ett svenskt B-körkort (du behöver ha det INNAN du påbörjar utbildningen). 2. Att du har ett giltigt körkortstillstånd för Grupp 2 (kräver läkarintyg). 3. Att du är 21 år (eller 18 år om du går YKB-utbildning samtidigt).",
 "keywords": [
 "b-körkort",
 "giltigt",
@@ -55,12 +105,91 @@
 "läkarintyg",
 "ålder",
 "behöver",
-"innan"
+"innan",
+"behöver jag b-körkort",
+"b-körkort innan lastbil",
+"krav lastbilskörkort",
+"21 år",
+"18 år",
+"behöver b-körkort innan lastbilskörkort"
+]
+},
+{
+"title": "Var erbjuder ni lastbilsutbildning (C, C1, CE, D)?",
+"answer": "Vi erbjuder utbildning för tung trafik på följande orter: Stockholm/Österåker, Göteborg, Malmö, Kristianstad. YKB-utbildningar hålls dessutom i Hässleholm. Är ni ett företag eller grupp som behöver utbildning på annan ort? Hör av er så ser vi vad vi kan ordna.",
+"keywords": [
+"göteborg",
+"hässleholm",
+"kristianstad",
+"lastbil",
+"malmö",
+"stockholm",
+"österåker",
+"var finns ni",
+"var utbildar ni",
+"vilka orter",
+"var kan jag ta lastbilskörkort",
+"erbjuder ni lastbil",
+"lastbil göteborg",
+"lastbil malmö",
+"lastbil stockholm"
+]
+},
+{
+"title": "Hur lång tid tar lastbilsutbildningen?",
+"answer": "Det varierar individuellt. Våra paket utgår från 5, 10 eller 15 lektioner à 80 minuter. De flesta behöver 10–15 lektioner för att vara redo för körprovet, beroende på tidigare erfarenhet. Kontakta oss på 010-344 49 50 eller tungtrafik@trafikskolan.com för en individuell bedömning.",
+"keywords": [
+"hur lång tid lastbil",
+"tid lastbilsutbildning",
+"hur länge tar lastbilskörkort",
+"hur många lektioner lastbil",
+"lastbilsutbildning tid",
+"hur lång tid tar lastbilsutbildningen",
+"hur lång är lastbilsutbildningen"
+]
+},
+{
+"title": "Vad ingår i lastbilspaketen (C/CE/C1/D)?",
+"answer": "Alla totalpaket för tung trafik inkluderar: körlektioner (80 min/st), teoriportalen (digitalt läromedel), uppvärmning inför körprovet och lån av ekipage vid provet. Enskilda lektioner och lektionspaket inkluderar enbart körning.",
+"keywords": [
+"vad ingår lastbilspaket",
+"ingår i c paketet",
+"vad ingår c utbildning",
+"totalpaket lastbil innehåll",
+"vad ingår i c1-utbildningen",
+"vad ingår ce paketet",
+"teoriportalen",
+"lån av ekipage",
+"ingår i lastbilspaket",
+"lastbilspaket innehåll"
+]
+},
+{
+"title": "Kontakt och Bokning för Tung Trafik",
+"answer": "Tung trafik bokas inte direkt på hemsidan utan via vår specialiserade support. Ring oss på 010-344 49 50 eller mejla tungtrafik@trafikskolan.com för hjälp och offert. Vi finns i Stockholm/Österåker, Göteborg, Malmö, Kristianstad och Hässleholm.",
+"keywords": [
+"tung trafik",
+"lastbil",
+"boka lastbil",
+"kontakt lastbil",
+"010-344 49 50",
+"010-188 83 26",
+"tungtrafik@trafikskolan.com",
+"offert",
+"pris lastbil",
+"lastbilsutbildning",
+"boka c körkort",
+"boka ce körkort",
+"kontakta tung trafik",
+"vad vet du om kontakt och bokning för tung trafik",
+"lastbil telefon",
+"lastbil mejl",
+"tung trafik kontakt"
 ]
 },
 {
 "title": "Vad är YKB (Yrkeskompetensbevis)?",
-"answer": "YKB står för Yrkeskompetensbevis och är ett lagkrav för att få arbeta som lastbils- eller bussförare. Utöver körkortet måste du alltså gå en YKB-utbildning för att få köra godstransporter mot betalning.",
+"answer": "YKB är ett lagkrav för att få arbeta yrkesmässigt som lastbils- eller bussförare. Utöver körkortet måste du gå en YKB-utbildning för att köra godstransporter mot betalning.",
 "keywords": [
 "arbeta",
 "jobba",
@@ -73,7 +202,7 @@
 },
 {
 "title": "YKB Grundutbildning (140 timmar)",
-"answer": "Om du tar lastbilskörkort för första gången och ska jobba som chaufför behöver du gå YKB Grundutbildning. Den är normalt 140 timmar och avslutas med ett prov hos Trafikverket. Går du denna utbildning får du ta C-körkort redan vid 18 års ålder.",
+"answer": "Om du tar lastbilskörkort för första gången och ska jobba som chaufför behöver du gå YKB Grundutbildning på 140 timmar. Den avslutas med ett prov hos Trafikverket. Med YKB 140H får du ta C-körkort redan vid 18 års ålder. Vi erbjuder YKB 140H i Malmö, Kristianstad, Hässleholm, Göteborg och Stockholm.",
 "keywords": [
 "140 timmar",
 "18 år",
@@ -81,12 +210,14 @@
 "ny förare",
 "prov",
 "ykb",
-"ykb grund"
+"ykb grund",
+"ykb 140h",
+"ykb grundutbildning"
 ]
 },
 {
 "title": "YKB Fortbildning (35 timmar)",
-"answer": "Du som redan har YKB måste förnya det vart 5:e år genom en fortbildning. Den är totalt 35 timmar uppdelad på 5 delkurser. Vi erbjuder dessa kurser löpande.",
+"answer": "Du som redan har YKB måste förnya det vart 5:e år genom en fortbildning på totalt 35 timmar, uppdelad på 5 delkurser. Vi erbjuder YKB fortbildning i Malmö, Kristianstad, Hässleholm, Göteborg och Stockholm.",
 "keywords": [
 "35 timmar",
 "delkurser",
@@ -95,41 +226,9 @@
 "giltighetstid",
 "vart 5 år",
 "ykb",
-"ykb fortbildning"
-]
-},
-{
-"title": "Var erbjuder ni lastbilsutbildning (C/CE/YKB)?",
-"answer": "Vi erbjuder utbildning för tung trafik (Lastbil och YKB) i Stockholm, Göteborg, Malmö, Hässleholm och Kristianstad.",
-"keywords": [
-"göteborg",
-"hässleholm",
-"kristianstad",
-"lastbil",
-"malmö",
-"stockholm",
-"var finns ni",
-"var utbildar ni"
-]
-},
-{
-"title": "Kontakt och Bokning för Tung Trafik",
-"answer": "Eftersom utbildning för tung trafik ofta kräver individuell planering bokas detta inte direkt på hemsidan. Kontakta vår specialiserade support för hjälp och offert på telefon 010-188 83 26 eller via mejl på tungtrafik@trafikskolan.com.",
-"keywords": [
-"tung trafik", "lastbil", "boka lastbil", "kontakt lastbil", 
-"010-188 83 26", "tungtrafik@trafikskolan.com", "offert", 
-"pris lastbil", "lastbilsutbildning"
-]
-},
-{
-"title": "Vad är C1E-körkort?",
-"answer": "C1E är för medeltunga lastbilar (max 7 500 kg) med tungt släp. Den sammanlagda totalvikten för bil och släp får inte överstiga 12 000 kg.",
-"keywords": [
-"12000 kg",
-"c1e",
-"medeltung med släp",
-"släp",
-"totalvikt"
+"ykb fortbildning",
+"ykb 35h",
+"förnya ykb"
 ]
 }
 ],
@@ -137,5 +236,5 @@
 "id": "basfakta_lastbil_c_ce_c1_c1e",
 "city": "",
 "area": "",
-"vehicle": "SLÄP"
+"vehicle": "LASTBIL"
 }
