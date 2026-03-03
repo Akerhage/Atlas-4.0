@@ -43,6 +43,12 @@ modal.style.pointerEvents = 'all';
 modal.onclick = (e) => {
 if (e.target === modal) _closeReader();
 };
+
+// Lysa upp notes-ikonen om det finns anteckningar
+const _t = (typeof currentTicketList !== 'undefined' ? currentTicketList : [])[currentTicketIdx];
+if (_t?.conversation_id && typeof refreshNotesGlow === 'function') {
+  refreshNotesGlow(_t.conversation_id);
+}
 }
 
 // =============================================
@@ -57,9 +63,11 @@ if (!t) return;
 const modal = document.getElementById('atlas-reader-modal');
 if (!modal) return;
 
-// 2. BRANDING: Använd sparad overrideTag (t.ex. Patric/Gävle) om den finns
+// 2. BRANDING: Agentens egen färg — med fallback till overrideTag/routing_tag
+const agentColor = (typeof currentUser !== 'undefined' && currentUser.agent_color)
+  ? currentUser.agent_color : null;
 const brandingTag = window._currentAdminOverrideTag || t.routing_tag || t.owner;
-const rStyles = getAgentStyles(brandingTag);
+const rStyles = agentColor ? getAgentStyles(agentColor) : getAgentStyles(brandingTag);
 
 const readerTitle = resolveTicketTitle(t);
 const readerSubtitle = resolveLabel(t.routing_tag || t.owner);
@@ -114,12 +122,13 @@ ${(readerTitle || 'U').substring(0,1).toUpperCase()}
 </div>
 <div style="min-width:0;">
 <div style="font-size:15px; font-weight:700; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px;">${readerTitle || 'Okänd'}</div>
-<div style="font-size:10px; opacity:0.4; color:white; letter-spacing:0.3px;">${readerSubtitle || ''} • ${t.conversation_id.replace('session_','').substring(0,10)}</div>
+<div style="font-size:10px; opacity:0.4; color:white; letter-spacing:0.3px;">${readerSubtitle || ''} • ${t.timestamp ? new Date(t.timestamp).toLocaleDateString('sv-SE') : '—'}</div>
 </div>
 </div>
 
 <div style="display:flex; align-items:center; gap:5px; flex-shrink:0; margin-left:10px;">
 <button class="btn-glass-icon notes-trigger-btn"
+data-id="${t.conversation_id}"
 onclick="openNotesModal('${t.conversation_id}')"
 title="Interna anteckningar"
 style="color:${rStyles.main}; border-color:${rStyles.border};">

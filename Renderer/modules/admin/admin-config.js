@@ -26,7 +26,8 @@ const sections = [
 { id: 'ai', icon: '🤖', label: 'AI-motor' },
 { id: 'paths', icon: '📁', label: 'Systemsökvägar' },
 { id: 'knowledge', icon: '📚', label: 'Kunskapsbank' },
-{ id: 'drift', icon: '🛡️', label: 'Drift & Säkerhet' }
+{ id: 'drift', icon: '🛡️', label: 'Drift & Säkerhet' },
+{ id: 'gaps', icon: '🔍', label: 'Kunskapsluckor' }
 ];
 
 listContainer.innerHTML = sections.map(s => `
@@ -83,6 +84,11 @@ renderDriftSecuritySection(detailBox, settings);
 } catch (e) {
 detailBox.innerHTML = '<div style="padding:20px; color:#ff6b6b;">Kunde inte hämta drift-inställningar.</div>';
 }
+return;
+}
+
+if (section === 'gaps') {
+renderRagFailuresInDetail(detailBox);
 return;
 }
 

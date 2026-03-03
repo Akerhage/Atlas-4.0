@@ -396,7 +396,12 @@ const idx = _currentTicketIdx;
 const t   = _currentTickets[idx];
 if (!t) return;
 
-const tStyles      = getAgentStyles(t.routing_tag || t.owner || 'unclaimed');
+// Använd inloggad agents färg (samma som i ärendelistorna) med fallback till routing_tag
+const agentColor = (typeof currentUser !== 'undefined' && currentUser.agent_color)
+  ? currentUser.agent_color : null;
+const tStyles = agentColor
+  ? getAgentStyles(agentColor)
+  : getAgentStyles(t.routing_tag || t.owner || 'unclaimed');
 const titleDisplay = t.subject || t.question || 'Ärende';
 const hasPrev      = idx > 0;
 const hasNext      = idx < _currentTickets.length - 1;
@@ -472,7 +477,7 @@ ${titleDisplay}
 <div style="display:flex; align-items:center; gap:5px; margin-top:2px; flex-wrap:nowrap;">
 <span style="font-size:10px; opacity:0.4; color:white; letter-spacing:0.3px;
 white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">
-${t.routing_tag ? resolveLabel(t.routing_tag) : '—'} • ${(t.conversation_id || '').replace('session_','').substring(0,8)}
+${t.routing_tag ? resolveLabel(t.routing_tag) : '—'} • ${t.timestamp ? new Date(t.timestamp).toLocaleDateString('sv-SE') : '—'}
 </span>
 ${t.is_archived === 1
 ? '<span style="flex-shrink:0; font-size:9px; font-weight:800; letter-spacing:0.5px; color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); padding:1px 6px; border-radius:4px; white-space:nowrap;">ARKIVERAT</span>'
@@ -484,6 +489,7 @@ ${t.is_archived === 1
 <!-- Höger: notes + paginering — aldrig krympt -->
 <div style="display:flex; align-items:center; gap:4px; flex-shrink:0; margin-left:8px;">
 <button class="btn-glass-icon notes-trigger-btn"
+data-id="${t.conversation_id}"
 onclick="openNotesModal('${t.conversation_id}')"
 title="Interna anteckningar"
 style="color:${tStyles.main}; border-color:${tStyles.border};">
@@ -520,6 +526,11 @@ ${bubblesHtml}
 modal.style.display = 'flex';
 modal.style.pointerEvents = 'all';
 modal.onclick = (e) => { if (e.target === modal) _closeCustomerReader(); };
+
+// Lysa upp notes-ikonen om det finns anteckningar för detta ärende
+if (t.conversation_id && typeof refreshNotesGlow === 'function') {
+  refreshNotesGlow(t.conversation_id);
+}
 
 // Koppla paginerings-knappar efter inject
 const prevBtn = modal.querySelector('#cust-reader-prev');

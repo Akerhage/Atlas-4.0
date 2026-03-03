@@ -105,7 +105,7 @@ const profileHTML = email ?
 onclick="showCustomerReaderModal('${email}')"
 title="Visa kundens ärendehistorik"
 style="color:${styles.main}; margin-right:4px;">
-${AVATAR_ICONS[0]}
+${UI_ICONS.CUSTOMER_HISTORY}
 </button>` : '';
 
 // Lägg till profile-knappen i extraActions

@@ -288,7 +288,10 @@ s.sender,
 s.updated_at,
 s.is_archived,
 s.office AS routing_tag,
-o.office_color
+o.office_color,
+o.city   AS office_city,
+o.area   AS office_area,
+o.name   AS office_name
 FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag
 WHERE s.human_mode = 1
@@ -343,7 +346,10 @@ t.last_message,
 t.sender,
 t.owner,
 t.routing_tag,
-t.conversation_id
+t.conversation_id,
+t.office_city,
+t.office_area,
+t.office_name
 ].some(field => field && String(field).toLowerCase().includes(q));
 });
 

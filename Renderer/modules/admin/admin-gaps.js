@@ -3,18 +3,14 @@
 // VAD DEN GÖR: Admin — Kunskapsluckor
 //              Visar frågor där RAG misslyckades,
 //              med info om TS-fallback hjälpte.
-// ANVÄNDS AV: admin-core.js (switchAdminTab 'gaps')
+// ANVÄNDS AV: admin-config.js (openSystemConfigSection 'gaps')
 // ============================================
 
-async function renderRagFailuresList() {
-const listContainer = document.getElementById('admin-main-list');
-const detailBox = document.getElementById('admin-detail-content');
-const placeholder = document.getElementById('admin-placeholder');
-if (!listContainer) return;
-
-listContainer.innerHTML = '<div class="spinner-small"></div>';
-if (placeholder) placeholder.style.display = 'flex';
-if (detailBox) detailBox.style.display = 'none';
+// Renderar Kunskapsluckor inuti detail-panelen (anropas från admin-config.js)
+async function renderRagFailuresInDetail(detailBox) {
+if (!detailBox) return;
+detailBox.style.display = 'flex';
+detailBox.innerHTML = '<div class="spinner-small"></div>';
 
 try {
 const res = await fetch(`${SERVER_URL}/api/admin/rag-failures`, { headers: fetchHeaders });
@@ -22,32 +18,32 @@ if (!res.ok) throw new Error(`HTTP ${res.status}`);
 const rows = await res.json();
 
 if (!rows.length) {
-listContainer.innerHTML = '<div style="padding:30px 20px; text-align:center; opacity:0.5; font-size:13px; line-height:1.6;">Inga misslyckanden registrerade ännu.<br><span style="font-size:11px;">Misslyckanden loggas automatiskt när AI inte hittar svar.</span></div>';
+detailBox.innerHTML = `
+<div class="detail-container" style="display:flex; flex-direction:column; height:100%;">
+<div class="detail-header" style="padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:space-between;">
+<span style="font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:var(--accent-primary);">🔍 Kunskapsluckor</span>
+</div>
+<div style="flex:1; display:flex; align-items:center; justify-content:center; opacity:0.5; font-size:13px; text-align:center; line-height:1.6; padding:40px;">
+Inga misslyckanden registrerade ännu.<br><span style="font-size:11px;">Misslyckanden loggas automatiskt när AI inte hittar svar.</span>
+</div>
+</div>`;
 return;
 }
 
-// --- Sammanfattningsstatistik ---
+// Statistik
 const now = Math.floor(Date.now() / 1000);
 const sevenDaysAgo = now - (7 * 24 * 3600);
 const last7 = rows.filter(r => r.created_at >= sevenDaysAgo);
 const totalSolved = rows.filter(r => r.ts_fallback_success === 1).length;
 const pct = rows.length > 0 ? Math.round((totalSolved / rows.length) * 100) : 0;
 
-const summaryHtml = `
-<div style="padding:12px 14px 10px 14px; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.06); font-size:11px; color:var(--text-secondary); line-height:1.7;">
-<span style="font-weight:700; color:var(--text-primary);">Totalt ${rows.length} misslyckanden</span>
-— <span style="color:#4cd964;">${totalSolved} lösta av TS (${pct}%)</span>
-— <span style="opacity:0.6;">${last7.length} senaste 7 dagarna</span>
-</div>`;
-
-// --- Räkna upprepningar ---
+// Räkna upprepningar
 const queryCount = {};
 rows.forEach(r => {
 const key = (r.query || '').toLowerCase().trim();
 queryCount[key] = (queryCount[key] || 0) + 1;
 });
 
-// --- Rendrera kort ---
 const cardsHtml = rows.map(r => {
 const freq = queryCount[(r.query || '').toLowerCase().trim()] || 1;
 const date = new Date(r.created_at * 1000).toLocaleDateString('sv-SE', {
@@ -69,7 +65,7 @@ const tsUrlShort = r.ts_url
 : null;
 
 return `
-<div class="admin-mini-card" style="--agent-color:#636366; flex-direction:column; align-items:flex-start; gap:5px; padding:10px 14px; cursor:default;">
+<div class="admin-mini-card" style="--agent-color:#636366; flex-direction:column; align-items:flex-start; gap:5px; padding:10px 14px; cursor:default; margin-bottom:6px;">
 <div style="display:flex; align-items:center; gap:6px; width:100%;">
 ${tsBadge}${freqBadge}
 <span style="font-size:10px; opacity:0.4; margin-left:auto; white-space:nowrap;">${date}</span>
@@ -79,15 +75,32 @@ ${tsUrlShort ? `<div style="font-size:10px; opacity:0.3; overflow:hidden; text-o
 </div>`;
 }).join('');
 
-listContainer.innerHTML = summaryHtml + cardsHtml;
+detailBox.innerHTML = `
+<div class="detail-container" style="display:flex; flex-direction:column; height:100%;">
+<div class="detail-header" style="padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+<span style="font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:var(--accent-primary);">🔍 Kunskapsluckor</span>
+<button class="btn-glass-icon" onclick="clearRagFailuresInDetail()" title="Rensa lista" style="padding:5px 8px;">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+</button>
+</div>
+<div style="padding:12px 14px 8px 14px; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.06); font-size:11px; color:var(--text-secondary); line-height:1.7; flex-shrink:0;">
+<span style="font-weight:700; color:var(--text-primary);">Totalt ${rows.length} misslyckanden</span>
+— <span style="color:#4cd964;">${totalSolved} lösta av TS (${pct}%)</span>
+— <span style="opacity:0.6;">${last7.length} senaste 7 dagarna</span>
+</div>
+<div style="flex:1; overflow-y:auto; padding:12px 14px;">
+${cardsHtml}
+</div>
+</div>`;
 
 } catch (e) {
 console.error('[admin-gaps] Fel:', e);
-listContainer.innerHTML = '<div style="padding:20px; color:#ff6b6b; font-size:12px;">Kunde inte hämta data.</div>';
+detailBox.innerHTML = '<div style="padding:20px; color:#ff6b6b; font-size:12px;">Kunde inte hämta data.</div>';
 }
 }
 
-async function clearRagFailures() {
+// Rensa-knapp anropad inifrån detailBox
+async function clearRagFailuresInDetail() {
 const ok = await atlasConfirm('Rensa Kunskapsluckor', 'Ta bort alla registrerade RAG-misslyckanden?');
 if (!ok) return;
 try {
@@ -96,9 +109,21 @@ method: 'DELETE',
 headers: fetchHeaders
 });
 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-renderRagFailuresList();
+// Hitta aktiv detailBox och rendera om
+const detailBox = document.getElementById('admin-detail-content');
+renderRagFailuresInDetail(detailBox);
 showToast('✅ Kunskapsluckor rensade.');
 } catch (e) {
 showToast('❌ Kunde inte rensa.');
 }
+}
+
+// Bakåtkompatibilitet — anropades tidigare direkt från switchAdminTab('gaps')
+async function renderRagFailuresList() {
+const detailBox = document.getElementById('admin-detail-content');
+renderRagFailuresInDetail(detailBox);
+}
+
+async function clearRagFailures() {
+clearRagFailuresInDetail();
 }
