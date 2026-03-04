@@ -136,20 +136,45 @@ let rows = '';
 
 if (section === 'network') {
 rows = `
-<h3 style="margin:0 0 20px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">🌐 Nätverksinställningar</h3>
+<h3 style="margin:0 0 6px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">🌐 Nätverksinställningar</h3>
+<p style="font-size:12px; color:var(--text-secondary); opacity:0.7; margin:0 0 6px 0;">
+Styr hur Atlas-servern exponeras lokalt och via internet. För att Atlas ärendesystem ska vara åtkomligt via webben — t.ex. för kundchatten eller fjärrinloggning — måste både porten och ngrok-domänen vara korrekt konfigurerade.
+</p>
+<div style="font-size:11px; color:#ff9f0a; background:rgba(255,159,10,0.08); border:1px solid rgba(255,159,10,0.2); border-radius:6px; padding:7px 11px; margin:0 0 20px 0; display:flex; gap:7px; align-items:flex-start;">
+<span>⚠️</span>
+<span>Ändringar kräver omstart av servern för att träda i kraft. Fel port eller ngrok-domän gör att systemet blir oåtkomligt utifrån.</span>
+</div>
+<div style="font-size:11px; color:var(--text-secondary); opacity:0.55; margin:-12px 0 14px 0; display:grid; grid-template-columns:90px 1fr; gap:2px 10px;">
+<span style="opacity:0.7;">PORT</span><span>Den port som Atlasservern lyssnar på lokalt (standard: 3000).</span>
+<span style="opacity:0.7;">NGROK Domain</span><span>Den fasta publika URL som tunnlar trafik från internet till den lokala servern via ngrok.</span>
+</div>
 ${buildConfigRow('PORT', 'PORT (Serverport)', config.PORT, false)}
 ${buildConfigRow('NGROK_DOMAIN', 'NGROK Domain', config.NGROK_DOMAIN, false)}
 `;
 } else if (section === 'email') {
 rows = `
-<h3 style="margin:0 0 20px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">📧 E-postkonfiguration</h3>
+<h3 style="margin:0 0 6px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">📧 E-postkonfiguration</h3>
+<p style="font-size:12px; color:var(--text-secondary); opacity:0.7; margin:0 0 6px 0;">
+Inloggningsuppgifterna som Atlas använder för att skicka utgående e-post — t.ex. avisering om nya ärenden. Använd en app-specifik lösenordsnyckel om kontot har tvåfaktorsautentisering aktiverat (rekommenderas).
+</p>
+<div style="font-size:11px; color:#ff9f0a; background:rgba(255,159,10,0.08); border:1px solid rgba(255,159,10,0.2); border-radius:6px; padding:7px 11px; margin:0 0 20px 0; display:flex; gap:7px; align-items:flex-start;">
+<span>⚠️</span>
+<span>Lösenordet lagras i <code>.env</code> och visas alltid maskerat. Ändringar kräver omstart av servern.</span>
+</div>
 ${buildConfigRow('EMAIL_USER', 'E-postadress', config.EMAIL_USER, false)}
 ${buildConfigRow('EMAIL_PASS', 'Lösenord / App-nyckel', config.EMAIL_PASS, true)}
 `;
 } else if (section === 'ai') {
 rows = `
-<h3 style="margin:0 0 20px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">🤖 AI-motor — Confidence-trösklar</h3>
-<div style="overflow-y:auto; max-height:calc(75vh - 120px); padding-right:8px;">
+<h3 style="margin:0 0 6px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">🤖 AI-motor — Confidence-trösklar</h3>
+<p style="font-size:12px; color:var(--text-secondary); opacity:0.7; margin:0 0 6px 0;">
+API-nyckeln kopplar Atlas till OpenAI. Confidence-trösklarna styr hur säker AI:n måste vara på en frågekategori innan den agerar — lägre värde ger fler svar men ökar risken för felklassificering, högre värde ger färre men säkrare svar.
+</p>
+<div style="font-size:11px; color:#ff9f0a; background:rgba(255,159,10,0.08); border:1px solid rgba(255,159,10,0.2); border-radius:6px; padding:7px 11px; margin:0 0 20px 0; display:flex; gap:7px; align-items:flex-start;">
+<span>⚠️</span>
+<span>API-nyckeln är känslig — dela den aldrig. Ändringar till trösklar kräver omstart av servern för att aktiveras i AI-motorn.</span>
+</div>
+<div style="overflow-y:auto; max-height:calc(75vh - 180px); padding-right:8px;">
 ${buildConfigRow('OPENAI_API_KEY', 'OpenAI API-nyckel', config.OPENAI_API_KEY, true)}
 ${buildConfigRow('defaultConfidence', 'Default Confidence', config.defaultConfidence)}
 ${buildConfigRow('conf_weather', 'Väder (weather)', config.conf_weather)}
@@ -167,7 +192,14 @@ ${buildConfigRow('conf_intent', 'Avsikt (intent)', config.conf_intent)}
 `;
 } else if (section === 'paths') {
 rows = `
-<h3 style="margin:0 0 20px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">📁 Systemsökvägar (Skrivskyddade)</h3>
+<h3 style="margin:0 0 6px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">📁 Systemsökvägar</h3>
+<p style="font-size:12px; color:var(--text-secondary); opacity:0.7; margin:0 0 6px 0;">
+Visar de filsystemsökvägar som servern använder internt. Dessa sätts automatiskt vid installation och är skrivskyddade — de kan inte ändras via gränssnittet. Kontakta systemadministratören om sökvägarna behöver justeras.
+</p>
+<div style="font-size:11px; color:rgba(150,150,180,0.6); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:6px; padding:7px 11px; margin:0 0 20px 0; display:flex; gap:7px; align-items:flex-start;">
+<span>🔒</span>
+<span>Skrivskyddade fält. Ändras enbart direkt i konfigurationsfilen vid behov.</span>
+</div>
 ${buildConfigRow('DEV_PATH', 'Utvecklingssökväg', config.DEV_PATH, false, true)}
 ${buildConfigRow('KNOWLEDGE_BASE_PATH', 'Kunskapsbas-sökväg', config.KNOWLEDGE_BASE_PATH, false, true)}
 `;
@@ -323,13 +355,14 @@ onclick="resetRagField('${id}', '${field}', ${defaultVal})">↺ Reset</button>
 detailBox.innerHTML = `
 <div class="detail-container">
 <div class="detail-body" style="padding:25px;">
-<h3 style="margin:0 0 6px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">
-⚡ RAG — Poängsättning
-</h3>
-<p style="font-size:12px; color:var(--text-secondary); opacity:0.7; margin:0 0 20px 0;">
-Chunks med högre score vinner konkurrensen i RAG-kontexten. Ändra med försiktighet —
-en regel som övertrumfar en annan kan ge felaktiga svar.
+<h3 style="margin:0 0 6px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">⚡ RAG — Poängsättning</h3>
+<p style="font-size:12px; color:var(--text-secondary); opacity:0.7; margin:0 0 6px 0;">
+Styr vilka kunskapschunks som prioriteras när AI:n hämtar information via RAG (Retrieval-Augmented Generation). Chunks med högre poäng "vinner" konkurrensen och skickas till AI-motorn — lägre poäng innebär att andra regler kan tränga undan svaret.
 </p>
+<div style="font-size:11px; color:#ff6b6b; background:rgba(255,107,107,0.08); border:1px solid rgba(255,107,107,0.25); border-radius:6px; padding:7px 11px; margin:0 0 20px 0; display:flex; gap:7px; align-items:flex-start;">
+<span>⚠️</span>
+<span>Ändra med stor försiktighet. En regel som oavsiktligt övertrumfar en annan kan ge felaktiga kundsvar. Kräver omstart av servern för att aktiveras.</span>
+</div>
 <div style="overflow-y:auto; max-height:calc(75vh - 140px); padding-right:8px;">
 ${buildRagRow(
 'a1_am', 'rag_score_a1_am', 'rule_A1_AM — AM/Moped chunks', 25000,
@@ -434,16 +467,16 @@ await saveRagField(id, field);
 function renderBookingLinksSection(links, detailBox) {
 
 const LABELS = {
-AM:       { label: 'AM / Moped',                   hint: 'Länk som visas när kunden frågar om moped/AM-kurs.' },
-MC:       { label: 'MC / Motorcykel',               hint: 'Länk som visas vid MC-frågor utan specifikt kontor.' },
-CAR:      { label: 'Bil / Körlektion',              hint: 'Länk för bilkörkort och generella lektionsfrågor.' },
-INTRO:    { label: 'Handledarkurs / Introduktion',  hint: 'Bokningslänk för introduktionskursen.' },
-RISK1:    { label: 'Riskettan (Risk 1)',             hint: 'Bokningslänk för Risk 1.' },
-RISK2:    { label: 'Risktvåan / Halkbana (Risk 2)', hint: 'Bokningslänk för Risk 2 / halkbana.' },
-TEORI:    { label: 'Teoriapp (Mitt Körkort)',        hint: 'Länk till appen som visas vid teori-frågor.' },
-'B96/BE': { label: 'Släpvagn (B96/BE)',             hint: 'Bokningslänk för släpvagnsutbildning.' },
-TUNG:     { label: 'Tung Trafik (C/CE)',            hint: 'Bokningslänk för lastbilsutbildning.' },
-POLICY:   { label: 'Policy / Köpvillkor',           hint: 'Länk som visas vid frågor om villkor och faktura.' }
+AM:       { label: 'AM / Moped',                   hint: 'Visas när kunden frågar om moped- eller AM-kurs.' },
+MC:       { label: 'MC / Motorcykel',               hint: 'Visas vid MC-frågor utan specifikt kontor.' },
+CAR:      { label: 'Bil / Körlektion',              hint: 'Visas vid frågor om bilkörkort och generella lektioner.' },
+INTRO:    { label: 'Handledarkurs / Introduktion',  hint: 'Visas vid frågor om introduktionskursen.' },
+RISK1:    { label: 'Riskettan (Risk 1)',             hint: 'Visas vid frågor om Risk 1.' },
+RISK2:    { label: 'Risktvåan / Halkbana (Risk 2)', hint: 'Visas vid frågor om Risk 2 / halkbana.' },
+TEORI:    { label: 'Teoriapp (Mitt Körkort)',        hint: 'Visas vid frågor om teori och körkortsprov.' },
+'B96/BE': { label: 'Släpvagn (B96/BE)',             hint: 'Visas vid frågor om släpvagnsutbildning.' },
+TUNG:     { label: 'Tung Trafik (C/CE)',            hint: 'Visas vid frågor om lastbilsutbildning.' },
+POLICY:   { label: 'Policy / Köpvillkor',           hint: 'Visas vid frågor om villkor, faktura och ångerrätt.' }
 };
 
 function buildLinkRow(key) {
@@ -451,21 +484,20 @@ const meta = LABELS[key] || { label: key, hint: '' };
 const currentUrl = (links[key] && links[key].url) ? links[key].url : '';
 const safeUrl = currentUrl.replace(/"/g, '&quot;');
 return `
-<div class="admin-config-row" style="margin-bottom:20px;" id="bl-row-${key}">
-<label style="font-size:13px; color:var(--text-secondary); margin-bottom:4px; display:block;">
-${meta.label}
-<span style="font-size:11px; opacity:0.45; margin-left:6px; font-family:monospace;">${key}</span>
-</label>
-${meta.hint ? `<div style="font-size:11px; color:var(--text-secondary); opacity:0.6; margin-bottom:6px;">${meta.hint}</div>` : ''}
-<div style="display:flex; align-items:center; gap:8px;">
-<input type="text" id="bl-${key}" class="admin-config-field"
-value="${safeUrl}" style="flex:1; min-width:0;" disabled
-placeholder="https://...">
-<button class="admin-lock-btn" id="bl-lock-${key}"
-onclick="unlockBookingLinkField('${key}')">🔒 Låst</button>
-<button class="btn-glass-small" style="display:none;" id="bl-save-${key}"
-onclick="saveBookingLinkField('${key}')">Spara</button>
+<div id="bl-row-${key}" style="display:grid; grid-template-columns:200px 1fr auto auto; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+<div>
+<div style="font-size:13px; color:var(--text-primary); font-weight:500; line-height:1.3;">${meta.label}
+<span style="font-size:10px; opacity:0.35; margin-left:5px; font-family:monospace; font-weight:400;">${key}</span>
 </div>
+${meta.hint ? `<div style="font-size:11px; color:var(--text-secondary); opacity:0.5; margin-top:2px; line-height:1.35;">${meta.hint}</div>` : ''}
+</div>
+<input type="text" id="bl-${key}" class="admin-config-field"
+value="${safeUrl}" style="min-width:0; width:100%;" disabled
+placeholder="https://...">
+<button class="admin-lock-btn" id="bl-lock-${key}" style="white-space:nowrap; flex-shrink:0;"
+onclick="unlockBookingLinkField('${key}')">🔒 Låst</button>
+<button class="btn-glass-small" style="display:none; flex-shrink:0;" id="bl-save-${key}"
+onclick="saveBookingLinkField('${key}')">Spara</button>
 </div>
 `;
 }
@@ -473,17 +505,23 @@ onclick="saveBookingLinkField('${key}')">Spara</button>
 detailBox.innerHTML = `
 <div class="detail-container">
 <div class="detail-body" style="padding:25px;">
-<h3 style="margin:0 0 6px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">
-🔗 Bokningslänkar
-</h3>
-<p style="font-size:12px; color:var(--text-secondary); opacity:0.7; margin:0 0 20px 0;">
-Länkarna sparas i <code>utils/booking-links.json</code> och läses in av RAG-motorn vid uppstart.
-Kräver omstart av servern för att träda i kraft.
+<h3 style="margin:0 0 6px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">🔗 Bokningslänkar</h3>
+<p style="font-size:12px; color:var(--text-secondary); opacity:0.7; margin:0 0 6px 0;">
+De URL:er som AI-assistenten inkluderar i sina svar när en kund frågar om bokning för en specifik kurstyp. Varje länk är kopplad till en kurskategori och visas kontextberoende — kunden ser aldrig fler länkar än vad frågan motiverar.
 </p>
-<div style="overflow-y:auto; max-height:calc(75vh - 140px); padding-right:8px;">
+<div style="font-size:11px; color:#ff9f0a; background:rgba(255,159,10,0.08); border:1px solid rgba(255,159,10,0.2); border-radius:6px; padding:7px 11px; margin:0 0 16px 0; display:flex; gap:7px; align-items:flex-start;">
+<span>⚠️</span>
+<span>Länkarna sparas i <code>utils/booking-links.json</code> och läses in av RAG-motorn vid uppstart. Kräver omstart av servern för att träda i kraft.</span>
+</div>
+<div style="display:grid; grid-template-columns:200px 1fr auto auto; gap:0 10px; padding:0 0 6px 0; border-bottom:1px solid rgba(255,255,255,0.09); margin-bottom:2px;">
+<span style="font-size:10px; text-transform:uppercase; letter-spacing:0.06em; opacity:0.4; color:var(--text-secondary);">Kurstyp</span>
+<span style="font-size:10px; text-transform:uppercase; letter-spacing:0.06em; opacity:0.4; color:var(--text-secondary);">URL</span>
+<span></span><span></span>
+</div>
+<div style="overflow-y:auto; max-height:calc(75vh - 200px); padding-right:6px;">
 ${Object.keys(LABELS).map(k => buildLinkRow(k)).join('')}
 </div>
-<div id="bl-notice" style="display:none; margin-top:16px;" class="admin-restart-notice">
+<div id="bl-notice" style="display:none; margin-top:14px;" class="admin-restart-notice">
 ✅ Länken sparad. Starta om servern för att aktivera i RAG-motorn.
 </div>
 </div>

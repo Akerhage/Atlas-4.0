@@ -92,7 +92,14 @@ return `
 detailBox.innerHTML = `
 <div class="detail-container">
 <div class="detail-body" style="padding:25px;">
-<h3 style="margin:0 0 20px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">🛡️ Drift & Säkerhet</h3>
+<h3 style="margin:0 0 6px 0; font-size:14px; text-transform:uppercase; color:var(--accent-primary);">🛡️ Drift & Säkerhet</h3>
+<p style="font-size:12px; color:var(--text-secondary); opacity:0.7; margin:0 0 6px 0;">
+Driftkritiska inställningar som påverkar systemets beteende direkt: hur ofta databasen säkerhetskopieras, var kopian sparas, hur länge inloggningssessioner gäller och om IMAP-polling för inkommande e-post ska vara aktiv.
+</p>
+<div style="font-size:11px; color:#ff6b6b; background:rgba(255,107,107,0.08); border:1px solid rgba(255,107,107,0.25); border-radius:6px; padding:7px 11px; margin:0 0 20px 0; display:flex; gap:7px; align-items:flex-start;">
+<span>⚠️</span>
+<span>Felaktiga ändringar här kan påverka systemets tillgänglighet och datasäkerhet. Ändra endast om du vet vad du gör.</span>
+</div>
 ${buildDriftLockRow('imap', 'imap_enabled', 'IMAP-polling (e-post)', s.imap_enabled, 'checkbox')}
 ${buildDriftLockRow('backup-interval', 'backup_interval_hours', 'Backup-intervall (timmar)', s.backup_interval_hours, 'number')}
 ${buildDriftLockRow('backup-path', 'backup_path', 'Backup-sökväg', s.backup_path, 'text')}

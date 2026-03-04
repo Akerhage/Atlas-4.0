@@ -84,6 +84,10 @@ detailBox.innerHTML = `
 </button>
 </div>
 <div style="padding:12px 14px 8px 14px; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.06); font-size:11px; color:var(--text-secondary); line-height:1.7; flex-shrink:0;">
+<div style="font-size:12px; color:var(--text-secondary); opacity:0.7; margin-bottom:6px; line-height:1.5;">
+Frågor där RAG-motorn inte hittade ett tillräckligt bra svar och föll tillbaka på generiskt svar eller Transportstyrelsens webbplats (TS). Används för att identifiera ämnen som saknas eller behöver förbättras i kunskapsbanken.
+<span style="display:inline-block; margin-left:4px; font-size:10px; color:rgba(150,150,180,0.5);">Påverkar inte systemets funktion. Listan kan rensas manuellt.</span>
+</div>
 <span style="font-weight:700; color:var(--text-primary);">Totalt ${rows.length} misslyckanden</span>
 — <span style="color:#4cd964;">${totalSolved} lösta av TS (${pct}%)</span>
 — <span style="opacity:0.6;">${last7.length} senaste 7 dagarna</span>
