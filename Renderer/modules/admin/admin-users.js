@@ -173,11 +173,12 @@ ${window._agentOwnerTickets?.length > 0 ? `onclick="(function(){window._savedTic
 style="${window._agentOwnerTickets?.length > 0 ? 'cursor:pointer;' : ''}"
 onmouseover="${window._agentOwnerTickets?.length > 0 ? `this.style.borderColor='${styles.main}66'; this.style.background='${styles.main}08'` : ''}"
 onmouseout="${window._agentOwnerTickets?.length > 0 ? `this.style.borderColor=''; this.style.background=''` : ''}">
-<div style="font-size:38px; font-weight:800; color:${styles.main}; line-height:1;">${stats.active || 0}</div>
+<div style="font-size:38px; font-weight:800; color:${styles.main}; line-height:1;">${window._agentOwnerTickets?.length || 0}</div>
 <div style="font-size:11px; opacity:0.5; text-transform:uppercase; margin-top:6px; display:flex; align-items:center; justify-content:center; gap:5px;">
 AKTIVA ÄRENDEN
 ${window._agentOwnerTickets?.length > 0 ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${styles.main}" stroke-width="2" opacity="0.6"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>` : ''}
 </div>
+${(() => { const internalCount = tickets.filter(t => t.session_type === 'internal').length; return internalCount > 0 ? `<div style="font-size:10px; opacity:0.35; margin-top:4px;">+ ${internalCount} interna</div>` : ''; })()}
 </div>
 
 <div class="glass-panel" style="padding:15px; border-radius:12px; border:1px solid var(--border-color); background:rgba(255,255,255,0.02);">

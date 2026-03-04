@@ -257,7 +257,11 @@ const uniqueVehicles = [...new Set(tickets.map(t => t.vehicle).filter(Boolean))]
 
 const firstOffice = uniqueOffices[0] ||
 (customerObj.offices ? customerObj.offices.split(',')[0].trim() : null);
-const styles = getAgentStyles(firstOffice || 'unclaimed');
+const agentStyleColor = (typeof currentUser !== 'undefined' && currentUser.agent_color)
+? currentUser.agent_color : null;
+const styles = agentStyleColor
+? getAgentStyles(currentUser.username)
+: getAgentStyles(firstOffice || 'unclaimed');
 
 const lastContactDate = customerObj.last_contact
 ? new Date(customerObj.last_contact * 1000).toLocaleDateString('sv-SE')
@@ -404,8 +408,8 @@ if (!t) return;
 // Använd inloggad agents färg (samma som i ärendelistorna) med fallback till routing_tag
 const agentColor = (typeof currentUser !== 'undefined' && currentUser.agent_color)
   ? currentUser.agent_color : null;
-const tStyles = agentColor
-  ? getAgentStyles(agentColor)
+const tStyles = (typeof currentUser !== 'undefined' && currentUser.username)
+  ? getAgentStyles(currentUser.username)
   : getAgentStyles(t.routing_tag || t.owner || 'unclaimed');
 const titleDisplay = t.subject || t.question || 'Ärende';
 const hasPrev      = idx > 0;
