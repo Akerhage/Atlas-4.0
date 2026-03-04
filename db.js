@@ -428,7 +428,14 @@ human_mode,
 owner,
 session_type,
 is_archived,
-updated_at
+updated_at,
+name,
+email,
+phone,
+source,
+office,
+vehicle,
+sender
 FROM chat_v2_state
 WHERE conversation_id = ?
 `,
@@ -540,7 +547,7 @@ flags
 });
 
 // 🔒 F1.1: Whitelist — endast kända kolumner tillåts för att förhindra SQL-injektion
-const ALLOWED_FLAGS = ['vehicle', 'office', 'topic', 'is_internal', 'status', 'sender', 'session_type', 'human_mode', 'is_archived'];
+const ALLOWED_FLAGS = ['vehicle', 'office', 'sender', 'session_type', 'human_mode', 'is_archived', 'name', 'email', 'phone', 'source'];
 const fields = [];
 const values = [];
 
@@ -693,7 +700,7 @@ function getUserByUsername(username) {
 return new Promise((resolve, reject) => {
 // Vi lägger till de nya kolumnerna i SELECT-frågan
 db.get(
-"SELECT id, username, password_hash, role, agent_color, avatar_id, status_text, routing_tag FROM users WHERE username = ?",
+"SELECT id, username, password_hash, role, agent_color, avatar_id, status_text, routing_tag, display_name FROM users WHERE username = ?",
 [username.toLowerCase()], // Tvingar sökningen till små bokstäver
 (err, row) => {
 if (err) reject(err);
@@ -731,9 +738,11 @@ const placeholders = officeTags.length > 0
 ? officeTags.map(() => '?').join(',')
 : "'__NOMATCH__'";
 
-// params: owner-match, office IN (...), owner IS NULL check, owner = agent check, internal sender
-const params = [agentName, ...officeTags, agentName, agentName];
+// params: owner = agentName, sender = agentName (internal)
+const params = [agentName, agentName];
 
+// Mina ärenden = jag är owner ELLER internt meddelande där jag är avsändare
+// OBS: Upplockade ärenden på mina kontor tillhör INKORGEN, inte mina ärenden
 const sql = `
 SELECT
 s.conversation_id,
@@ -751,10 +760,6 @@ WHERE s.human_mode = 1
 AND (s.is_archived IS NULL OR s.is_archived = 0)
 AND (
 s.owner = ?
-OR (
-s.office IN (${placeholders})
-AND (s.owner IS NULL OR s.owner = ?)
-)
 OR (s.session_type = 'internal' AND s.sender = ?)
 )
 ORDER BY s.updated_at ASC

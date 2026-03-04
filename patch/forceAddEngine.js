@@ -613,13 +613,60 @@ return 1;
 return 0;
 }
 
-// FIX 10: Lastbil Generell & YKB
+// Lastbil Generell & YKB
+// FIXAD: Sätt HÖGSTA prioritet (18000) för att slå ut pris-chunks
+// och använd prepend: true för att säkerställa basfakta hamnar först
 rule_Fix_Lastbil_YKB(queryLower, intent) {
-if ((intent === 'price_lookup' || intent === 'intent_info') && this.qHas(queryLower, 'ykb', '140 tim', '35 tim', 'grundutbildning', 'fortbildning', 'lastbil', 'c-körkort', 'ce-körkort')) {
-const chunks = this.findBasfaktaBySource('basfakta_lastbil_c_ce_c1_c1e.json');
-return this.addChunks(chunks, 9600, true);
+  // Triggers för YKB och lastbilsutbildning (regelverk + tid + förnyelse)
+  const isYKBQuery = this.qHas(queryLower, 'ykb', 'yrkeskompetensbevis', 'grundutbildning', 'fortbildning', '140 tim', '35 tim');
+  const isLastbilQuery = this.qHas(queryLower, 'lastbil', 'c-körkort', 'ce-körkort', 'c1-körkort', 'lastbilsutbildning', 'tung lastbil');
+  const isTimeQuery = this.qHas(queryLower, 'hur lång tid', 'hur länge', 'tid tar', 'timmar');
+  const isFornyaQuery = this.qHas(queryLower, 'förnya', 'förnyelse', 'förnyar');
+  
+  // Kör om det är YKB ELLER (lastbil + (tid/förnya/intent_info))
+  if (isYKBQuery || (isLastbilQuery && (isTimeQuery || isFornyaQuery || intent === 'intent_info' || intent === 'service_inquiry'))) {
+    const chunks = this.findBasfaktaBySource('basfakta_lastbil_c_ce_c1_c1e.json');
+    // Öka score till 18000 för att slå ut pris-chunks (som har ~7000)
+    // prepend: true (tredje parametern) = läggs först i listan
+    const count = this.addChunks(chunks, 18000, true);
+    if (count > 0) {
+      console.log(`[FIX-YKB/LASTBIL] Lade till ${count} basfakta-chunks FÖRE priser (score: 18000)`);
+    }
+    return count;
+  }
+  return 0;
 }
-return 0;
+
+// FIX 10b: Hur lång tid tar utbildningen? (alla fordon)
+// Denna regel fångar upp generella "hur lång tid tar" frågor
+rule_Fix_Utbildningstid(queryLower, intent, slots) {
+  const isTimeQuery = this.qHas(queryLower, 'hur lång tid', 'hur länge tar', 'tid tar', 'duration', 'hur många timmar');
+  const isUtbildningQuery = this.qHas(queryLower, 'utbildning', 'kurs', 'utbildningen', 'körkort');
+  
+  // Endast om det är en tid-fråga OM utbildning
+  if (isTimeQuery && isUtbildningQuery) {
+    let chunks = [];
+    
+    // Välj basfakta baserat på fordon
+    if (slots.vehicle === 'LASTBIL' || this.qHas(queryLower, 'lastbil', 'c-körkort', 'ce')) {
+      chunks = this.findBasfaktaBySource('basfakta_lastbil_c_ce_c1_c1e.json');
+    } else if (slots.vehicle === 'MC' || this.qHas(queryLower, 'mc', 'motorcykel')) {
+      chunks = this.findBasfaktaBySource('basfakta_mc_lektioner_utbildning.json');
+    } else if (slots.vehicle === 'AM' || this.qHas(queryLower, 'moped', 'am')) {
+      chunks = this.findBasfaktaBySource('basfakta_am_kort_och_kurser.json');
+    } else {
+      // Bil som fallback
+      chunks = this.findBasfaktaBySource('basfakta_lektioner_paket_bil.json');
+    }
+    
+    if (chunks.length > 0) {
+      // Hög prioritet för att slå ut pris-chunks
+      const count = this.addChunks(chunks, 17000, true);
+      console.log(`[FIX-UTBILDNINGSTID] Lade till ${count} chunks för utbildningstid (score: 17000)`);
+      return count;
+    }
+  }
+  return 0;
 }
 
 // FIX 11: Utbildningskontroll (Steg 8)
@@ -756,6 +803,7 @@ totalAdded += this.rule_Fix_Nollutrymme(queryLower, intent);
 totalAdded += this.rule_Fix_PersonbilInfo(queryLower, intent, slots.vehicle);
 totalAdded += this.rule_Fix_RiskInfo(queryLower, intent, slots.service);
 totalAdded += this.rule_Fix_Lastbil_YKB(queryLower, intent);
+totalAdded += this.rule_Fix_Utbildningstid(queryLower, intent, slots);
 totalAdded += this.rule_Fix_Utbildningskontroll(queryLower, intent);
 totalAdded += this.rule_B1_Policy(queryLower, intent, slots);
 

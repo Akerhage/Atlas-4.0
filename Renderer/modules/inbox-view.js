@@ -37,21 +37,20 @@ fetch(`${SERVER_URL}/team/my-tickets?t=${Date.now()}`, { headers: fetchHeaders }
 
 const inboxData = await inboxRes.json();
 const myData = await myRes.json();
-
-const inboxTickets = inboxData.tickets || [];
 const myTickets = myData.tickets || [];
 
-// Inkorg: alla oplockat (live-chattar + mail + plockade ärenden)
-const inboxCount = inboxTickets.filter(t => !t.owner).length;
+// Inkorg: räkna direkt från de strukturerade listorna (live_chats + mail + claimed)
+// live_chats och mail = alltid owner=null (oplockade)
+// claimed = plockade av annan agent eller routade till kontor
+const liveChatCount = (inboxData.live_chats || []).length;
+const mailCount     = (inboxData.mail || []).length;
+const claimedCount  = (inboxData.claimed || []).length;
 
-// Plockade ärenden i inkorgen (routade till kontor)
-const claimedCount = (inboxData.claimed || []).length;
-
-// Mina ärenden: alla som API:et returnerar för denna agent
+// Mina ärenden: visas i separat badge, räknas INTE in i inkorgen
 const myCount = myTickets.length;
 
-const totalInbox = inboxCount + claimedCount;
-const totalCount = totalInbox + myCount;
+const totalInbox = liveChatCount + mailCount + claimedCount;
+const totalCount = totalInbox; // Inkorgens badge visar bara inkorgen
 
 // Uppdatera badges
 if (inboxBadge) {
@@ -657,7 +656,8 @@ ${atlasAvatar}
 });
 }
 
-bodyContent = `<div class="inbox-chat-history" style="padding:10px 5px;">${chatHistoryHtml}</div>`;
+bodyContent = `<div class="inbox-chat-history" style="padding:10px 5px;">${chatHistoryHtml}</div>
+<div id="typing-indicator-${ticket.conversation_id}" style="display:none; padding:4px 14px 8px; font-size:12px; font-style:italic; color:${styles.main}; opacity:0.75;">✍️ Kunden skriver...</div>`;
 }
 
 // Villkor för Snabbsvar: admin/agent + chattärende (customer) + ej plockat
@@ -730,9 +730,17 @@ if (qrBtn) { qrBtn.disabled = false; qrBtn.style.opacity = '1'; }
 const qrBtn = document.getElementById('btn-quick-reply-send');
 if (qrBtn) qrBtn.onclick = quickReply;
 const qrInput = document.getElementById('quick-reply-input');
-if (qrInput) qrInput.addEventListener('keydown', (e) => {
+if (qrInput) {
+qrInput.addEventListener('keydown', (e) => {
 if (e.ctrlKey && e.key === 'Enter') quickReply();
 });
+// Meddela kunden att agenten skriver
+qrInput.addEventListener('input', () => {
+if (window.socketAPI) {
+window.socketAPI.emit('team:agent_typing', { sessionId: ticket.conversation_id });
+}
+});
+}
 }
 
 const clearDetailView = () => {

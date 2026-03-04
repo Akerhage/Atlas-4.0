@@ -198,8 +198,8 @@ if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(
 const { username } = req.params;
 const statsQuery = `
 SELECT
--- Egna: pågående ärenden som ägs av agenten
-(SELECT COUNT(*) FROM chat_v2_state WHERE owner = ? AND (is_archived IS NULL OR is_archived = 0)) as active_count,
+-- Egna: pågående ärenden som ägs av agenten (human_mode=1, matchar listan)
+(SELECT COUNT(*) FROM chat_v2_state WHERE owner = ? AND human_mode = 1 AND (is_archived IS NULL OR is_archived = 0)) as active_count,
 -- Egna: arkiverade ärenden
 (SELECT COUNT(*) FROM chat_v2_state WHERE owner = ? AND is_archived = 1) as archived_count,
 -- Egna: arkiverade mailärenden (hanterade mail)
@@ -245,17 +245,7 @@ if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(
 try {
 const { username } = req.params;
 
-const user = await getUserByUsername(username);
-const officeTags = user && user.routing_tag
-? user.routing_tag.split(',').map(t => t.trim()).filter(t => t)
-: [];
-
-const placeholders = officeTags.length > 0
-? officeTags.map(() => '?').join(',')
-: "'__NOMATCH__'";
-
-const params = [username, ...officeTags];
-
+// Agentens egna ärenden = only where owner = username (ej alla kontorets ärenden)
 const sql = `
 SELECT
 s.conversation_id,
@@ -266,29 +256,32 @@ s.sender,
 s.updated_at,
 s.is_archived,
 s.office AS routing_tag,
-o.office_color
+o.office_color,
+s.name,
+s.email,
+s.phone
 FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag
 WHERE s.human_mode = 1
 AND (s.is_archived IS NULL OR s.is_archived = 0)
-AND (s.session_type IS NULL OR s.session_type != 'internal')
-AND (
-s.owner = ?
-OR
-s.office IN (${placeholders})
-)
+AND s.session_type != 'internal'
+AND s.owner = ?
 ORDER BY s.updated_at DESC
 `;
 
-db.all(sql, params, async (err, rows) => {
+db.all(sql, [username], async (err, rows) => {
 if (err) return res.status(500).json({ error: err.message });
 const ticketsWithData = await Promise.all(rows.map(async (t) => {
 const stored = await getContextRow(t.conversation_id);
 const ctx = stored?.context_data || {};
+const locked = ctx.locked_context || {};
 return {
 ...t,
 office_color: t.office_color,
-subject: ctx.locked_context?.subject || "Inget ämne",
+subject: ctx.locked_context?.subject || locked?.subject || "Inget ämne",
+contact_name: locked?.name || locked?.contact_name || locked?.full_name || t.name || null,
+contact_email: locked?.email || locked?.contact_email || t.email || null,
+contact_phone: locked?.phone || locked?.contact_phone || t.phone || null,
 messages: ctx.messages || []
 };
 }));
@@ -396,6 +389,9 @@ s.owner,
 s.session_type,
 s.sender,
 s.updated_at,
+s.name,
+s.email,
+s.phone,
 o.office_color -- ✅ RÄTT KOLUMN (Hämtas via JOIN)
 FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag -- ✅ JOIN KRÄVS HÄR OCKSÅ
@@ -419,10 +415,14 @@ ctx = {};
 console.error('[server] Korrupt context_data:', stored?.conversation_id, e.message);
 }
 
+const locked = ctx.locked_context || {};
 return {
 ...t,
-office_color: t.office_color, // ✅ Skickar med färgen
-subject: ctx.locked_context?.subject || "Inget ämne",
+office_color: t.office_color,
+subject: locked.subject || "Inget ämne",
+contact_name: locked.name || locked.contact_name || locked.full_name || t.name || null,
+contact_email: locked.email || locked.contact_email || t.email || null,
+contact_phone: locked.phone || locked.contact_phone || t.phone || null,
 messages: ctx.messages || []
 };
 }));

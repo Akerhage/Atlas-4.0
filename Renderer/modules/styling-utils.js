@@ -7,7 +7,7 @@
 
 // Kompakt ersättare för resolveLabel
 function resolveLabel(tag) {
-const office = officeData.find(o => o.routing_tag === tag);
+const office = officeData.find(o => o.routing_tag === (tag ? tag.toLowerCase() : tag));
 if (!office) return tag ? tag.toUpperCase() : "ÄRENDE";
 
 const city = office.city || "";
@@ -31,14 +31,14 @@ return finalLabel.toUpperCase();
 
 // Kompakt ersättare för formatName
 function formatName(tag) {
-const office = officeData.find(o => o.routing_tag === tag);
+const office = officeData.find(o => o.routing_tag === (tag ? tag.toLowerCase() : tag));
 if (office) return office.name;
 return tag ? tag.charAt(0).toUpperCase() + tag.slice(1) : "";
 }
 
 // Kompakt ersättare för getCityFromOwner
 function getCityFromOwner(tag) {
-const office = officeData.find(o => o.routing_tag === tag);
+const office = officeData.find(o => o.routing_tag === (tag ? tag.toLowerCase() : tag));
 return office ? office.city : "Support";
 }
 
@@ -55,7 +55,9 @@ if (office) {
 hex = office.office_color;
 } else {
 const u = usersCache.find(u => u.username === tag);
-hex = u?.agent_color || (tag === currentUser?.username ? currentUser.agent_color : fallbackHex);
+// Fallback-kedja: cache → currentUser (synkront vid omstart) → blå standard
+hex = u?.agent_color
+|| (tag === currentUser?.username ? (currentUser?.agent_color || fallbackHex) : fallbackHex);
 }
 
 // Säkerställ att hex är en sträng och börjar med #

@@ -465,7 +465,14 @@ window.socketAPI.on('agent:color_updated', ({ username, color }) => {
 console.log(`🎨 [LIVE] Agentfärg uppdaterad: ${username} → ${color}`);
 const user = usersCache.find(u => u.username === username);
 if (user) user.agent_color = color;
-if (currentUser?.username === username) currentUser.agent_color = color;
+if (currentUser?.username === username) {
+currentUser.agent_color = color;
+localStorage.setItem('atlas_user', JSON.stringify(currentUser));
+// Uppdatera CSS-accentvariabeln som styr HEM-vyn, knappar och all accentfärg globalt
+document.documentElement.style.setProperty('--accent-primary', color);
+// Uppdatera sidebar-avataren, namn och statustext direkt
+if (typeof updateProfileUI === 'function') updateProfileUI();
+}
 renderInbox();
 renderMyTickets();
 if (document.getElementById('view-archive')?.style.display === 'flex') renderArchive();

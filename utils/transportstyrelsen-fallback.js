@@ -34,8 +34,19 @@ const TOPIC_URL_MAP = [
     patterns: ['be-körkort', 'be körkort', 'be-kort', 'släpvagn', 'b96', 'dragbil', 'utökad b'],
     url: 'https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/valj-behorighet/personbil-och-latt-lastbil/'
   },
+  // YKB HAR EGEN SIDA - separera från C-körkort
   {
-    patterns: ['c-körkort', 'ce-körkort', 'lastbilskörkort', 'ykb', 'tung lastbil', 'c1-körkort'],
+    patterns: [
+      'ykb', 'yrkeskompetensbevis', 
+      'grundutbildning lastbil', 'fortbildning lastbil',
+      '140 timmar', '35 timmar', 'ykb grundutbildning', 'ykb fortbildning',
+      'förnya ykb', 'ykb förnyelse', 'ykb-kort',
+      'ykb 140h', 'ykb 35h'
+    ],
+    url: 'https://www.transportstyrelsen.se/sv/vagtrafik/yrkestrafik/ykb/'
+  },
+  {
+    patterns: ['c-körkort', 'ce-körkort', 'lastbilskörkort', 'tung lastbil', 'c1-körkort', 'lastbilsutbildning', 'lastbil utbildning'],
     url: 'https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/valj-behorighet/tung-lastbil/c-tung-lastbil/'
   },
   {
@@ -69,7 +80,8 @@ const TOPIC_URL_MAP = [
 ];
 
 // Företagsspecifika nyckelord — om dessa matchar, blockera fallback
-// (frågor om pris/bokning/kontakt tillhör trafikskolan, inte Transportstyrelsen)
+// OBS: 'kostar' och 'pris' är kvar för att blockera VANLIGA prisfrågor till oss
+// Men vi tillåter fortfarande TS-fallback om det är regelverk som har officiella priser
 const COMPANY_SPECIFIC_KEYWORDS = [
   'pris', 'kostar', ' kr', 'rabatt', 'erbjudande',
   'boka', 'bokning', 'ledig tid', 'bokningslänk',
@@ -77,7 +89,7 @@ const COMPANY_SPECIFIC_KEYWORDS = [
   'testlektion', 'provlektion', 'prova på',
   'paket', 'intensivkurs', 'totalpaket',
   'hos er', 'er trafikskola', 'ni erbjuder', 'ni har',
-  'på er', 'er skola',
+  'på er', 'er skola', 'lediga tider', 'boka tid'
 ];
 
 /**

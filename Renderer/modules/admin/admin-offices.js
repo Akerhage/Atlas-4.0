@@ -226,7 +226,7 @@ ${tickets.length ? tickets.map((t, idx) => `
 <div class="admin-ticket-preview" onclick="openTicketReader(${idx}, '${tag}')" 
 style="border-left: 3px solid ${oc} !important; --atp-color: ${oc} !important;">
 <div style="flex:1; min-width:0;">
-<div class="atp-sender">${t.sender || 'Okänd kund'}</div>
+<div class="atp-sender">${t.name || t.contact_name || 'Okänd kund'}</div>
 <div class="atp-subject">${t.subject || 'Inget ämne'}</div>
 </div>
 <button class="atp-note-btn" 
@@ -370,9 +370,9 @@ document.querySelectorAll('#admin-detail-content .glass-panel h4').forEach(h4 =>
 h4.style.color = hex;
 });
 
-// Rubrikens titel
+// Rubrikens titel (setProperty med 'important' krävs för att slå CSS-specificiteten)
 const detailTitle = document.querySelector('#admin-detail-content .detail-subject');
-if (detailTitle) detailTitle.style.color = hex;
+if (detailTitle) detailTitle.style.setProperty('color', hex, 'important');
 
 // Auto-spara med debounce — snabb endpoint, ingen AI-validering
 clearTimeout(window._colorSaveTimer);
@@ -387,6 +387,7 @@ if (saveRes.ok) {
 await preloadOffices();      // Uppdatera officeData-cache
 renderMyTickets?.();         // Ärendekort i Mina Ärenden
 renderInbox?.();             // Ärendekort i Inkorg
+renderArchive?.(true);       // Ärendekort i Arkiv (filtrerar befintlig data, ingen ny fetch)
 showToast('🎨 Kontorsfärg sparad');
 }
 

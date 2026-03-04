@@ -361,12 +361,13 @@ sessionId
 // Säkra session om den saknas
 if (!v2State) {
 const initialOwner = providedContext?.locked_context?.agent_id || null;
+const initialOffice = providedContext?.locked_context?.agent_id || null; // office = routing_tag, inte owner
 await new Promise((resolve) => {
 db.run(
 `INSERT INTO chat_v2_state (conversation_id, session_type, human_mode, owner, office, updated_at)
-VALUES (?, 'customer', 0, ?, ?, ?)
+VALUES (?, 'customer', 0, NULL, ?, ?)
 ON CONFLICT(conversation_id) DO NOTHING`,
-[sessionId, initialOwner, initialOwner, Math.floor(Date.now() / 1000)], // initialOwner skickas två gånger
+[sessionId, initialOffice, Math.floor(Date.now() / 1000)],
 () => resolve()
 );
 });
@@ -1144,7 +1145,9 @@ await new Promise((resolve, reject) => {
 db.run(
 `INSERT INTO chat_v2_state (conversation_id, session_type, human_mode, owner, updated_at)
 VALUES (?, 'message', 1, ?, ?)
-ON CONFLICT(conversation_id) DO UPDATE SET updated_at = excluded.updated_at, owner = excluded.owner`,
+ON CONFLICT(conversation_id) DO UPDATE SET 
+updated_at = excluded.updated_at, 
+owner = excluded.owner`,
 [conversationId, agentName, now],
 (err) => err ? reject(err) : resolve()
 );
@@ -1526,8 +1529,8 @@ await new Promise((resolve) => {
 const initialOffice = conversationId.includes('_') ? conversationId.split('_')[0] : null; 
 db.run(
 `INSERT INTO chat_v2_state (conversation_id, session_type, human_mode, owner, office, updated_at)
-VALUES (?, 'message', 1, ?, ?, ?)`,
-[conversationId, initialOffice, initialOffice, now],
+VALUES (?, 'message', 1, NULL, ?, ?)`,
+[conversationId, initialOffice, now],
 () => resolve()
 );
 });

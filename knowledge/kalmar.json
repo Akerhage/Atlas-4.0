@@ -236,5 +236,6 @@
     "AM": "https://booking.mydrivingacademy.com/widget?vehicleType=moped&productType=Bundle&regionId=200026&locationId=200021&serviceId=468"
   },
   "type": "kontor_info",
-  "area": ""
+  "area": "",
+  "office_color": "#4c9e86"
 }

@@ -20,7 +20,7 @@ const { getTemplatesCached } = require('./templates');
 let io, sendToLHC, parseContextData, HUMAN_TRIGGERS, HUMAN_RESPONSE_TEXT;
 
 router.init = function({ io: _io, sendToLHC: _stl, parseContextData: _pcd,
-  HUMAN_TRIGGERS: _ht, HUMAN_RESPONSE_TEXT: _hrt }) {
+HUMAN_TRIGGERS: _ht, HUMAN_RESPONSE_TEXT: _hrt }) {
 io = _io;
 sendToLHC = _stl;
 parseContextData = _pcd;
@@ -208,9 +208,9 @@ if (!v2State || v2State.human_mode !== 1) {
 
 await new Promise((resolve) => {
 db.run(
-`INSERT INTO chat_v2_state (conversation_id, session_type, human_mode, owner, updated_at)
-VALUES (?, 'bot', 0, NULL, ?)
-ON CONFLICT(conversation_id) DO UPDATE SET session_type = 'bot'`,
+`INSERT INTO chat_v2_state (conversation_id, session_type, human_mode, owner, source, updated_at)
+VALUES (?, 'bot', 0, NULL, 'lhc', ?)
+ON CONFLICT(conversation_id) DO UPDATE SET session_type = 'bot', source = 'lhc'`,
 [chat_id, now],
 () => resolve()
 );

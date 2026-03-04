@@ -144,44 +144,45 @@ router.get('/team/inbox', authenticateToken, async (req, res) => {
 try {
 if (req.user.role === 'admin' || req.user.role === 'support') {
 
+// Live-chattar: ALLA oplockade customer-chattar oavsett kontor
 const sqlLiveChats = `
 SELECT s.conversation_id, s.session_type, s.human_mode, s.owner, s.sender,
-s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color
+s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color,
+s.name, s.email, s.phone
 FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag
 WHERE s.human_mode = 1
 AND (s.is_archived IS NULL OR s.is_archived = 0)
-AND (s.session_type IS NULL OR s.session_type != 'internal')
-AND (s.office = 'admin' OR s.office IS NULL)
 AND s.session_type = 'customer'
 AND s.owner IS NULL
 ORDER BY s.updated_at ASC
 `;
 
+// Inkomna mail: ALLA oplockade mail oavsett kontor
 const sqlMail = `
 SELECT s.conversation_id, s.session_type, s.human_mode, s.owner, s.sender,
-s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color
+s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color,
+s.name, s.email, s.phone
 FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag
 WHERE s.human_mode = 1
 AND (s.is_archived IS NULL OR s.is_archived = 0)
-AND (s.session_type IS NULL OR s.session_type != 'internal')
-AND (s.office = 'admin' OR s.office IS NULL)
 AND s.session_type = 'message'
 AND s.owner IS NULL
 ORDER BY s.updated_at ASC
 `;
 
+// Plockade: ALLA ärenden som har owner ELLER kontor satta (ej internal, ej egna)
 const sqlClaimed = `
 SELECT s.conversation_id, s.session_type, s.human_mode, s.owner, s.sender,
-s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color
+s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color,
+s.name, s.email, s.phone
 FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag
 WHERE s.human_mode = 1
 AND (s.is_archived IS NULL OR s.is_archived = 0)
-AND (s.session_type IS NULL OR s.session_type != 'internal')
-AND s.office IS NOT NULL
-AND s.office != 'admin'
+AND s.session_type != 'internal'
+AND (s.owner IS NOT NULL OR s.office IS NOT NULL)
 AND (s.owner IS NULL OR s.owner != ?)
 ORDER BY s.updated_at ASC
 `;
@@ -212,9 +213,9 @@ return {
 messages,
 last_message: lastMsg,
 office_color: t.office_color,
-contact_name: locked.name || locked.contact_name || locked.full_name || null,
-contact_email: locked.email || locked.contact_email || null,
-contact_phone: locked.phone || locked.contact_phone || null,
+contact_name: locked.name || locked.contact_name || locked.full_name || t.name || null,
+contact_email: locked.email || locked.contact_email || t.email || null,
+contact_phone: locked.phone || locked.contact_phone || t.phone || null,
 subject: locked.subject || null,
 city: locked.city || null,
 vehicle: locked.vehicle || null
@@ -253,9 +254,9 @@ return {
 messages,
 last_message: lastMsg,
 office_color: t.office_color,
-contact_name: locked.name || locked.contact_name || locked.full_name || null,
-contact_email: locked.email || locked.contact_email || null,
-contact_phone: locked.phone || locked.contact_phone || null,
+contact_name: locked.name || locked.contact_name || locked.full_name || t.name || null,
+contact_email: locked.email || locked.contact_email || t.email || null,
+contact_phone: locked.phone || locked.contact_phone || t.phone || null,
 subject: locked.subject || null,
 city: locked.city || null,
 vehicle: locked.vehicle || null
@@ -291,7 +292,10 @@ s.office AS routing_tag,
 o.office_color,
 o.city   AS office_city,
 o.area   AS office_area,
-o.name   AS office_name
+o.name   AS office_name,
+s.name,
+s.email,
+s.phone
 FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag
 WHERE s.human_mode = 1
@@ -319,8 +323,8 @@ if (lastUserMsg) lastMsg = lastUserMsg.content;
 else lastMsg = messages[messages.length - 1].content || "";
 }
 
-const finalName = locked.name || locked.contact_name || locked.full_name || locked.Name || t.sender || "";
-const email = locked.email || locked.contact_email || "";
+const finalName = locked.name || locked.contact_name || locked.full_name || locked.Name || t.name || t.sender || "";
+const email = locked.email || locked.contact_email || t.email || "";
 const subject = locked.subject || "";
 
 return {
@@ -329,7 +333,7 @@ messages,
 last_message: lastMsg,
 contact_name: finalName,
 contact_email: email,
-contact_phone: locked.phone || locked.contact_phone || null,
+contact_phone: locked.phone || locked.contact_phone || t.phone || null,
 subject,
 city: locked.city || null,
 vehicle: locked.vehicle || null

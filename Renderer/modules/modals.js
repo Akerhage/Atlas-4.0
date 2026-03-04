@@ -344,6 +344,9 @@ const avatarOptions = overlay.querySelectorAll('.avatar-option');
 
 // LIVE SYNC LOGIK (KOMPLETT: Realtid, Inga dubbletter & Korrekt Logik)
 const syncProfileUI = (color, avatarId, statusText) => {
+// 0. Uppdatera CSS-accentvariabeln direkt (styr HEM-vyn, knappar, statusrad m.m.)
+document.documentElement.style.setProperty('--accent-primary', color);
+
 // 1. Modal-preview (Uppe i modalen)
 if (previewContainer) {
 previewContainer.style.borderColor = color;
@@ -430,6 +433,11 @@ body: JSON.stringify(profileData)
 if (!profRes.ok) throw new Error("Kunde inte spara");
 currentUser = { ...currentUser, ...profileData };
 localStorage.setItem('atlas_user', JSON.stringify(currentUser));
+
+// Uppdatera CSS-accentvariabeln omedelbart (väntar inte på socket-roundtrip)
+document.documentElement.style.setProperty('--accent-primary', profileData.agent_color);
+// Uppdatera sidofältets avatar, namn och statustext via den centrala funktionen
+if (typeof updateProfileUI === 'function') updateProfileUI();
 
 // KIRURGISK TILLÄGG: Live-uppdatering av kundvyn vid profilfärgsändring
 const _newColor = colorInput.value;

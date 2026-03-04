@@ -145,7 +145,7 @@ Styr hur Atlas-servern exponeras lokalt och via internet. För att Atlas ärende
 <span>Ändringar kräver omstart av servern för att träda i kraft. Fel port eller ngrok-domän gör att systemet blir oåtkomligt utifrån.</span>
 </div>
 <div style="font-size:11px; color:var(--text-secondary); opacity:0.55; margin:-12px 0 14px 0; display:grid; grid-template-columns:90px 1fr; gap:2px 10px;">
-<span style="opacity:0.7;">PORT</span><span>Den port som Atlasservern lyssnar på lokalt (standard: 3000).</span>
+<span style="opacity:0.7;">PORT</span><span>Den port som Atlasservern lyssnar på lokalt.</span>
 <span style="opacity:0.7;">NGROK Domain</span><span>Den fasta publika URL som tunnlar trafik från internet till den lokala servern via ngrok.</span>
 </div>
 ${buildConfigRow('PORT', 'PORT (Serverport)', config.PORT, false)}

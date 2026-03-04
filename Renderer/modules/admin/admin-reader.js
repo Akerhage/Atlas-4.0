@@ -153,6 +153,7 @@ ${ADMIN_UI_ICONS.ARROW_RIGHT}
 
 <div style="flex:1; overflow-y:auto; padding:16px 18px; display:flex; flex-direction:column; gap:10px; min-height:0;">
 ${messageHistoryHtml}
+<div id="reader-typing-indicator-${t.conversation_id}" style="display:none; font-size:12px; font-style:italic; color:${rStyles.main}; opacity:0.75; padding:4px 2px;">✍️ Kunden skriver...</div>
 </div>
 
 <div style="padding:10px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.18); flex-shrink:0;">
@@ -213,6 +214,25 @@ const replyTA = modal.querySelector('#reader-quick-reply');
 const convId = t.conversation_id;
 
 if (sendBtn && replyTA) {
+// Meddela kunden att agenten skriver
+replyTA.addEventListener('input', () => {
+if (window.socketAPI) {
+window.socketAPI.emit('team:agent_typing', { sessionId: convId });
+}
+});
+
+// Uppdatera typing-indikatorn för kunden i reader-vyn om den är öppen
+window.socketAPI?.on && window.socketAPI.on('team:client_typing', (data) => {
+if (data.sessionId === convId) {
+const indicator = document.getElementById('reader-typing-indicator-' + convId);
+if (indicator) {
+indicator.style.display = 'block';
+clearTimeout(indicator._hideTimer);
+indicator._hideTimer = setTimeout(() => { indicator.style.display = 'none'; }, 3000);
+}
+}
+});
+
 const doSend = async () => {
 const msg = replyTA.value.trim();
 if (!msg) return;

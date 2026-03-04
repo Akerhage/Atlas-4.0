@@ -332,7 +332,7 @@
         "gratis",
         "kostnadsfritt",
         "grupp",
-		"helsingborg",
+        "helsingborg",
         "svenska"
       ],
       "type": "basfakta"
@@ -343,5 +343,6 @@
     "MC": "https://booking.mydrivingacademy.com/widget?vehicleType=mc&productType=Bundle&regionId=200035&locationId=200034",
     "AM": "https://booking.mydrivingacademy.com/widget?vehicleType=moped&productType=Bundle&regionId=200035&locationId=200034&serviceId=474"
   },
-  "type": "kontor_info"
+  "type": "kontor_info",
+  "office_color": "#712f9d"
 }

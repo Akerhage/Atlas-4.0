@@ -202,10 +202,16 @@ rolePill.style.color = color;
 detailBox.querySelectorAll('.admin-ticket-preview').forEach(card => {
 card.style.setProperty('--atp-color', color);
 });
+
+// 5. Uppdatera agentnamnet i rubriken (h2 .detail-subject, t.ex. "Madeleine")
+const nameTitle = detailBox.querySelector('.detail-subject');
+if (nameTitle) nameTitle.style.setProperty('color', color, 'important');
 }
 
 // KIRURGISK FIX: Synka med sidofältet om det är JAG (currentUser) som ändras
 if (currentUser && username === currentUser.username) {
+// Uppdatera CSS-variabeln som styr HEM-vyn, knappar och all accentfärg globalt
+document.documentElement.style.setProperty('--accent-primary', color);
 currentUser.agent_color = color;
 localStorage.setItem('atlas_user', JSON.stringify(currentUser));
 
