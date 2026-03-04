@@ -6,11 +6,21 @@
 // ============================================
 
 class forceAddEngine {
-constructor(allChunks) {
+constructor(allChunks, scores = {}) {
 this.allChunks = allChunks;
 this.mustAddChunks = [];
 this.forceHighConfidence = false;
-this.version = "1.9.5"; 
+this.version = "1.9.6";
+
+// Scores med fallback till hårdkodade defaults
+this.scores = {
+a1_am:       scores.rag_score_a1_am       ?? 25000,
+fix_saknade: scores.rag_score_fix_saknade  ?? 20000,
+c8_kontakt:  scores.rag_score_c8_kontakt   ?? 25000,
+b1_policy:   scores.rag_score_b1_policy    ?? 50000,
+c7_teori:    scores.rag_score_c7_teori     ?? 55000
+};
+console.log(`[ForceAddEngine v${this.version}] Scores: ${JSON.stringify(this.scores)}`);
 }
 
 // === HJÄLPFUNKTIONER ===
@@ -90,8 +100,9 @@ if (slots.vehicle !== 'AM' && !this.qReg(queryLower, /\bam\b/) && !this.qHas(que
 return 0;
 }
 const chunks = this.findBasfaktaBySource('basfakta_am_kort_och_kurser.json');
-const count = this.addChunks(chunks, 5000, false);
-console.log(`[A1-AM] Lade till ${count} chunks (score: 5000)`);
+const score = this.scores.a1_am;
+const count = this.addChunks(chunks, score, false);
+console.log(`[A1-AM] Lade till ${count} chunks (score: ${score})`);
 return count;
 }
 
@@ -153,7 +164,7 @@ const chunks = this.findBasfaktaBySource('basfakta_policy_kundavtal.json');
 
 if (intent === 'policy' || intent === 'booking' || intent === 'legal_query') {
 this.forceHighConfidence = true;
-added += this.addChunks(chunks, 50000, true);
+added += this.addChunks(chunks, this.scores.b1_policy, true);
 } else {
 // Om vi inte har rätt intent, sänk score till 3000 så MiniSearch vinner
 added += this.addChunks(chunks, 3000, false);
@@ -376,9 +387,9 @@ if (has_app_keywords) {
 // 1. Vi använder det exakta filnamnet för att garantera matchning
 const chunks = this.findBasfaktaBySource('basfakta_korkortsteori_mitt_korkort.json');
 
-// 2. Vi höjer poängen till 55 000 för att vinna över policyn (50k) och stadsinfo (25k)
+// 2. Vi höjer poängen för att vinna över policyn och stadsinfo
 // Detta garanterar att app-infon hamnar ABSOLUT ÖVERST i AI-kontexten.
-return this.addChunks(chunks, 55000, true);
+return this.addChunks(chunks, this.scores.c7_teori, true);
 }
 return 0;
 }
@@ -394,7 +405,7 @@ const contactKeywords = [
 
 if (this.qHas(queryLower, ...contactKeywords)) {
 if (intent === 'contact_info') {
-let score = 25000;
+let score = this.scores.c8_kontakt;
 let prepend = this.qHas(queryLower, 'kontakta support', 'ring support', 'kundtjänst nummer');
 added += this.addChunks(this.findBasfaktaBySource('basfakta_om_foretaget.json'), score, prepend);
 } else {
@@ -556,7 +567,7 @@ return 0;
 const chunks = this.findBasfaktaBySource('basfakta_saknade_svar.json');
 if (chunks.length) {
 this.forceHighConfidence = true; 
-return this.addChunks(chunks, 20000, true);
+return this.addChunks(chunks, this.scores.fix_saknade, true);
 }
 return 0;
 }
@@ -642,45 +653,45 @@ if (highConfCount++ < 2) this.forceHighConfidence = true;
 
 // 1a. META-PRISFRÅGOR (t.ex. "Varför skiljer sig priserna åt i landet?")
 if (this.qHas(queryLower, 'skiljer') ||
-    (this.qHas(queryLower, 'dyrare', 'billigare', 'olika priser') &&
-     this.qHas(queryLower, 'ort', 'stad', 'land', 'landet', 'region'))) {
-  const metaChunks = this.allChunks.filter(c =>
-    this.isBasfakta(c) &&
-    c.source && c.source.includes('basfakta_om_foretaget.json') &&
-    (c.keywords || []).some(k => ['dyrare', 'olika priser', 'varierar'].includes(k))
-  );
-  if (metaChunks.length > 0) {
-    totalAdded += this.addChunks(metaChunks, 18000, true);
-    if (highConfCount++ < 2) this.forceHighConfidence = true;
-    console.log(`[META-PRIS] Lade till ${metaChunks.length} meta-prischunks (score: 18000)`);
-  }
+(this.qHas(queryLower, 'dyrare', 'billigare', 'olika priser') &&
+this.qHas(queryLower, 'ort', 'stad', 'land', 'landet', 'region'))) {
+const metaChunks = this.allChunks.filter(c =>
+this.isBasfakta(c) &&
+c.source && c.source.includes('basfakta_om_foretaget.json') &&
+(c.keywords || []).some(k => ['dyrare', 'olika priser', 'varierar'].includes(k))
+);
+if (metaChunks.length > 0) {
+totalAdded += this.addChunks(metaChunks, 18000, true);
+if (highConfCount++ < 2) this.forceHighConfidence = true;
+console.log(`[META-PRIS] Lade till ${metaChunks.length} meta-prischunks (score: 18000)`);
+}
 }
 
 // 1b. FAKTURAADRESS GENERELL (Täcker alla varianter av fakturaadress-frågor)
 if (this.qHas(queryLower, 'faktura', 'fakturaadress')) {
-    console.log(`[DEBUG-FAKTURA] Query matchar faktura-trigger`);
-    
-    const fakturaChunks = this.allChunks.filter(c => {
-        const isBasfakta = this.isBasfakta(c);
-        const hasSource = c.source && c.source.includes('basfakta_om_foretaget.json');
-        const hasTitle = (c.title || '').toLowerCase().includes('faktura');
-        
-        console.log(`[DEBUG-CHUNK] id=${c.id}, isBasfakta=${isBasfakta}, hasSource=${hasSource}, hasTitle=${hasTitle}`);
-        
-        return isBasfakta && hasSource && hasTitle;
-    });
+console.log(`[DEBUG-FAKTURA] Query matchar faktura-trigger`);
 
-    console.log(`[DEBUG-FAKTURA] Hittade ${fakturaChunks.length} chunks`);
+const fakturaChunks = this.allChunks.filter(c => {
+const isBasfakta = this.isBasfakta(c);
+const hasSource = c.source && c.source.includes('basfakta_om_foretaget.json');
+const hasTitle = (c.title || '').toLowerCase().includes('faktura');
 
-    if (fakturaChunks.length > 0) {
-        totalAdded += this.addChunks(fakturaChunks, 22000, true);
-        if (highConfCount++ < 2) this.forceHighConfidence = true;
-        console.log(`[FAKTURAADRESS-GENERELL] Lade till ${fakturaChunks.length} chunks (score: 22000)`);
-    } else {
-        console.log(`[DEBUG-FAKTURA] ❌ INGA CHUNKS HITTADES - Fallback till hela filen`);
-        const allCompanyChunks = this.findBasfaktaBySource('basfakta_om_foretaget.json');
-        totalAdded += this.addChunks(allCompanyChunks, 18000, true);
-    }
+console.log(`[DEBUG-CHUNK] id=${c.id}, isBasfakta=${isBasfakta}, hasSource=${hasSource}, hasTitle=${hasTitle}`);
+
+return isBasfakta && hasSource && hasTitle;
+});
+
+console.log(`[DEBUG-FAKTURA] Hittade ${fakturaChunks.length} chunks`);
+
+if (fakturaChunks.length > 0) {
+totalAdded += this.addChunks(fakturaChunks, 22000, true);
+if (highConfCount++ < 2) this.forceHighConfidence = true;
+console.log(`[FAKTURAADRESS-GENERELL] Lade till ${fakturaChunks.length} chunks (score: 22000)`);
+} else {
+console.log(`[DEBUG-FAKTURA] ❌ INGA CHUNKS HITTADES - Fallback till hela filen`);
+const allCompanyChunks = this.findBasfaktaBySource('basfakta_om_foretaget.json');
+totalAdded += this.addChunks(allCompanyChunks, 18000, true);
+}
 }
 
 // 1c. HANDLEDARUTBILDNING (FAIL 33, 40)

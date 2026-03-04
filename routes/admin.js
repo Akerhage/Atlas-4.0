@@ -26,11 +26,11 @@ const isPackaged = process.env.IS_PACKAGED === 'true';
 
 // Server.js-lokala beroenden injiceras via init()
 let io, getEnvPath, getFilePaths, BLOCKED_CONFIG_KEYS,
-    recreateMailTransporter, setSetting, runDatabaseBackup, authRoutes;
+recreateMailTransporter, setSetting, runDatabaseBackup, authRoutes;
 
 router.init = function({ io: _io, getEnvPath: _gep, getFilePaths: _gfp,
-  BLOCKED_CONFIG_KEYS: _bck, recreateMailTransporter: _rmt,
-  setSetting: _ss, runDatabaseBackup: _rdb, authRoutes: _ar }) {
+BLOCKED_CONFIG_KEYS: _bck, recreateMailTransporter: _rmt,
+setSetting: _ss, runDatabaseBackup: _rdb, authRoutes: _ar }) {
 io = _io;
 getEnvPath = _gep;
 getFilePaths = _gfp;
@@ -1022,6 +1022,155 @@ db.run(`DELETE FROM rag_failures`, (err) => {
 if (err) return res.status(500).json({ error: err.message });
 res.json({ success: true });
 });
+});
+
+// =============================================================================
+// ADMIN: RAG — POÄNGSÄTTNING
+// Läser och skriver ForceAddEngine-scores i settings-tabellen.
+// =============================================================================
+
+const RAG_SCORE_DEFAULTS = {
+rag_score_a1_am:       25000,
+rag_score_fix_saknade: 20000,
+rag_score_c8_kontakt:  25000,
+rag_score_b1_policy:   50000,
+rag_score_c7_teori:    55000
+};
+
+const RAG_SCORE_KEYS = Object.keys(RAG_SCORE_DEFAULTS);
+
+// GET — Returnerar alla RAG-scores (från settings-tabellen, med default-fallback)
+router.get('/api/admin/rag-scores', authenticateToken, (req, res) => {
+const placeholders = RAG_SCORE_KEYS.map(() => '?').join(',');
+db.all(
+`SELECT key, value FROM settings WHERE key IN (${placeholders})`,
+RAG_SCORE_KEYS,
+(err, rows) => {
+if (err) return res.status(500).json({ error: err.message });
+const result = { ...RAG_SCORE_DEFAULTS };
+(rows || []).forEach(row => {
+const parsed = parseInt(row.value, 10);
+if (!isNaN(parsed)) result[row.key] = parsed;
+});
+res.json(result);
+}
+);
+});
+
+// POST — Sparar ett enskilt RAG-score i settings-tabellen
+router.post('/api/admin/rag-scores', authenticateToken, (req, res) => {
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+
+const { field, value } = req.body;
+
+if (!field || value === undefined || value === null) {
+return res.status(400).json({ error: 'field och value krävs.' });
+}
+if (!RAG_SCORE_KEYS.includes(field)) {
+return res.status(400).json({ error: `Okänt RAG-score-fält: ${field}` });
+}
+
+const numVal = parseInt(value, 10);
+if (isNaN(numVal) || numVal < 0) {
+return res.status(400).json({ error: 'value måste vara ett heltal >= 0.' });
+}
+
+db.run(
+`INSERT INTO settings (key, value) VALUES (?, ?)
+ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+[field, String(numVal)],
+function(err) {
+if (err) {
+console.error('[RAG-SCORES] Kunde inte spara:', err.message);
+return res.status(500).json({ error: 'Kunde inte spara RAG-score.' });
+}
+console.log(`⚡ [RAG-SCORES] ${field} = ${numVal}`);
+res.json({ success: true, field, value: numVal, restartRequired: true });
+}
+);
+});
+
+// =============================================================================
+// ADMIN: BOKNINGSLÄNKAR
+// Läser och skriver utils/booking-links.json.
+// legacy_engine.js läser samma fil vid uppstart via loadBookingLinks().
+// Kräver omstart av servern för att aktiveras i RAG-motorn.
+// =============================================================================
+
+const BOOKING_LINKS_PATH = isPackaged
+? path.join(process.resourcesPath, 'utils', 'booking-links.json')
+: path.join(__dirname, '..', 'utils', 'booking-links.json');
+
+const BOOKING_LINKS_DEFAULTS = {
+AM:     { type: 'info', text: 'Boka din AM-kurs via vår hemsida här',                linkText: 'här',     url: 'https://mydrivingacademy.com/two-wheels/ta-am-korkort/' },
+MC:     { type: 'info', text: 'För mer MC-information, kolla vår hemsida',            linkText: 'hemsida', url: 'https://mydrivingacademy.com/two-wheels/home/' },
+CAR:    { type: 'info', text: 'För mer information om bilkörkort, kolla vår hemsida', linkText: 'hemsida', url: 'https://mydrivingacademy.com/kom-igang/' },
+INTRO:  { type: 'book', text: 'Boka Handledarkurs/Introduktionskurs här',             linkText: 'här',     url: 'https://mydrivingacademy.com/handledarutbildning/' },
+RISK1:  { type: 'book', text: 'Boka Riskettan (Risk 1) här',                          linkText: 'här',     url: 'https://mydrivingacademy.com/riskettan/' },
+RISK2:  { type: 'book', text: 'Boka Risktvåan/Halkbana (Risk 2) här',                linkText: 'här',     url: 'https://mydrivingacademy.com/halkbana/' },
+TEORI:  { type: 'book', text: 'Plugga körkortsteori i appen Mitt Körkort här',        linkText: 'här',     url: 'https://mydrivingacademy.com/app/' },
+'B96/BE': { type: 'book', text: 'Boka Släpvagnsutbildning (B96/BE) här',             linkText: 'här',     url: 'https://mydrivingacademy.com/slapvagn/' },
+TUNG:   { type: 'book', text: 'Boka utbildning för Tung Trafik (C/CE) här',          linkText: 'här',     url: 'https://mydrivingacademy.com/tungtrafik/' },
+POLICY: { type: 'info', text: 'Läs våra köpvillkor och policy här',                   linkText: 'här',     url: 'https://mydrivingacademy.com/privacy-policy/' }
+};
+
+// GET — Returnerar alla bokningslänkar (från fil, med default-fallback)
+router.get('/api/admin/booking-links', authenticateToken, (req, res) => {
+try {
+if (fs.existsSync(BOOKING_LINKS_PATH)) {
+const data = JSON.parse(fs.readFileSync(BOOKING_LINKS_PATH, 'utf8'));
+// Slå ihop med defaults så att nya nycklar alltid finns
+res.json({ ...BOOKING_LINKS_DEFAULTS, ...data });
+} else {
+res.json(BOOKING_LINKS_DEFAULTS);
+}
+} catch (err) {
+console.error('[BOOKING-LINKS GET]', err.message);
+res.status(500).json({ error: 'Kunde inte läsa booking-links.json.' });
+}
+});
+
+// POST — Uppdaterar en enskild nyckel (t.ex. { key: 'CAR', url: 'https://...' })
+router.post('/api/admin/booking-links', authenticateToken, (req, res) => {
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+
+const { key, url } = req.body;
+
+if (!key || !url || typeof url !== 'string' || !url.startsWith('http')) {
+return res.status(400).json({ error: 'key och en giltig url (http/https) krävs.' });
+}
+
+const validKeys = Object.keys(BOOKING_LINKS_DEFAULTS);
+if (!validKeys.includes(key)) {
+return res.status(400).json({ error: `Okänd nyckel: ${key}. Giltiga: ${validKeys.join(', ')}` });
+}
+
+try {
+// Läs nuvarande fil (eller defaults om den saknas)
+let current = { ...BOOKING_LINKS_DEFAULTS };
+if (fs.existsSync(BOOKING_LINKS_PATH)) {
+try {
+current = { ...current, ...JSON.parse(fs.readFileSync(BOOKING_LINKS_PATH, 'utf8')) };
+} catch (e) {
+console.warn('[BOOKING-LINKS POST] Kunde inte parsa befintlig fil, skriver ny.');
+}
+}
+
+// Uppdatera URL för nyckeln (bevarar type/text/linkText)
+current[key] = { ...current[key], url: url.trim() };
+
+// Säkerställ att mappen finns (packad app)
+const dir = path.dirname(BOOKING_LINKS_PATH);
+if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+fs.writeFileSync(BOOKING_LINKS_PATH, JSON.stringify(current, null, 2), 'utf8');
+console.log(`🔗 [BOOKING-LINKS] ${key} → ${url.trim()}`);
+res.json({ success: true, key, url: url.trim(), restartRequired: true });
+
+} catch (err) {
+console.error('[BOOKING-LINKS POST]', err.message);
+res.status(500).json({ error: 'Kunde inte spara booking-links.json.' });
+}
 });
 
 module.exports = router;

@@ -192,6 +192,7 @@ let officeData = {};
 let chunkMap = new Map();
 let intentEngine;
 let criticalAnswers = [];
+let bookingLinks = {};
 
 // rebuildChunkMap - Index Chunks by ID
 function rebuildChunkMap() {
@@ -327,7 +328,7 @@ const UNIFIED_SYNONYMS = {
 'behöver gå': ['måste gå', 'krävs', 'genomföra', 'obligatorisk', 'behöver genomföra'],
 'obligatorisk': ['krav', 'måste', 'krävs', 'obligatoriskt moment'],
 'göra om': ['ta om', 'göra om', 'genomföra på nytt', 'underkänd'],
-'två elever': ['två elever', '2 elever', 'duo-lektion', 'duo'],
+'två elever': ['två elever', '2 elever'],
 'handledare': ['handledare', 'din handledare', 'handledaren', 'privat handledare', 'handledarskap', 'introduktionskurs'],
 'elev': ['du som ska ta körkort', 'du som elev', 'elev', 'student'],
 'privat körning': ['privat övningskörning', 'övningsköra privat', 'köra hemma'],
@@ -352,7 +353,7 @@ const UNIFIED_SYNONYMS = {
 // === LEKTIONSLÄNGDER (VIKTIGT FÖR PRISER) ===
 '80 min': ['80 min', '80 minuter', 'standardlektion', 'körlektion'],
 '40 min': ['40 min', '40 minuter', 'halv lektion'],
-'100 min': ['100 min', '100 minuter', 'dubbel lektion', 'duo'],
+'100 min': ['100 min', '100 minuter', 'dubbel lektion'],
 '3,5 timmar': ['3,5 timmar', 'tre och en halv timme', 'riskettan tid'],
 
 // === FORDON & KURSER ===
@@ -1121,8 +1122,28 @@ console.error('[FATAL] Kunde inte initiera IntentEngine:', e.message);
 console.log('\n✅ Kunskapsbas fullständigt laddad!\n');
 };
 
+// ====================================================================
+// BOOKING LINKS LOADER (Läser utils/booking-links.json vid uppstart)
+// ====================================================================
+const loadBookingLinks = () => {
+const filePath = path.join(UTILS_PATH, 'booking-links.json');
+try {
+if (fs.existsSync(filePath)) {
+bookingLinks = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+console.log(`✅ [BookingLinks] Laddade ${Object.keys(bookingLinks).length} bokningslänkar från utils/booking-links.json`);
+} else {
+console.warn('[BookingLinks] utils/booking-links.json saknas — faller tillbaka på hårdkodade defaults.');
+bookingLinks = {};
+}
+} catch (err) {
+console.error('[BookingLinks] Kunde inte läsa booking-links.json:', err.message);
+bookingLinks = {};
+}
+};
+
 // Starta initiering
 loadKnowledgeBase();
+loadBookingLinks();
 
 // ====================================================================
 // THE CORE EXECUTION ENGINE (Stateless Wrapper)
@@ -2151,19 +2172,19 @@ locked_context: session.locked_context
 
 
 // STEP 7: POST-PROCESSING (Booking Links)
-
-
-const GENERAL_FALLBACK_LINKS = {
-'AM': { type: 'info', text: 'Boka din AM-kurs via vår hemsida här', linkText: 'här', url: 'https://mydrivingacademy.com/two-wheels/ta-am-korkort/' },
-'MC': { type: 'info', text: 'För mer MC-information, kolla vår hemsida', linkText: 'hemsida', url: 'https://mydrivingacademy.com/two-wheels/home/' },
-'CAR': { type: 'info', text: 'För mer information om bilkörkort, kolla vår hemsida', linkText: 'hemsida', url: 'https://mydrivingacademy.com/kom-igang/' },
-'INTRO': { type: 'book', text: 'Boka Handledarkurs/Introduktionskurs här', linkText: 'här', url: 'https://mydrivingacademy.com/handledarutbildning/' },
-'RISK1': { type: 'book', text: 'Boka Riskettan (Risk 1) här', linkText: 'här', url: 'https://mydrivingacademy.com/riskettan/' },
-'RISK2': { type: 'book', text: 'Boka Risktvåan/Halkbana (Risk 2) här', linkText: 'här', url: 'https://mydrivingacademy.com/halkbana/' },
-'TEORI': { type: 'book', text: 'Plugga körkortsteori i appen Mitt Körkort här', linkText: 'här', url: 'https://mydrivingacademy.com/app/' },
-'B96/BE': { type: 'book', text: 'Boka Släpvagnsutbildning (B96/BE) här', linkText: 'här', url: 'https://mydrivingacademy.com/slapvagn/' },
-'TUNG': { type: 'book', text: 'Boka utbildning för Tung Trafik (C/CE) här', linkText: 'här', url: 'https://mydrivingacademy.com/tungtrafik/' },
-'POLICY': { type: 'info', text: 'Läs våra köpvillkor och policy här', linkText: 'här', url: 'https://mydrivingacademy.com/privacy-policy/' }
+// Länkarna läses in från utils/booking-links.json vid uppstart via loadBookingLinks().
+// Faller tillbaka på tomt objekt om filen saknas (ingen krasch).
+const GENERAL_FALLBACK_LINKS = Object.keys(bookingLinks).length > 0 ? bookingLinks : {
+'AM':     { type: 'info', text: 'Boka din AM-kurs via vår hemsida här',               linkText: 'här',     url: 'https://mydrivingacademy.com/two-wheels/ta-am-korkort/' },
+'MC':     { type: 'info', text: 'För mer MC-information, kolla vår hemsida',           linkText: 'hemsida', url: 'https://mydrivingacademy.com/two-wheels/home/' },
+'CAR':    { type: 'info', text: 'För mer information om bilkörkort, kolla vår hemsida',linkText: 'hemsida', url: 'https://mydrivingacademy.com/kom-igang/' },
+'INTRO':  { type: 'book', text: 'Boka Handledarkurs/Introduktionskurs här',            linkText: 'här',     url: 'https://mydrivingacademy.com/handledarutbildning/' },
+'RISK1':  { type: 'book', text: 'Boka Riskettan (Risk 1) här',                         linkText: 'här',     url: 'https://mydrivingacademy.com/riskettan/' },
+'RISK2':  { type: 'book', text: 'Boka Risktvåan/Halkbana (Risk 2) här',               linkText: 'här',     url: 'https://mydrivingacademy.com/halkbana/' },
+'TEORI':  { type: 'book', text: 'Plugga körkortsteori i appen Mitt Körkort här',       linkText: 'här',     url: 'https://mydrivingacademy.com/app/' },
+'B96/BE': { type: 'book', text: 'Boka Släpvagnsutbildning (B96/BE) här',              linkText: 'här',     url: 'https://mydrivingacademy.com/slapvagn/' },
+'TUNG':   { type: 'book', text: 'Boka utbildning för Tung Trafik (C/CE) här',         linkText: 'här',     url: 'https://mydrivingacademy.com/tungtrafik/' },
+'POLICY': { type: 'info', text: 'Läs våra köpvillkor och policy här',                  linkText: 'här',     url: 'https://mydrivingacademy.com/privacy-policy/' }
 };
 
 let bookingLinkAdded = false;
