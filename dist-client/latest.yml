@@ -1,8 +1,0 @@
-version: 3.8.0
-files:
-  - url: Atlas-Klient-Setup-3.8.0.exe
-    sha512: 3R7UI/57jgk5NYm9kUOsQ8BSuRnese2IHRaxM25wt9KykvMD/ELKFZ+s7oW7rVv01t4U24xOx31kyuNBz/CwOw==
-    size: 131506554
-path: Atlas-Klient-Setup-3.8.0.exe
-sha512: 3R7UI/57jgk5NYm9kUOsQ8BSuRnese2IHRaxM25wt9KykvMD/ELKFZ+s7oW7rVv01t4U24xOx31kyuNBz/CwOw==
-releaseDate: '2026-03-05T06:13:42.757Z'

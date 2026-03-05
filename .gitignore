@@ -12,6 +12,7 @@ package-lock.json
 
 # ========= Build Output =========
 dist/
+dist-client/
 win-unpacked/
 
 # ========= Databaser & System =========
