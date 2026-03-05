@@ -91,7 +91,9 @@ let selectedBulkTickets = new Set();
 // Hämtar alla kontor från servern och lagrar dem i officeData för snabb uppslag
 async function preloadOffices() {
 try {
-const res = await fetch(`${SERVER_URL}/api/public/offices`);
+const res = await fetch(`${SERVER_URL}/api/public/offices`, {
+headers: { 'ngrok-skip-browser-warning': 'true' }
+});
 officeData = await res.json();
 console.log(`✅ Laddat ${officeData.length} kontor från SQL.`);
 } catch (err) { console.error("Kunde inte förladda kontor:", err); }
@@ -103,7 +105,7 @@ console.log('📋 officeData:', JSON.stringify(officeData.map(o => ({ tag: o.rou
 // Hämtar alla användare från servern och lagrar dem i usersCache för agentfärger och namnuppslag
 async function preloadUsers() {
 try {
-const res = await fetch(`${SERVER_URL}/api/auth/users`, { headers: fetchHeaders });
+const res = await fetch(`${SERVER_URL}/api/auth/users`, { headers: { ...fetchHeaders, 'ngrok-skip-browser-warning': 'true' } });
 if (res.ok) usersCache = await res.json();
 } catch (_) {}
 }
@@ -161,10 +163,10 @@ const NOTIFICATION_SOUND = "assets/js/pling.mp3";
 // DIN NGROK-ADRESS (Uppdaterad för webb-åtkomst)
 const NGROK_HOST = window.location.origin; // Dynamisk — härleds från aktuell URL
 
-// Välj URL: Localhost för Electron, Ngrok för Webb/Mobil
-let SERVER_URL = (isElectron || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+// Välj URL: Tom initialt för Electron (fylls i av getAppInfo), annars härleds från aktuell URL
+let SERVER_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && !isElectron
 ? 'http://localhost:3001' 
-: NGROK_HOST;
+: (isElectron ? '' : NGROK_HOST);
 
 console.log(`🌍 Miljö: ${isElectron ? 'ELECTRON' : 'WEBB'}`);
 console.log(`🔗 Server URL: ${SERVER_URL}`);
@@ -1147,21 +1149,8 @@ newItem.addEventListener('click', () => switchView(newItem.dataset.view));
 DOM.menuItems = document.querySelectorAll('.menu-item'); 
 }
 
-// 4. Autentisering och system-start
-checkAuth();
-await preloadOffices();
-await preloadUsers();
-initHeroPlaceholders();
-
-// Socket-start
-if (typeof io === 'undefined') {
-loadSocketIoScriptWithRetry();
-} else {
-initializeSocket();
-}
-
 // =====================================
-// 2. App Info & API Key (SÄKRAD)
+// 4. App Info & API Key (SÄKRAD - körs FÖRE nätverksanrop)
 // =====================================
 if (window.electronAPI) {
 const info = await window.electronAPI.getAppInfo();
@@ -1176,6 +1165,19 @@ const sVer = info.SERVER_VERSION && info.SERVER_VERSION !== 'Väntar...'
 : 'Väntar...';
 
 if (DOM.serverVersion) DOM.serverVersion.textContent = sVer;
+}
+
+// 5. Autentisering och system-start (SERVER_URL är nu korrekt satt)
+checkAuth();
+await preloadOffices();
+await preloadUsers();
+initHeroPlaceholders();
+
+// Socket-start
+if (typeof io === 'undefined') {
+loadSocketIoScriptWithRetry();
+} else {
+initializeSocket();
 }
 
 // =====================================
