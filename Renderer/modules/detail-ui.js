@@ -11,6 +11,31 @@
 //   formatName, resolveTicketTitle — renderer.js / chat-engine.js
 // ============================================
 
+// ⚠️  ╔══════════════════════════════════════════════════════════════╗
+// ⚠️  ║     KRITISK VARNING — DETALJVYNS HEADER OCH FÄRGER          ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║                                                              ║
+// ⚠️  ║  renderDetailHeader(item, styles, extraActions) är          ║
+// ⚠️  ║  konsument av färgobjektet från getAgentStyles() i          ║
+// ⚠️  ║  styling-utils.js. Den skapar INGA egna hex-värden.         ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  FÄRGNYCKLAR SOM ANVÄNDS HÄR (från styles-objektet):        ║
+// ⚠️  ║   styles.main   → header-gradient, border, subject-text,    ║
+// ⚠️  ║                   pill-text/border, kundhistorik-knapp       ║
+// ⚠️  ║   styles.bg     → header-bakgrundsgradient (8% opacity)     ║
+// ⚠️  ║   styles.border → pill-kantlinje (30% opacity)              ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  ❌ ÄNDRA INTE: styles.bg || styles.main + '1a' — fallback  ║
+// ⚠️  ║     om bg saknas (äldre data utan bg-nyckel).               ║
+// ⚠️  ║  ❌ ÄNDRA INTE: '!important' på border-bottom och           ║
+// ⚠️  ║     detail-subject color — CSS-specificiteten kräver det.   ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  getVehicleIcon(type): Matchar fordonstyp mot UI_ICONS-     ║
+// ⚠️  ║  biblioteket. Strängarna (BIL/MC/AM/LASTBIL/SLÄP) matchar  ║
+// ⚠️  ║  exakt vad DB och locked_context sparar — ändra inte        ║
+// ⚠️  ║  jämförelsesträngarna utan att verifiera mot DB-data.       ║
+// ⚠️  ╚══════════════════════════════════════════════════════════════╝
+
 // ===================================================
 // 4. STÄDAR VYERNA OCH RENDERAR OM
 // ===================================================

@@ -15,6 +15,34 @@
 //   switchView                                 — renderer.js
 // ============================================
 
+// ⚠️  ╔══════════════════════════════════════════════════════════════╗
+// ⚠️  ║     VARNING — DIREKTANVÄNDNING AV agent_color               ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║                                                              ║
+// ⚠️  ║  Denna fil läser agent_color DIREKT från usersCache[] och   ║
+// ⚠️  ║  currentUser — den använder INTE getAgentStyles() från      ║
+// ⚠️  ║  styling-utils.js. Det är ett AVSIKTLIGT undantag för       ║
+// ⚠️  ║  profilinställningar och assign-modalen.                    ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  STÄLLEN DÄR agent_color ANVÄNDS DIREKT (ÄNDRA INTE):       ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  rad ~173  assign-modal: agentlistan, border-left-färg      ║
+// ⚠️  ║  rad ~265  profilmodal: initialColor för färgpickern        ║
+// ⚠️  ║  rad ~331  profilmodal: inloggad agents egna accentknappar  ║
+// ⚠️  ║  rad ~424  profilmodal: sparar ny agent_color till server   ║
+// ⚠️  ║  rad ~438  profilmodal: sätter --accent-primary efter spara ║
+// ⚠️  ║  rad ~446  profilmodal: synkar --agent-color på ärendekort  ║
+// ⚠️  ║  rad ~726  internal assign: agentlistan, border+data-color  ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  ❌ ÄNDRA INTE: --accent-primary setProperty (rad 438)      ║
+// ⚠️  ║     — utan den byter inte accentfärgen globalt vid spara.   ║
+// ⚠️  ║  ❌ ÄNDRA INTE: fallback '#0071e3' i agent_color-uttrycken  ║
+// ⚠️  ║     — den triggas när agent saknar sparad färg.             ║
+// ⚠️  ║  ❌ ÄNDRA INTE: '#4cd964'-fallbacken på rad ~331            ║
+// ⚠️  ║     — den är avsiktligt grön (aktiv-signal) för inloggad   ║
+// ⚠️  ║     agent utan egen sparad färg.                            ║
+// ⚠️  ╚══════════════════════════════════════════════════════════════╝
+
 // ============================================================================
 // 🎨 ATLAS CONFIRM - Snygg Ja/Nej-ruta (SÄKRAD)
 // ============================================================================

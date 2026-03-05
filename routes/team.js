@@ -7,6 +7,63 @@
 //             + teamRoutes.init({ io })
 // SENAST STÄDAD: 2026-02-27
 // ============================================
+
+// ⚠️  ╔══════════════════════════════════════════════════════════════╗
+// ⚠️  ║         KRITISK VARNING — LÄS INNAN DU ÄNDRAR NÅGOT         ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║                                                              ║
+// ⚠️  ║  ROUTING, FÄRGER OCH INKORG-LOGIKEN I DENNA FIL HAR TAGIT   ║
+// ⚠️  ║  EXTREMT LÅNG TID ATT FELSÖKA OCH FUNGERAR NU KORREKT.      ║
+// ⚠️  ║  GÖR INGA ÄNDRINGAR UTAN ATT FÖRSTÅ HELA SYSTEMET.          ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  SÅ HÄR FUNGERAR INKORG-LOGIKEN (FÖRÄNDRA INTE):            ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  1. LIVE-CHATTAR & INKOMNA MAIL (centralsupporten):         ║
+// ⚠️  ║     → office IS NULL eller office = 'admin'                 ║
+// ⚠️  ║     → owner IS NULL (ingen agent har tagit ärendet)         ║
+// ⚠️  ║     → Kunden valde "Centralsupporten" i chatten             ║
+// ⚠️  ║     → SKALL vara NULL — det är DESIGN, inte ett fel.        ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  2. PLOCKADE ÄRENDEN:                                       ║
+// ⚠️  ║     → office IS NOT NULL (kunden valde ett kontor) ELLER    ║
+// ⚠️  ║     → owner IS NOT NULL (en agent har tagit ärendet)        ║
+// ⚠️  ║     → Båda villkoren i OR är nödvändiga — ta inte bort      ║
+// ⚠️  ║       något av dem.                                          ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  3. AGENT-FLÖDET (ej admin/support):                        ║
+// ⚠️  ║     → Använder getAgentTickets(username) från db.js         ║
+// ⚠️  ║     → Matchar på agentens routing_tag — rör inte den        ║
+// ⚠️  ║       mappningen utan att förstå db.js fullt ut.            ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  ROUTING_TAG & OFFICE_COLOR — FÖRÄNDRA INTE:                ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  • office_color hämtas via LEFT JOIN offices ON             ║
+// ⚠️  ║    s.office = o.routing_tag                                 ║
+// ⚠️  ║  • routing_tag är PRIMÄRNYCKELN för matchning mot kontor.   ║
+// ⚠️  ║  • Om du ändrar kolumnnamn, alias eller JOIN-villkor         ║
+// ⚠️  ║    slutar färgkodning och kontorsmatchning att fungera       ║
+// ⚠️  ║    i HELA systemet — inte bara här.                         ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  INNAN DU ÄNDRAR NÅGOT HÄR — KONTROLLERA:                  ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  □ Har du läst db_oracle_master.md?                         ║
+// ⚠️  ║    → Finns i projektmappen. Visar hela DB-schemat,          ║
+// ⚠️  ║      routing-taggar, agentmatris och känd data.             ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  □ Förstår du skillnaden mellan office (routing_tag) och    ║
+// ⚠️  ║    owner (agentnamn)?                                        ║
+// ⚠️  ║    → office = vilket kontor ärendet tillhör                 ║
+// ⚠️  ║    → owner  = vilken agent som tagit ärendet                ║
+// ⚠️  ║    → De är oberoende av varandra.                           ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  □ Har du testat med atlas-master-test.js efteråt?          ║
+// ⚠️  ║    → Kör: ATLAS_PASSWORD=<lösen> node atlas-master-test.js  ║
+// ⚠️  ║    → Alla 7 steg skall visa ✅ PASS.                        ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╚══════════════════════════════════════════════════════════════╝
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
@@ -144,7 +201,13 @@ router.get('/team/inbox', authenticateToken, async (req, res) => {
 try {
 if (req.user.role === 'admin' || req.user.role === 'support') {
 
-// Live-chattar: ALLA oplockade customer-chattar oavsett kontor
+// ⚠️ LOCK [1/3] — LIVE-CHATTAR (Centralsupporten, oplockade)
+// Visar customer-chattar där kunden INTE valt ett specifikt kontor.
+// office IS NULL  → kunden valde "Centralsupporten". KORREKT DESIGN.
+// office='admin'  → legacy-värde, samma sak.
+// owner IS NULL   → ingen agent har tagit ärendet ännu.
+// ❌ ÄNDRA INTE: office-filtret. NULL är INTE ett fel — det är Centralsupporten.
+// ❌ ÄNDRA INTE: LEFT JOIN offices ON s.office = o.routing_tag (styr office_color).
 const sqlLiveChats = `
 SELECT s.conversation_id, s.session_type, s.human_mode, s.owner, s.sender,
 s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color,
@@ -159,7 +222,11 @@ AND (s.office IS NULL OR s.office = 'admin')
 ORDER BY s.updated_at ASC
 `;
 
-// Inkomna mail: ALLA oplockade mail oavsett kontor
+// ⚠️ LOCK [2/3] — INKOMNA MAIL (Centralsupporten, oplockade)
+// Samma logik som Live-chattar ovan men för session_type = 'message'.
+// Formulärärenden och IMAP-mail utan kontorstillhörighet hamnar här.
+// ❌ ÄNDRA INTE: office-filtret eller session_type-villkoret.
+// ❌ ÄNDRA INTE: LEFT JOIN — krävs för office_color även om office är NULL.
 const sqlMail = `
 SELECT s.conversation_id, s.session_type, s.human_mode, s.owner, s.sender,
 s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color,
@@ -174,7 +241,13 @@ AND (s.office IS NULL OR s.office = 'admin')
 ORDER BY s.updated_at ASC
 `;
 
-// Plockade: ALLA ärenden som har owner ELLER kontor satta (ej internal, ej egna)
+// ⚠️ LOCK [3/3] — PLOCKADE ÄRENDEN
+// Visar ärenden som har ett kontor ELLER en ägare — dvs hanteras aktivt.
+// (s.owner IS NOT NULL OR s.office IS NOT NULL) — BÅDA villkoren krävs i OR:
+//   owner IS NOT NULL  → en agent har tagit ärendet (oavsett kontor)
+//   office IS NOT NULL → kunden valde ett kontor (kanske ej tagit av agent ännu)
+// ❌ ÄNDRA INTE: Ta inte bort något av OR-villkoren — båda fallen ska täckas.
+// ❌ ÄNDRA INTE: owner != ? exkluderar admin:s egna ärenden från "Plockade"-listan.
 const sqlClaimed = `
 SELECT s.conversation_id, s.session_type, s.human_mode, s.owner, s.sender,
 s.updated_at, s.is_archived, s.office AS routing_tag, o.office_color,

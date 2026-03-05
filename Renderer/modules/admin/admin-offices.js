@@ -15,6 +15,61 @@
 //   window.saveOfficeSection                       — definieras inuti openAdminOfficeDetail
 // ============================================
 
+// ⚠️  ╔══════════════════════════════════════════════════════════════╗
+// ⚠️  ║     KRITISK VARNING — KONTORSFÄRG OCH LIVE-UPPDATERING      ║
+// ⚠️  ║     LÄS DETTA INNAN DU ÄNDRAR NÅGOT I DENNA FIL             ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║                                                              ║
+// ⚠️  ║  FÄRGFLÖDET FÖR KONTOR — steg för steg:                    ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  1. office_color läses från /api/knowledge/:tag             ║
+// ⚠️  ║     (JSON-kunskapsfilen) → sparas i officeData[]            ║
+// ⚠️  ║  2. Renderas som `oc` på VARJE element i kontorlistan       ║
+// ⚠️  ║     och detaljvyn (header, pills, borders, avatarer,        ║
+// ⚠️  ║     section-titlar, ärendekort).                            ║
+// ⚠️  ║  3. Färgpickern (inp-office-color) kallar                   ║
+// ⚠️  ║     _updateOfficeLiveColor() oninput (vid varje drag).      ║
+// ⚠️  ║  4. Auto-spara sker med 700ms debounce via                  ║
+// ⚠️  ║     POST /api/admin/update-office-color.                    ║
+// ⚠️  ║  5. Efter spara: preloadOffices() → officeData[] synkas     ║
+// ⚠️  ║     → renderMyTickets() + renderInbox() + renderArchive()   ║
+// ⚠️  ║     triggas så att ny färg syns i alla aktiva vyer.         ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  CSS-VARIABLER (ÄNDRA INTE NAMNEN):                        ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  --agent-color  sätts på .admin-mini-card (kontorslistan)   ║
+// ⚠️  ║  --atp-color    sätts på .admin-ticket-preview (korten)     ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  Dessa CSS-variabler används av stylesheet:n för hover-     ║
+// ⚠️  ║  effekter och borders. Byt inte namn.                       ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  _updateOfficeLiveColor() — KOMPLETT ELEMENTLISTA           ║
+// ⚠️  ║  (ÄNDRA INTE UTAN ATT TESTA VARJE ELEMENT VISUELLT):       ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║   #office-detail-header     gradient + border               ║
+// ⚠️  ║   #office-avatar-circle     bakgrundsfärg                   ║
+// ⚠️  ║   .office-pill-accent       KONTOR-pillens border+text      ║
+// ⚠️  ║   #office-id-pill           ID-pillens border+text (66%)    ║
+// ⚠️  ║   .notes-trigger-btn        anteckningsikonens textfärg     ║
+// ⚠️  ║   .admin-mini-card.active   --agent-color + bubble          ║
+// ⚠️  ║   .admin-ticket-preview     --atp-color                     ║
+// ⚠️  ║   glass-panel borders       box-contact/prices/booking/     ║
+// ⚠️  ║                             box-desc/box-tickets            ║
+// ⚠️  ║   .glass-panel h4           section-titlar                  ║
+// ⚠️  ║   .detail-subject           kontorsnamnet (h2, !important)  ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  Om ett element tas bort slutar det att uppdateras live —   ║
+// ⚠️  ║  ingen krasch, men visuellt fel som är svårt att spåra.     ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  saveOfficeSection() — SPARAR ALLTID HELA JSON-OBJEKTET:   ║
+// ⚠️  ║  GET → patcha fält → PUT. Prisradernas keywords läses från  ║
+// ⚠️  ║  data-keywords i DOM — ändra inte det utan att förstå       ║
+// ⚠️  ║  RAG-indexeringen i server.js.                              ║
+// ⚠️  ╚══════════════════════════════════════════════════════════════╝
+
 // ===================================================
 // ADMIN - RENDER OFFICE LIST
 // ===================================================
@@ -314,8 +369,13 @@ window.cancelEdit = (boxId) => {
 openAdminOfficeDetail(tag); // Ladda om vyn
 };
 
-// Live-uppdatering av kontorets accentfärg — kallas från color picker oninput
-// Sparas automatiskt med debounce, ingen spara-knapp behövs för färgändring
+// ⚠️ LOCK — _updateOfficeLiveColor(hex): Live DOM-synk vid färgbyte.
+// Uppdaterar varje element med kontorets färg synkront (ingen fetch).
+// Se elementlistan i filhuvudet ovan — listan är komplett och avsiktlig.
+// ❌ ÄNDRA INTE: debounce-timer (700ms) — kortare ger för många API-anrop.
+// ❌ ÄNDRA INTE: preloadOffices() + renderMyTickets() + renderInbox() +
+//    renderArchive() efter spara — utan dem syns inte ny färg i korten.
+// ❌ TA INTE BORT element ur listan — tyst visuellt fel, ingen krasch.
 window._updateOfficeLiveColor = (hex) => {
 // Hex-display bredvid pickern
 const hexEl = document.getElementById('inp-office-color-hex');
@@ -398,9 +458,12 @@ console.error('[OfficeColor] Auto-spara misslyckades:', e);
 };
 
 
-// =============================================================================
-// SPARA SEKTION NÄR DU REDIGERAR ETT KONTORS INFO
-// =============================================================================
+// ⚠️ LOCK — saveOfficeSection(tag): Sparar HELA JSON-objektet (GET → patcha → PUT).
+// ❌ ÄNDRA INTE: data-keywords-inläsningen på prisrader — keywords krävs
+//    för att RAG-sökning ska fungera efter en prisändring. Utan keywords
+//    tappar AI:n förmågan att matcha frågor mot rätt tjänst.
+// ❌ ÄNDRA INTE: data-idx vs data-new-service-logiken — befintliga rader
+//    bevarar keywords från filen, nya rader läser från data-keywords i DOM.
 window.saveOfficeSection = async (tag) => {
 try {
 const res = await fetch(`${SERVER_URL}/api/knowledge/${tag}`, { headers: fetchHeaders });

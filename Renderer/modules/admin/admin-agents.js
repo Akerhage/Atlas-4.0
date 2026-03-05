@@ -15,6 +15,45 @@
 //   usersCache[], currentUser             — renderer.js globals
 // ============================================
 
+// ⚠️  ╔══════════════════════════════════════════════════════════════╗
+// ⚠️  ║     KRITISK VARNING — AGENTFÄRG OCH LIVE-UPPDATERING        ║
+// ⚠️  ║     LÄS DETTA INNAN DU ÄNDRAR NÅGOT I DENNA FIL             ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║                                                              ║
+// ⚠️  ║  updateAgentColor(username, color) hanterar TVÅ separata    ║
+// ⚠️  ║  fall som BÅDA måste fungera:                               ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  FALL 1 — Annan agents färg ändras (admin redigerar):       ║
+// ⚠️  ║    • DOM-uppdatering i admin-detaljvyn (header, avatar,     ║
+// ⚠️  ║      pills, ärendekort via --atp-color)                     ║
+// ⚠️  ║    • usersCache[] synkas direkt (cached.agent_color)        ║
+// ⚠️  ║    • renderAdminUserList() + renderMyTickets() +            ║
+// ⚠️  ║      renderInbox() triggas                                  ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  FALL 2 — Inloggad agent ändrar sin EGEN färg:              ║
+// ⚠️  ║    • CSS-variabeln --accent-primary sätts globalt           ║
+// ⚠️  ║      (styr ALL accentfärg i hela appen)                     ║
+// ⚠️  ║    • currentUser.agent_color uppdateras + localStorage      ║
+// ⚠️  ║    • Sidebar-avatarens ring och ikon uppdateras             ║
+// ⚠️  ║    • Kundkortslistan + kunddetaljvyn + customer-reader-     ║
+// ⚠️  ║      modal synkas (om öppen)                                ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  ❌ ÄNDRA INTE: if (currentUser && username === currentUser  ║
+// ⚠️  ║     .username)-blocken — de är SEPARATA och båda krävs.    ║
+// ⚠️  ║  ❌ ÄNDRA INTE: --accent-primary setProperty — tas den bort ║
+// ⚠️  ║     slutar knappar, highlights och accenter att byta färg.  ║
+// ⚠️  ║  ❌ ÄNDRA INTE: localStorage.setItem — tas den bort tappar  ║
+// ⚠️  ║     agenten sin färg vid nästa sidladdning.                 ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  CSS-VARIABLER SOM ANVÄNDS (ÄNDRA INTE NAMNEN):            ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  --accent-primary  global accentfärg (sätts på :root)       ║
+// ⚠️  ║  --agent-color     ärendekort i kundlistan                  ║
+// ⚠️  ║  --atp-color       .admin-ticket-preview-korten             ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╚══════════════════════════════════════════════════════════════╝
+
 // =============================================================================
 // NY FUNKTION: Lås upp specifik sektion i Kontorsvyn
 // =============================================================================
@@ -151,9 +190,13 @@ const res = await fetch(`${SERVER_URL}/api/admin/update-role-by-username`, { met
 if (res.ok) showToast(`Rättigheter uppdaterade för @${username}`);
 };
 
-// =============================================================================
-// UI: UPPDATERA FÄRGER PÅ AGENTER
-// =============================================================================
+// ⚠️ LOCK — updateAgentColor(username, color)
+// Hanterar BÅDE andras färger (admin) och inloggad agents egna färg.
+// Se filhuvudet ovan för fullständig beskrivning av de två fallen.
+// ❌ ÄNDRA INTE: --accent-primary setProperty (global accentfärg).
+// ❌ ÄNDRA INTE: localStorage.setItem (bevarar färg över sidladdningar).
+// ❌ ÄNDRA INTE: de två separata if(currentUser && username===...)-blocken.
+// ❌ ÄNDRA INTE: cached.agent_color = color (synkar usersCache[]-cachen).
 window.updateAgentColor = async (username, color) => {
 const res = await fetch(`${SERVER_URL}/api/admin/update-agent-color`, { 
 method: 'POST', 
