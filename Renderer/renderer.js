@@ -163,10 +163,11 @@ const NOTIFICATION_SOUND = "assets/js/pling.mp3";
 // DIN NGROK-ADRESS (Uppdaterad för webb-åtkomst)
 const NGROK_HOST = window.location.origin; // Dynamisk — härleds från aktuell URL
 
-// Välj URL: Tom initialt för Electron (fylls i av getAppInfo), annars härleds från aktuell URL
-let SERVER_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && !isElectron
-? 'http://localhost:3001' 
-: (isElectron ? '' : NGROK_HOST);
+// Välj URL: Localhost för Electron/dev, origin för webb via ngrok
+// För klient-EXE skriver getAppInfo() över detta med config.SERVER_URL
+let SERVER_URL = (isElectron || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+? 'http://localhost:3001'
+: NGROK_HOST;
 
 console.log(`🌍 Miljö: ${isElectron ? 'ELECTRON' : 'WEBB'}`);
 console.log(`🔗 Server URL: ${SERVER_URL}`);

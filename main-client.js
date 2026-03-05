@@ -164,7 +164,10 @@ ipcMain.handle('get-app-info', async () => {
         APP_NAME: config.APP_NAME,
         ATLAS_VERSION: config.VERSION || '3.14',
         SERVER_VERSION: 'Extern server (Ngrok)',
-        SERVER_URL: config.SERVER_URL || null
+        SERVER_URL: config.SERVER_URL || (() => {
+            console.error('❌ KRITISKT: SERVER_URL saknas i config.json — klienten vet inte var servern är!');
+            return null;
+        })()
     };
 });
 
