@@ -155,6 +155,7 @@ WHERE s.human_mode = 1
 AND (s.is_archived IS NULL OR s.is_archived = 0)
 AND s.session_type = 'customer'
 AND s.owner IS NULL
+AND (s.office IS NULL OR s.office = 'admin')
 ORDER BY s.updated_at ASC
 `;
 
@@ -169,6 +170,7 @@ WHERE s.human_mode = 1
 AND (s.is_archived IS NULL OR s.is_archived = 0)
 AND s.session_type = 'message'
 AND s.owner IS NULL
+AND (s.office IS NULL OR s.office = 'admin')
 ORDER BY s.updated_at ASC
 `;
 

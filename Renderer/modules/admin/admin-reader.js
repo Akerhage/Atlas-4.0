@@ -63,11 +63,9 @@ if (!t) return;
 const modal = document.getElementById('atlas-reader-modal');
 if (!modal) return;
 
-// 2. BRANDING: Agentens egen färg — med fallback till overrideTag/routing_tag
-const agentColor = (typeof currentUser !== 'undefined' && currentUser.agent_color)
-  ? currentUser.agent_color : null;
+// 2. BRANDING: Ärendets kontorsfärg via routing_tag/owner — aldrig agentens hex-färg
 const brandingTag = window._currentAdminOverrideTag || t.routing_tag || t.owner;
-const rStyles = agentColor ? getAgentStyles(agentColor) : getAgentStyles(brandingTag);
+const rStyles = getAgentStyles(brandingTag);
 
 const readerTitle = resolveTicketTitle(t);
 const readerSubtitle = resolveLabel(t.routing_tag || t.owner);

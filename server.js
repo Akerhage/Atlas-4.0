@@ -298,9 +298,9 @@ const matchedOffice = allOffices.find(o =>
 o.city.toLowerCase() === searchCity.toLowerCase() && 
 (o.area || "").toLowerCase() === searchArea.toLowerCase()
 );
-routingTag = matchedOffice ? matchedOffice.routing_tag : 'admin';
+routingTag = matchedOffice ? matchedOffice.routing_tag : null; // Ingen match = generell inkorg
 } else if (!routingTag) {
-routingTag = 'admin'; // Total fallback till centralsupport-taggen
+routingTag = null; // Ingen office = generell inkorg, hamnar som oplockat
 }
 
 // VIKTIGT: Vi sätter owner till NULL här för att det ska landa i Inkorgen som "Oplockat"
