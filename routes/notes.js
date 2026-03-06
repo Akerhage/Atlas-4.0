@@ -33,7 +33,7 @@ router.put('/notes/:id', authenticateToken, async (req, res) => {
 try {
 const note = await getTicketNoteById(req.params.id);
 if (!note) return res.status(404).json({ error: 'Note not found' });
-if (note.agent_name !== req.user.username && req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+if (note.agent_name !== req.user.username && req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 
 await updateTicketNote(req.params.id, req.body.content);
 res.json({ success: true });
@@ -44,7 +44,7 @@ router.delete('/notes/:id', authenticateToken, async (req, res) => {
 try {
 const note = await getTicketNoteById(req.params.id);
 if (!note) return res.status(404).json({ error: 'Note not found' });
-if (note.agent_name !== req.user.username && req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+if (note.agent_name !== req.user.username && req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 
 await deleteTicketNote(req.params.id);
 res.json({ success: true });

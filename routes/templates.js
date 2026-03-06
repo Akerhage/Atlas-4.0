@@ -41,7 +41,6 @@ res.status(500).json({ error: "Database error" });
 // ENDPOINT: /api/templates/save (SPARA/UPPDATERA MALL VIA WEBB)
 // -------------------------------------------------------------------------
 router.post('/templates/save', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { id, title, content, group_name } = req.body;
 const sql = `
 INSERT INTO templates (id, title, content, group_name)
@@ -68,7 +67,6 @@ res.json({ status: 'success' });
 
 // POST /api/templates/delete - Alternativ raderingsväg för frontend-kompatibilitet
 router.post('/templates/delete', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { id } = req.body;
 if (!id) return res.status(400).json({ error: "id saknas" });
 
@@ -83,7 +81,6 @@ res.json({ status: 'success' });
 // ENDPOINT: /api/templates/delete/:id (RADERA MALL VIA WEBB)
 // -------------------------------------------------------------------------
 router.delete('/templates/delete/:id', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { id } = req.params;
 if (!id) return res.status(400).json({ error: "id saknas" });
 

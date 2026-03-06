@@ -17,7 +17,7 @@ if (!currentUser) return;
 const inboxTab = document.querySelector('li[data-view="inbox"]');
 const adminTab = document.getElementById('menu-admin');
 
-const isSupport = currentUser.role === 'support' || currentUser.role === 'admin';
+const isSupport = currentUser.role === 'admin';
 
 // Måste använda setProperty med 'important' — CSS .menu-item{display:flex!important} vinner annars
 if (inboxTab) inboxTab.style.setProperty('display', isSupport ? 'flex' : 'none', 'important');
@@ -119,7 +119,7 @@ if (currentUser) window.currentUser = currentUser;
 function isSupportAgent() {
 // Atlas: Vi litar på rollen som hämtats från databasen vid inloggning.
 // Vi kollar efter både 'admin' och 'support' för att vara framtidssäkrade.
-return currentUser && (currentUser.role === 'admin' || currentUser.role === 'support');
+return currentUser && currentUser.role === 'admin';
 }
 
 // 🛑 DEBUG (Uppdaterad för att visa både namn och roll)

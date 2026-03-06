@@ -72,7 +72,7 @@ return res.status(500).json({ error: "Databasfel vid hämtning av kontor" });
 
 // 2. Uppdatera data (Totalbesiktigad - Idiotsäker & RAG-synkad)
 router.put('/knowledge/:routingTag', authenticateToken, async (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') {
+if (req.user.role !== 'admin') {
 return res.status(403).json({ error: "Access denied" });
 }
 

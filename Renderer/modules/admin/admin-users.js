@@ -24,7 +24,7 @@ const users = await res.json();
 users.sort((a, b) => (a.display_name || a.username).localeCompare(b.display_name || b.username, 'sv'));
 listContainer.innerHTML = users.map(u => {
 
-const isAdmin = (u.role === 'support' || u.role === 'admin');
+const isAdmin = (u.role === 'admin');
 const agentColor = u.agent_color || '#0071e3';
 const displayName = u.display_name || formatName(u.username);
 
@@ -87,13 +87,19 @@ fetch(`${SERVER_URL}/api/admin/agent-tickets/${username}`, { headers: fetchHeade
 const users = await userRes.json();
 const offices = await officesRes.json();
 const stats = await statsRes.json();
-const tickets = await ticketsRes.json();
+const ticketsRaw = await ticketsRes.json();
+
+// Guard: om endpointen returnerar 403/fel-objekt → använd tom array
+const tickets = Array.isArray(ticketsRaw) ? ticketsRaw : [];
+
 const u = users.find(user => user.username === username);
 
 // Sparas för Ticket Reader-modalen (alla tickets — listan nedanför)
 currentTicketList = tickets;
-// Endast agentens egna ärenden — för stat-kortets ärendebläddare
-window._agentOwnerTickets = tickets.filter(t => t.owner === username);
+// Tilldelade ärenden (owner = username) — för ärendebläddaren i stat-kortet
+window._agentOwnerTickets = tickets.filter(t => t.is_assigned === 1 || t.owner === username);
+// Kontors-ärenden via routing_tag (ej direkt tilldelade)
+window._agentRoutingTickets = tickets.filter(t => t.is_assigned === 0 && t.owner !== username);
 const styles = getAgentStyles(username);
 const readOnly = !isSupportAgent(); // Agent ser i läsläge
 
@@ -169,14 +175,18 @@ ${actionsHTML}
 
 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
 <div class="admin-stat-card"
-${window._agentOwnerTickets?.length > 0 ? `onclick="(function(){window._savedTicketList=currentTicketList;currentTicketList=window._agentOwnerTickets||[];openTicketReader(0,'${username}');})()" title="Öppna ärendebläddaren — ${u.display_name || u.username}s egna ärenden"` : ''}
-style="${window._agentOwnerTickets?.length > 0 ? 'cursor:pointer;' : ''}"
-onmouseover="${window._agentOwnerTickets?.length > 0 ? `this.style.borderColor='${styles.main}66'; this.style.background='${styles.main}08'` : ''}"
-onmouseout="${window._agentOwnerTickets?.length > 0 ? `this.style.borderColor=''; this.style.background=''` : ''}">
-<div style="font-size:38px; font-weight:800; color:${styles.main}; line-height:1;">${window._agentOwnerTickets?.length || 0}</div>
+${tickets.length > 0 ? `onclick="(function(){window._savedTicketList=currentTicketList;currentTicketList=tickets;openTicketReader(0,'${username}');})()" title="Öppna ärendebläddaren — alla aktiva ärenden för ${u.display_name || u.username}"` : ''}
+style="${tickets.length > 0 ? 'cursor:pointer;' : ''}"
+onmouseover="${tickets.length > 0 ? `this.style.borderColor='${styles.main}66'; this.style.background='${styles.main}08'` : ''}"
+onmouseout="${tickets.length > 0 ? `this.style.borderColor=''; this.style.background=''` : ''}">
+<div style="font-size:38px; font-weight:800; color:${styles.main}; line-height:1;">${tickets.length || 0}</div>
 <div style="font-size:11px; opacity:0.5; text-transform:uppercase; margin-top:6px; display:flex; align-items:center; justify-content:center; gap:5px;">
 AKTIVA ÄRENDEN
-${window._agentOwnerTickets?.length > 0 ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${styles.main}" stroke-width="2" opacity="0.6"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>` : ''}
+${tickets.length > 0 ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${styles.main}" stroke-width="2" opacity="0.6"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>` : ''}
+</div>
+<div style="font-size:10px; opacity:0.4; margin-top:5px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+${window._agentOwnerTickets?.length > 0 ? `<span style="color:${styles.main}99;">${window._agentOwnerTickets.length} tilldelade</span>` : ''}
+${window._agentRoutingTickets?.length > 0 ? `<span style="opacity:0.6;">+${window._agentRoutingTickets.length} via kontor</span>` : ''}
 </div>
 ${(() => { const internalCount = tickets.filter(t => t.session_type === 'internal').length; return internalCount > 0 ? `<div style="font-size:10px; opacity:0.35; margin-top:4px;">+ ${internalCount} interna</div>` : ''; })()}
 </div>

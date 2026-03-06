@@ -62,7 +62,7 @@ res.json(rows);
 
 // 3. POST: Skapa ny agent
 router.post('/api/admin/create-user', authenticateToken, async (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 const { username, password, role, display_name, agent_color, avatar_id, routing_tag } = req.body;
 try {
 const hash = await bcrypt.hash(password, 10);
@@ -84,7 +84,7 @@ res.json({ success: true, userId: this.lastID });
 
 // 3B: Uppdatera befintlig användarprofil (Universal)
 router.post('/api/admin/update-user-profile', authenticateToken, async (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 
 // ÄNDRING: Vi hämtar userId istället för id från req.body
 const { userId, username, password, role, display_name, agent_color, avatar_id, routing_tag } = req.body;
@@ -119,7 +119,7 @@ res.status(500).json({ error: "Systemfel vid uppdatering" });
 
 // 4. POST: Uppdatera roll (Gör till Admin / Ta bort Admin)
 router.post('/api/admin/update-role', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 const { userId, newRole } = req.body;
 if (userId === req.user.id) return res.status(400).json({ error: "Du kan inte ändra din egen roll" });
 
@@ -131,7 +131,7 @@ res.json({ success: true });
 
 // 5. POST: Reset lösenord (Administrativt)
 router.post('/api/admin/reset-password', authenticateToken, async (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 const { userId, newPassword } = req.body;
 
 try {
@@ -145,7 +145,7 @@ res.json({ success: true });
 
 // 6. POST: Radera användare permanent
 router.post('/api/admin/delete-user', authenticateToken, async (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 const { userId } = req.body;
 if (userId === req.user.id) return res.status(400).json({ error: "Du kan inte ta bort dig själv" });
 
@@ -193,8 +193,8 @@ res.json(row || { total_sessions: 0, human_sessions: 0, last_activity: null });
 });
 
 // GET /api/admin/user-stats/:username - Hämtar statistik för en specifik agent
+// Alla autentiserade agenter kan läsa — bara skrivoperationer kräver admin/support
 router.get('/api/admin/user-stats/:username', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 const { username } = req.params;
 const statsQuery = `
 SELECT
@@ -240,13 +240,53 @@ spam_count:     row ? (row.spam_count     || 0) : 0
 });
 
 // NY: Hämta alla ärenden för en specifik agent (för bläddraren)
+// Inkluderar BÅDE direkt tilldelade (owner=username) OCH
+// kontor agenten bevakar (office IN routing_tags). Exkl. interna.
+// Alla autentiserade agenter kan läsa — bara skrivoperationer kräver admin/support
 router.get('/api/admin/agent-tickets/:username', authenticateToken, async (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 try {
 const { username } = req.params;
 
-// Agentens egna ärenden = only where owner = username (ej alla kontorets ärenden)
-const sql = `
+// 1. Hämta agentens routing_tags från DB (alltid färsk — aldrig från JWT-cache)
+const userRow = await new Promise((resolve, reject) => {
+db.get("SELECT routing_tag FROM users WHERE username = ?", [username],
+(err, row) => err ? reject(err) : resolve(row));
+});
+
+const tags = userRow?.routing_tag
+? userRow.routing_tag.split(',').map(t => t.trim()).filter(t => t)
+: [];
+
+let sql, params;
+
+if (tags.length > 0) {
+const placeholders = tags.map(() => '?').join(',');
+sql = `
+SELECT DISTINCT
+s.conversation_id,
+s.session_type,
+s.human_mode,
+s.owner,
+s.sender,
+s.updated_at,
+s.is_archived,
+s.office AS routing_tag,
+o.office_color,
+s.name,
+s.email,
+s.phone,
+CASE WHEN s.owner = ? THEN 1 ELSE 0 END as is_assigned
+FROM chat_v2_state s
+LEFT JOIN offices o ON s.office = o.routing_tag
+WHERE s.human_mode = 1
+AND (s.is_archived IS NULL OR s.is_archived = 0)
+AND s.session_type != 'internal'
+AND (s.owner = ? OR s.office IN (${placeholders}))
+ORDER BY s.updated_at DESC
+`;
+params = [username, username, ...tags];
+} else {
+sql = `
 SELECT
 s.conversation_id,
 s.session_type,
@@ -259,7 +299,8 @@ s.office AS routing_tag,
 o.office_color,
 s.name,
 s.email,
-s.phone
+s.phone,
+1 as is_assigned
 FROM chat_v2_state s
 LEFT JOIN offices o ON s.office = o.routing_tag
 WHERE s.human_mode = 1
@@ -268,8 +309,10 @@ AND s.session_type != 'internal'
 AND s.owner = ?
 ORDER BY s.updated_at DESC
 `;
+params = [username];
+}
 
-db.all(sql, [username], async (err, rows) => {
+db.all(sql, params, async (err, rows) => {
 if (err) return res.status(500).json({ error: err.message });
 const ticketsWithData = await Promise.all(rows.map(async (t) => {
 const stored = await getContextRow(t.conversation_id);
@@ -294,7 +337,7 @@ res.status(500).json({ error: err.message });
 
 // NY: Uppdatera kontorsfärg direkt — snabb väg, ingen AI-validering
 router.post('/api/admin/update-office-color', authenticateToken, async (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') {
+if (req.user.role !== 'admin') {
 return res.status(403).json({ error: "Access denied" });
 }
 const { routing_tag, color } = req.body;
@@ -329,8 +372,11 @@ res.status(500).json({ error: "Kunde inte uppdatera färg" });
 
 // NY: Uppdatera agentens färg
 router.post('/api/admin/update-agent-color', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+// Agenter får bara ändra sin egen färg — admins får ändra vems som helst
 const { username, color } = req.body;
+if (req.user.role !== 'admin' && req.user.username !== username) {
+return res.status(403).json({ error: 'Du kan bara ändra din egen profilfärg.' });
+}
 db.run("UPDATE users SET agent_color = ? WHERE username = ?", [color, username], (err) => {
 if (err) return res.status(500).json({ error: err.message });
 io.emit('agent:color_updated', { username, color });
@@ -340,7 +386,7 @@ res.json({ success: true });
 
 // NY: Hantera agentens kontorsroller (routing_tags) - SYNCHRONIZED WITH RENDERER
 router.post('/api/admin/update-agent-offices', authenticateToken, async (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support')
+if (req.user.role !== 'admin')
 return res.status(403).json({ error: "Access denied" });
 
 // Vi mappar nu mot Renderer rad 4882 som skickar { username, tag, isChecked }
@@ -384,8 +430,8 @@ res.status(500).json({ error: "Internt serverfel" });
 });
 
 // Hämta ärenden för ett specifikt kontor (Används i Admin -> Kontor)
+// Alla autentiserade agenter kan läsa — bara skrivoperationer kräver admin/support
 router.get('/api/admin/office-tickets/:tag', authenticateToken, async (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
 try {
 const { tag } = req.params;
 const sql = `
@@ -441,7 +487,7 @@ res.status(500).json({ error: err.message });
 
 // Uppdatera roll baserat på användarnamn (Matchar anropet i renderer.js rad 4693)
 router.post('/api/admin/update-role-by-username', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 const { username, newRole } = req.body;
 db.run("UPDATE users SET role = ? WHERE username = ?", [newRole, username], (err) => {
 if (err) return res.status(500).json({ error: err.message });
@@ -453,7 +499,7 @@ res.json({ success: true });
 // ADMIN: SKAPA NYTT KONTOR (TOTALSYNKAD MED FLAGSHIP-FILER)
 // =============================================================================
 router.post('/api/admin/create-office', authenticateToken, async (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support')
+if (req.user.role !== 'admin')
 return res.status(403).json({ error: "Access denied" });
 
 const { city, area, routing_tag, office_color, brand, services_offered,
@@ -824,7 +870,7 @@ res.status(500).json({ error: 'Kunde inte spara konfiguration.' });
 // =====================================================================
 
 router.get('/api/admin/basfakta-list', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+// Alla inloggade får läsa listan — bara PUT är admin-only
 
 const knowledgePath = getFilePaths().knowledgePath;
 try {
@@ -851,7 +897,7 @@ res.status(500).json({ error: 'Kunde inte läsa kunskapsbanken.' });
 // 🛠️ ADMIN — GET - BASFAKTA-SKAPA/TA BORT SEKTIONER/AI KEYWORD VALIDERING
 // =====================================================================
 router.get('/api/admin/basfakta/:filename', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+// Alla inloggade får läsa basfakta — bara PUT är admin-only
 
 const { filename } = req.params;
 if (!/^basfakta_[\w]+\.json$/.test(filename)) {
@@ -1021,7 +1067,7 @@ res.json(rows || []);
 });
 
 router.delete('/api/admin/rag-failures', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') {
+if (req.user.role !== 'admin') {
 return res.status(403).json({ error: 'Ej behörig' });
 }
 db.run(`DELETE FROM rag_failures`, (err) => {

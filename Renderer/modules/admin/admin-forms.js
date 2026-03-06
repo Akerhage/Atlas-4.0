@@ -134,7 +134,7 @@ oninput="window._adminFormDirty=true; window._checkNewAgentPw();">
 <select id="new-agent-role" class="filter-input" style="cursor:pointer;"
 onchange="document.getElementById('new-agent-preview-role').textContent=this.options[this.selectedIndex].text; window._adminFormDirty=true;">
 <option value="agent" ${isEdit && editUser.role === 'agent' ? 'selected' : ''}>Agent</option>
-<option value="support" ${isEdit && (editUser.role === 'support' || editUser.role === 'admin') ? 'selected' : ''}>Support / Admin</option>
+<option value="admin" ${isEdit && editUser.role === 'admin' ? 'selected' : ''}>Admin</option>
 </select>
 </div>
 

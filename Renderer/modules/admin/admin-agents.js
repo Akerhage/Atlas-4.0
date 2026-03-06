@@ -185,7 +185,7 @@ else alert("Kunde inte skapa agent.");
 };
 
 window.toggleAdminStatus = async (username, isAdmin) => {
-const newRole = isAdmin ? 'support' : 'agent';
+const newRole = isAdmin ? 'admin' : 'agent';
 const res = await fetch(`${SERVER_URL}/api/admin/update-role-by-username`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ username, newRole }) });
 if (res.ok) showToast(`Rättigheter uppdaterade för @${username}`);
 };
@@ -344,16 +344,29 @@ const tickets = await ticketsRes.json();
 
 // Uppdatera globala ticket-listorna
 currentTicketList = tickets;
-window._agentOwnerTickets = tickets.filter(t => t.owner === username);
+window._agentOwnerTickets = tickets.filter(t => t.is_assigned === 1 || t.owner === username);
+window._agentRoutingTickets = tickets.filter(t => t.is_assigned === 0 && t.owner !== username);
 
 const detailBox = document.getElementById('admin-detail-content');
 if (!detailBox) return;
 
-// Uppdatera räknaren (AKTIVA ÄRENDEN-siffran)
+// Uppdatera räknaren (AKTIVA ÄRENDEN — total)
 const statCard = detailBox.querySelector('.admin-stat-card');
 if (statCard) {
 const numEl = statCard.querySelector('div[style*="font-size:38px"]');
-if (numEl) numEl.textContent = window._agentOwnerTickets.length || 0;
+if (numEl) numEl.textContent = tickets.length || 0;
+
+// Uppdatera uppdelningsraden (tilldelade / via kontor)
+const breakdownEl = statCard.querySelector('div[style*="display:flex; gap:8px"]');
+if (breakdownEl) {
+const styles = getAgentStyles(username);
+const ownedCount = window._agentOwnerTickets?.length || 0;
+const routingCount = window._agentRoutingTickets?.length || 0;
+breakdownEl.innerHTML = `
+${ownedCount > 0 ? `<span style="color:${styles.main}99;">${ownedCount} tilldelade</span>` : ''}
+${routingCount > 0 ? `<span style="opacity:0.6;">+${routingCount} via kontor</span>` : ''}
+`;
+}
 }
 
 // Uppdatera ärendelistan (Pågående ärenden för agent)

@@ -199,7 +199,7 @@ res.status(500).json({ error: 'Kunde inte skapa internt meddelande' });
 // -------------------------------------------------------------------------
 router.get('/team/inbox', authenticateToken, async (req, res) => {
 try {
-if (req.user.role === 'admin' || req.user.role === 'support') {
+if (req.user.role === 'admin') {
 
 // ⚠️ LOCK [1/3] — LIVE-CHATTAR (Centralsupporten, oplockade)
 // Visar customer-chattar där kunden INTE valt ett specifikt kontor.
@@ -523,7 +523,7 @@ res.status(500).json({ error: "Failed to claim ticket" });
 router.post('/team/assign', authenticateToken, async (req, res) => {
 // 🔒 F2.2: Vanliga agenter får inte tilldela ärenden — kräver support eller admin
 if (req.user.role === 'agent') {
-return res.status(403).json({ error: "Endast admin/support kan tilldela ärenden." });
+return res.status(403).json({ error: "Endast admin kan tilldela ärenden." });
 }
 try {
 const { conversationId, targetAgent } = req.body;

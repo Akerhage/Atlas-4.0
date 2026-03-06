@@ -729,21 +729,49 @@ if (err) reject(err); else resolve(this.lastID);
 function getAgentTickets(agentName) {
 return new Promise(async (resolve, reject) => {
 try {
+// Färsk DB-uppläsning — aldrig från JWT-cache
 const user = await getUserByUsername(agentName);
 const officeTags = user && user.routing_tag
 ? user.routing_tag.split(',').map(t => t.trim()).filter(t => t)
 : [];
 
-const placeholders = officeTags.length > 0
-? officeTags.map(() => '?').join(',')
-: "'__NOMATCH__'";
+let sql, params;
 
-// params: owner = agentName, sender = agentName (internal)
-const params = [agentName, agentName];
-
-// Mina ärenden = jag är owner ELLER internt meddelande där jag är avsändare
-// OBS: Upplockade ärenden på mina kontor tillhör INKORGEN, inte mina ärenden
-const sql = `
+if (officeTags.length > 0) {
+// Mina ärenden = jag är owner
+//             ELLER internt meddelande där jag är avsändare
+//             ELLER ärende skickat till ett kontor jag bevakar (ej upplockade av annan)
+// DISTINCT förhindrar dubbletter om owner=agentName OCH office matchar
+const placeholders = officeTags.map(() => '?').join(',');
+sql = `
+SELECT DISTINCT
+s.conversation_id,
+s.session_type,
+s.human_mode,
+s.owner,
+s.sender,
+s.updated_at,
+s.is_archived,
+s.office AS routing_tag,
+o.office_color
+FROM chat_v2_state s
+LEFT JOIN offices o ON s.office = o.routing_tag
+WHERE s.human_mode = 1
+AND (s.is_archived IS NULL OR s.is_archived = 0)
+AND (
+s.owner = ?
+OR (s.session_type = 'internal' AND s.sender = ?)
+OR (
+s.session_type != 'internal'
+AND s.office IN (${placeholders})
+)
+)
+ORDER BY s.updated_at ASC
+`;
+params = [agentName, agentName, ...officeTags];
+} else {
+// Inga kontor kopplade — visa bara egna + interna
+sql = `
 SELECT
 s.conversation_id,
 s.session_type,
@@ -764,6 +792,8 @@ OR (s.session_type = 'internal' AND s.sender = ?)
 )
 ORDER BY s.updated_at ASC
 `;
+params = [agentName, agentName];
+}
 
 db.all(sql, params, (err, rows) => {
 if (err) {
