@@ -320,7 +320,8 @@ body: JSON.stringify({ username, tag, isChecked })
 });
 if (res.ok) {
 showToast("Kontor uppdaterat");
-// Visuell uppdatering direkt utan reload
+
+// Visuell uppdatering direkt på checkboxen utan väntan
 if (checkboxEl) {
 const label = checkboxEl.closest('label');
 if (label) {
@@ -328,6 +329,59 @@ label.style.background = isChecked ? 'rgba(100,60,200,0.25)' : 'rgba(255,255,255
 label.style.borderColor = isChecked ? 'rgba(150,100,255,0.5)' : 'rgba(255,255,255,0.06)';
 label.style.color = isChecked ? '#b09fff' : '';
 }
+}
+
+// 🔄 LIVE-UPPDATERING: Ladda om räknaren och ärendelistan för denna agent.
+// Hämtar ny data från servern och uppdaterar AKTIVA ÄRENDEN + ärendelistan
+// direkt i den öppna detaljvyn — utan att stänga och öppna om hela vyn.
+try {
+const [statsRes, ticketsRes] = await Promise.all([
+fetch(`${SERVER_URL}/api/admin/user-stats/${username}`, { headers: fetchHeaders }),
+fetch(`${SERVER_URL}/api/admin/agent-tickets/${username}`, { headers: fetchHeaders })
+]);
+const stats = await statsRes.json();
+const tickets = await ticketsRes.json();
+
+// Uppdatera globala ticket-listorna
+currentTicketList = tickets;
+window._agentOwnerTickets = tickets.filter(t => t.owner === username);
+
+const detailBox = document.getElementById('admin-detail-content');
+if (!detailBox) return;
+
+// Uppdatera räknaren (AKTIVA ÄRENDEN-siffran)
+const statCard = detailBox.querySelector('.admin-stat-card');
+if (statCard) {
+const numEl = statCard.querySelector('div[style*="font-size:38px"]');
+if (numEl) numEl.textContent = window._agentOwnerTickets.length || 0;
+}
+
+// Uppdatera ärendelistan (Pågående ärenden för agent)
+const styles = getAgentStyles(username);
+const ticketListEl = detailBox.querySelector('.scroll-list');
+if (ticketListEl) {
+ticketListEl.innerHTML = tickets.length ? tickets.map((t, idx) => `
+<div class="admin-ticket-preview" onclick="openTicketReader(${idx}, '${username}')"
+style="border-left: 3px solid ${styles.main} !important; --atp-color: ${styles.main} !important;">
+<div style="flex:1; min-width:0;">
+<div class="atp-sender">${t.contact_name || t.sender || 'Okänd kund'}</div>
+<div class="atp-subject">${t.subject || 'Inget ämne'}</div>
+</div>
+<button class="atp-note-btn"
+onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')"
+title="Intern anteckning">
+${UI_ICONS.NOTES}
+</button>
+</div>
+`).join('') : '<div class="template-item-empty">Inga aktiva ärenden.</div>';
+
+// Sätt notes-knapp-färger
+ticketListEl.querySelectorAll('.atp-note-btn').forEach(btn => {
+btn.style.setProperty('color', 'var(--atp-color, #0071e3)', 'important');
+});
+}
+} catch (refreshErr) {
+console.warn('⚠️ Kunde inte uppdatera agentdetaljer live:', refreshErr);
 }
 }
 };
