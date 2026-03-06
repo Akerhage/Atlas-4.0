@@ -338,13 +338,20 @@ office: routingTag  || 'admin'
 });
 }
 
-// Sätt flaggor (stad/fordon)
-if (isFirstMessage) {
+// Sätt flaggor (stad/fordon/kontaktinfo för kundvyn)
+{
+const lc = contextData.locked_context || {};
+const pc = providedContext?.locked_context || {};
 const flags = {
-vehicle: contextData.locked_context?.vehicle || null
+vehicle: lc.vehicle    || pc.vehicle    || null,
+name:    lc.name       || pc.name       || lc.full_name || pc.full_name || null,
+email:   lc.email      || pc.email      || null,
+phone:   lc.phone      || pc.phone      || null
 };
-if (flags.vehicle) {
-await updateTicketFlags(sessionId, flags);
+const activeFlags = Object.fromEntries(Object.entries(flags).filter(([_, v]) => v !== null));
+console.log('🔍 [FLAG-DEBUG] activeFlags som skickas till updateTicketFlags:', JSON.stringify(activeFlags));
+if (Object.keys(activeFlags).length > 0) {
+await updateTicketFlags(sessionId, activeFlags);
 }
 }
 
@@ -828,6 +835,23 @@ updated_at: Math.floor(Date.now() / 1000)
 // Aktivera läget och meddela teamet
 // 2. Aktivera human mode
 await setHumanMode(sessionId, 'customer');
+
+// Spara kontaktinfo (email/namn/telefon) till chat_v2_state för kundvyn
+{
+const lc = contextData.locked_context || {};
+const pc = context?.locked_context || {};
+const flags = {
+vehicle: lc.vehicle    || pc.vehicle    || null,
+name:    lc.name       || pc.name       || lc.full_name || pc.full_name || null,
+email:   lc.email      || pc.email      || null,
+phone:   lc.phone      || pc.phone      || null
+};
+const activeFlags = Object.fromEntries(Object.entries(flags).filter(([_, v]) => v !== null));
+if (Object.keys(activeFlags).length > 0) {
+await updateTicketFlags(sessionId, activeFlags);
+}
+}
+
 // Skicka till ALLA agenter (enkel broadcast)
 io.emit('team:update', { type: 'human_mode_triggered', sessionId });
 return; // Avbryt här, skicka inte till AI

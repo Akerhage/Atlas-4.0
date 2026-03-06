@@ -369,6 +369,12 @@ console.error("❌ Fel vid sparning av kontorsroll:", err);
 return res.status(500).json({ error: err.message });
 }
 console.log(`✅ [ADMIN] Uppdaterade kontor för @${username}: ${newRoutingTag}`);
+
+// 🔥 LIVE-UPPDATERING: Meddela alla klienter att agentens kontor ändrades
+if (typeof io !== 'undefined') {
+io.emit('agent:offices_updated', { username, newTags: newRoutingTag });
+}
+
 res.json({ success: true, newTags: newRoutingTag });
 });
 } catch (e) {

@@ -311,6 +311,11 @@ _lpTimer = null;
 });
 
 content.appendChild(card);
+
+// 🔥 Sätt notes-glow på kortet om anteckningar finns
+if (typeof refreshNotesGlow === 'function') {
+refreshNotesGlow(t.conversation_id);
+}
 });
 }
 

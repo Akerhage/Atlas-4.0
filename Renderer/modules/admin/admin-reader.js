@@ -47,7 +47,7 @@ if (e.target === modal) _closeReader();
 // Lysa upp notes-ikonen om det finns anteckningar
 const _t = (typeof currentTicketList !== 'undefined' ? currentTicketList : [])[currentTicketIdx];
 if (_t?.conversation_id && typeof refreshNotesGlow === 'function') {
-  refreshNotesGlow(_t.conversation_id);
+refreshNotesGlow(_t.conversation_id);
 }
 }
 
@@ -262,6 +262,11 @@ const newIdx = currentTicketIdx + dir;
 if (newIdx >= 0 && newIdx < currentTicketList.length) {
 currentTicketIdx = newIdx;
 renderReaderContent();
+// 🔥 Uppdatera notes-glow för det nya ärendet
+const t = currentTicketList[currentTicketIdx];
+if (t?.conversation_id && typeof refreshNotesGlow === 'function') {
+refreshNotesGlow(t.conversation_id);
+}
 }
 }
 
@@ -269,14 +274,14 @@ renderReaderContent();
 // HELPER - CLOSE READER (Global scope)
 // ===================================================
 function _closeReader() {
-  const modal = document.getElementById('atlas-reader-modal');
-  if (modal) {
-    modal.style.display = 'none';
-    modal.style.pointerEvents = 'none'; // Säkra att klick inte registreras när den är dolda
-  }
+const modal = document.getElementById('atlas-reader-modal');
+if (modal) {
+modal.style.display = 'none';
+modal.style.pointerEvents = 'none'; // Säkra att klick inte registreras när den är dolda
+}
 
-  if (window._savedTicketList !== undefined) {
-    currentTicketList = window._savedTicketList;
-    delete window._savedTicketList;
-  }
+if (window._savedTicketList !== undefined) {
+currentTicketList = window._savedTicketList;
+delete window._savedTicketList;
+}
 }

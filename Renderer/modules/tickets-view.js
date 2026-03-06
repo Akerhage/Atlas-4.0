@@ -227,6 +227,11 @@ container.insertBefore(card, container.children[index]);
 } else if (!card.parentNode) {
 container.appendChild(card);
 }
+
+// 🔥 Sätt notes-glow på kortet om anteckningar finns
+if (typeof refreshNotesGlow === 'function') {
+refreshNotesGlow(t.conversation_id);
+}
 });
 
 } catch (err) {

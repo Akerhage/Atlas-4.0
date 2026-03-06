@@ -178,6 +178,14 @@ renderMyTickets();
 if (DOM.views && DOM.views.archive && DOM.views.archive.style.display === 'flex') {
 renderArchive();
 }
+
+// 🔥 LIVE: Ladda om kontorsdetaljvyn tyst om admin har ett kontor öppet
+// data-current-id på admin-detail-content innehåller routing_tag för öppet kontor
+const adminDetail = document.getElementById('admin-detail-content');
+const openOfficeTag = adminDetail?.getAttribute('data-current-id');
+if (openOfficeTag && typeof openAdminOfficeDetail === 'function') {
+openAdminOfficeDetail(openOfficeTag, null);
+}
 }, 350);
 });
 
@@ -476,6 +484,25 @@ if (typeof updateProfileUI === 'function') updateProfileUI();
 renderInbox();
 renderMyTickets();
 if (document.getElementById('view-archive')?.style.display === 'flex') renderArchive();
+});
+
+// 🔥 LIVE KONTOR-SYNK: Uppdaterar agentens routing_tag direkt när admin ändrar
+window.socketAPI.on('agent:offices_updated', ({ username, newTags }) => {
+console.log(`🏢 [LIVE] Kontorsroll uppdaterad: ${username} -> ${newTags}`);
+
+// Synka usersCache
+const user = usersCache.find(u => u.username === username);
+if (user) user.routing_tag = newTags;
+
+// Om det är den inloggade agenten — uppdatera currentUser och localStorage
+if (currentUser?.username === username) {
+currentUser.routing_tag = newTags;
+localStorage.setItem('atlas_user', JSON.stringify(currentUser));
+console.log(`✅ [LIVE] Egen routing_tag uppdaterad till: ${newTags}`);
+}
+
+// Rendera om Mina Ärenden så rätt ärenden visas direkt
+renderMyTickets?.();
 });
 
 } // <-- Stänger setupSocketListeners-funktionen
