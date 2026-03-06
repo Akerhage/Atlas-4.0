@@ -1065,8 +1065,20 @@ if (!conversationId || !message) return;
 
 console.log(`💬 [AGENT REPLY] ${conversationId}: ${message}`);
 
-// 🔥 FIX 1: Vi hämtar namnet FÖRST så vi kan spara det i databasen
 const agentName = socket.user?.username || 'Support';
+
+// 🔒 AUTO-CLAIM: Om ärendet saknar ägare när agenten svarar via socket,
+// sätt agenten som ägare automatiskt — samma som snabbsvarsflödet gör explicit.
+// Förhindrar att svar skickas utan att ärendet kopplas till någon agent.
+const replyState = await getV2State(conversationId);
+if (replyState && !replyState.owner) {
+await claimTicket(conversationId, agentName);
+console.log(`🔗 [AGENT REPLY] Auto-claim: ${conversationId} → ${agentName}`);
+if (typeof io !== 'undefined') {
+io.emit('team:update', { type: 'ticket_claimed', sessionId: conversationId, owner: agentName });
+io.emit('team:ticket_taken', { conversationId, takenBy: agentName });
+}
+}
 
 const stored = await getContextRow(conversationId);
 let contextData = stored?.context_data ?? { messages: [], locked_context: {} };

@@ -76,6 +76,16 @@ const showAI = document.getElementById('archive-show-ai')?.checked || false;
 
 let filtered = State.archiveItems.filter(item => {
 
+// --- 🔒 INTERN SEKRETESS: Sista försvarslinje på klienten.
+// Interna ärenden (session_type='internal') ska aldrig visas för någon
+// som inte är owner eller sender — även om servern av misstag skickar dem.
+if (item.session_type === 'internal') {
+const myName = currentUser?.username?.toLowerCase();
+const isOwner = item.owner && item.owner.toLowerCase() === myName;
+const isSender = item.sender && item.sender.toLowerCase() === myName;
+if (!isOwner && !isSender) return false;
+}
+
 // --- 🔥 H. AI-FILTER (MÅSTE VARA FÖRST FÖR ATT REAGERA DIREKT) ---
 // Om ärendet är ett rent AI-svar (human_mode === 0) och checkboxen INTE är ikryssad -> Dölj det.
 if (item.human_mode === 0 && !showAI) return false;
@@ -268,18 +278,18 @@ const avatarInitial = isUser ? (item.contact_name ? item.contact_name.charAt(0).
 if (isUser) {
 historyHtml += `
 <div class="msg-row user" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-start;">
-	<div class="msg-avatar" style="background:${themeStyles.main}; color:white; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; margin-right:12px; flex-shrink:0;">${avatarInitial}</div>
-	<div class="bubble" style="background:${themeStyles.bubbleBg} !important; border:1px solid ${themeStyles.border} !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
-		${formatAtlasMessage(clean)}
-	</div>
+<div class="msg-avatar" style="background:${themeStyles.main}; color:white; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; margin-right:12px; flex-shrink:0;">${avatarInitial}</div>
+<div class="bubble" style="background:${themeStyles.bubbleBg} !important; border:1px solid ${themeStyles.border} !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
+${formatAtlasMessage(clean)}
+</div>
 </div>`;
 } else {
 historyHtml += `
 <div class="msg-row atlas" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-end;">
-	<div class="bubble" style="background:var(--bg-dark-tertiary) !important; border:1px solid rgba(255,255,255,0.1) !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
-		${formatAtlasMessage(clean)}
-	</div>
-	<div class="msg-avatar" style="background:#3a3a3c; margin-left:12px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0; font-size:18px;">🤖</div>
+<div class="bubble" style="background:var(--bg-dark-tertiary) !important; border:1px solid rgba(255,255,255,0.1) !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
+${formatAtlasMessage(clean)}
+</div>
+<div class="msg-avatar" style="background:#3a3a3c; margin-left:12px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0; font-size:18px;">🤖</div>
 </div>`;
 }
 });

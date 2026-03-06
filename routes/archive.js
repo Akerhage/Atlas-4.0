@@ -132,6 +132,25 @@ return res.status(400).json({ error: "Missing conversationId" });
 console.log(`🗑️ Mottog begäran att radera: ${conversationId}`);
 
 try {
+// 🔒 INTERN SEKRETESS: Interna ärenden får bara raderas av den som är owner eller sender.
+// Förhindrar att en admin råkar (eller medvetet) raderar andras interna konversationer.
+const internalCheck = await new Promise((resolve, reject) => {
+db.get(
+'SELECT session_type, owner, sender FROM chat_v2_state WHERE conversation_id = ?',
+[conversationId],
+(err, row) => err ? reject(err) : resolve(row)
+);
+});
+if (
+internalCheck &&
+internalCheck.session_type === 'internal' &&
+internalCheck.owner !== req.user.username &&
+internalCheck.sender !== req.user.username
+) {
+console.warn(`🚫 [DELETE] ${req.user.username} nekad — internt ärende tillhör ${internalCheck.owner}/${internalCheck.sender}`);
+return res.status(403).json({ error: 'Du kan inte radera andras interna ärenden.' });
+}
+
 // 1. Vi kör städningen i databasen
 await deleteConversation(conversationId);
 console.log(`✅ Ärende ${conversationId} raderat permanent från DB.`);
@@ -160,13 +179,55 @@ return res.status(500).json({ error: "Kunde inte radera ärendet" });
 // -------------------------------------------------------------------------
 // ENDPOINT: /api/inbox/archive (ARKIVERA UTAN ATT RADERA)
 // -------------------------------------------------------------------------
-router.post('/api/inbox/archive', authenticateToken, (req, res) => {
-if (req.user.role !== 'admin' && req.user.role !== 'support') return res.status(403).json({ error: 'Access denied' });
+router.post('/api/inbox/archive', authenticateToken, async (req, res) => {
+// Agenter får arkivera sina egna ärenden. Admin/support får arkivera alla (utom andras interna).
 const { conversationId } = req.body;
 
 if (!conversationId) {
 return res.status(400).json({ error: "Missing conversationId" });
 }
+
+// 🔒 ÄGARSKAPSCHECK: Agenter får bara arkivera ärenden de äger eller är avsändare på.
+// Admin/support får arkivera alla — men aldrig andras interna ärenden (se nedan).
+if (req.user.role === 'agent') {
+const ownerCheck = await new Promise((resolve, reject) => {
+db.get(
+'SELECT owner, sender, session_type FROM chat_v2_state WHERE conversation_id = ?',
+[conversationId],
+(err, row) => err ? reject(err) : resolve(row)
+);
+});
+if (!ownerCheck) return res.status(404).json({ error: 'Ärendet hittades inte.' });
+const isOwner = ownerCheck.owner === req.user.username;
+const isSender = ownerCheck.sender === req.user.username;
+if (!isOwner && !isSender) {
+return res.status(403).json({ error: 'Du kan bara arkivera dina egna ärenden.' });
+}
+}
+
+// 🔒 INTERN SEKRETESS: Interna ärenden får bara arkiveras av den som är owner eller sender.
+try {
+const internalCheck = await new Promise((resolve, reject) => {
+db.get(
+'SELECT session_type, owner, sender FROM chat_v2_state WHERE conversation_id = ?',
+[conversationId],
+(err, row) => err ? reject(err) : resolve(row)
+);
+});
+if (
+internalCheck &&
+internalCheck.session_type === 'internal' &&
+internalCheck.owner !== req.user.username &&
+internalCheck.sender !== req.user.username
+) {
+console.warn(`🚫 [ARCHIVE] ${req.user.username} nekad — internt ärende tillhör ${internalCheck.owner}/${internalCheck.sender}`);
+return res.status(403).json({ error: 'Du kan inte arkivera andras interna ärenden.' });
+}
+} catch (checkErr) {
+console.error('Archive ownership check error:', checkErr);
+return res.status(500).json({ error: 'Kunde inte verifiera ärendeägarskap' });
+}
+
 const now = Math.floor(Date.now() / 1000);
 
 // 🔥 FIX: Sätter is_archived = 1 i BÅDE chat_v2_state OCH local_qa_history

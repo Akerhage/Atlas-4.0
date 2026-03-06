@@ -206,13 +206,13 @@ if(btn) {
 btn.onclick = async (e) => {
 e.stopPropagation();
 try {
-await fetch(`${SERVER_URL}/api/inbox/archive`, {
+const archRes = await fetch(`${SERVER_URL}/api/inbox/archive`, {
 method: 'POST',
 headers: fetchHeaders,
 body: JSON.stringify({ conversationId: t.conversation_id })
 });
+if (!archRes.ok) throw new Error('Arkivering nekad');
 showToast('✅ Ärendet arkiverat!');
-// STÄNG VYN: Om det arkiverade ärendet råkar vara det som är öppet
 checkAndResetDetail('my-ticket-detail', t.conversation_id);
 renderMyTickets();
 } catch(err) {
@@ -554,11 +554,7 @@ content: originalMsg
 // 4. Arkivera (Direkt utan bekräftelsepopup — toast visas istället)
 const btnArch = document.getElementById('btn-archive-my');
 if(btnArch) btnArch.onclick = async () => {
-archiveTicketFromMyTickets(ticket.conversation_id);
-showToast('✅ Ärendet arkiverat!');
-checkAndResetDetail('inbox-detail');
-checkAndResetDetail('my-ticket-detail');
-checkAndResetDetail('archive-detail');
+await archiveTicketFromMyTickets(ticket.conversation_id);
 };
 
 const btnDel = document.getElementById('btn-delete-my');
@@ -628,10 +624,15 @@ body: JSON.stringify({ conversationId })
 
 if (!res.ok) throw new Error('Kunde inte arkivera ärendet');
 
-// Återställ UI - TOTALRENSNING
+// ✅ Servern bekräftade — nu är det säkert att rensa UI
+showToast('✅ Ärendet arkiverat!');
+checkAndResetDetail('inbox-detail', conversationId);
+checkAndResetDetail('my-ticket-detail', conversationId);
+checkAndResetDetail('archive-detail', conversationId);
+
 const myDetail = document.getElementById('my-ticket-detail');
 if (myDetail) {
-myDetail.innerHTML = ''; 
+myDetail.innerHTML = '';
 myDetail.style.display = 'none';
 myDetail.removeAttribute('data-current-id');
 }

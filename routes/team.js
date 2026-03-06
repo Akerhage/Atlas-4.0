@@ -533,6 +533,13 @@ return res.status(400).json({ error: "Missing ID or Target" });
 }
 
 console.log(`👤 [ASSIGN] ${req.user.username} tilldelar ${conversationId} till ${targetAgent}`);
+
+// 🔔 NOTIFIERING: Om ärendet redan har en ägare som inte är targetAgent,
+// meddela den nuvarande ägaren att ärendet tagits ifrån dem.
+const preAssignState = await getV2State(conversationId);
+const previousOwner = preAssignState?.owner || null;
+const ownerIsChanging = previousOwner && previousOwner !== targetAgent;
+
 await claimTicket(conversationId, targetAgent);
 
 // ✅ GLOBAL UPDATE: Meddela alla att ärendet har tilldelats
@@ -542,6 +549,15 @@ type: 'ticket_claimed',
 sessionId: conversationId,
 owner: targetAgent
 });
+
+// Skicka team:ticket_taken så den tidigare ägarens UI uppdateras med toast
+if (ownerIsChanging) {
+io.emit('team:ticket_taken', {
+conversationId,
+takenBy: `${req.user.username} (tilldelat till ${targetAgent})`
+});
+console.log(`🔔 [ASSIGN] Notifierar ${previousOwner} — ärendet tilldelades ${targetAgent}`);
+}
 }
 
 res.json({ status: "success", assignedTo: targetAgent });
