@@ -705,7 +705,8 @@ status: 'online'
 });
 console.log(`🔌 Agent Online: ${socket.user.username} (ID: ${socket.user.id})`);
 } else {
-// En kund anslöt
+// En kund anslöt — gå med i eget rum så agentsvar kan skickas riktat
+socket.join(socket.sessionId);
 console.log(`🔌 Client connected: ${socket.id} (Kund: ${socket.sessionId})`);
 }
 
@@ -1111,6 +1112,8 @@ db.run(
 // ✅ GLOBAL SYNC: Ser till att svaret syns i alla agenter/fönster direkt
 if (typeof io !== 'undefined') {
 io.emit('team:customer_reply', { conversationId, message, sender: agentName, timestamp: Date.now() });
+// ✅ RIKTAT: Skicka även direkt till kundens socket-rum (säkerställer leverans)
+io.to(conversationId).emit('team:customer_reply', { conversationId, message, sender: agentName, timestamp: Date.now() });
 io.emit('team:update', { type: 'new_message', sessionId: conversationId });
 }
 
