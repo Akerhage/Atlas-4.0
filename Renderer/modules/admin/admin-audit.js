@@ -19,6 +19,7 @@ const grid = document.getElementById('about-grid');
 if (!grid) return;
 
 const savedTheme = localStorage.getItem('atlas-theme') || 'standard-theme';
+const savedSound = localStorage.getItem('atlas-sound') || 'assets/audio/pling-1.mp3';
 const soundOn = State.soundEnabled !== false;
 const themeOptions = [
 ['standard-theme', 'Standard Vision ⚡'],
@@ -30,6 +31,14 @@ const themeOptions = [
 ['sunset-horizon', 'Sunset Horizon 🌅'],
 ['atlas-navigator', 'Atlas Navigator 🧭'],
 ].map(([v, l]) => `<option value="${v}"${savedTheme === v ? ' selected' : ''}>${l}</option>`).join('');
+
+const soundOptions = [
+['assets/audio/pling-1.mp3', 'Pling 1 — Standard'],
+['assets/audio/pling-2.mp3', 'Pling 2'],
+['assets/audio/pling-3.mp3', 'Pling 3'],
+['assets/audio/pling-4.mp3', 'Pling 4'],
+['assets/audio/pling-5.mp3', 'Pling 5'],
+].map(([v, l]) => `<option value="${v}"${savedSound === v ? ' selected' : ''}>${l}</option>`).join('');
 
 grid.innerHTML = `
 <!-- CELL 1: Tangentbordsgenvägar (övre vänster) -->
@@ -72,7 +81,8 @@ Snabbguide — Arbetsflöde
 <div class="guide-step"><span class="step-number">1</span><div class="step-content"><strong>Markera text</strong> i vilket program som helst</div></div>
 <div class="guide-step"><span class="step-number">2</span><div class="step-content"><strong>Ctrl+C</strong> — kopiera den markerade texten</div></div>
 <div class="guide-step"><span class="step-number">3</span><div class="step-content"><strong>Ctrl+P</strong> — klistrar in &amp; startar <strong>NY</strong> AI-fråga</div></div>
-<div class="guide-step"><span class="step-number">4</span><div class="step-content"><strong>Ctrl+Alt+P</strong> — ställ en <strong>följdfråga</strong> i samma session</div></div>
+<div class="guide-step"><span class="step-number">4</span><div class="step-content"><strong>Ctrl+C</strong> — kopiera <strong>nästa</strong> fråga eller text</div></div>
+<div class="guide-step"><span class="step-number">5</span><div class="step-content"><strong>Ctrl+Alt+P</strong> — ställ en <strong>följdfråga</strong> i samma session</div></div>
 </div>
 </div>
 
@@ -82,7 +92,7 @@ Snabbguide — Arbetsflöde
 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
 Min Statistik
 </h3>
-<div id="about-stats-content" style="flex:1; min-height:0; overflow:hidden; display:flex; align-items:center; justify-content:center;"><div class="spinner-small"></div></div>
+<div id="about-stats-content" style="flex:1; min-height:0; overflow:visible; display:flex; align-items:flex-start; justify-content:center;"><div class="spinner-small"></div></div>
 </div>
 
 <!-- CELL 4: Utseende & System (nedre höger) -->
@@ -95,16 +105,24 @@ Utseende &amp; System
 <label>🎨 Välj tema</label>
 <select id="theme-select" class="filter-select" onchange="changeTheme(this.value)">${themeOptions}</select>
 </div>
-<div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid var(--border-color);">
-<label style="cursor:pointer; display:flex; align-items:center; gap:8px;">🔔 Pling-ljud vid nytt ärende</label>
-<input type="checkbox" id="sound-toggle" ${soundOn ? 'checked' : ''} style="transform:scale(1.3); cursor:pointer; appearance:auto; -webkit-appearance:checkbox; width:16px; height:16px; flex-shrink:0;" onchange="window._handleSoundToggle(this.checked)">
+<div class="setting-item" style="padding-top:8px; border-top:1px solid var(--border-color);">
+<label>🔔 Välj notisljud</label>
+<div style="display:flex; align-items:center; gap:6px;">
+<select id="sound-select" class="filter-select" style="flex:1;" onchange="changeSound(this.value)">${soundOptions}</select>
+<button onclick="playNotificationSound()" title="Testa valt ljud"
+style="flex-shrink:0; width:28px; height:28px; border-radius:7px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s;"
+onmouseover="this.style.background='rgba(255,255,255,0.12)';this.style.color='white'"
+onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='rgba(255,255,255,0.5)'">
+<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+</button>
+<input type="checkbox" id="sound-toggle" ${soundOn ? 'checked' : ''} title="Aktivera/inaktivera notisljud" style="transform:scale(1.3); cursor:pointer; appearance:auto; -webkit-appearance:checkbox; width:16px; height:16px; flex-shrink:0;" onchange="window._handleSoundToggle(this.checked)">
+</div>
 </div>
 <div style="border-top:1px solid rgba(255,255,255,0.08); margin-top:6px; padding-top:5px; display:flex; flex-direction:column; gap:1px;">
 <div class="info-item"><span class="info-label">Atlas Version:</span><span id="app-version-display">${ATLAS_VERSION}</span></div>
 <div class="info-item"><span class="info-label">Server Version:</span><span id="server-version-display">Hämtar...</span></div>
 <div class="info-item"><span class="info-label">Serverstatus:</span><span id="server-status" style="color:#f1c40f; font-weight:700;">● Ansluter...</span></div>
 <div class="info-item" id="about-user-info"></div>
-<div class="info-item"><span class="info-label">Skapad av:</span><span>Patrik Åkerhage</span></div>
 </div>
 </div>
 `;
@@ -167,7 +185,7 @@ const sysRow = (label, val, color = 'var(--text-secondary)') =>
 </div>`;
 
 if (statsEl) statsEl.innerHTML = `
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:7px; height:100%; overflow:hidden;">
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:7px; width:100%;">
 
 <!-- Vänster: Egna ärenden -->
 <div style="display:flex; flex-direction:column; gap:3px; min-height:0; overflow:hidden;">
@@ -351,6 +369,16 @@ console.groupEnd();
 // =============================================================================
 // ATLAS INFO-MODAL — visas via ?-knappen i Om-vyn
 // =============================================================================
+// Nedladdning av manualer via Express static serving
+window._downloadAtlasManual = function(filename) {
+const a = document.createElement('a');
+a.href = `${SERVER_URL}/assets/data/${filename}`;
+a.download = filename;
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+};
+
 function showAtlasInfoModal() {
 const existing = document.getElementById('atlas-info-modal');
 if (existing) { existing.style.display = 'flex'; return; }
@@ -379,7 +407,8 @@ overlay.innerHTML = `
     </div>
     <div>
       <div style="font-size:15px; font-weight:700; color:white;">Om Atlas</div>
-      <div style="font-size:10px; opacity:0.4; color:white; letter-spacing:0.3px;">Intelligent kundsupport-plattform • v${typeof ATLAS_VERSION !== 'undefined' ? ATLAS_VERSION : '3.14'}</div>
+      <div style="font-size:10px; opacity:0.4; color:white; letter-spacing:0.3px;">Intelligent kundsupport-plattform • v${typeof ATLAS_VERSION !== 'undefined' ? ATLAS_VERSION : '4.0'}</div>
+      <div style="font-size:9px; opacity:0.25; color:white; margin-top:2px;">Skapad av Patrik Åkerhage</div>
     </div>
   </div>
 
@@ -425,13 +454,13 @@ overlay.innerHTML = `
           ['Frontend', 'Electron / HTML / JS'],
           ['Backend', 'Node.js / Express'],
           ['Databas', 'SQLite (lokalt)'],
-          ['AI-motor', 'RAG + vektorembeddings'],
+          ['AI-motor', 'RAG + embeddings'],
           ['Realtid', 'Socket.IO'],
-          ['Version', typeof ATLAS_VERSION !== 'undefined' ? `Atlas v${ATLAS_VERSION}` : 'Atlas v3.14'],
+          ['Version', typeof ATLAS_VERSION !== 'undefined' ? `Atlas v${ATLAS_VERSION}` : 'Atlas v4.0'],
         ].map(([lbl, val]) => `
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 7px; border-radius:6px; background:rgba(255,255,255,0.025);">
-            <span style="font-size:10px; opacity:0.5;">${lbl}</span>
-            <strong style="font-size:11px; color:var(--text-primary);">${val}</strong>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; padding:4px 7px; border-radius:6px; background:rgba(255,255,255,0.025);">
+            <span style="font-size:10px; opacity:0.5; flex-shrink:0;">${lbl}</span>
+            <strong style="font-size:11px; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right;">${val}</strong>
           </div>
         `).join('')}
       </div>
@@ -441,7 +470,24 @@ overlay.innerHTML = `
 
   <!-- Footer -->
   <div style="padding:10px 18px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.18); display:flex; justify-content:space-between; align-items:center; gap:8px; flex-shrink:0;">
-    <span style="font-size:11px; opacity:0.35; color:var(--text-secondary);">Utvecklad med ❤ för körskolebranschen</span>
+    <div style="display:flex; gap:6px;">
+      <button onclick="_downloadAtlasManual('Atlas_Användarmanual.docx')"
+        style="display:flex; align-items:center; gap:5px; padding:4px 10px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.45); font-size:10px; cursor:pointer; transition:all 0.2s;"
+        onmouseover="this.style.background='rgba(255,255,255,0.09)';this.style.color='rgba(255,255,255,0.75)'"
+        onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.color='rgba(255,255,255,0.45)'"
+        title="Ladda ner Användarmanual (.docx)">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Användarmanual
+      </button>
+      <button onclick="_downloadAtlasManual('Atlas_Adminmanual.docx')"
+        style="display:flex; align-items:center; gap:5px; padding:4px 10px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.45); font-size:10px; cursor:pointer; transition:all 0.2s;"
+        onmouseover="this.style.background='rgba(255,255,255,0.09)';this.style.color='rgba(255,255,255,0.75)'"
+        onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.color='rgba(255,255,255,0.45)'"
+        title="Ladda ner Adminmanual (.docx)">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Adminmanual
+      </button>
+    </div>
     <button class="btn-glass-icon" onclick="document.getElementById('atlas-info-modal').style.display='none'"
       style="padding:5px 14px; width:auto; height:28px; font-size:11px; border-radius:7px; color:var(--text-secondary);">
       Stäng

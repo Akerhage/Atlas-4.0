@@ -600,9 +600,13 @@ Du MÅSTE följa dessa regler slaviskt, även om kontexten verkar vag:
 - Handledare: "Handledaren måste vara minst 24 år, haft körkort i minst 5 av de senaste 10 åren och både elev och handledare behöver gå introduktionskurs."
 - Automat: "Automat ger villkor 78."
 
-// === FALLBACK ===
-- Om information saknas helt i kontexten svara exakt:
-"Jag hittar ingen information i vår kunskapsbas om det här."
+// === FALLBACK (INTELLIGENT) ===
+- Om information saknas i kontexten: GISSA ALDRIG priser, tider, tillgänglighet eller annat du inte vet.
+- Analysera istället VAD kunden frågar om och formulera ett kortfattat, mänskligt svar (max 2–3 meningar) som:
+  1. Erkänner att du inte har den specifika informationen
+  2. Förklarar KORT varför om det är uppenbart (t.ex. att bokningsscheman/lediga tider inte finns i databasen, eller att du behöver veta stad och fordonstyp för att ge rätt svar)
+  3. Hänvisar till ett konkret nästa steg: be om mer info om frågan är för vag, tipsa om hemsidan för bokning/tider, eller föreslå att kunden klickar på headset-knappen för direkt kontakt med en handläggare
+- Var varm och mänsklig — förklara, gissa inte.
 
 LÄS NEDAN KONTEXT NOGA OCH SVARA UTIFRÅN DEN (MEN FÖLJ DE KRITISKA REGLERNA ÖVERST):
 <<KONTEXT_BIFOGAD_AV_SERVERN>>
@@ -810,10 +814,57 @@ finalAnswer = `${timeGreeting}${finalAnswer}`;
 }
 }
 if (!finalAnswer || finalAnswer.length < 2) {
-finalAnswer = "Jag hittar ingen information i vår kunskapsbas om det här.";
+// Sista nödutgång om AI returnerar tom sträng — ska sällan träffas efter system-prompt-ändringen
+finalAnswer = "Jag har tyvärr inte den informationen just nu. Klicka på headset-knappen ovan om du vill prata med en av oss direkt!";
 }
 finalAnswer = finalAnswer;
 return { type: "answer", answer: finalAnswer, messages, model: "gpt-4o-mini" };
+}
+
+// ====================================================================
+// SECTION 5b: SMART CLARIFICATION — AI-driven motfråga för vaga frågor
+// Anropas när konfidenstjänsten bedömer att kontexten är för svag.
+// Analyserar frågan + NLU-slots och ber kunden om rätt info.
+// ====================================================================
+async function generateSmartClarification(query, nluResult, detectedCity, detectedVehicle) {
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Bygg lista på vad som saknas baserat på vad NLU hittade
+const missing = [];
+if (!detectedCity) missing.push('stad eller kontor');
+if (!detectedVehicle) missing.push('fordonstyp (bil, MC, moped/AM, lastbil)');
+
+const missingText = missing.length > 0 ? missing.join(' och ') : 'mer specifik information';
+
+const systemPrompt = `Du är Atlas — en varm, hjälpsam kundtjänstassistent för en svensk trafikskola.
+Kunden har ställt en fråga som är för vag för att du ska kunna ge ett korrekt svar.
+Din uppgift: Skriv ett kort, naturligt svar (1–2 meningar) på svenska som:
+1. Visar att du förstår vad kunden frågar om (nämn gärna ämnet)
+2. Ber om den specifika information du saknar för att kunna hjälpa
+Gissa ALDRIG priser, tider eller annan fakta. Var vänlig och konkret.`;
+
+const userPrompt = `Kundens fråga: "${query}"
+Identifierat ämne: ${nluResult?.intent || 'okänt'}
+Hittade nyckelord: stad=${detectedCity || 'saknas'}, fordon=${detectedVehicle || 'saknas'}
+Det saknas: ${missingText}
+Skriv en kort, smart motfråga som hjälper kunden precisera sin fråga.`;
+
+try {
+const completion = await openai.chat.completions.create({
+model: 'gpt-4o-mini',
+messages: [
+{ role: 'system', content: systemPrompt },
+{ role: 'user', content: userPrompt }
+],
+max_tokens: 150,
+temperature: 0.5
+});
+return completion.choices[0]?.message?.content?.trim()
+|| 'För att kunna hjälpa dig — kan du berätta i vilken stad och vilket typ av fordon (bil, MC, moped?) det gäller?';
+} catch (err) {
+console.error('[CLARIFICATION] AI-fel:', err.message);
+return 'För att hjälpa dig på bästa sätt — kan du berätta lite mer? Vilken stad och vilket typ av fordon gäller det?';
+}
 }
 
 // ====================================================================
@@ -1865,7 +1916,8 @@ const isContactQuery = nluResult.intent === 'contact_info';
 const threshold = isContactQuery ? 0.05 : LOW_CONFIDENCE_THRESHOLD;
 
 if (!hasBasfakta && bestScore < threshold && nluResult.intent !== 'contact_info') {
-const clarification = `För att ge ett korrekt svar behöver jag lite mer info — vilken stad eller vilket kontor menar du?`;
+// AI analyserar frågan och ber om rätt info istället för hårdkodad sträng
+const clarification = await generateSmartClarification(query, nluResult, lockedCity || detectedCity, detectedVehicleType);
 return res.json({ answer: clarification, context: [], debug: { low_confidence: true, best_score: bestScore } });
 }
 } 

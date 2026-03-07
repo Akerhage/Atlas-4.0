@@ -386,6 +386,26 @@ if (typeof playNotificationSound === 'function') playNotificationSound();
 return; // AVSLUTA HÄR - Ingen kopiering till urklipp behövs då
 }
 
+// Inkorg snabbsvar
+const quickInput = document.getElementById('quick-reply-input');
+if (quickInput) {
+quickInput.value = data.answer;
+quickInput.disabled = false;
+quickInput.focus();
+if (typeof playNotificationSound === 'function') playNotificationSound();
+return;
+}
+
+// Admin Reader-modal
+const readerInput = document.getElementById('reader-quick-reply');
+if (readerInput) {
+readerInput.value = data.answer;
+readerInput.disabled = false;
+readerInput.focus();
+if (typeof playNotificationSound === 'function') playNotificationSound();
+return;
+}
+
 // --- DIN GAMLA LOGIK (FALLBACK FÖR URKLIPP) ---
 if (data.is_email_draft) {
 console.log("🤖 AI har genererat ett mail-svar! Tvingar kopiering...");
@@ -457,6 +477,54 @@ if (typeof playNotificationSound === 'function') playNotificationSound();
 }
 }
 });
+// ==========================================================
+// ✨ AI SAMMANFATTNING (svar från server)
+// ==========================================================
+// ==========================================================
+// 📢 ADMIN BROADCAST — systemmeddelande till alla agenter
+// ==========================================================
+window.socketAPI.on('admin:notification', (data) => {
+  const modal = document.getElementById('admin-broadcast-modal');
+  if (!modal) return;
+  const time = new Date(data.timestamp).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  modal.innerHTML = `
+    <div class="glass-modal-box glass-effect"
+    style="width:460px; max-width:88vw; border-top:3px solid var(--accent-primary);
+    text-align:center; padding:30px 28px 24px;">
+      <div style="font-size:30px; margin-bottom:10px;">📢</div>
+      <div style="font-size:16px; font-weight:700; color:white; margin-bottom:5px;">Systemmeddelande</div>
+      <div style="font-size:11px; color:var(--text-secondary); opacity:0.55; margin-bottom:18px;">
+        Från: ${data.sentBy} • ${time}
+      </div>
+      <div style="font-size:14px; line-height:1.7; color:var(--text-primary);
+      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09);
+      border-radius:10px; padding:14px 16px; margin-bottom:22px; text-align:left;
+      white-space:pre-wrap; word-break:break-word;">${data.message}</div>
+      <button id="broadcast-close-btn" style="width:100%; padding:11px; border-radius:8px;
+      background:var(--accent-primary); color:black; font-weight:700; border:none;
+      cursor:pointer; font-size:13px; letter-spacing:0.3px;">Stäng</button>
+    </div>`;
+  modal.style.display = 'flex';
+  modal.style.pointerEvents = 'all';
+  modal.querySelector('#broadcast-close-btn').onclick = () => {
+    modal.style.display = 'none';
+    modal.style.pointerEvents = 'none';
+  };
+  if (typeof playNotificationSound === 'function') playNotificationSound();
+});
+
+window.socketAPI.on('ticket:summary', (data) => {
+  const txt = document.getElementById('ticket-summary-text');
+  const panel = document.getElementById('ticket-summary-panel');
+  if (txt) {
+    txt.textContent = data.summary;
+    if (panel) panel.style.display = 'block';
+    if (typeof playNotificationSound === 'function') playNotificationSound();
+  }
+  const btn = document.getElementById('btn-summarize');
+  if (btn) btn.disabled = false;
+});
+
 // ==========================================================
 // 🎨 LIVE FÄRG-SYNK (OFFICE & AGENT)
 // ==========================================================

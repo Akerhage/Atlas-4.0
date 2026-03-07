@@ -188,8 +188,8 @@ style="width:28px; height:28px; cursor:pointer; border:none; background:transpar
 <span id="inp-office-color-hex" style="font-family:monospace; font-size:9px; opacity:0.45;">${data.office_color || '#0071e3'}</span>
 </div>
 <button class="btn-glass-icon" onclick="deleteOffice('${tag}')" title="Radera kontor permanent"
-style="color:#ff453a; border:none; background:transparent;">
-${ADMIN_UI_ICONS.DELETE}
+style="color:#ff453a; border:none; background:transparent; display:${currentUser.role === 'admin' ? 'inline-flex' : 'none'}">
+${UI_ICONS.TRASH}
 </button>
 </div>
 </div>
@@ -273,29 +273,9 @@ style="flex:1;">
 </div>
 </div>
 
-<div style="display: flex; flex-direction: column;">
-<div class="glass-panel" id="box-tickets" style="padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid ${oc}44; height: 100%; display: flex; flex-direction: column; overflow:hidden;">
-<h4 style="margin: 0 0 15px 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Aktiva Ärenden (${tickets.length})</h4>
-<div class="scroll-list">
-${tickets.length ? tickets.map((t, idx) => `
-<div class="admin-ticket-preview" onclick="openTicketReader(${idx}, '${tag}')" 
-style="border-left: 3px solid ${oc} !important; --atp-color: ${oc} !important;">
-<div style="flex:1; min-width:0;">
-<div class="atp-sender">${t.name || t.contact_name || 'Okänd kund'}</div>
-<div class="atp-subject">${t.subject || 'Inget ämne'}</div>
-</div>
-<button class="atp-note-btn" 
-onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')" 
-title="Intern anteckning"
-style="color:${oc} !important;">
-${UI_ICONS.NOTES}
-</button>
-</div>
-`).join('') : '<div class="template-item-empty" style="text-align:center;">Kön är tom ✅</div>'}
-</div>
-</div>
+<div style="display: flex; flex-direction: column; gap: 16px;">
 
-<div class="glass-panel" id="box-agents" style="padding:20px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); margin-top:16px;">
+<div class="glass-panel" id="box-agents" style="padding:20px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);">
 <h4 style="margin:0 0 12px 0; color:${oc}; font-size:11px; text-transform:uppercase;">Kopplade Agenter</h4>
 ${connectedAgents.length ? connectedAgents.map(u => `
 <div style="display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
@@ -306,9 +286,37 @@ ${u.is_online ? '<span style="width:7px;height:7px;border-radius:50%;background:
 : '<div style="opacity:0.4;font-size:12px;padding-top:6px;">Inga agenter kopplade</div>'}
 </div>
 
+<div class="glass-panel" id="box-tickets" style="padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid ${oc}44; flex:1; display: flex; flex-direction: column; overflow:hidden;">
+<h4 style="margin: 0 0 15px 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Aktiva Ärenden (${tickets.length})</h4>
+<div class="scroll-list">
+${tickets.length ? tickets.map((t, idx) => `
+<div class="admin-ticket-preview" onclick="openTicketReader(${idx}, '${tag}')"
+style="border-left: 3px solid ${oc} !important; --atp-color: ${oc} !important;">
+<div style="flex:1; min-width:0;">
+<div class="atp-sender">${t.name || t.contact_name || 'Okänd kund'}</div>
+<div class="atp-subject">${t.subject || 'Inget ämne'}</div>
+</div>
+<button class="atp-note-btn notes-trigger-btn"
+data-id="${t.conversation_id || t.id}"
+onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')"
+title="Intern anteckning"
+style="color:${oc} !important;">
+${UI_ICONS.NOTES}
+</button>
+</div>
+`).join('') : '<div class="template-item-empty" style="text-align:center;">Kön är tom ✅</div>'}
+</div>
+</div>
+
 </div>
 </div>
 </div>`;
+
+// Lysa upp notes-ikonen om kontoret har anteckningar, och ärendekorten i listan
+if (typeof refreshNotesGlow === 'function') {
+  refreshNotesGlow('office_' + tag);
+  tickets.forEach(t => { if (t.conversation_id) refreshNotesGlow(t.conversation_id); });
+}
 
 // 4. Koppla Editeringsfunktioner
 window.toggleEditMode = (boxId) => {

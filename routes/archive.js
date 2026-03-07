@@ -215,14 +215,16 @@ return res.status(500).json({ error: 'Kunde inte verifiera ärendeägarskap' });
 const now = Math.floor(Date.now() / 1000);
 
 // 🔥 FIX: Sätter is_archived = 1 i BÅDE chat_v2_state OCH local_qa_history
+const closeReason = `agent:${req.user.username}`;
 db.serialize(() => {
 // 1. Uppdatera chat_v2_state (om ärendet finns där)
 db.run(`
 UPDATE chat_v2_state
 SET is_archived = 1,
+close_reason = ?,
 updated_at = ?
 WHERE conversation_id = ?
-`, [now, conversationId], function(err) {
+`, [closeReason, now, conversationId], function(err) {
 if (err) {
 console.error("Archive Error (chat_v2_state):", err);
 return res.status(500).json({ error: "Kunde inte arkivera ärendet" });
@@ -282,6 +284,7 @@ s.office,
 s.name,
 s.email,
 s.phone,
+s.close_reason,
 o.office_color,
 c.context_data
 FROM chat_v2_state s
@@ -340,7 +343,8 @@ contact_email: locked.email || row.email || null,
 contact_phone: locked.phone || row.phone || null,
 city: locked.city || null,
 vehicle: locked.vehicle || null,
-subject: locked.subject || null
+subject: locked.subject || null,
+close_reason: row.close_reason || null
 };
 });
 

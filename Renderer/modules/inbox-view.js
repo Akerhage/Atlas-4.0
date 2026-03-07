@@ -21,6 +21,38 @@
 //   window.electronAPI.deleteQA                     — ipc-bridges.js
 // ============================================
 
+// ⚠️  ╔══════════════════════════════════════════════════════════════╗
+// ⚠️  ║     KRITISK VARNING — INKORG FÄRG- OCH ROUTING-LOGIK        ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║                                                              ║
+// ⚠️  ║  REGEL 1 — isInternal-kontrollen (ÄNDRA INTE):              ║
+// ⚠️  ║   Interna ärenden identifieras ALLTID med båda villkoren:   ║
+// ⚠️  ║     session_type === 'internal' || routing_tag === 'INTERNAL'║
+// ⚠️  ║   Båda behövs — gamla poster kan ha routing_tag='INTERNAL'  ║
+// ⚠️  ║   utan session_type, och nya kan ha tvärtom.                ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  REGEL 2 — Intern färg är ALLTID hårdkodat gul (ÄNDRA INTE):║
+// ⚠️  ║   isInternal → { main: '#f1c40f', bg: transparent, ... }   ║
+// ⚠️  ║   Gult är avsiktlig visuell signal — interna ärenden ska   ║
+// ⚠️  ║   ALDRIG ta kontorsfärgen, oavsett routing_tag-värde.       ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  REGEL 3 — Prioritetsordning för icke-interna (ÄNDRA INTE): ║
+// ⚠️  ║   styles = getAgentStyles(t.routing_tag || t.owner)         ║
+// ⚠️  ║   routing_tag = kontorets färg (STARKAST)                   ║
+// ⚠️  ║   owner = agentens färg (om inget kontor ännu)              ║
+// ⚠️  ║   LÄGG INTE TILL fler fallbacks här — styling-utils.js      ║
+// ⚠️  ║   hanterar den interna fallback-kedjan själv.               ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  REGEL 4 — Två render-kontexter i denna fil (ÄNDRA INTE):   ║
+// ⚠️  ║   a) renderInboxGroup() — grupperade köer (live/mail/claim) ║
+// ⚠️  ║      isInternal-check FINNS här (inkorgen kan ha interna)   ║
+// ⚠️  ║   b) Claimed-tickets sektion — ej intern, styles direkt     ║
+// ⚠️  ║      (claimed ärenden är alltid kundärenden, ej interna)    ║
+// ⚠️  ║   c) openInboxDetail() — detaljvy, samma prioritet          ║
+// ⚠️  ║      styles = getAgentStyles(ticket.routing_tag||ticket.owner)║
+// ⚠️  ║                                                              ║
+// ⚠️  ╚══════════════════════════════════════════════════════════════╝
+
 // ============================================================================
 // FIX 1: BADGE-HANTERING + WINDOWS TASKBAR ICON (SÄKRAD)
 // ============================================================================
@@ -192,7 +224,9 @@ content.innerHTML = `<div style="padding:15px; text-align:center; opacity:0.5; f
 } else {
 tickets.forEach(t => {
 const card = document.createElement('div');
+// ⚠️ LOCK — isInternal: Båda villkoren krävs. ÄNDRA INTE ordningen eller logiken. Se regel 1 ovan.
 const isInternal = (t.session_type === 'internal' || t.routing_tag === 'INTERNAL');
+// ⚠️ LOCK — styles: Gult för interna, getAgentStyles(routing_tag||owner) för övriga. Se reglerna 2-3 ovan.
 const styles = isInternal ? { main: '#f1c40f', bg: 'transparent', border: 'rgba(241,196,15,0.3)', bubbleBg: 'rgba(241,196,15,0.15)' } : getAgentStyles(t.routing_tag || t.owner);
 
 // Deklarera variablerna innan de används i HTML
@@ -402,7 +436,8 @@ container.classList.add('bulk-mode-active');
 tickets.forEach(t => {
 const card = document.createElement('div');
 
-// 🔥 DIN ORIGINAL-MAPPING - EXAKT SOM DU SKREV DEN
+// ⚠️ LOCK — styles (claimed-kö): Claimed ärenden är alltid kundärenden, ingen isInternal-check behövs här.
+// Prioritet: routing_tag (kontorsfärg, starkast) → owner (agentfärg). ÄNDRA INTE fallback-kedjan.
 const styles = getAgentStyles(t.routing_tag || t.owner);
 const timeStr = new Date(t.updated_at * 1000).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
 const dateStr = new Date(t.updated_at * 1000).toLocaleDateString('sv-SE');
@@ -555,6 +590,8 @@ placeholder.style.display = 'none';
 detailView.style.display = 'flex';
 detailView.setAttribute('data-current-id', ticket.conversation_id);
 
+// ⚠️ LOCK — styles (detaljvy): Samma prioritet som kortet. routing_tag → owner. ÄNDRA INTE.
+// Inkorgens detaljvy visar ej interna ärenden (de öppnas via Mina Ärenden) → ingen isInternal-check.
 const styles = getAgentStyles(ticket.routing_tag || ticket.owner);
 detailView.className = 'template-editor-container';
 detailView.setAttribute('data-owner', ticket.owner || 'unclaimed');
@@ -665,31 +702,53 @@ bodyContent = `<div class="inbox-chat-history" style="padding:10px 5px;">${chatH
 <div id="typing-indicator-${ticket.conversation_id}" style="display:none; padding:4px 14px 8px; font-size:12px; font-style:italic; color:${styles.main}; opacity:0.75;">✍️ Kunden skriver...</div>`;
 }
 
-// Villkor för Snabbsvar: admin/agent + chattärende (customer) + ej plockat
+// Villkor för Snabbsvar: chatt (customer) eller mailärende (message) med e-post
+const isMailTicket = ticket.session_type === 'message' && !!ticket.contact_email;
 const canQuickReply = ['admin', 'agent'].includes(currentUser?.role)
-&& ticket.session_type === 'customer';
+&& (ticket.session_type === 'customer' || isMailTicket);
+
+const msgs = ticket.messages || [];
+const totalChars = msgs.reduce((acc, m) => acc + (m.content || m.text || '').length, 0);
+const isLongEnough = msgs.length >= 5 || totalChars >= 400;
 
 const content = document.createElement('div');
 content.className = 'detail-container';
 content.innerHTML = `
 ${renderDetailHeader(ticket, styles, topActionBtn)}
+${isLongEnough ? `
+<div id="ticket-summary-panel" style="display:none; margin:0 16px 10px; padding:10px 14px;
+border-radius:8px; background:${styles.main}11; border:1px solid ${styles.border};
+font-size:13px; line-height:1.6; color:var(--text-secondary);">
+<span style="font-size:11px; font-weight:600; color:${styles.main}; text-transform:uppercase;
+letter-spacing:0.5px; display:block; margin-bottom:6px;">AI Sammanfattning</span>
+<span id="ticket-summary-text"></span>
+</div>` : ''}
 <div class="detail-body scroll-list" id="inbox-detail-body">
 ${bodyContent}
 </div>
 ${canQuickReply ? `
-<div id="quick-reply-area" style="padding:8px 16px; border-top:1px solid ${styles.border}; background:${styles.bg}; display:flex; align-items:flex-end; gap:8px;">
-<textarea id="quick-reply-input" placeholder="Snabbsvar... (Ctrl+Enter)"
+<div id="quick-reply-area" style="padding:8px 16px; border-top:1px solid ${styles.border}; background:${styles.bg}; display:flex; flex-direction:column; gap:4px;">
+${isMailTicket ? `<div style="font-size:11px; color:var(--text-secondary); opacity:0.55; padding:0 2px;">Till: ${ticket.contact_email}</div>` : ''}
+<div style="display:flex; align-items:flex-end; gap:8px;">
+<textarea id="quick-reply-input" placeholder="${isMailTicket ? 'Skriv mailsvar... (Ctrl+Enter)' : 'Snabbsvar... (Ctrl+Enter)'}"
 style="flex:1; min-height:44px; max-height:120px; resize:vertical; padding:8px 10px; border-radius:8px;
 background:rgba(255,255,255,0.07); border:1px solid ${styles.border};
 color:var(--text-primary); font-size:13px; font-family:inherit; box-sizing:border-box;"></textarea>
+<button id="btn-quick-reply-ai" title="AI Förslag" style="flex-shrink:0; width:36px; height:36px;
+border-radius:8px; background:rgba(255,255,255,0.07); border:1px solid ${styles.border};
+color:${styles.main}; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+${UI_ICONS.AI}
+</button>
 <button id="btn-quick-reply-send" title="Skicka svar" style="flex-shrink:0; width:36px; height:36px; border-radius:8px;
 background:${styles.main}; color:white; border:none; cursor:pointer;
 display:flex; align-items:center; justify-content:center;">
 ${UI_ICONS.SEND}
 </button>
+</div>
 </div>` : ''}
 <div class="detail-footer-area">
 <div class="detail-footer-toolbar" style="padding: 12px 20px; border-top:1px solid var(--border-color); background:rgba(0,0,0,0.25); display:flex; justify-content:flex-end; gap:12px;">
+${isLongEnough ? `<button class="footer-icon-btn" id="btn-summarize" title="AI Sammanfattning">${UI_ICONS.AI}</button>` : ''}
 <button class="footer-icon-btn btn-archive-red" id="btn-archive" title="Arkivera">${UI_ICONS.ARCHIVE}</button>
 <button class="footer-icon-btn danger" id="btn-delete" title="Ta bort permanent">${UI_ICONS.TRASH}</button>
 </div>
@@ -717,10 +776,20 @@ method: 'POST', headers: fetchHeaders,
 body: JSON.stringify({ conversationId: ticket.conversation_id, agentName: currentUser.username })
 });
 // 2. Skicka svaret via socket
+if (isMailTicket) {
+window.socketAPI.emit('team:send_email_reply', {
+conversationId: ticket.conversation_id,
+message: msg,
+html: msg.replace(/\n/g, '<br>'),
+customerEmail: ticket.contact_email,
+subject: 'Re: ' + (ticket.subject || ticket.question || 'Ditt ärende')
+});
+} else {
 window.socketAPI.emit('team:agent_reply', {
 conversationId: ticket.conversation_id,
 message: msg
 });
+}
 // Stäng detail + ladda om inkorg (ärendet försvinner dit — det är nu i Mina Ärenden)
 clearDetailView();
 renderInbox();
@@ -739,13 +808,48 @@ if (qrInput) {
 qrInput.addEventListener('keydown', (e) => {
 if (e.ctrlKey && e.key === 'Enter') quickReply();
 });
-// Meddela kunden att agenten skriver
+// Meddela kunden att agenten skriver (bara för chattärenden)
+if (!isMailTicket) {
 qrInput.addEventListener('input', () => {
 if (window.socketAPI) {
 window.socketAPI.emit('team:agent_typing', { sessionId: ticket.conversation_id });
 }
 });
 }
+}
+// AI-knapp för snabbsvar i inkorg
+const btnQrAI = document.getElementById('btn-quick-reply-ai');
+if (btnQrAI) {
+btnQrAI.onclick = () => {
+const inp = document.getElementById('quick-reply-input');
+if (!inp) return;
+const lastUser = [...(ticket.messages || [])].reverse().find(m => m.role === 'user');
+const originalMsg = lastUser?.content || ticket.last_message || '';
+if (!originalMsg) { showToast('Ingen kundtext att basera förslag på.'); return; }
+inp.value = '🤖 Tänker... (Hämtar AI-förslag)';
+inp.disabled = true;
+window.socketAPI.emit('team:email_action', {
+conversationId: ticket.conversation_id,
+action: 'draft',
+content: originalMsg
+});
+};
+}
+}
+
+// AI Sammanfattning — inkorg
+const btnSumInbox = document.getElementById('btn-summarize');
+if (btnSumInbox) {
+  btnSumInbox.onclick = () => {
+    btnSumInbox.disabled = true;
+    const panel = document.getElementById('ticket-summary-panel');
+    const txt = document.getElementById('ticket-summary-text');
+    if (panel && txt) { panel.style.display = 'block'; txt.textContent = '🤖 Sammanfattar...'; }
+    window.socketAPI.emit('team:summarize_ticket', {
+      conversationId: ticket.conversation_id,
+      messages: ticket.messages || []
+    });
+  };
 }
 
 const clearDetailView = () => {

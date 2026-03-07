@@ -18,6 +18,7 @@ let _customerItems    = [];
 let _currentTickets   = [];
 let _currentTicketIdx = 0;
 let _currentCustomerObj = null;
+let _aiSummaryCache = {}; // email → summering (överlever ticket-navigering)
 
 // ============================================================================
 // RENDER CUSTOMER LIST — Hämtar data i bakgrunden, visar TOM lista vid start
@@ -414,6 +415,7 @@ const tStyles = (typeof currentUser !== 'undefined' && currentUser.username)
 const titleDisplay = t.subject || t.question || 'Ärende';
 const hasPrev      = idx > 0;
 const hasNext      = idx < _currentTickets.length - 1;
+const hasHistory   = _currentTickets.length >= 2;
 
 // Skapa eller återanvänd modal-overlay (samma mönster som admin-reader.js)
 let modal = document.getElementById('customer-reader-modal');
@@ -497,6 +499,11 @@ ${t.is_archived === 1
 
 <!-- Höger: notes + paginering — aldrig krympt -->
 <div style="display:flex; align-items:center; gap:4px; flex-shrink:0; margin-left:8px;">
+${hasHistory ? `<button class="btn-glass-icon" id="cust-reader-ai-btn"
+title="AI-summering av kund"
+style="color:${tStyles.main}; border-color:${tStyles.border};">
+${UI_ICONS.AI}
+</button>` : ''}
 <button class="btn-glass-icon notes-trigger-btn"
 data-id="${t.conversation_id}"
 onclick="openNotesModal('${t.conversation_id}')"
@@ -522,6 +529,17 @@ ${ADMIN_UI_ICONS.ARROW_RIGHT}
 </div>
 </div>
 
+${hasHistory ? `
+<div id="cust-ai-panel" style="display:${_aiSummaryCache[_currentCustomerObj?.email] ? 'block' : 'none'};
+padding:10px 18px; border-bottom:1px solid rgba(0,113,227,0.15);
+background:rgba(0,113,227,0.06); flex-shrink:0;">
+<span style="font-size:10px; font-weight:600; color:#0071e3; text-transform:uppercase;
+letter-spacing:0.5px; display:block; margin-bottom:4px;">AI Kundanalys</span>
+<span id="cust-ai-text" style="font-size:12px; line-height:1.65; color:var(--text-secondary);">
+${_aiSummaryCache[_currentCustomerObj?.email] || ''}
+</span>
+</div>` : ''}
+
 <!-- MEDDELANDEBUBBLAR -->
 <div style="flex:1; overflow-y:auto; padding:16px 18px;
 display:flex; flex-direction:column; gap:10px; min-height:0;">
@@ -546,6 +564,33 @@ const prevBtn = modal.querySelector('#cust-reader-prev');
 const nextBtn = modal.querySelector('#cust-reader-next');
 if (prevBtn && hasPrev) prevBtn.onclick = () => { _currentTicketIdx--; _renderCustomerReaderModal(); };
 if (nextBtn && hasNext) nextBtn.onclick = () => { _currentTicketIdx++; _renderCustomerReaderModal(); };
+
+// AI-summering av hela kundhistoriken (cachas per email, överlever ticket-navigering)
+const aiBtn = modal.querySelector('#cust-reader-ai-btn');
+if (aiBtn) {
+  aiBtn.onclick = async () => {
+    const email = _currentCustomerObj?.email;
+    aiBtn.disabled = true;
+    const panel = modal.querySelector('#cust-ai-panel');
+    const txt   = modal.querySelector('#cust-ai-text');
+    if (panel && txt) { panel.style.display = 'block'; txt.textContent = '🤖 Analyserar...'; }
+    try {
+      const r = await fetch(`${SERVER_URL}/api/customers/summarize`, {
+        method: 'POST',
+        headers: { ...fetchHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await r.json();
+      const summary = data.summary || data.error || 'Inget svar.';
+      if (email) _aiSummaryCache[email] = summary; // Cacha för navigering
+      if (txt) txt.textContent = summary;
+    } catch (e) {
+      if (txt) txt.textContent = 'Kunde inte nå servern.';
+    } finally {
+      aiBtn.disabled = false;
+    }
+  };
+}
 
 // ESC stänger
 const escHandler = (e) => {

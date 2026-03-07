@@ -4,6 +4,60 @@
 //              detaljvy för agentens egna ärenden
 // ANVÄNDS AV: renderer.js
 // ============================================
+//
+// ⚠️  ╔══════════════════════════════════════════════════════════════╗
+// ⚠️  ║    KRITISK VARNING — FÄRG- OCH ROUTING-LOGIK                ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║                                                              ║
+// ⚠️  ║  FÄRGSYSTEMET I ATLAS ÄR GENOMTÄNKT OCH TESTAT.             ║
+// ⚠️  ║  ÄNDRA INGENTING NEDAN UTAN ATT LÄSA HELA DETTA BLOCK.      ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  REGEL 1 — isInternal-CHECK (ÄNDRA INTE):                  ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║   session_type === 'internal'  → agent skickade internt     ║
+// ⚠️  ║   routing_tag  === 'INTERNAL'  → legacy-flagga (backup)     ║
+// ⚠️  ║   _isLocal     === true        → lokal IPC-post (Electron)  ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  Alla tre fall → gul färg (#f1c40f). Det är DESIGN.        ║
+// ⚠️  ║  Gult signalerar internt/privat för agenten. Ändra inte.    ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  REGEL 2 — FÄRGPRIORITET FÖR ICKE-INTERNA ÄRENDEN:         ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║   getAgentStyles(t.routing_tag || t.owner || myName)        ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║   routing_tag → kontorets färg  (starkaste källan)          ║
+// ⚠️  ║   owner       → agentens personliga färg (fallback)         ║
+// ⚠️  ║   myName      → inloggad agents färg (sista fallback)       ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║   ❌ Lägg INTE till owner-logik i kontorets ställe.         ║
+// ⚠️  ║   ❌ Byt INTE ordning — routing_tag MÅSTE vara först.       ║
+// ⚠️  ║   ❌ Ta INTE bort || myName — det förhindrar att ärenden    ║
+// ⚠️  ║      utan kontor/ägare hamnar i "unclaimed"-röd.            ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  REGEL 3 — BUBBLEFÄRGER I DETALJVYN:                       ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║   Interna ärenden:                                          ║
+// ⚠️  ║     VÄNSTER (avsändare): internalSenderStyles               ║
+// ⚠️  ║       = getAgentStyles(ticket.sender || '')                 ║
+// ⚠️  ║     HÖGER  (ägare/mottagare): internalOwnerStyles           ║
+// ⚠️  ║       = getAgentStyles(ticket.owner || currentUser.username) ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║   Vanliga ärenden (chatt + mail):                           ║
+// ⚠️  ║     ALLA bubblor → styles (ärendets temafärg)               ║
+// ⚠️  ║   ❌ Använd INTE getAgentStyles(m.sender) för vanliga        ║
+// ⚠️  ║      ärenden — m.sender är ofta undefined och ger fel.      ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  REGEL 4 — MAILÄRENDEN (isMail = session_type 'message'):   ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║   Mail-blocket (if isMail) är SEPARAT från chat-blocket.    ║
+// ⚠️  ║   Mail-bubblorna använder alltid styles.main/.bubbleBg/.    ║
+// ⚠️  ║   border — aldrig internalSenderStyles/internalOwnerStyles. ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╚══════════════════════════════════════════════════════════════╝
 // Beroenden (löses vid anropstid):
 //   State, DOM, currentUser, isBulkMode,           — renderer.js globals
 //   selectedTicketIds, SERVER_URL, fetchHeaders     — renderer.js globals
@@ -107,10 +161,21 @@ return;
 
 tickets.forEach((t, index) => {
 const myName = currentUser.username;
+
+// ⚠️ LOCK — isInternal: Avgör om ärendet är privat/internt (se filhuvudet för regler)
+// ❌ ÄNDRA INTE ordningen eller villkoren — alla tre fall måste täckas.
 const isInternal = (t.session_type === 'internal' || t.routing_tag === 'INTERNAL');
+
+// ⚠️ LOCK — styles: getAgentStyles(routing_tag || owner || myName)
+// routing_tag = kontorsfärg (starkast) → owner = agentfärg → myName = sista fallback
+// Interna ärenden: alltid hårdkodat gul (#f1c40f) — ÄNDRA INTE hex-värdet.
+// ❌ Byt INTE ordning på routing_tag/owner/myName — routing_tag MÅSTE prövas först.
 const styles = isInternal ? { main: '#f1c40f', bg: 'transparent', border: 'rgba(241,196,15,0.3)', bubbleBg: 'rgba(241,196,15,0.15)' } : getAgentStyles(t.routing_tag || t.owner || myName);
 
-// Visa kontoret (routing_tag) på kortet. Interna ärenden visar avsändarens visningsnamn.
+// ⚠️ LOCK — tagText: Visa kontorets korta namn (routing_tag) på kortet.
+// Interna ärenden: visa avsändarens visningsnamn istf kontoret.
+// resolveLabel() slår upp routing_tag → area/city → förkortat displaynamn.
+// ❌ Använd INTE t.owner direkt som tag — det är agentnamnet, inte kontorets namn.
 const tagText = (t.session_type === 'internal')
 ? (() => { const u = usersCache.find(u => u.username === (t.sender || t.owner)); return (u?.display_name || t.sender || t.owner || 'INTERN').toUpperCase(); })()
 : resolveLabel(t.routing_tag || t.owner || myName);
@@ -263,17 +328,25 @@ placeholder.style.display = 'none';
 detail.style.display = 'flex';
 detail.setAttribute('data-current-id', ticket.conversation_id);
 
-// 1. STILAR & FÄRG (FIX FÖR GULT & INGEN LINJE)
-// Vi inkluderar _isLocal här så att dina egna Ida-chattar blir gula
+// ⚠️ LOCK — DETALJVYNS FÄRGLOGIK (ÄNDRA INTE UTAN ATT LÄSA FILHUVUDET)
+//
+// isInternal: inkluderar _isLocal för att lokala IPC-poster (Electron) också blir gula.
+// I detaljvyn är det EXTRA viktigt: _isLocal finns inte i server-data men kan sättas
+// av archive-view.js på lokala poster — ändra aldrig utan att kontrollera båda ställen.
+// ❌ Ta INTE bort || ticket._isLocal — det bryter färgvisning för lokala Electron-poster.
 const isInternal = (ticket.session_type === 'internal' || ticket.routing_tag === 'INTERNAL' || ticket._isLocal);
 
 const internalYellow = {
 main: '#f1c40f',
-bg: 'transparent', // Ingen bakgrundsfärg som kan läcka
+bg: 'transparent',
 border: 'rgba(241, 196, 15, 0.3)',
 bubbleBg: 'rgba(241, 196, 15, 0.15)'
 };
 
+// ⚠️ LOCK — styles för detaljvyn: routing_tag || owner (ingen myName-fallback här)
+// Skillnad mot kortvyn: här används INTE || myName som sista fallback.
+// Det är avsiktligt — detaljvyn skall inte visa inloggad agents färg på andras ärenden.
+// ❌ Lägg INTE till || currentUser.username eller liknande som extra fallback.
 let styles = isInternal ? internalYellow : getAgentStyles(ticket.routing_tag || ticket.owner);
 
 detail.classList.add('template-editor-container');
@@ -324,13 +397,24 @@ ${!isUser ? '<div class="msg-avatar" style="background:#3a3a3c; margin-left:10px
 }
 } else {
 // --- CHATT (MINA ÄRENDEN) ---
-const messages = ticket.messages || []; 
+const messages = ticket.messages || [];
+
+// ⚠️ LOCK — BUBBLEFÄRGER FÖR INTERNA ÄRENDEN
+// Interna ärenden: varje agent får sin personliga färg på sina bubblor.
+//   internalSenderStyles = avsändarens agentfärg (vänster bubbla)
+//   internalOwnerStyles  = ägarens/mottagarens agentfärg (höger bubbla)
+// För icke-interna ärenden: båda är null → senderStyles = styles (ärendets temafärg).
+// ❌ Använd INTE getAgentStyles(m.sender) för icke-interna ärenden —
+//    m.sender är undefined på kundmeddelanden och ger fel "unclaimed"-röd färg.
+const internalSenderStyles = isInternal ? getAgentStyles(ticket.sender || '') : null;
+const internalOwnerStyles  = isInternal ? getAgentStyles(ticket.owner  || currentUser.username) : null;
+
 messages.forEach(m => {
 const time = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }) : '';
 const dateStrMsg = m.timestamp ? new Date(m.timestamp).toLocaleDateString('sv-SE') : '';
 
 let isUser = (m.role === 'user');
-let rowDisplayTitle = displayTitle; 
+let rowDisplayTitle = displayTitle;
 
 if (isInternal) {
 if (m.sender && m.sender.toLowerCase() !== currentUser.username.toLowerCase()) {
@@ -341,16 +425,19 @@ isUser = false;
 }
 }
 
-const senderStyles = isInternal ? internalYellow : (isUser ? getAgentStyles(m.sender) : styles);
+// ⚠️ LOCK — senderStyles: ALLTID styles för icke-interna ärenden.
+// ❌ Använd INTE getAgentStyles(m.sender) här — bryter färg för kundchattar.
+// ❌ Skilj INTE på isUser=true/false för icke-interna — båda skall ha styles.
+const senderStyles = isInternal ? internalSenderStyles : styles;
 const leftInitial = rowDisplayTitle ? rowDisplayTitle.charAt(0).toUpperCase() : 'K';
-const userAvatar = `<div class="msg-avatar" style="background:${senderStyles.main}; color:white; margin-right:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; flex-shrink:0;">${leftInitial}</div>`;
+const userAvatar = `<div class="msg-avatar" style="background:${senderStyles.main}; color:black; font-weight:800; margin-right:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0;">${leftInitial}</div>`;
 
 let rightAvatarContent = '🤖';
 let rightAvatarStyle = 'background:#3a3a3c;';
 
 if (isInternal && !isUser) {
-rightAvatarContent = currentUser.username.charAt(0).toUpperCase();
-rightAvatarStyle = `background:${styles.main}; color:white; font-weight:bold;`;
+rightAvatarContent = (typeof formatName === 'function' ? formatName(ticket.owner || currentUser.username) : (ticket.owner || currentUser.username)).charAt(0).toUpperCase();
+rightAvatarStyle = `background:${internalOwnerStyles.main}; color:black; font-weight:800;`;
 }
 
 const atlasAvatar = `<div class="msg-avatar" style="${rightAvatarStyle} margin-left:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0;">${rightAvatarContent}</div>`;
@@ -359,8 +446,9 @@ const content = formatAtlasMessage(m.text || m.content || "").trim();
 if (isUser) {
 bodyContent += `<div class="msg-row user" style="display:flex; width:100% !important; margin-bottom:12px; justify-content:flex-start;">${userAvatar}<div style="display:flex; flex-direction:column; align-items:flex-start; max-width:75%;"><div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-left:4px;"><b>${rowDisplayTitle || 'Kund'}</b> • ${dateStrMsg} ${time}</div><div class="bubble" style="background:${senderStyles.bubbleBg} !important; border:1px solid ${senderStyles.border} !important; color:var(--text-primary) !important;">${content}</div></div></div>`;
 } else {
-const senderLabel = isInternal ? 'Du' : 'Atlas';
-bodyContent += `<div class="msg-row atlas" style="display:flex; width:100% !important; margin-bottom:12px; justify-content:flex-end;"><div style="display:flex; flex-direction:column; align-items:flex-end; max-width:75%;"><div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-right:4px;">${senderLabel} • ${time}</div><div class="bubble" style="background:${styles.bubbleBg} !important; border:1px solid ${styles.border} !important; color:var(--text-primary) !important;">${content}</div></div>${atlasAvatar}</div>`;
+const senderLabel = isInternal ? (typeof formatName === 'function' ? formatName(ticket.owner || currentUser.username) : (ticket.owner || currentUser.username)) : 'Atlas';
+const rightBubbleStyles = (isInternal && internalOwnerStyles) ? internalOwnerStyles : styles;
+bodyContent += `<div class="msg-row atlas" style="display:flex; width:100% !important; margin-bottom:12px; justify-content:flex-end;"><div style="display:flex; flex-direction:column; align-items:flex-end; max-width:75%;"><div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:2px; padding-right:4px;">${senderLabel} • ${time}</div><div class="bubble" style="background:${rightBubbleStyles.bubbleBg} !important; border:1px solid ${rightBubbleStyles.border} !important; color:var(--text-primary) !important;">${content}</div></div>${atlasAvatar}</div>`;
 }
 });
 }
@@ -373,10 +461,22 @@ if (State.templates) {
 State.templates.forEach(t => { templateOptions += `<option value="${t.id}">${t.title}</option>`; });
 }
 
+const msgs = ticket.messages || [];
+const totalChars = msgs.reduce((acc, m) => acc + (m.content || m.text || '').length, 0);
+const isLongEnough = msgs.length >= 5 || totalChars >= 400;
+
 const contentBox = document.createElement('div');
 contentBox.className = 'detail-container';
 contentBox.innerHTML = `
 ${renderDetailHeader(ticket, styles)}
+${isLongEnough ? `
+<div id="ticket-summary-panel" style="display:none; margin:0 20px 12px; padding:12px 16px;
+border-radius:8px; background:${styles.main}11; border:1px solid ${styles.border};
+font-size:13px; line-height:1.6; color:var(--text-secondary);">
+<span style="font-size:11px; font-weight:600; color:${styles.main}; text-transform:uppercase;
+letter-spacing:0.5px; display:block; margin-bottom:6px;">AI Sammanfattning</span>
+<span id="ticket-summary-text"></span>
+</div>` : ''}
 <div class="detail-body scroll-list" id="my-chat-scroll-area">
 ${bodyContent}
 </div>
@@ -391,7 +491,8 @@ ${!ticket.is_archived ? '<p style="font-size:10px; opacity:0.3; text-align:right
 <div style="display:flex; justify-content: space-between; align-items:center; padding: 0 20px 15px 20px;">
 <div style="flex:1; max-width:60%;"><select id="quick-template-select" class="filter-select">${templateOptions}</select></div>
 <div style="display:flex; gap:10px;">
-${isMail ? `<button type="button" class="footer-icon-btn" id="btn-ai-draft" title="AI Förslag">${UI_ICONS.AI}</button>` : ''}
+${!ticket.is_archived ? `<button type="button" class="footer-icon-btn" id="btn-ai-draft" title="AI Förslag">${UI_ICONS.AI}</button>` : ''}
+${isLongEnough ? `<button type="button" class="footer-icon-btn" id="btn-summarize" title="AI Sammanfattning">${UI_ICONS.AI}</button>` : ''}
 <button type="button" class="footer-icon-btn btn-archive-red" id="btn-archive-my" title="Arkivera">${UI_ICONS.ARCHIVE}</button>
 <button type="button" class="footer-icon-btn danger" id="btn-delete-my" title="Radera">${UI_ICONS.TRASH}</button>
 </div>
@@ -536,19 +637,42 @@ activeTemplateHtml = null; // Nollställ
 
 // 3. AI TROLLSTAV
 const btnAI = document.getElementById('btn-ai-draft');
-if (btnAI && isMail) {
+if (btnAI) {
 btnAI.onclick = () => {
 const inp = document.getElementById('my-ticket-chat-input');
-const originalMsg = ticket.messages && ticket.messages.length > 0 ? ticket.messages[0].content : ticket.last_message;
-inp.value = "🤖 Tänker så det knakar... (Hämtar AI-svar)";
+if (!inp) return;
+// Mail: första meddelandet. Chatt: sista kund-meddelandet.
+let originalMsg = '';
+if (isMail) {
+  originalMsg = ticket.messages?.[0]?.content || ticket.last_message || '';
+} else {
+  const lastUser = [...(ticket.messages || [])].reverse().find(m => m.role === 'user');
+  originalMsg = lastUser?.content || ticket.last_message || '';
+}
+if (!originalMsg) { showToast('Ingen kundtext att basera förslag på.'); return; }
+inp.value = '🤖 Tänker så det knakar... (Hämtar AI-svar)';
 inp.disabled = true;
-
-window.socketAPI.emit('team:email_action', { 
-conversationId: ticket.conversation_id, 
+window.socketAPI.emit('team:email_action', {
+conversationId: ticket.conversation_id,
 action: 'draft',
-content: originalMsg 
+content: originalMsg
 });
 };
+}
+
+// 3b. AI Sammanfattning
+const btnSum = document.getElementById('btn-summarize');
+if (btnSum) {
+  btnSum.onclick = () => {
+    btnSum.disabled = true;
+    const panel = document.getElementById('ticket-summary-panel');
+    const txt = document.getElementById('ticket-summary-text');
+    if (panel && txt) { panel.style.display = 'block'; txt.textContent = '🤖 Sammanfattar...'; }
+    window.socketAPI.emit('team:summarize_ticket', {
+      conversationId: ticket.conversation_id,
+      messages: ticket.messages || []
+    });
+  };
 }
 
 // 4. Arkivera (Direkt utan bekräftelsepopup — toast visas istället)

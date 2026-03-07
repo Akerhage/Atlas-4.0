@@ -9,7 +9,10 @@
       "Bash(node tests/scripts/audit_diagnose.js:*)",
       "Bash(node:*)",
       "Bash(grep:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(wc:*)",
+      "Bash(du:*)",
+      "Bash(find:*)"
     ]
   }
 }

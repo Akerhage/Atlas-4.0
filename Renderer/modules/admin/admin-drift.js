@@ -67,10 +67,10 @@ const checked = value === true || value === 'true';
 return `
 <div class="admin-config-row" style="margin-bottom:18px;">
 <label style="font-size:13px; color:var(--text-secondary); margin-bottom:6px; display:block;">${label}</label>
-<div style="display:flex; align-items:center; gap:12px;">
+<div style="display:flex; align-items:center; gap:12px; width:100%;">
 <input type="checkbox" id="drift-${id}" ${checked ? 'checked' : ''} disabled>
 <span style="font-size:13px;" id="drift-${id}-label">${checked ? 'Aktiverad' : 'Avaktiverad'}</span>
-<button class="admin-lock-btn" id="drift-lock-${id}" onclick="unlockDriftField('${id}','${field}')">🔒 Låst</button>
+<button class="admin-lock-btn" id="drift-lock-${id}" style="margin-left:auto;" onclick="unlockDriftField('${id}','${field}')">🔒 Låst</button>
 <button class="btn-glass-small" style="display:none;" id="drift-save-${id}" onclick="saveDriftFieldAndLock('${id}','${field}')">Spara</button>
 </div>
 </div>`;
@@ -81,9 +81,9 @@ const extras = inputType === 'number' ? 'min="1" max="168"' : '';
 return `
 <div class="admin-config-row" style="margin-bottom:18px;">
 <label style="font-size:13px; color:var(--text-secondary); margin-bottom:6px; display:block;">${label}</label>
-<div style="display:flex; align-items:center; gap:8px;">
+<div style="display:flex; align-items:center; gap:8px; width:100%;">
 <input type="${actualType}" id="drift-${id}" class="admin-config-field" value="${value}" ${extras} style="${extraStyle}" disabled>
-<button class="admin-lock-btn" id="drift-lock-${id}" onclick="unlockDriftField('${id}','${field}')">🔒 Låst</button>
+<button class="admin-lock-btn" id="drift-lock-${id}" style="margin-left:auto;" onclick="unlockDriftField('${id}','${field}')">🔒 Låst</button>
 <button class="btn-glass-small" style="display:none;" id="drift-save-${id}" onclick="saveDriftFieldAndLock('${id}','${field}')">Spara</button>
 </div>
 </div>`;
@@ -105,7 +105,45 @@ ${buildDriftLockRow('backup-interval', 'backup_interval_hours', 'Backup-interval
 ${buildDriftLockRow('backup-path', 'backup_path', 'Backup-sökväg', s.backup_path, 'text')}
 ${buildDriftLockRow('jwt', 'jwt_expires_in', 'JWT-livslängd (t.ex. 24h, 7d)', s.jwt_expires_in, 'jwt')}
 ${buildDriftLockRow('auto-exit', 'auto_human_exit', 'Auto-Human-Exit (återgå till AI när alla ärenden stängs)', s.auto_human_exit, 'checkbox')}
+<hr style="border:none; border-top:1px solid rgba(255,255,255,0.07); margin:24px 0;">
+<h4 style="margin:0 0 8px 0; font-size:12px; text-transform:uppercase;
+letter-spacing:0.5px; color:var(--accent-primary);">📢 Skicka systemmeddelande</h4>
+<p style="font-size:12px; color:var(--text-secondary); opacity:0.65; margin:0 0 12px 0;">
+  Skickar ett popup-meddelande med plingljud till alla agenter som är inloggade just nu.
+</p>
+<textarea id="broadcast-message-input" rows="3"
+placeholder="Skriv ditt meddelande här..."
+style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px;
+resize:vertical; border:1px solid rgba(255,255,255,0.12);
+background:rgba(255,255,255,0.04); color:var(--text-primary);
+font-size:13px; font-family:inherit; outline:none; margin-bottom:10px;"></textarea>
+<div style="display:flex; align-items:center; gap:12px;">
+<button id="broadcast-send-btn" style="padding:9px 20px; border-radius:8px;
+background:var(--accent-primary); color:black; font-weight:700; border:none;
+cursor:pointer; font-size:13px;">Skicka till alla agenter</button>
+<span id="broadcast-confirm"
+style="display:none; font-size:12px; color:#4cd964;">✅ Skickat!</span>
+</div>
 </div>
 </div>
 `;
+
+// Broadcast-knapp logik
+const broadcastBtn = detailBox.querySelector('#broadcast-send-btn');
+const broadcastInput = detailBox.querySelector('#broadcast-message-input');
+const broadcastConfirm = detailBox.querySelector('#broadcast-confirm');
+if (broadcastBtn && broadcastInput) {
+  broadcastBtn.onclick = () => {
+    const msg = broadcastInput.value.trim();
+    if (!msg) return;
+    broadcastBtn.disabled = true;
+    window.socketAPI.emit('admin:broadcast', { message: msg });
+    broadcastInput.value = '';
+    if (broadcastConfirm) {
+      broadcastConfirm.style.display = 'inline';
+      setTimeout(() => { broadcastConfirm.style.display = 'none'; }, 3000);
+    }
+    setTimeout(() => { broadcastBtn.disabled = false; }, 2000);
+  };
+}
 }

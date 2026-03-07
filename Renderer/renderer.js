@@ -4,7 +4,7 @@
 // ANVÄNDS AV: index.html (Electron renderer process)
 // SENAST STÄDAD: 2026-02-27
 // ============================================
-const ATLAS_VERSION = '3.14'; // Centralt versionsnummer — uppdatera ENDAST här
+const ATLAS_VERSION = '4.0'; // Centralt versionsnummer — uppdatera ENDAST här
 // AVATAR_ICONS, UI_ICONS, ADMIN_UI_ICONS → flyttade till modules/ui-constants.js
 
 // =============================================================================
@@ -154,7 +154,7 @@ throw err;
 
 const isElectron = (typeof window.electronAPI !== 'undefined');
 // Ljudfil för notifieringar
-const NOTIFICATION_SOUND = "assets/js/pling.mp3";
+const NOTIFICATION_SOUND = "assets/audio/pling-1.mp3"; // Fallback om localStorage saknas
 
 // ==========================================================
 // === 1. NÄTVERK & MILJÖKONFIGURATION ===
@@ -550,12 +550,11 @@ detEl.removeAttribute('data-current-id');
 // =============================================================================
 // Spela upp notisljud
 function playNotificationSound() {
-// Kontrollera att NOTIFICATION_SOUND är definierad högst upp i filen
-if (typeof NOTIFICATION_SOUND === 'undefined') return;
-
+// Läser valt ljud från localStorage, faller tillbaka på NOTIFICATION_SOUND-konstanten
+const sound = localStorage.getItem('atlas-sound') || NOTIFICATION_SOUND;
 try {
-const audio = new Audio(NOTIFICATION_SOUND);
-audio.volume = 0.5; // Justera volym (0.0 - 1.0)
+const audio = new Audio(sound);
+audio.volume = 0.5;
 audio.play().catch(e => console.warn("Kunde inte spela ljud (Autoplay policy?):", e));
 } catch (err) {
 console.error("Ljudfel:", err);
@@ -1657,13 +1656,14 @@ if (modal) modal.style.display = 'flex';
 
 // Lista på alla fält som ska trigga automatisk uppdatering vid ändring
 const filterIds = [
-'filter-type', 
-'filter-agent', 
-'filter-vehicle', 
+'filter-type',
+'filter-agent',
+'filter-vehicle',
 'filter-city',
-'filter-office', 
-'filter-date-start', 
-'filter-date-end'
+'filter-office',
+'filter-date-start',
+'filter-date-end',
+'archive-show-ai'
 ];
 
 filterIds.forEach(id => {

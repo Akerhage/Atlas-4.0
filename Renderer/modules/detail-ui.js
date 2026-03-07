@@ -124,6 +124,26 @@ if (phone) {
 pills += `<span class="pill">${UI_ICONS.PHONE} ${phone}</span>`;
 }
 
+// 7. AVSLUTNINGSORSAK (Garaget — visas om close_reason finns)
+if (item.close_reason) {
+let closedLabel = '';
+let closedIcon = '🔒';
+if (item.close_reason === 'inactivity') {
+closedLabel = 'Stängd: inaktivitet';
+closedIcon = '⏱️';
+} else if (item.close_reason === 'customer') {
+closedLabel = 'Kunden avslutade';
+closedIcon = '👋';
+} else if (item.close_reason.startsWith('agent:')) {
+const agentName = item.close_reason.replace('agent:', '');
+closedLabel = `Avslutad av ${agentName}`;
+closedIcon = '✅';
+} else {
+closedLabel = item.close_reason;
+}
+pills += `<span class="pill" title="Avslutningsorsak">${closedIcon} ${closedLabel}</span>`;
+}
+
 const aiBadge = item.human_mode === 0 ? `<span class="ai-badge">AI</span>` : '';
 const profileHTML = email ?
 `<button class="header-button icon-only-btn"

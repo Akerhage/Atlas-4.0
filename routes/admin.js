@@ -1030,10 +1030,10 @@ router.get('/api/admin/available-services', authenticateToken, (req, res) => {
 if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 
 try {
-// Hämta från den nya filen i assets/js
+// Hämta från assets/data
 const templatePath = isPackaged
-? path.join(process.resourcesPath, 'Renderer', 'assets', 'js', 'service_templates.json')
-: path.join(__dirname, '..', 'Renderer', 'assets', 'js', 'service_templates.json');
+? path.join(process.resourcesPath, 'Renderer', 'assets', 'data', 'service_templates.json')
+: path.join(__dirname, '..', 'Renderer', 'assets', 'data', 'service_templates.json');
 
 if (fs.existsSync(templatePath)) {
 const data = JSON.parse(fs.readFileSync(templatePath, 'utf8'));
@@ -1223,6 +1223,280 @@ res.json({ success: true, key, url: url.trim(), restartRequired: true });
 console.error('[BOOKING-LINKS POST]', err.message);
 res.status(500).json({ error: 'Kunde inte spara booking-links.json.' });
 }
+});
+
+// =============================================================================
+// ENDPOINT: POST /api/admin/generate-report — AI-genererade rapporter
+// Körs SQL-queries mot DB, skickar data till OpenAI, returnerar Markdown.
+// =============================================================================
+router.post('/api/admin/generate-report', authenticateToken, async (req, res) => {
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+const { type, customQuery } = req.body;
+if (!type) return res.status(400).json({ error: 'type saknas' });
+if (type === 'custom' && !customQuery?.trim()) {
+return res.status(400).json({ error: 'customQuery saknas' });
+}
+
+// Hjälpfunktion: kör en SQL-query och returnerar promise med rows
+const query = (sql, params = []) => new Promise((resolve, reject) => {
+db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows));
+});
+
+try {
+let reportTitle = '';
+let dataContext = '';
+
+// --- AKTIVITETSRAPPORT ---
+if (type === 'activity') {
+reportTitle = 'Aktivitetsrapport';
+const [byAgent, byOffice, totals] = await Promise.all([
+query(`
+SELECT owner,
+COUNT(*) as totalt,
+SUM(CASE WHEN is_archived=1 THEN 1 ELSE 0 END) as arkiverade,
+SUM(CASE WHEN human_mode=1 THEN 1 ELSE 0 END) as manskligt_hanterade,
+SUM(CASE WHEN session_type='message' THEN 1 ELSE 0 END) as mailärenden,
+SUM(CASE WHEN session_type='customer' THEN 1 ELSE 0 END) as chattärenden
+FROM chat_v2_state
+WHERE session_type != 'internal' AND owner IS NOT NULL
+GROUP BY owner ORDER BY totalt DESC`),
+query(`
+SELECT routing_tag as kontor, COUNT(*) as totalt,
+SUM(CASE WHEN is_archived=1 THEN 1 ELSE 0 END) as arkiverade
+FROM chat_v2_state
+WHERE session_type != 'internal' AND routing_tag IS NOT NULL
+GROUP BY routing_tag ORDER BY totalt DESC`),
+query(`
+SELECT
+COUNT(*) as totalt_alla,
+SUM(CASE WHEN is_archived=1 THEN 1 ELSE 0 END) as arkiverade,
+SUM(CASE WHEN human_mode=0 THEN 1 ELSE 0 END) as ai_hanterade,
+SUM(CASE WHEN human_mode=1 THEN 1 ELSE 0 END) as manskligt_hanterade,
+SUM(CASE WHEN session_type='message' THEN 1 ELSE 0 END) as mailärenden,
+SUM(CASE WHEN session_type='customer' THEN 1 ELSE 0 END) as chattärenden
+FROM chat_v2_state WHERE session_type != 'internal'`)
+]);
+dataContext = `TOTALSUMMERING:\n${JSON.stringify(totals[0], null, 2)}\n\nPER AGENT:\n${JSON.stringify(byAgent, null, 2)}\n\nPER KONTOR:\n${JSON.stringify(byOffice, null, 2)}`;
+
+// --- AGENTSTATISTIK ---
+} else if (type === 'agents') {
+reportTitle = 'Agentstatistik';
+const [agents, agentTickets] = await Promise.all([
+query(`SELECT username, display_name, role, routing_tag FROM users ORDER BY username`),
+query(`
+SELECT owner,
+COUNT(*) as totalt,
+SUM(CASE WHEN is_archived=1 THEN 1 ELSE 0 END) as arkiverade,
+SUM(CASE WHEN human_mode=1 THEN 1 ELSE 0 END) as manskligt_hanterade,
+SUM(CASE WHEN session_type='message' THEN 1 ELSE 0 END) as mail,
+SUM(CASE WHEN session_type='customer' THEN 1 ELSE 0 END) as chatt,
+SUM(CASE WHEN session_type='internal' THEN 1 ELSE 0 END) as interna
+FROM chat_v2_state
+WHERE owner IS NOT NULL
+GROUP BY owner`)
+]);
+dataContext = `AGENTER I SYSTEMET:\n${JSON.stringify(agents, null, 2)}\n\nÄRENDESTATISTIK PER AGENT:\n${JSON.stringify(agentTickets, null, 2)}`;
+
+// --- KUNSKAPSLUCKOR (RAG-FAILURES) ---
+} else if (type === 'rag_gaps') {
+reportTitle = 'Kunskapsluckor (RAG-failures)';
+const [topGaps, recent, total] = await Promise.all([
+query(`
+SELECT query, COUNT(*) as förekomster, MAX(created_at) as senast_sedd
+FROM rag_failures
+GROUP BY query ORDER BY förekomster DESC LIMIT 30`),
+query(`SELECT query, created_at FROM rag_failures ORDER BY created_at DESC LIMIT 20`),
+query(`SELECT COUNT(*) as totalt FROM rag_failures`)
+]);
+dataContext = `TOTALT ANTAL FAILURES: ${total[0]?.totalt || 0}\n\nVANLIGASTE FRÅGOR UTAN SVAR (topp 30):\n${JSON.stringify(topGaps, null, 2)}\n\nSENASTE 20 FAILURES:\n${JSON.stringify(recent, null, 2)}`;
+
+// --- KUNDKONTAKTER ---
+} else if (type === 'contacts') {
+reportTitle = 'Kundkontakter';
+const [contacts, stats] = await Promise.all([
+query(`
+SELECT name, email, phone, routing_tag, session_type,
+datetime(updated_at, 'unixepoch') as datum,
+close_reason
+FROM chat_v2_state
+WHERE (email IS NOT NULL OR phone IS NOT NULL)
+AND session_type != 'internal'
+ORDER BY updated_at DESC LIMIT 200`),
+query(`
+SELECT
+COUNT(*) as totalt,
+SUM(CASE WHEN email IS NOT NULL THEN 1 ELSE 0 END) as med_email,
+SUM(CASE WHEN phone IS NOT NULL THEN 1 ELSE 0 END) as med_telefon
+FROM chat_v2_state
+WHERE (email IS NOT NULL OR phone IS NOT NULL)
+AND session_type != 'internal'`)
+]);
+dataContext = `SAMMANFATTNING:\n${JSON.stringify(stats[0], null, 2)}\n\nKUNDKONTAKTER (senaste 200):\n${JSON.stringify(contacts, null, 2)}`;
+
+// --- ANPASSAD RAPPORT ---
+} else if (type === 'custom') {
+reportTitle = 'Anpassad rapport';
+// Hämta bred kontext — AI väljer vad som är relevant
+const [activitySummary, agentStats, ragTop, contactCount] = await Promise.all([
+query(`
+SELECT owner, COUNT(*) as totalt,
+SUM(CASE WHEN is_archived=1 THEN 1 ELSE 0 END) as arkiverade,
+SUM(CASE WHEN human_mode=1 THEN 1 ELSE 0 END) as manskligt
+FROM chat_v2_state WHERE session_type != 'internal' AND owner IS NOT NULL
+GROUP BY owner ORDER BY totalt DESC LIMIT 20`),
+query(`SELECT username, display_name, role, routing_tag FROM users`),
+query(`SELECT query, COUNT(*) as förekomster FROM rag_failures GROUP BY query ORDER BY förekomster DESC LIMIT 15`),
+query(`SELECT COUNT(*) as total, SUM(CASE WHEN is_archived=1 THEN 1 ELSE 0 END) as arkiverade, SUM(CASE WHEN human_mode=0 THEN 1 ELSE 0 END) as ai FROM chat_v2_state WHERE session_type != 'internal'`)
+]);
+dataContext = `SYSTEMÖVERSIKT:\n${JSON.stringify(contactCount[0], null, 2)}\n\nAGENTER:\n${JSON.stringify(agentStats, null, 2)}\n\nAKTIVITET PER AGENT:\n${JSON.stringify(activitySummary, null, 2)}\n\nVANLIGASTE KUNSKAPSLUCKOR:\n${JSON.stringify(ragTop, null, 2)}`;
+} else {
+return res.status(400).json({ error: 'Okänd rapporttyp' });
+}
+
+// Anropa OpenAI för att formatera data som Markdown-rapport
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const systemPrompt = `Du är en dataanalytiker för Atlas — ett ärendehanteringssystem för en svensk trafikskola.
+Generera en välstrukturerad Markdown-rapport på svenska utifrån den data du får.
+Format:
+- # Rapporttitel med datum
+- ## Sektionsrubriker för varje ämnesområde
+- Tabeller med | för tabulär data (agent/kontor-statistik etc.)
+- **Fetstil** för viktiga siffror och insikter
+- Avsluta alltid med ## Sammanfattning och 2-3 konkreta insikter eller rekommendationer
+Gissa ALDRIG data som inte finns. Om fältet är null/tomt, skriv "—".`;
+
+const userPrompt = type === 'custom'
+? `Önskad rapport: "${customQuery}"\n\nTillgänglig data från systemet:\n${dataContext}`
+: `Skapa rapport: ${reportTitle}\n\nData:\n${dataContext}`;
+
+const completion = await openai.chat.completions.create({
+model: 'gpt-4o-mini',
+messages: [
+{ role: 'system', content: systemPrompt },
+{ role: 'user', content: userPrompt }
+],
+max_tokens: 2000,
+temperature: 0.2
+});
+
+const markdown = completion.choices[0]?.message?.content?.trim()
+|| `# ${reportTitle}\n\nKunde inte generera rapport.`;
+
+console.log(`📊 [REPORT] Genererade: ${reportTitle} (${markdown.length} tecken)`);
+res.json({ markdown, title: reportTitle, generatedAt: new Date().toISOString() });
+
+} catch (err) {
+console.error('[REPORT] Fel:', err);
+res.status(500).json({ error: 'Kunde inte generera rapport', details: err.message });
+}
+});
+
+// ENDPOINT: POST /api/admin/analyze-gaps — Kort AI-analys av kunskapsluckor
+router.post('/api/admin/analyze-gaps', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+  if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'AI ej aktiverat.' });
+
+  const query = (sql, params = []) => new Promise((resolve, reject) =>
+    db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows))
+  );
+
+  try {
+    const [topGaps, total] = await Promise.all([
+      query(`SELECT query, COUNT(*) as förekomster FROM rag_failures
+             GROUP BY query ORDER BY förekomster DESC LIMIT 30`),
+      query(`SELECT COUNT(*) as totalt FROM rag_failures`)
+    ]);
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'Du är en analytiker för ett ärendehanteringssystem för en svensk trafikskola. Analysera de vanligaste frågorna som AI-motorn misslyckades svara på. Svara i 3–5 meningar på svenska: identifiera de 2–3 vanligaste temana, uppskatta andel av total, och ge konkreta rekommendationer om vad som bör läggas till i kunskapsbanken. Inga rubriker, bara löpande text.' },
+        { role: 'user', content: `Totalt ${total[0]?.totalt || 0} misslyckanden.\n\nVanligaste frågor:\n${topGaps.map(g => `${g.förekomster}× ${g.query}`).join('\n')}` }
+      ],
+      max_tokens: 350,
+      temperature: 0.2
+    });
+
+    const analysis = completion.choices[0]?.message?.content?.trim() || 'Kunde inte generera analys.';
+    res.json({ analysis });
+  } catch (err) {
+    console.error('[analyze-gaps] Fel:', err);
+    res.status(500).json({ error: 'Kunde inte generera analys.' });
+  }
+});
+
+// ENDPOINT: POST /api/admin/analyze-gap-single — AI-analys av en specifik kunskapslucka
+// Returnerar: { analysis, target_file, section? } som JSON
+router.post('/api/admin/analyze-gap-single', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+  if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'AI ej aktiverat.' });
+
+  const { query, ts_fallback_used, ts_fallback_success, ts_url } = req.body;
+  if (!query) return res.status(400).json({ error: 'Fråga saknas.' });
+
+  try {
+    const knowledgePath = path.join(__dirname, '..', 'knowledge');
+    const files = fs.readdirSync(knowledgePath).filter(f => f.endsWith('.json'));
+    const basfaktaFiles = files.filter(f => f.startsWith('basfakta_'));
+    const kontorFiles = files.filter(f => !f.startsWith('basfakta_'));
+
+    const fileList = [
+      'BASFAKTA-filer (generell info, sektionsbaserade):',
+      ...basfaktaFiles.map(f => `  - ${f}`),
+      '',
+      'KONTOR-filer (kontorsspecifik info: priser, öppettider, adress etc.):',
+      ...kontorFiles.map(f => `  - ${f}`)
+    ].join('\n');
+
+    const tsContext = ts_fallback_success
+      ? 'TS-fallback användes och lyckades (hittade svar på Transportstyrelsen — frågan gäller regler/lagar).'
+      : ts_fallback_used
+      ? `TS-fallback användes men misslyckades också${ts_url ? ` (URL: ${ts_url})` : ''}.`
+      : 'Ingen TS-fallback — frågan gäller troligen trafikskolans egna tjänster, priser eller rutiner.';
+
+    const systemPrompt = `Du är expert på RAG-kunskapsbaser för svenska trafikskolor. En kundfråga misslyckades — AI-motorn hittade inget tillräckligt bra svar i kunskapsbanken.
+
+Tillgängliga kunskapsfiler:
+${fileList}
+
+Filformat:
+- basfakta_*.json har ett "sections"-array. Varje sektion: { "title": "...", "answer": "...", "keywords": ["..."] }
+- kontor-filer (stad_område.json) har kontorsinfo med priser, öppettider, kontaktuppgifter — ej sektionsbaserade.
+
+Regler:
+1. Om frågan gäller generell info (priser, kurser, regler) → välj lämpligaste basfakta-fil och generera en komplett section.
+2. Om frågan gäller ett specifikt kontor → ange kontorsfilen men utelämna "section"-nyckeln.
+3. Om inget passar → föreslå ett nytt filnamn (t.ex. basfakta_xxx.json) och generera ändå en section.
+
+Svara ENBART som giltig JSON med exakt dessa nycklar:
+{
+  "analysis": "1-2 meningar: varför RAG troligen misslyckades och vad som saknas i KB",
+  "target_file": "filnamn.json",
+  "section": { "title": "...", "answer": "Komplett svar på svenska, 2-4 meningar.", "keywords": ["...", "..."] }
+}
+
+Utelämna "section" om det gäller en kontorsfil. Inga förklaringar utanför JSON.`;
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Misslyckad kundfråga: "${query}"\n\nKontext: ${tsContext}` }
+      ],
+      max_tokens: 500,
+      temperature: 0.2,
+      response_format: { type: 'json_object' }
+    });
+
+    const raw = completion.choices[0]?.message?.content?.trim() || '{}';
+    const parsed = JSON.parse(raw);
+    res.json(parsed);
+  } catch (err) {
+    console.error('[analyze-gap-single] Fel:', err);
+    res.status(500).json({ error: 'Kunde inte generera analys.' });
+  }
 });
 
 module.exports = router;

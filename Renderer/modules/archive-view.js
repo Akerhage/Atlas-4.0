@@ -15,6 +15,46 @@
 //   refreshNotesGlow, atlasConfirm, switchView          — renderer.js
 // ============================================
 
+// ⚠️  ╔══════════════════════════════════════════════════════════════╗
+// ⚠️  ║     KRITISK VARNING — GARAGET FÄRG- OCH ROUTING-LOGIK       ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║                                                              ║
+// ⚠️  ║  REGEL 1 — isInternal/isInternalItem (ÄNDRA INTE):          ║
+// ⚠️  ║   Garaget har ETT EXTRA villkor jämfört med Inkorg/Mina:    ║
+// ⚠️  ║     routing_tag === 'INTERNAL'                               ║
+// ⚠️  ║     || session_type === 'internal'                           ║
+// ⚠️  ║     || item._isLocal   ← lokala Electron IPC-poster         ║
+// ⚠️  ║   _isLocal = true sätts på poster från loadQAHistory() som  ║
+// ⚠️  ║   laddas via Electron-IPC. Dessa är alltid "privata" och    ║
+// ⚠️  ║   ska visas med gult precis som interna ärenden.            ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  REGEL 2 — Intern färg är ALLTID hårdkodat gul (ÄNDRA INTE):║
+// ⚠️  ║   isInternal → { main: '#f1c40f', ... } (kort)             ║
+// ⚠️  ║   isInternalItem → internalYellow { main: '#f1c40f', ... }  ║
+// ⚠️  ║   Gult är avsiktlig visuell signal — ALDRIG kontorsfärgen.  ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  REGEL 3 — Prioritet för icke-interna kort (ÄNDRA INTE):    ║
+// ⚠️  ║   getAgentStyles(item.routing_tag || item.owner             ║
+// ⚠️  ║               || (item._isLocal ? currentUser.username      ║
+// ⚠️  ║                               : 'unclaimed'))               ║
+// ⚠️  ║   routing_tag → owner → currentUser (lokal) → 'unclaimed'  ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  REGEL 4 — Detaljvyn (onclick-handler) (ÄNDRA INTE):        ║
+// ⚠️  ║   themeStyles = isInternalItem ? internalYellow             ║
+// ⚠️  ║               : getAgentStyles(item.routing_tag || item.owner║
+// ⚠️  ║                             || 'unclaimed')                 ║
+// ⚠️  ║   themeStyles = det tema som styr HELA detaljvyn (header,   ║
+// ⚠️  ║   bakgrund, kund-avatar-färg).                              ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  REGEL 5 — Interna detaljvy-avatarer (ÄNDRA INTE):          ║
+// ⚠️  ║   senderStyles = getAgentStyles(senderName) (avsändaren)    ║
+// ⚠️  ║   ownerStyles  = getAgentStyles(ownerName)  (mottagaren)    ║
+// ⚠️  ║   Dessa är AVSIKTLIGT individuella per person — interna     ║
+// ⚠️  ║   chattar ska visa avsändarens och mottagarens egna färger, ║
+// ⚠️  ║   INTE det gula tema-objektet. Kontrasten används.          ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╚══════════════════════════════════════════════════════════════╝
+
 /* ===============================================================
 RENDER ARCHIVE (GARAGET) - MED SÖKFUNKTION & OPTIMERING (FIXAD)
 =============================================================== */
@@ -163,10 +203,13 @@ return;
 filtered.forEach(item => {
 const el = document.createElement('div');
 
-// Identifiera interna ärenden och skapa en CSS-klass för dem
+// ⚠️ LOCK — isInternal: Tre villkor — routing_tag=INTERNAL, session_type=internal, OCH _isLocal.
+// _isLocal=true sätts på Electron IPC-poster. Alla tre visas som gula privata ärenden. Se regel 1 ovan.
 const isInternal = (item.routing_tag === 'INTERNAL' || item.session_type === 'internal' || item._isLocal);
 const internalClass = isInternal ? 'internal-ticket' : '';
 
+// ⚠️ LOCK — styles (kort): Gult { main:'#f1c40f' } för interna. För övriga: routing_tag → owner → fallback.
+// ❌ Flytta INTE _isLocal-logiken till getAgentStyles() — den hör hemma HÄR, i den lokala kontexten.
 const styles = isInternal ? { main: '#f1c40f' } : getAgentStyles(item.routing_tag || item.owner || (item._isLocal ? currentUser.username : 'unclaimed'));
 
 const isMail = item.session_type === 'message';
@@ -225,7 +268,7 @@ ${UI_ICONS.NOTES}
 <div class="ticket-footer-bar">
 <div class="ticket-time">${fullDateStr}</div>
 <div class="ticket-tag" style="background: ${isInternal ? styles.main + '22' : 'rgba(255,255,255,0.05)'}; color: ${styles.main}; border: 1px solid ${styles.main}44;">
-${(item.routing_tag || item.office) ? resolveLabel(item.routing_tag || item.office) : (item.city ? item.city.toUpperCase() : '—')}
+${(item.routing_tag || item.office) ? resolveLabel(item.routing_tag || item.office) : (item.city ? item.city.toUpperCase() : (item.session_type === 'customer' ? 'WEBB' : '—'))}
 </div>
 </div>
 `;
@@ -243,8 +286,9 @@ if (detail) {
 detail.style.display = 'flex';
 detail.innerHTML = '';
 
-// KIRURGISK FIX: Tvinga gult om det är privat (_isLocal) eller internt
+// ⚠️ LOCK — isInternalItem (detaljvy): Samma tre villkor som i kortrendering ovan. ÄNDRA INTE.
 const isInternalItem = (item.routing_tag === 'INTERNAL' || item.session_type === 'internal' || item._isLocal);
+// ⚠️ LOCK — internalYellow: Hårdkodat gult tema för interna/lokala ärenden. ÄNDRA INTE hex-värden.
 const internalYellow = {
 main: '#f1c40f',
 bg: 'transparent',
@@ -252,6 +296,8 @@ border: 'rgba(241, 196, 15, 0.3)',
 bubbleBg: 'rgba(241, 196, 15, 0.15)'
 };
 
+// ⚠️ LOCK — themeStyles: Gult för interna, getAgentStyles(routing_tag||owner||'unclaimed') för övriga.
+// themeStyles styr header, bakgrund och kund-avatarfärg i hela detaljvyn. Se regel 4 ovan.
 const themeStyles = isInternalItem ? internalYellow : getAgentStyles(item.routing_tag || item.owner || 'unclaimed');
 
 // DÖDAR LINJEN OCH BAKGRUNDEN HÄR
@@ -270,27 +316,65 @@ messages = JSON.parse(item.answer);
 } else { messages = [{ role: 'user', content: item.answer || "..." }]; }
 } catch(e) { messages = []; }
 
+// ⚠️ LOCK — senderStyles/ownerStyles (interna detaljvy-avatarer):
+// Dessa är AVSIKTLIGT individuella per person — avsändarens och mottagarens egna agentfärger.
+// ❌ BLANDA INTE ihop med themeStyles (det gula temat). Dessa används BARA för bubbelkanter/avatarer.
+// ❌ ÄNDRA INTE till themeStyles här — kontrasten mellan personerna är avsiktlig. Se regel 5 ovan.
+let senderStyles, ownerStyles, senderInitial, ownerInitial;
+if (isInternalItem) {
+  const senderName = item.sender || '';
+  const ownerName  = item.owner  || '';
+  senderStyles  = getAgentStyles(senderName);
+  ownerStyles   = getAgentStyles(ownerName);
+  const sDisp   = (typeof formatName === 'function' ? formatName(senderName) : senderName) || '?';
+  const oDisp   = (typeof formatName === 'function' ? formatName(ownerName)  : ownerName)  || '?';
+  senderInitial = sDisp.charAt(0).toUpperCase();
+  ownerInitial  = oDisp.charAt(0).toUpperCase();
+}
+
 messages.forEach(m => {
 const isUser = m.role === 'user';
 const clean = (m.content || m.text || '').replace(/^📧\s*(\((Mail|Svar)\):)?\s*/i, '');
-const avatarInitial = isUser ? (item.contact_name ? item.contact_name.charAt(0).toUpperCase() : 'K') : '🤖';
 
-if (isUser) {
-historyHtml += `
+if (isInternalItem) {
+  // Interna ärenden: user-roll = avsändaren (vänster), övriga = mottagaren (höger)
+  if (isUser) {
+    historyHtml += `
+<div class="msg-row user" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-start;">
+<div class="msg-avatar" style="background:${senderStyles.main}; color:black; font-weight:800; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; margin-right:12px; flex-shrink:0;">${senderInitial}</div>
+<div class="bubble" style="background:${senderStyles.bubbleBg} !important; border:1px solid ${senderStyles.border} !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
+${formatAtlasMessage(clean)}
+</div>
+</div>`;
+  } else {
+    historyHtml += `
+<div class="msg-row atlas" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-end;">
+<div class="bubble" style="background:${ownerStyles.bubbleBg} !important; border:1px solid ${ownerStyles.border} !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
+${formatAtlasMessage(clean)}
+</div>
+<div class="msg-avatar" style="background:${ownerStyles.main}; color:black; font-weight:800; margin-left:12px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0;">${ownerInitial}</div>
+</div>`;
+  }
+} else {
+  // Vanliga ärenden: original-logik
+  const avatarInitial = isUser ? (item.contact_name ? item.contact_name.charAt(0).toUpperCase() : 'K') : '🤖';
+  if (isUser) {
+    historyHtml += `
 <div class="msg-row user" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-start;">
 <div class="msg-avatar" style="background:${themeStyles.main}; color:white; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; margin-right:12px; flex-shrink:0;">${avatarInitial}</div>
 <div class="bubble" style="background:${themeStyles.bubbleBg} !important; border:1px solid ${themeStyles.border} !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
 ${formatAtlasMessage(clean)}
 </div>
 </div>`;
-} else {
-historyHtml += `
+  } else {
+    historyHtml += `
 <div class="msg-row atlas" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-end;">
 <div class="bubble" style="background:var(--bg-dark-tertiary) !important; border:1px solid rgba(255,255,255,0.1) !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
 ${formatAtlasMessage(clean)}
 </div>
 <div class="msg-avatar" style="background:#3a3a3c; margin-left:12px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0; font-size:18px;">🤖</div>
 </div>`;
+  }
 }
 });
 
@@ -307,7 +391,7 @@ ${historyHtml}
 </div>
 <div class="detail-footer-toolbar" style="padding: 15px 20px; background: rgba(0, 0, 0, 0.4); display: flex; justify-content: flex-end; gap: 10px;">
 ${restoreBtn}
-<button class="footer-icon-btn danger" id="archive-delete-btn" title="Radera permanent">${UI_ICONS.TRASH}</button>
+${currentUser?.role === 'admin' ? `<button class="footer-icon-btn danger" id="archive-delete-btn" title="Radera permanent">${UI_ICONS.TRASH}</button>` : ''}
 </div>
 `;
 

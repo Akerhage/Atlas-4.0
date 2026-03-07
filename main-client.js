@@ -1,5 +1,5 @@
 // =============================================================================
-// ATLAS MAIN-CLIENT v.3.14 - DEFINITIV VERSION
+// ATLAS MAIN-CLIENT v.4.0 - DEFINITIV VERSION
 // Klient-only Electron — ansluter mot extern server via SERVER_URL
 // =============================================================================
 
@@ -162,7 +162,7 @@ ipcMain.handle('get-app-info', async () => {
     return {
         CLIENT_API_KEY: config.CLIENT_API_KEY,
         APP_NAME: config.APP_NAME,
-        ATLAS_VERSION: config.VERSION || '3.14',
+        ATLAS_VERSION: config.VERSION || '4.0',
         SERVER_VERSION: 'Extern server (Ngrok)',
         SERVER_URL: config.SERVER_URL || (() => {
             console.error('❌ KRITISKT: SERVER_URL saknas i config.json — klienten vet inte var servern är!');

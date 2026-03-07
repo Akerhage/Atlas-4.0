@@ -223,6 +223,11 @@ db.run(`ALTER TABLE chat_v2_state ADD COLUMN sender TEXT DEFAULT NULL`, (err) =>
 if (!err) console.log('✅ Kolumn "sender" tillagd i chat_v2_state');
 });
 
+// Migration: close_reason — varför ärendet avslutades
+db.run(`ALTER TABLE chat_v2_state ADD COLUMN close_reason TEXT DEFAULT NULL`, (err) => {
+if (!err) console.log('✅ Kolumn "close_reason" tillagd i chat_v2_state');
+});
+
 // TABELL FÖR INKORG/HISTORIK (UPPDATERAD) ===
 db.run(`CREATE TABLE IF NOT EXISTS local_qa_history (
 id INTEGER PRIMARY KEY,

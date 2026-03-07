@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-<meta name="version" content="3.9">
+<meta name="version" content="4.0">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' http://localhost:* http://127.0.0.1:* https://*.ngrok-free.dev ws://localhost:* ws://127.0.0.1:* wss://*.ngrok-free.dev; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* https://*.ngrok-free.dev https://cdn.socket.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: http: https:; media-src 'self' data:;">
@@ -75,7 +75,7 @@
 <script src="./renderer.js" defer></script>
 </head>
 <body>
-<span id="atlas-version-info" style="display: none;">3.9</span>
+<span id="atlas-version-info" style="display: none;">4.0</span>
 
 <div class="app-container">
 <nav class="sidebar glass-effect">
@@ -483,7 +483,7 @@ Admin
 <div class="help-modal-box glass-effect">
 <button id="help-close-btn" onclick="document.getElementById('atlas-help-overlay').style.display='none'">✕</button>
 <div id="help-content-area" class="help-content"></div>
-<div class="help-footer">Atlas Support Guide v3.9</div>
+<div class="help-footer">Atlas Support Guide v4.0</div>
 </div>
 </div>
 
@@ -547,6 +547,8 @@ Admin
 </form>
 </div>
 </div>
+
+<div id="admin-broadcast-modal" class="custom-modal-overlay" style="display:none; pointer-events:none; z-index:99999;"></div>
 
 <div id="atlas-reader-modal" class="custom-modal-overlay">
 <div class="glass-modal-box" style="width: 90vw; height: 90vh; max-width: none; max-height: none; padding: 10px;">

@@ -223,8 +223,9 @@ style="border-left: 3px solid ${styles.main} !important; --atp-color: ${styles.m
 <div class="atp-sender">${t.contact_name || t.sender || 'Okänd kund'}</div>
 <div class="atp-subject">${t.subject || 'Inget ämne'}</div>
 </div>
-<button class="atp-note-btn" 
-onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')" 
+<button class="atp-note-btn notes-trigger-btn"
+data-id="${t.conversation_id || t.id}"
+onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')"
 title="Intern anteckning">
 ${UI_ICONS.NOTES}
 </button>
@@ -238,6 +239,11 @@ ${UI_ICONS.NOTES}
 detailBox.querySelectorAll('.atp-note-btn').forEach(btn => {
 btn.style.setProperty('color', 'var(--atp-color, #0071e3)', 'important');
 });
+// Lysa upp notes-ikonen för agenten och deras ärendekort
+if (typeof refreshNotesGlow === 'function') {
+  refreshNotesGlow('agent_' + u.username);
+  tickets.forEach(t => { if (t.conversation_id) refreshNotesGlow(t.conversation_id); });
+}
 } catch (e) {
 console.error("Admin Agent Detail Error:", e);
 detailBox.innerHTML = '<div class="template-item-empty" style="color:#ff453a;">Kunde inte ladda agentprofilen.</div>';

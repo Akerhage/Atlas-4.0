@@ -10,6 +10,7 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('../db');
 const authenticateToken = require('../middleware/auth');
+const OpenAI = require('openai');
 
 // Tom init — reserverad för framtida beroenden
 router.init = function(opts) {};
@@ -154,6 +155,58 @@ subject: locked.subject || null
 
 res.json({ tickets: cleanRows });
 });
+});
+
+// -------------------------------------------------------------------------
+// POST /api/customers/summarize — AI-summering av en kunds ärendehistorik
+// -------------------------------------------------------------------------
+router.post('/customers/summarize', authenticateToken, async (req, res) => {
+  if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'AI ej aktiverat.' });
+
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'email krävs' });
+
+  db.all(`
+    SELECT s.conversation_id, s.updated_at, s.is_archived, s.office,
+           c.context_data
+    FROM chat_v2_state s
+    LEFT JOIN context_store c ON s.conversation_id = c.conversation_id
+    WHERE LOWER(TRIM(s.email)) = LOWER(TRIM(?))
+    AND s.session_type != 'internal'
+    ORDER BY s.updated_at DESC
+  `, [email], async (err, rows) => {
+    if (err) return res.status(500).json({ error: 'Databasfel.' });
+    if (!rows.length) return res.status(404).json({ error: 'Inga ärenden hittade.' });
+
+    const ticketList = rows.map((row, i) => {
+      let ctx = {};
+      try { ctx = typeof row.context_data === 'string' ? JSON.parse(row.context_data) : (row.context_data || {}); } catch (e) {}
+      const locked  = ctx.locked_context || {};
+      const msgs    = ctx.messages || [];
+      const subject = locked.subject || (msgs.find(m => m.role === 'user')?.content?.slice(0, 80)) || '(inget ämne)';
+      const date    = new Date(row.updated_at * 1000).toLocaleDateString('sv-SE');
+      const status  = row.is_archived ? 'arkiverat' : 'aktivt';
+      return `${i + 1}. ${subject} | ${locked.vehicle || '?'} | ${row.office || '?'} | ${msgs.length} msg | ${date} | ${status}`;
+    }).join('\n');
+
+    try {
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'Du är assistent för ett ärendehanteringssystem för en svensk trafikskola. Analysera kundens ärendehistorik och sammanfatta i 2–3 meningar på svenska: vad kunden vanligtvis frågar om, eventuellt intressemönster (stad, fordonstyp), och hur aktiv kunden är. Inga rubriker, bara löpande text.' },
+          { role: 'user', content: `Kund: ${email}\nAntal ärenden: ${rows.length}\n\nÄrenden (ämne | fordon | kontor | meddelanden | datum | status):\n${ticketList}` }
+        ],
+        max_tokens: 200,
+        temperature: 0.2
+      });
+      const summary = completion.choices[0]?.message?.content?.trim() || 'Kunde inte generera sammanfattning.';
+      res.json({ summary });
+    } catch (e) {
+      console.error('[summarize-customer] Fel:', e);
+      res.status(500).json({ error: 'Kunde inte generera sammanfattning.' });
+    }
+  });
 });
 
 module.exports = router;

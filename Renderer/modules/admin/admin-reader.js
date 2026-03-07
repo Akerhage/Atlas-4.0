@@ -69,6 +69,8 @@ const rStyles = getAgentStyles(brandingTag);
 
 const readerTitle = resolveTicketTitle(t);
 const readerSubtitle = resolveLabel(t.routing_tag || t.owner);
+const readerDate = t.updated_at ? new Date(t.updated_at * 1000).toLocaleDateString('sv-SE') : (t.timestamp ? new Date(t.timestamp).toLocaleDateString('sv-SE') : '—');
+const readerExtra = (t.vehicle || t.vehicle_type) ? ' • ' + (t.vehicle || t.vehicle_type) : (t.contact_phone || t.phone ? ' • ' + (t.contact_phone || t.phone) : '');
 
 // 3. OSCAR BERG-FIX: Förbered meddelandehistoriken
 let messageHistoryHtml = '';
@@ -120,7 +122,7 @@ ${(readerTitle || 'U').substring(0,1).toUpperCase()}
 </div>
 <div style="min-width:0;">
 <div style="font-size:15px; font-weight:700; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px;">${readerTitle || 'Okänd'}</div>
-<div style="font-size:10px; opacity:0.4; color:white; letter-spacing:0.3px;">${readerSubtitle || ''} • ${t.timestamp ? new Date(t.timestamp).toLocaleDateString('sv-SE') : '—'}</div>
+<div style="font-size:10px; opacity:0.4; color:white; letter-spacing:0.3px;">${readerSubtitle || ''} • ${readerDate}${readerExtra}</div>
 </div>
 </div>
 
@@ -131,6 +133,17 @@ onclick="openNotesModal('${t.conversation_id}')"
 title="Interna anteckningar"
 style="color:${rStyles.main}; border-color:${rStyles.border};">
 ${UI_ICONS.NOTES}
+</button>
+<div style="width:1px; height:16px; background:rgba(255,255,255,0.1); margin:0 3px;"></div>
+<button class="btn-glass-icon" onclick="assignTicketFromReader('${t.conversation_id}')"
+title="Tilldela ärende till agent"
+style="color:var(--text-secondary);">
+${UI_ICONS.ASSIGN}
+</button>
+<button class="btn-glass-icon" onclick="claimTicketFromReader('${t.conversation_id}')"
+title="Plocka upp ärendet"
+style="color:${rStyles.main}; border-color:${rStyles.border}; background:${rStyles.main}1a;">
+${UI_ICONS.CLAIM}
 </button>
 <div style="width:1px; height:16px; background:rgba(255,255,255,0.1); margin:0 3px;"></div>
 <button class="btn-glass-icon" id="reader-prev"
@@ -161,6 +174,11 @@ placeholder="Snabbsvar till kunden... (Ctrl+Enter för att skicka)"
 style="flex:1; height:58px; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:var(--text-primary); resize:none; font-family:inherit; font-size:13px; line-height:1.5; outline:none; transition:border-color 0.2s;"
 onfocus="this.style.borderColor='${rStyles.main}66'"
 onblur="this.style.borderColor='rgba(255,255,255,0.12)'"></textarea>
+<button id="reader-ai-btn" class="btn-glass-icon"
+style="width:38px; height:38px; flex-shrink:0; color:${rStyles.main}; border-color:${rStyles.border}; background:rgba(255,255,255,0.07);"
+title="AI Förslag">
+${UI_ICONS.AI}
+</button>
 <button id="reader-send-btn" class="btn-glass-icon"
 style="width:38px; height:38px; flex-shrink:0; color:${rStyles.main}; border-color:${rStyles.border}; background:${rStyles.main}1a;"
 title="Skicka svar och ta ärendet (Ctrl+Enter)">
@@ -170,15 +188,15 @@ ${UI_ICONS.SEND}
 </div>
 
 <div style="padding:9px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.3); display:flex; justify-content:flex-end; align-items:center; gap:8px; flex-shrink:0;">
-<button class="btn-glass-icon" onclick="assignTicketFromReader('${t.conversation_id}')"
-title="Tilldela ärende till agent"
+<button class="btn-glass-icon" id="reader-archive-btn"
+title="Arkivera ärende"
 style="color:var(--text-secondary);">
-${UI_ICONS.ASSIGN}
+${UI_ICONS.ARCHIVE}
 </button>
-<button class="btn-glass-icon" onclick="claimTicketFromReader('${t.conversation_id}')"
-title="Plocka upp ärendet"
-style="color:${rStyles.main}; border-color:${rStyles.border}; background:${rStyles.main}1a;">
-${UI_ICONS.CLAIM}
+<button class="btn-glass-icon" id="reader-delete-btn"
+title="Ta bort permanent"
+style="color:#ff453a;">
+${UI_ICONS.TRASH}
 </button>
 </div>
 
@@ -251,7 +269,54 @@ sendBtn.style.opacity = '';
 };
 sendBtn.onclick = doSend;
 replyTA.onkeydown = (e) => { if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); doSend(); } };
+// AI-knapp i reader-modalen
+const aiBtn = modal.querySelector('#reader-ai-btn');
+if (aiBtn) {
+aiBtn.onclick = () => {
+if (!replyTA) return;
+const lastUser = [...(t.messages || [])].reverse().find(m => m.role === 'user');
+const originalMsg = lastUser?.content || t.last_message || '';
+if (!originalMsg) { showToast('Ingen kundtext att basera förslag på.'); return; }
+replyTA.value = '🤖 Tänker... (Hämtar AI-förslag)';
+replyTA.disabled = true;
+window.socketAPI.emit('team:email_action', {
+conversationId: convId,
+action: 'draft',
+content: originalMsg
+});
+};
 }
+}
+
+// Archive-knapp i reader
+const readerArchiveBtn = modal.querySelector('#reader-archive-btn');
+if (readerArchiveBtn) {
+readerArchiveBtn.onclick = async () => {
+try {
+await fetch(`${SERVER_URL}/api/inbox/archive`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ conversationId: convId }) });
+showToast('✅ Ärendet arkiverat!');
+currentTicketList.splice(currentTicketIdx, 1);
+if (currentTicketList.length === 0) { _closeReader(); }
+else { currentTicketIdx = Math.min(currentTicketIdx, currentTicketList.length - 1); renderReaderContent(); }
+} catch (err) { console.error('[reader-archive] Fel:', err); showToast('❌ Kunde inte arkivera.'); }
+};
+}
+
+// Delete-knapp i reader
+const readerDeleteBtn = modal.querySelector('#reader-delete-btn');
+if (readerDeleteBtn) {
+readerDeleteBtn.onclick = async () => {
+if (!(await atlasConfirm('Ta bort', 'Är du säker? Detta raderar ärendet permanent.'))) return;
+try {
+await fetch(`${SERVER_URL}/api/inbox/delete`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ conversationId: convId }) });
+showToast('✅ Ärendet raderat');
+currentTicketList.splice(currentTicketIdx, 1);
+if (currentTicketList.length === 0) { _closeReader(); }
+else { currentTicketIdx = Math.min(currentTicketIdx, currentTicketList.length - 1); renderReaderContent(); }
+} catch (err) { console.error('[reader-delete] Fel:', err); showToast('❌ Kunde inte radera.'); }
+};
+}
+
 } // <--- Denna stänger hela funktionen renderReaderContent
 
 // ===================================================

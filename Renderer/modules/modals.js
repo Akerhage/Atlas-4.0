@@ -91,14 +91,18 @@ newCancel.onclick = () => { modal.style.display = 'none'; resolve(false); };
 // CHANGE THEME =================================================================
 function changeTheme(themeName) {
 // Kolla både globala DOM-objektet och stylesheet-referensen
-const stylesheet = (typeof DOM !== 'undefined' && DOM.themeStylesheet) 
-? DOM.themeStylesheet 
+const stylesheet = (typeof DOM !== 'undefined' && DOM.themeStylesheet)
+? DOM.themeStylesheet
 : document.getElementById('theme-stylesheet');
 
 if (stylesheet) {
 stylesheet.href = `./assets/themes/${themeName}/${themeName}.css`;
 }
 localStorage.setItem('atlas-theme', themeName);
+}
+
+function changeSound(soundFile) {
+localStorage.setItem('atlas-sound', soundFile);
 }
 
 // ============================================================================

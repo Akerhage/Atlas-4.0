@@ -360,7 +360,7 @@ attempts++;
 return {
 CLIENT_API_KEY: config.CLIENT_API_KEY,
 APP_NAME: config.APP_NAME,
-ATLAS_VERSION: config.VERSION || '3.4',
+ATLAS_VERSION: config.VERSION || '4.0',
 SERVER_VERSION: serverVersion,
 SERVER_URL: config.SERVER_URL || 'http://localhost:3001'
 };

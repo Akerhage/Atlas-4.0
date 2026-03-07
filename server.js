@@ -27,7 +27,7 @@ JWT_SECRET: !!process.env.JWT_SECRET,
 OPENAI_API_KEY: !!process.env.OPENAI_API_KEY
 });
 
-const SERVER_VERSION = "3.8"; 
+const SERVER_VERSION = "4.0";
 const express = require('express');
 const crypto = require('crypto');
 const http = require('http');
@@ -126,11 +126,6 @@ let autoHumanExit  = false;
 let backupTimerId  = null;          // Referens för att kunna reschedulera backup-intervallet
 let aiEnabled      = !!process.env.OPENAI_API_KEY; // Globalt AI-lås — stängs av om nyckeln saknas
 
-// 🔒 F2.3: In-memory brute-force-skydd för login (max 5 fel / 15 min per IP)
-const loginAttempts = new Map(); // ip → { count, firstAttempt }
-const LOGIN_MAX_ATTEMPTS = 5;
-const LOGIN_WINDOW_MS    = 15 * 60 * 1000; // 15 minuter
-
 // 🔒 F3.2: Race-guard för Human Mode — förhindrar dubbla triggrar vid simultana HTTP+Socket-anrop
 const humanModeLocks = new Set(); // conversationId → låst under ~3 sek
 
@@ -200,6 +195,55 @@ const HUMAN_TRIGGERS = [
 const HUMAN_RESPONSE_TEXT = "Jag kopplar dig till en mänsklig kollega.";
 const { runLegacyFlow, loadKnowledgeBase } = require('./legacy_engine');
 const OpenAI = require('openai');
+
+// ==================================================
+// ✨ AUTO-SUBJECT — Generera kort ärenderubrik vid human mode
+// ==================================================
+async function generateAutoSubject(sessionId, contextData) {
+  if (!process.env.OPENAI_API_KEY) return;
+  try {
+    // Hoppa över om ämne redan finns
+    if (contextData.locked_context?.subject) return;
+
+    const customerMsgs = (contextData.messages || [])
+      .filter(m => m.role === 'user')
+      .slice(-8)
+      .map(m => m.content)
+      .join('\n');
+    if (!customerMsgs.trim()) return;
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'Du är assistent för ett ärendehanteringssystem för svenska trafikskolor. Generera ett kort ämne (max 6 ord) på svenska som beskriver vad kunden frågar om. Exempel: "MC-körkort pris — ny kund", "Fråga om teoriprov", "Bokning intensivkurs Göteborg". Svara ENBART med ämnet, inga förklaringar.' },
+        { role: 'user', content: customerMsgs }
+      ],
+      max_tokens: 30,
+      temperature: 0.2
+    });
+
+    const subject = completion.choices[0]?.message?.content?.trim();
+    if (!subject) return;
+
+    // Läs senaste context, sätt subject, skriv tillbaka
+    const row = await getContextRow(sessionId);
+    if (!row?.context_data) return;
+    const ctx = row.context_data;
+    if (!ctx.locked_context) ctx.locked_context = {};
+    if (ctx.locked_context.subject) return; // Dubbelkoll — kan ha satts medan vi väntade
+    ctx.locked_context.subject = subject;
+    await upsertContextRow({
+      conversation_id: sessionId,
+      last_message_id: row.last_message_id,
+      context_data: ctx,
+      updated_at: Math.floor(Date.now() / 1000)
+    });
+    console.log(`✨ [AUTO-SUBJECT] ${sessionId}: "${subject}"`);
+  } catch (err) {
+    console.error('[AUTO-SUBJECT] Fel:', err.message);
+  }
+}
 
 // ==================================================
 // 🔁 GEMENSAM CHAT HANDLER (SOCKET + CUSTOMER CHAT)
@@ -325,6 +369,9 @@ last_message_id: contextData.messages.length,
 context_data: contextData,
 updated_at: Math.floor(Date.now() / 1000)
 });
+
+// Auto-generera ärenderubrik asynkront (blockerar ej svaret till kunden)
+generateAutoSubject(sessionId, contextData);
 
 // Aktivera human mode
 await setHumanMode(sessionId, 'customer');
@@ -1044,9 +1091,11 @@ console.log("✅ [SOCKET] Svar skickat!");
 // 🔒 KRITISK GUARD: Endast kundärenden får trigga Team Inbox
 if (v2State.session_type === 'customer') {
 
-// ✅ GLOBAL UPDATE: Skickar till alla anslutna Atlas-klienter (förhindrar Room-fel)
+// ✅ AGENT UPDATE: Skickar till alla UTOM kunden själv (socket.broadcast) —
+// io.emit skulle skicka till kundchatten också och orsaka att kundens eget
+// meddelande dyker upp som ett "svar" i chattwidgeten (echo-bug).
 if (typeof io !== 'undefined') {
-io.emit('team:customer_reply', { conversationId: sessionId, message: query, sender: 'user', timestamp: Date.now() });
+socket.broadcast.emit('team:customer_reply', { conversationId: sessionId, message: query, sender: 'user', timestamp: Date.now() });
 }
 }
 
@@ -1292,7 +1341,38 @@ console.log(`✅ [MAIL-ACTION] AI-förslag skickat direkt till klienten för ${c
 
 } catch (error) {
 console.error("❌ Fel vid generering av mail-svar:", error);
+socket.emit('ai:prediction', { conversationId, answer: 'Kunde inte generera förslag just nu.', is_email_draft: true });
 }
+});
+
+// ==================================================
+// ✨ AI SAMMANFATTNING AV ÄRENDE (on-demand)
+// ==================================================
+socket.on('team:summarize_ticket', async (data) => {
+  const { conversationId, messages } = data;
+  if (!messages || messages.length === 0) return;
+  if (!process.env.OPENAI_API_KEY) {
+    return socket.emit('ticket:summary', { conversationId, summary: 'AI ej aktiverat (API-nyckel saknas).' });
+  }
+  try {
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); // Ny instans = hanterar hot-reload
+    const chatHistory = messages
+      .map(m => `${m.role === 'user' ? 'Kund' : 'Agent'}: ${(m.content || m.text || '').substring(0, 500)}`)
+      .join('\n');
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'Du är ett hjälpmedel för kundtjänst. Sammanfatta konversationen nedan i 2-3 korta meningar på svenska. Fokusera på: vad kunden vill ha, kundens ton, och viktig info (stad, körkort-typ etc). Inga punktlistor, bara löpande text.' },
+        { role: 'user', content: chatHistory }
+      ],
+      max_tokens: 180
+    });
+    const summary = completion.choices[0].message.content.trim();
+    socket.emit('ticket:summary', { conversationId, summary });
+  } catch (err) {
+    console.error('[summarize_ticket] Fel:', err);
+    socket.emit('ticket:summary', { conversationId, summary: 'Kunde inte generera sammanfattning.' });
+  }
 });
 
 // ==================================================
@@ -1305,12 +1385,20 @@ const sessionId = payload.sessionId || payload.conversationId;
 if (!sessionId) return; // Avbryt om ID saknas helt
 console.log(`[CHAT] Customer ended session ${sessionId}`);
 
-// 1. Lägg till systemmeddelande i DB
+const nowTs = Math.floor(Date.now() / 1000);
+
+// 1. Arkivera sessionen direkt + sätt close_reason = 'customer'
+db.run(
+"UPDATE chat_v2_state SET is_archived = 1, close_reason = 'customer', updated_at = ? WHERE conversation_id = ?",
+[nowTs, sessionId]
+);
+
+// 2. Lägg till systemmeddelande i DB
 const stored = await getContextRow(sessionId);
 let contextData = stored?.context_data || { messages: [] };
 
 contextData.messages.push({
-role: 'system', // Ny roll för systemhändelser
+role: 'system',
 content: '⚠️ Kunden har avslutat chatten.',
 timestamp: Date.now()
 });
@@ -1319,14 +1407,28 @@ await upsertContextRow({
 conversation_id: sessionId,
 last_message_id: (stored?.last_message_id || 0) + 1,
 context_data: contextData,
-updated_at: Math.floor(Date.now() / 1000)
+updated_at: nowTs
 });
 
-// ✅ GLOBAL UPDATE: Meddela alla agenter direkt när chatten avslutas
+// 3. Meddela alla agenter
 if (typeof io !== 'undefined') {
 io.emit('team:customer_reply', { conversationId: sessionId, message: '⚠️ Kunden har avslutat chatten.', sender: 'System', type: 'system_info' });
+io.emit('team:update', { type: 'ticket_archived', sessionId });
 }
 });
+// ADMIN BROADCAST — systemmeddelande till alla inloggade agenter
+socket.on('admin:broadcast', (data) => {
+  if (!socket.user || socket.user.role !== 'admin') return;
+  const message = (data?.message || '').trim();
+  if (!message) return;
+  console.log(`📢 [BROADCAST] ${socket.user.username}: "${message.substring(0, 60)}"`);
+  io.emit('admin:notification', {
+    message,
+    sentBy: socket.user.username,
+    timestamp: Date.now()
+  });
+});
+
 socket.on('disconnect', () => {
 console.log('🔌 Disconnected:', socket.id);
 });
@@ -1626,51 +1728,137 @@ isScanning = false;
 // =============================================================================
 // AUTOMATISK ARKIVERING VID INAKTIVITET (10 MINUTER)
 // =============================================================================
+// In-memory tracker för inaktivitetsstatus per session
+// sessionId → { warningSentAt: unix-timestamp | null }
+// Återställs vid serveromstart (godtagbart — timers är mjuka garantier)
+const inactivityState = new Map();
+
 async function checkChatInactivity() {
-const INACTIVITY_LIMIT = 600; // 10 minuter
+const WARNING_THRESHOLD = 15 * 60; // 15 min → skicka varning till kund
+const ARCHIVE_THRESHOLD  = 20 * 60; // 20 min → arkivera automatiskt
 const now = Math.floor(Date.now() / 1000);
-const threshold = now - INACTIVITY_LIMIT;
 
 try {
-// 1. Hitta endast AI-chattar (human_mode = 0) som inte uppdaterats på 10 min
-const inactiveRows = await new Promise((resolve, reject) => {
+// Hämta alla aktiva kundchattar inkl. meddelandehistorik
+// session_type = 'customer' utesluter mail ('message') och interna sessioner ('private')
+const activeRows = await new Promise((resolve, reject) => {
 db.all(
-"SELECT conversation_id FROM chat_v2_state WHERE is_archived = 0 AND human_mode = 0 AND updated_at < ?",
-[threshold],
-(err, rows) => {
-if (err) reject(err); else resolve(rows || []);
-}
+`SELECT s.conversation_id, s.updated_at, s.human_mode, c.context_data
+FROM chat_v2_state s
+LEFT JOIN context_store c ON s.conversation_id = c.conversation_id
+WHERE s.is_archived = 0
+AND s.session_type = 'customer'
+AND s.human_mode = 0
+AND s.updated_at IS NOT NULL`,
+[],
+(err, rows) => (err ? reject(err) : resolve(rows || []))
 );
 });
 
-if (inactiveRows.length > 0) {
-console.log(`🕒 [INACTIVITY] Arkiverar ${inactiveRows.length} inaktiva AI-chattar.`);
-
-for (const row of inactiveRows) {
+for (const row of activeRows) {
 const id = row.conversation_id;
 
-// 2. 🔒 F3.5: Atomisk arkivering — båda UPDATE lyckas eller ingen (BEGIN/COMMIT/ROLLBACK)
+// ── KONTROLLERA OM DET ÄR KUNDENS TUR ATT SVARA ──────────────────────
+// Timern skall bara ticka när kunden är den som ska svara, dvs. senaste
+// meddelandet är från atlas eller en agent — inte från kunden själv.
+let contextData;
+try {
+contextData = parseContextData(row.context_data);
+} catch (e) {
+continue;
+}
+
+const messages = contextData?.messages || [];
+
+// Ingen konversation har startat än — hoppa över
+if (messages.length === 0) continue;
+
+// Hitta senaste riktiga meddelandet (exkludera systemmeddelanden)
+const lastRealMessage = [...messages]
+.reverse()
+.find(m => m.role === 'atlas' || m.role === 'agent' || m.role === 'user');
+
+// Senaste meddelandet är från kunden → deras tur har inte kommit än → hoppa över
+if (!lastRealMessage || lastRealMessage.role === 'user') continue;
+
+// Senaste är från atlas/agent → kundens tur → bevakas för inaktivitet
+const inactive = now - row.updated_at;
+
+if (!inactivityState.has(id)) {
+inactivityState.set(id, { warningSentAt: null });
+}
+const state = inactivityState.get(id);
+
+// ── STEG 1: ARKIVERA vid 15 min ──────────────────────────────────────
+if (inactive >= ARCHIVE_THRESHOLD) {
+console.log(`🕒 [INACTIVITY] Arkiverar session ${id} (inaktiv ${Math.round(inactive / 60)} min, kundens tur)`);
+
+// 🔒 F3.5: Atomisk arkivering
 await new Promise((resolve, reject) => {
 db.run('BEGIN TRANSACTION', (beginErr) => {
 if (beginErr) return reject(beginErr);
-db.run("UPDATE chat_v2_state SET is_archived = 1, updated_at = ? WHERE conversation_id = ?", [now, id], (e1) => {
+db.run("UPDATE chat_v2_state SET is_archived = 1, close_reason = 'inactivity', updated_at = ? WHERE conversation_id = ?", [now, id], (e1) => {
 if (e1) { db.run('ROLLBACK'); return reject(e1); }
 db.run("UPDATE local_qa_history SET is_archived = 1 WHERE id = ?", [id], (e2) => {
-if (e2) { db.run('ROLLBACK'); return reject(e2); }
-db.run('COMMIT', (commitErr) => {
-if (commitErr) { db.run('ROLLBACK'); return reject(commitErr); }
-resolve();
-}); // COMMIT
-}); // local_qa_history
-}); // chat_v2_state
-}); // BEGIN TRANSACTION
-}); // new Promise
+  if (e2) { db.run('ROLLBACK'); return reject(e2); }
+  db.run('COMMIT', (commitErr) => {
+	if (commitErr) { db.run('ROLLBACK'); return reject(commitErr); }
+	resolve();
+  });
+});
+});
+});
+});
 
+inactivityState.delete(id);
+
+// Notifiera agenter
 if (typeof io !== 'undefined') {
 io.emit('team:update', { type: 'ticket_archived', sessionId: id });
 }
+
+// Notifiera kunden direkt i deras chattfönster → EndSessionDialog öppnas
+if (typeof io !== 'undefined') {
+io.to(id).emit('team:session_status', {
+conversationId: id,
+status: 'archived',
+message: 'Chatten har stängts automatiskt på grund av inaktivitet.'
+});
+}
+
+console.log(`✅ [INACTIVITY] Session ${id} arkiverad och kund notifierad.`);
+continue;
+}
+
+// ── STEG 2: SKICKA VARNING vid 10 min (en gång per session) ──────────
+if (inactive >= WARNING_THRESHOLD && state.warningSentAt === null) {
+console.log(`⚠️ [INACTIVITY WARNING] Skickar varning till kund ${id} (inaktiv ${Math.round(inactive / 60)} min)`);
+state.warningSentAt = now;
+
+// Skickar till kundens chattfönster → varningsbanderoll + nedräkning visas
+if (typeof io !== 'undefined') {
+io.to(id).emit('team:session_warning', {
+conversationId: id,
+sessionId: id,
+minutesLeft: 5 // 15 - 10 = 5 min kvar
+});
 }
 }
+
+// ── STEG 3: ÅTERSTÄLL om kunden svarat igen ───────────────────────────
+// updated_at uppdateras när kunden skickar → inactive sjunker under tröskeln
+if (inactive < WARNING_THRESHOLD && state.warningSentAt !== null) {
+console.log(`✅ [INACTIVITY] Kund ${id} aktiv igen — återställer varningsstate.`);
+state.warningSentAt = null;
+}
+}
+
+// Rensa poster för sessioner som inte längre är aktiva
+const activeIds = new Set(activeRows.map(r => r.conversation_id));
+for (const [id] of inactivityState) {
+if (!activeIds.has(id)) inactivityState.delete(id);
+}
+
 } catch (err) {
 console.error("❌ Fel vid inaktivitetskontroll:", err);
 }
@@ -1914,7 +2102,7 @@ res.json({ success: true, field, value: field === 'OPENAI_API_KEY' ? '***' : val
 
 
 // =====================================================================
-// 🚀 SYSTEM START (SERVER v.3.8 DEFINITIVE - NON-BLOCKING)
+// 🚀 SYSTEM START (SERVER v.4.0 DEFINITIVE - NON-BLOCKING)
 // =====================================================================
 const PORT = process.env.PORT || 3001;
 
@@ -1925,7 +2113,7 @@ console.log('✅ [Startup] is_online reset för alla användare');
 });
 
 // 1. Logga omedelbart att servern är uppe lokalt
-console.log(`\n\x1b[32m%s\x1b[0m`, `✅ Atlas v.3.8 är ONLINE på http://localhost:${PORT}`);
+console.log(`\n\x1b[32m%s\x1b[0m`, `✅ Atlas v.4.0 är ONLINE på http://localhost:${PORT}`);
 console.log(`--------------------------------------------------`);
 
 // 2. NGROK hanteras av main.js processen - server fokuserar bara på http

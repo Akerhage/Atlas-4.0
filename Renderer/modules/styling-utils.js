@@ -115,8 +115,8 @@ return office ? office.city : "Support";
 // ❌ ÄNDRA INTE: hex-valideringen (startsWith('#')) — skyddar mot undefined/null-krasch.
 // ❌ FLYTTA INTE: hexToRgba() — den är avsiktligt inlinead, inte global.
 function getAgentStyles(tag) {
-const fallbackHex = '#0071e3';
-const fallback = { main: fallbackHex, bg: 'rgba(0, 113, 227, 0.08)', border: 'rgba(0, 113, 227, 0.3)', bubbleBg: 'rgba(0, 113, 227, 0.12)' };
+const fallbackHex = '#b8955a'; // Dämpad guld — visas när inget kontor/agent-matchning finns
+const fallback = { main: fallbackHex, bg: 'rgba(184, 149, 90, 0.08)', border: 'rgba(184, 149, 90, 0.3)', bubbleBg: 'rgba(184, 149, 90, 0.12)' };
 
 if (!tag || tag.toLowerCase() === 'unclaimed') return { ...fallback, main: '#ff4444', bg: 'rgba(255, 68, 68, 0.08)' };
 

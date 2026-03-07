@@ -79,7 +79,8 @@ user: {
 id: user.id,
 username: user.username,
 role: user.role,
-color: user.agent_color,
+agent_color: user.agent_color,
+display_name: user.display_name,
 avatar_id: user.avatar_id,
 status_text: user.status_text,
 routing_tag: user.routing_tag
@@ -163,7 +164,7 @@ res.status(500).json({ error: err.message });
 
 // Serverns version (ingen auth krävs — används av klienten vid uppstart)
 router.get('/public/version', (req, res) => {
-res.json({ version: '3.14' });
+res.json({ version: '4.0' });
 });
 
 module.exports = router;

@@ -21,15 +21,16 @@ const listContainer = document.getElementById('admin-main-list');
 if (!listContainer) return;
 
 const sections = [
+{ id: 'paths', icon: '📁', label: 'Systemsökvägar' },
+{ id: 'drift', icon: '🛡️', label: 'Drift & Säkerhet' },
 { id: 'network', icon: '🌐', label: 'Nätverksinställningar' },
 { id: 'email', icon: '📧', label: 'E-postkonfiguration' },
 { id: 'ai', icon: '🤖', label: 'AI-motor' },
 { id: 'rag', icon: '⚡', label: 'RAG — Poängsättning' },
 { id: 'bookinglinks', icon: '🔗', label: 'Bokningslänkar' },
-{ id: 'paths', icon: '📁', label: 'Systemsökvägar' },
 { id: 'knowledge', icon: '📚', label: 'Kunskapsbank' },
-{ id: 'drift', icon: '🛡️', label: 'Drift & Säkerhet' },
-{ id: 'gaps', icon: '🔍', label: 'Kunskapsluckor' }
+{ id: 'gaps', icon: '🔍', label: 'Kunskapsluckor' },
+{ id: 'reports', icon: '📊', label: 'Rapporter <span style="font-size:9px; font-weight:700; color:var(--accent-primary); opacity:0.85; letter-spacing:0.4px; vertical-align:middle; margin-left:3px;">AI</span>' }
 ];
 
 listContainer.innerHTML = sections.map(s => `
@@ -91,6 +92,11 @@ return;
 
 if (section === 'gaps') {
 renderRagFailuresInDetail(detailBox);
+return;
+}
+
+if (section === 'reports') {
+renderReportSection(detailBox);
 return;
 }
 
@@ -590,4 +596,129 @@ showToast('❌ Nätverksfel vid sparning.');
 } finally {
 if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = ''; }
 }
+}
+
+// =============================================================================
+// RAPPORTER — renderReportSection / generateReport / downloadReport
+// =============================================================================
+function renderReportSection(detailBox) {
+const presets = [
+{ type: 'activity', icon: '📈', label: 'Aktivitetsrapport',  desc: 'Ärenden per agent och kontor' },
+{ type: 'agents',   icon: '👤', label: 'Agentstatistik',     desc: 'Per agent: ärenden och hantering' },
+{ type: 'rag_gaps', icon: '🔍', label: 'Kunskapsluckor',     desc: 'Vanligaste RAG-failures' },
+{ type: 'contacts', icon: '📧', label: 'Kundkontakter',      desc: 'Sessioner med e-post / telefon' }
+];
+
+detailBox.innerHTML = `<div class="detail-body" style="padding:25px; overflow-y:auto;">
+<h2 style="margin:0 0 6px; font-size:17px; font-weight:600; opacity:0.9;">📊 Rapporter</h2>
+<p style="margin:0 0 24px; font-size:13px; opacity:0.45;">AI hämtar data ur databasen och genererar en Markdown-rapport som du kan ladda ner.</p>
+
+<div style="margin-bottom:24px;">
+<div style="font-size:11px; opacity:0.45; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Fördefinierade rapporter</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+${presets.map(r => `
+<button class="report-preset-btn" onclick="generateReport('${r.type}')">
+<span style="font-size:22px; line-height:1;">${r.icon}</span>
+<div style="text-align:left;">
+<div style="font-weight:600; font-size:13px; margin-bottom:2px;">${r.label}</div>
+<div style="font-size:11px; opacity:0.5;">${r.desc}</div>
+</div>
+</button>`).join('')}
+</div>
+</div>
+
+<div style="margin-bottom:24px;">
+<div style="font-size:11px; opacity:0.45; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Anpassad rapport med AI</div>
+<textarea id="report-custom-input"
+placeholder="Beskriv vilken rapport du önskar... t.ex. 'Visa de 5 mest aktiva agenterna den senaste månaden med fordonsfördelning'"
+style="width:100%; height:90px; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05); color:var(--text-primary); font-size:13px; resize:vertical; box-sizing:border-box; outline:none;"></textarea>
+<button class="report-action-btn" onclick="generateReport('custom')" style="margin-top:10px;">
+✨ Generera anpassad rapport
+</button>
+</div>
+
+<div id="report-output" style="display:none;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+<div id="report-output-title" style="font-size:12px; opacity:0.5;"></div>
+<button class="report-action-btn" onclick="downloadReport()">⬇️ Ladda ner .md</button>
+</div>
+<pre id="report-preview" style="
+background:rgba(0,0,0,0.3);
+border:1px solid rgba(255,255,255,0.08);
+border-radius:8px; padding:16px; font-size:12px; line-height:1.65;
+overflow-x:auto; white-space:pre-wrap; max-height:420px; overflow-y:auto;
+font-family:monospace; margin:0;"></pre>
+</div>
+</div>`;
+}
+
+async function generateReport(type) {
+const outputEl  = document.getElementById('report-output');
+const previewEl = document.getElementById('report-preview');
+const titleEl   = document.getElementById('report-output-title');
+
+const customQuery = type === 'custom'
+? (document.getElementById('report-custom-input')?.value?.trim() || '')
+: null;
+
+if (type === 'custom' && !customQuery) {
+showToast('Beskriv vad du vill ha i rapporten.');
+return;
+}
+
+// Visa laddning
+if (outputEl)  outputEl.style.display = 'block';
+if (previewEl) previewEl.textContent = '⏳ Hämtar data och genererar rapport...';
+if (titleEl)   titleEl.textContent   = '';
+
+try {
+const res = await fetch(`${SERVER_URL}/api/admin/generate-report`, {
+method: 'POST',
+headers: { ...fetchHeaders, 'Content-Type': 'application/json' },
+body: JSON.stringify({ type, customQuery })
+});
+
+if (!res.ok) {
+const err = await res.json().catch(() => ({}));
+throw new Error(err.error || `HTTP ${res.status}`);
+}
+
+const { markdown, title, generatedAt } = await res.json();
+
+if (previewEl) previewEl.textContent = markdown;
+if (titleEl) {
+const dateStr = generatedAt
+? new Date(generatedAt).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' })
+: '';
+titleEl.textContent = `${title} • ${dateStr}`;
+}
+
+// Spara för nedladdning
+window._lastReportMarkdown = markdown;
+window._lastReportTitle    = title;
+
+} catch (err) {
+if (previewEl) previewEl.textContent = `❌ Kunde inte generera rapport: ${err.message}`;
+console.error('[REPORT] Fel:', err);
+}
+}
+
+function downloadReport() {
+const markdown = window._lastReportMarkdown;
+if (!markdown) { showToast('Ingen rapport att ladda ner.'); return; }
+
+const slug = (window._lastReportTitle || 'atlas-rapport')
+.toLowerCase()
+.replace(/[åä]/g, 'a').replace(/ö/g, 'o')
+.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+const date     = new Date().toISOString().slice(0, 10);
+const filename = `atlas-${slug}-${date}.md`;
+
+const blob = new Blob([markdown], { type: 'text/markdown; charset=utf-8' });
+const url  = URL.createObjectURL(blob);
+const a    = document.createElement('a');
+a.href     = url;
+a.download = filename;
+a.click();
+URL.revokeObjectURL(url);
 }
