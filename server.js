@@ -1074,6 +1074,16 @@ context_data: contextData,
 updated_at: Math.floor(Date.now() / 1000)
 });
 
+// Synka updated_at i chat_v2_state — inaktivitetstimern mäter från detta fält.
+// Utan denna uppdatering räknar timern från sessionsskapandet, inte från Atlas svar.
+await new Promise((resolve, reject) => {
+db.run(
+'UPDATE chat_v2_state SET updated_at = ? WHERE conversation_id = ?',
+[Math.floor(Date.now() / 1000), sessionId],
+(err) => err ? reject(err) : resolve()
+);
+});
+
 console.log("📤 [SOCKET] Skickar svar till klient:", {
 answer_length: responseText.length,
 sessionId: sessionId,
@@ -1755,6 +1765,10 @@ AND s.updated_at IS NOT NULL`,
 );
 });
 
+if (activeRows.length > 0) {
+console.log(`🕒 [INACTIVITY] ${activeRows.length} aktiv AI-session(er) bevakas.`);
+}
+
 for (const row of activeRows) {
 const id = row.conversation_id;
 
@@ -1822,6 +1836,7 @@ if (typeof io !== 'undefined') {
 io.to(id).emit('team:session_status', {
 conversationId: id,
 status: 'archived',
+close_reason: 'inactivity',
 message: 'Chatten har stängts automatiskt på grund av inaktivitet.'
 });
 }

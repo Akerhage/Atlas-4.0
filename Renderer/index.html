@@ -487,7 +487,6 @@ Admin
 
 <div id="atlas-help-overlay" class="atlas-help-overlay">
 <div class="help-modal-box glass-effect">
-<button id="help-close-btn" onclick="document.getElementById('atlas-help-overlay').style.display='none'">✕</button>
 <div id="help-content-area" class="help-content"></div>
 <div class="help-footer">Atlas Support Guide v4.0</div>
 </div>
@@ -495,7 +494,6 @@ Admin
 
 <div id="atlas-mail-composer" class="custom-modal-overlay">
 <div class="glass-modal-box">
-<button class="modal-close" onclick="document.getElementById('atlas-mail-composer').style.display='none'">✕</button>
 <div class="glass-modal-header"><h3>Starta Nytt Ärende</h3></div>
 <div class="glass-modal-body" id="composer-body-container"></div>
 </div>
@@ -503,7 +501,6 @@ Admin
 
 <div id="atlas-notes-modal" class="custom-modal-overlay">
 <div class="glass-modal-box">
-<button class="modal-close" id="close-notes-btn">✕</button>
 <div class="glass-modal-header"><h3>Interna Anteckningar</h3></div>
 <div class="glass-modal-body" id="notes-list-container"></div>
 <div class="note-input-area">
@@ -519,8 +516,7 @@ Admin
 <div class="glass-modal-box" style="width: 400px;">
 <div class="glass-modal-header"><h3 id="confirm-title">Bekräfta</h3></div>
 <div class="glass-modal-body"><p id="confirm-message"></p></div>
-<div class="glass-modal-footer">
-<button id="confirm-cancel" class="btn-modal-cancel">Avbryt</button>
+<div class="glass-modal-footer" style="justify-content:center;">
 <button id="confirm-ok" class="btn-modal-confirm">OK</button>
 </div>
 </div>
@@ -533,8 +529,7 @@ Admin
 <p id="prompt-message" style="margin-bottom: 15px;"></p>
 <input type="text" id="prompt-input" class="filter-input" style="width: 100%;" autocomplete="off">
 </div>
-<div class="glass-modal-footer">
-<button id="prompt-cancel" class="btn-modal-cancel">Avbryt</button>
+<div class="glass-modal-footer" style="justify-content:flex-end;">
 <button id="prompt-confirm" class="btn-modal-confirm">Spara</button>
 </div>
 </div>
@@ -558,7 +553,6 @@ Admin
 
 <div id="atlas-reader-modal" class="custom-modal-overlay">
 <div class="glass-modal-box" style="width: 90vw; height: 90vh; max-width: none; max-height: none; padding: 10px;">
-<button class="modal-close" id="reader-close-btn" style="top: 10px; right: 10px;">✕</button>
 <div id="reader-content" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden;"></div>
 <div id="reader-nav" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px;">
 <button id="reader-prev" class="btn-modal-cancel">Föregående</button>
@@ -569,7 +563,6 @@ Admin
 
 <div id="atlas-profile-modal" class="custom-modal-overlay">
 <div class="glass-modal-box">
-<button class="modal-close" onclick="document.getElementById('atlas-profile-modal').style.display='none'">✕</button>
 <div class="glass-modal-header"><h3>Din Profil</h3></div>
 <div class="glass-modal-body" id="profile-modal-content"></div>
 </div>

@@ -392,16 +392,8 @@ overlay.onclick = (e) => { if (e.target === overlay) overlay.style.display = 'no
 overlay.innerHTML = `
 <div class="glass-modal-box glass-effect" style="width:540px; max-width:92vw; border-top:3px solid var(--accent-primary); position:relative; display:flex; flex-direction:column; max-height:82vh; overflow:hidden;">
 
-  <!-- Stäng-knapp -->
-  <button id="atlas-info-close"
-    style="position:absolute; top:10px; right:10px; z-index:10; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.4); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;"
-    onmouseover="this.style.background='rgba(255,69,58,0.45)';this.style.color='white'"
-    onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='rgba(255,255,255,0.4)'">
-    ${typeof ADMIN_UI_ICONS !== 'undefined' ? ADMIN_UI_ICONS.CANCEL : '✕'}
-  </button>
-
   <!-- Header -->
-  <div style="padding:16px 48px 14px 18px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; gap:12px; flex-shrink:0; background:linear-gradient(90deg, var(--accent-primary)14, transparent);">
+  <div style="padding:16px 18px 14px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; gap:12px; flex-shrink:0; background:linear-gradient(90deg, var(--accent-primary)14, transparent);">
     <div style="width:38px; height:38px; border-radius:10px; background:var(--accent-primary); color:black; font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 12px var(--accent-primary)55;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
     </div>
@@ -500,10 +492,7 @@ document.body.appendChild(overlay);
 overlay.style.display = 'flex';
 
 // Stäng-knapp
-const closeBtn = overlay.querySelector('#atlas-info-close');
-if (closeBtn) closeBtn.onclick = () => overlay.style.display = 'none';
-
-// ESC-tangent stänger
+// ESC-tangent och klick utanför stänger (global handler + per-call)
 const onEsc = (e) => { if (e.key === 'Escape') { overlay.style.display = 'none'; document.removeEventListener('keydown', onEsc); } };
 document.addEventListener('keydown', onEsc);
 }

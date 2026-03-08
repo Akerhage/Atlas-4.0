@@ -66,8 +66,7 @@ style="width:100%; padding:10px; border-radius:6px; border:1px solid rgba(255,25
 style="width:100%; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; font-size:14px; box-sizing:border-box;">
 <p id="rpw-error" style="color:#ff6b6b; font-size:12px; min-height:16px;"></p>
 </div>
-<div class="glass-modal-footer">
-<button id="rpw-cancel" class="btn-modal-cancel">Avbryt</button>
+<div class="glass-modal-footer" style="justify-content:flex-end;">
 <button id="rpw-ok" class="btn-modal-ok">Spara</button>
 </div>
 </div>`;
@@ -80,7 +79,7 @@ document.getElementById('rpw-error').textContent = '';
 modal.style.display = 'flex';
 setTimeout(() => document.getElementById('rpw-pass1')?.focus(), 50);
 
-document.getElementById('rpw-cancel').onclick = () => { modal.style.display = 'none'; };
+// Stäng via ESC eller klick utanför (global handler i renderer.js)
 document.getElementById('rpw-ok').onclick = async () => {
 const p1 = document.getElementById('rpw-pass1').value.trim();
 const p2 = document.getElementById('rpw-pass2').value.trim();

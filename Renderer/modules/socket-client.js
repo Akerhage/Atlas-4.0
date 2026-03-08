@@ -498,18 +498,15 @@ window.socketAPI.on('admin:notification', (data) => {
       </div>
       <div style="font-size:14px; line-height:1.7; color:var(--text-primary);
       background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09);
-      border-radius:10px; padding:14px 16px; margin-bottom:22px; text-align:left;
+      border-radius:10px; padding:14px 16px; text-align:left;
       white-space:pre-wrap; word-break:break-word;">${data.message}</div>
-      <button id="broadcast-close-btn" style="width:100%; padding:11px; border-radius:8px;
-      background:var(--accent-primary); color:black; font-weight:700; border:none;
-      cursor:pointer; font-size:13px; letter-spacing:0.3px;">Stäng</button>
     </div>`;
   modal.style.display = 'flex';
   modal.style.pointerEvents = 'all';
-  modal.querySelector('#broadcast-close-btn').onclick = () => {
-    modal.style.display = 'none';
-    modal.style.pointerEvents = 'none';
-  };
+  const _closeBroadcast = () => { modal.style.display = 'none'; modal.style.pointerEvents = 'none'; };
+  modal.onclick = (e) => { if (e.target === modal) _closeBroadcast(); };
+  const _bcEsc = (e) => { if (e.key === 'Escape') { _closeBroadcast(); document.removeEventListener('keydown', _bcEsc); } };
+  document.addEventListener('keydown', _bcEsc);
   if (typeof playNotificationSound === 'function') playNotificationSound();
 });
 

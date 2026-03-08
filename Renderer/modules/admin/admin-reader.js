@@ -108,14 +108,7 @@ ${cleanText}
 modal.innerHTML = `
 <div class="glass-modal-box glass-effect" style="width:680px; max-width:92vw; border-top:3px solid ${rStyles.main}; position:relative; display:flex; flex-direction:column; max-height:82vh; overflow:hidden;">
 
-<button id="reader-close-btn"
-style="position:absolute; top:10px; right:10px; z-index:10; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.4); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;"
-onmouseover="this.style.background='rgba(255,69,58,0.45)';this.style.color='white'"
-onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='rgba(255,255,255,0.4)'">
-${ADMIN_UI_ICONS.CANCEL}
-</button>
-
-<div style="padding:14px 48px 14px 16px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; background:linear-gradient(90deg, ${rStyles.main}14, transparent);">
+<div style="padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; background:linear-gradient(90deg, ${rStyles.main}14, transparent);">
 <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
 <div style="width:40px; height:40px; border-radius:10px; background:${rStyles.main}; color:black; font-weight:800; font-size:17px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 12px ${rStyles.main}55;">
 ${(readerTitle || 'U').substring(0,1).toUpperCase()}
@@ -205,11 +198,7 @@ ${UI_ICONS.TRASH}
 // --- 5. LOGIK FÖR KNAPPAR (Kopplas efter att HTML injicerats) ---
 modal.style.pointerEvents = 'all';
 
-const closeBtn = modal.querySelector('#reader-close-btn');
-if (closeBtn) {
-closeBtn.style.pointerEvents = 'all';
-closeBtn.onclick = _closeReader;
-}
+// Stäng via ESC/klick-utanför (global handler i renderer.js)
 
 const prevBtn = modal.querySelector('#reader-prev');
 const nextBtn = modal.querySelector('#reader-next');

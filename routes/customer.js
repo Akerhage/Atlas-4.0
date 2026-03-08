@@ -68,6 +68,23 @@ return res.json({ success: true, status: 'forwarded_to_agent', human_mode: true 
 }
 
 // --- 🤖 OM INTE HUMAN MODE: KÖR AI SOM VANLIGT ---
+
+// Säkerställ att sessionen finns i chat_v2_state.
+// getV2State() returnerar alltid ett default-objekt (aldrig null), så if(!v2State) i
+// handleChatMessage är alltid false och skapar aldrig raden. Utan denna rad i DB
+// hittar inaktivitetstimern aldrig sessionen och arkiverar den aldrig automatiskt.
+const nowTs = Math.floor(Date.now() / 1000);
+const agentId = req.body.context?.locked_context?.agent_id || null;
+await new Promise((resolve) => {
+db.run(
+`INSERT INTO chat_v2_state (conversation_id, session_type, human_mode, owner, office, updated_at)
+VALUES (?, 'customer', 0, NULL, ?, ?)
+ON CONFLICT(conversation_id) DO NOTHING`,
+[sessionId, agentId, nowTs],
+() => resolve()
+);
+});
+
 const stored = await getContextRow(sessionId);
 const hasHistory = stored && stored.context_data && stored.context_data.messages && stored.context_data.messages.length > 0;
 
@@ -77,6 +94,16 @@ sessionId,
 isFirstMessage: !hasHistory,
 session_type: "customer",
 providedContext: req.body.context
+});
+
+// Uppdatera updated_at efter Atlas svar — inaktivitetstimern mäter från detta tidsstämpel.
+// Utan denna uppdatering mäter timern från sessionsskapandet, inte från Atlas senaste svar.
+await new Promise((resolve) => {
+db.run(
+'UPDATE chat_v2_state SET updated_at = ? WHERE conversation_id = ?',
+[Math.floor(Date.now() / 1000), sessionId],
+() => resolve()
+);
 });
 
 res.json(response);
@@ -103,7 +130,8 @@ success: true,
 history: messages,
 messages: messages,
 human_mode: state?.human_mode === 1,
-is_archived: state?.is_archived === 1   // ← NY RAD
+is_archived: state?.is_archived === 1,
+close_reason: state?.close_reason || null
 });
 } catch (err) {
 console.error("❌ History API Error:", err);

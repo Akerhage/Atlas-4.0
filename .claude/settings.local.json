@@ -16,7 +16,8 @@
       "WebFetch(domain:lucide.dev)",
       "WebFetch(domain:unpkg.com)",
       "Bash(curl:*)",
-      "Bash(sort:*)"
+      "Bash(sort:*)",
+      "Bash(pm2 list:*)"
     ]
   }
 }

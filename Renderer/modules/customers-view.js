@@ -256,10 +256,14 @@ const archivedCount  = tickets.filter(t => t.is_archived === 1).length;
 const uniqueOffices  = [...new Set(tickets.map(t => t.routing_tag).filter(Boolean))];
 const uniqueVehicles = [...new Set(tickets.map(t => t.vehicle).filter(Boolean))];
 
+// Använd alltid inloggad agents färg direkt — undviker inaktuell usersCache och
+// fel kontorsfärg. firstOffice används enbart för kontorsetiketten i statistikraden.
 const firstOffice = uniqueOffices[0] ||
 (customerObj.offices ? customerObj.offices.split(',')[0].trim() : null);
-// Använd kundens primära kontor för färger — konsekvent i header och kortlista
-const styles = getAgentStyles(firstOffice || 'unclaimed');
+const _agentHex = (typeof currentUser !== 'undefined' && currentUser?.agent_color?.startsWith?.('#'))
+  ? currentUser.agent_color : '#0071e3';
+const _hx = (h, a) => { try { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; } catch(e){ return `rgba(0,113,227,${a})`; } };
+const styles = { main: _agentHex, bg: _hx(_agentHex,0.08), tagBg: _hx(_agentHex,0.2), bubbleBg: _hx(_agentHex,0.12), border: _hx(_agentHex,0.3) };
 
 const lastContactDate = customerObj.last_contact
 ? new Date(customerObj.last_contact * 1000).toLocaleDateString('sv-SE')
@@ -382,6 +386,22 @@ const mailDetailBtn = detail.querySelector('#cust-detail-mail-btn');
 if (mailDetailBtn) {
   mailDetailBtn.onclick = () => openCustomerMailCompose(customerObj.email, customerObj.name);
 }
+
+// Async: Lysa upp notes-ikonen om kunden har anteckningar
+if (customerObj.email) {
+  (async () => {
+    try {
+      const res = await fetch(`${SERVER_URL}/api/customer-notes?email=${encodeURIComponent(customerObj.email)}`, { headers: fetchHeaders });
+      if (!res.ok) return;
+      const data = await res.json();
+      const notesBtn = detail.querySelector('.notes-trigger-btn');
+      if (notesBtn) {
+        if ((data.notes || []).length > 0) notesBtn.classList.add('has-notes-active');
+        else notesBtn.classList.remove('has-notes-active');
+      }
+    } catch (e) { /* Tyst felhantering */ }
+  })();
+}
 }
 
 // ============================================================================
@@ -395,7 +415,9 @@ return '<div class="template-item-empty">Inga ärenden hittades.</div>';
 const header = `<h4 style="margin:0 0 12px 0; font-size:10px; opacity:0.5; text-transform:uppercase;">Ärendehistorik (${_currentTickets.length})</h4>`;
 
 const cards = _currentTickets.map((t, i) => {
-const agentColor = getAgentStyles(t.routing_tag || 'unclaimed').main;
+// Visa alltid inloggad agents färg — kundvyn är agentens perspektiv
+const agentColor = (typeof currentUser !== 'undefined' && currentUser?.agent_color?.startsWith?.('#'))
+  ? currentUser.agent_color : '#0071e3';
 const isMail   = t.session_type === 'message';
 const typeIcon = isMail ? UI_ICONS.MAIL : UI_ICONS.CHAT;
 const dateStr  = new Date(t.timestamp).toLocaleString('sv-SE', {
@@ -407,7 +429,7 @@ const titleDisplay = t.subject || t.question || 'Ärende';
 
 return `
 <div class="team-ticket-card"
-style="border-left:3px solid ${agentColor} !important; margin-bottom:8px; cursor:pointer;"
+style="--agent-color:${agentColor}; margin-bottom:8px; cursor:pointer;"
 onclick="_openCustomerTicketReader(${i})">
 <div class="ticket-header-row">
 <div class="ticket-title" style="font-size:12px;">
@@ -643,9 +665,6 @@ padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0
 <h3 style="margin:0; font-size:13px; font-weight:700; color:var(--text-primary);">
 Anteckningar — ${customerName || email}
 </h3>
-<button onclick="document.getElementById('customer-notes-overlay').remove()"
-class="footer-icon-btn"
-style="font-size:16px; opacity:0.5; line-height:1;">✕</button>
 </div>
 <div id="customer-notes-list"
 style="flex:1; overflow-y:auto; padding:16px 20px; min-height:80px;">
@@ -803,17 +822,18 @@ _renderCustomerReaderModal();
 // SKICKA NYTT MAIL — öppnar komposeringsdialog med kundens mail förifyllt
 // ============================================================================
 function openCustomerMailCompose(email, name) {
+const _mHex = (typeof currentUser !== 'undefined' && currentUser?.agent_color?.startsWith?.('#')) ? currentUser.agent_color : '#0071e3';
+const _mRgba = (a) => { try { const r=parseInt(_mHex.slice(1,3),16),g=parseInt(_mHex.slice(3,5),16),b=parseInt(_mHex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; } catch(e){ return `rgba(0,113,227,${a})`; } };
 const overlay = document.createElement('div');
 overlay.className = 'custom-modal-overlay';
 overlay.style.zIndex = '10001';
 overlay.innerHTML = `
-<div class="glass-modal-box glass-effect" style="width:520px; max-width:92vw;">
-  <div style="padding:18px 22px 14px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:space-between;">
+<div class="glass-modal-box glass-effect" style="width:520px; max-width:92vw; border-top:3px solid ${_mHex};">
+  <div style="padding:18px 22px 14px; border-bottom:1px solid ${_mRgba(0.15)}; background:linear-gradient(90deg,${_mRgba(0.06)},transparent); display:flex; align-items:center;">
     <div>
-      <div style="font-size:15px; font-weight:700;">Nytt mail</div>
+      <div style="font-size:15px; font-weight:700; color:${_mHex};">Nytt mail</div>
       <div style="font-size:11px; opacity:0.4; margin-top:2px;">Skapar ett nytt mailärende</div>
     </div>
-    <button onclick="this.closest('.custom-modal-overlay').remove()" style="background:none; border:none; color:rgba(255,255,255,0.35); cursor:pointer; font-size:20px; padding:4px; line-height:1;">✕</button>
   </div>
   <div style="padding:18px 22px; display:flex; flex-direction:column; gap:12px;">
     <div>
@@ -829,15 +849,16 @@ overlay.innerHTML = `
       <textarea id="cust-mail-body" placeholder="Skriv ditt meddelande..." style="width:100%; height:130px; resize:vertical; box-sizing:border-box; padding:10px 12px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-primary); font-size:13px; font-family:inherit; outline:none; transition:border-color 0.2s;"></textarea>
     </div>
   </div>
-  <div style="padding:12px 22px 18px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid rgba(255,255,255,0.06);">
-    <button id="cust-mail-cancel" class="header-button" style="padding:8px 16px; font-size:13px; height:36px; border-radius:8px;">Avbryt</button>
-    <button id="cust-mail-send" class="send-button-ticket" style="height:36px; width:auto; padding:0 20px; border-radius:10px; font-size:13px; font-weight:600;">Skicka mail</button>
+  <div style="padding:12px 22px 18px; display:flex; justify-content:flex-end; border-top:1px solid rgba(255,255,255,0.06);">
+    <button id="cust-mail-send" class="btn-glass-icon" title="Skicka mail" style="width:38px; height:38px;">${UI_ICONS.SEND}</button>
   </div>
 </div>`;
 document.body.appendChild(overlay);
 overlay.style.display = 'flex';
-overlay.querySelector('#cust-mail-cancel').onclick = () => overlay.remove();
 overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+const _mailEscHandler = (e) => { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', _mailEscHandler); } };
+document.addEventListener('keydown', _mailEscHandler);
+overlay.addEventListener('remove', () => document.removeEventListener('keydown', _mailEscHandler));
 overlay.querySelector('#cust-mail-send').onclick = () => {
   const to      = overlay.querySelector('#cust-mail-to').value.trim();
   const subject = overlay.querySelector('#cust-mail-subject').value.trim() || 'Kontakt från kundtjänst';
@@ -863,20 +884,21 @@ overlay.querySelector('#cust-mail-send').onclick = () => {
 // INFO-MODAL — förklarar Kundregistret för agenter
 // ============================================================================
 function showCustomersInfoModal() {
+const _iHex = (typeof currentUser !== 'undefined' && currentUser?.agent_color?.startsWith?.('#')) ? currentUser.agent_color : '#0071e3';
+const _iRgba = (a) => { try { const r=parseInt(_iHex.slice(1,3),16),g=parseInt(_iHex.slice(3,5),16),b=parseInt(_iHex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; } catch(e){ return `rgba(0,113,227,${a})`; } };
 const overlay = document.createElement('div');
 overlay.className = 'custom-modal-overlay';
 overlay.style.zIndex = '10001';
 overlay.innerHTML = `
-<div class="glass-modal-box glass-effect" style="width:460px; max-width:90vw;">
-  <div style="padding:20px 22px 14px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; gap:12px;">
-    <div style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+<div class="glass-modal-box glass-effect" style="width:460px; max-width:90vw; border-top:3px solid ${_iHex};">
+  <div style="padding:20px 22px 14px; border-bottom:1px solid ${_iRgba(0.15)}; background:linear-gradient(90deg,${_iRgba(0.06)},transparent); display:flex; align-items:center; gap:12px;">
+    <div style="width:36px; height:36px; border-radius:50%; background:${_iRgba(0.12)}; border:1px solid ${_iRgba(0.3)}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${_iHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
     </div>
     <div>
-      <div style="font-size:15px; font-weight:700; color:white;">Kundregistret</div>
+      <div style="font-size:15px; font-weight:700; color:${_iHex};">Kundregistret</div>
       <div style="font-size:11px; opacity:0.4; margin-top:1px;">Ärendehistorik och kundanalys</div>
     </div>
-    <button onclick="this.closest('.custom-modal-overlay').remove()" style="margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); cursor:pointer; font-size:20px; padding:4px; line-height:1;">✕</button>
   </div>
   <div style="padding:18px 22px; display:flex; flex-direction:column; gap:10px;">
     <div style="font-size:12px; line-height:1.6; color:var(--text-secondary);">Kundregistret samlar alla kunder som kontaktat er, oavsett kanal (chatt eller mail).</div>

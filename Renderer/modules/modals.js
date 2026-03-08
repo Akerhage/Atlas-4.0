@@ -61,11 +61,10 @@ modal.style.zIndex = '30000';
 const sendIcon = (typeof UI_ICONS !== 'undefined' && UI_ICONS.SEND) ? UI_ICONS.SEND : '';
 
 modal.innerHTML = `
-<div class="glass-modal-box">
+<div class="glass-modal-box" style="border-top:3px solid var(--accent-primary);">
 <div class="glass-modal-header"><h3 id="confirm-title"></h3></div>
 <div class="glass-modal-body"><p id="confirm-message" style="margin: 15px 0 25px 0;"></p></div>
-<div class="glass-modal-footer" style="justify-content:center; gap:15px;">
-<button id="confirm-cancel" class="btn-modal-cancel">Avbryt</button>
+<div class="glass-modal-footer" style="justify-content:center;">
 <button id="confirm-ok" class="btn-modal-confirm">${sendIcon} OK</button>
 </div>
 </div>`;
@@ -74,17 +73,19 @@ document.body.appendChild(modal);
 
 modal.querySelector('#confirm-title').innerText = title;
 modal.querySelector('#confirm-message').innerText = message;
+const _cHex = (typeof currentUser !== 'undefined' && currentUser?.agent_color?.startsWith?.('#')) ? currentUser.agent_color : '#0071e3';
+modal.querySelector('.glass-modal-box').style.borderTop = `3px solid ${_cHex}`;
 modal.style.display = 'flex';
 
 const btnOk = modal.querySelector('#confirm-ok');
-const btnCancel = modal.querySelector('#confirm-cancel');
 const newOk = btnOk.cloneNode(true);
-const newCancel = btnCancel.cloneNode(true);
 btnOk.parentNode.replaceChild(newOk, btnOk);
-btnCancel.parentNode.replaceChild(newCancel, btnCancel);
 
-newOk.onclick = () => { modal.style.display = 'none'; resolve(true); };
-newCancel.onclick = () => { modal.style.display = 'none'; resolve(false); };
+const _cClose = (val) => { modal.style.display = 'none'; document.removeEventListener('keydown', _cEsc); modal.onclick = null; resolve(val); };
+const _cEsc = (e) => { if (e.key === 'Escape') _cClose(false); };
+document.addEventListener('keydown', _cEsc);
+modal.onclick = (e) => { if (e.target === modal) _cClose(false); };
+newOk.onclick = () => _cClose(true);
 });
 }
 
@@ -119,7 +120,7 @@ modal.style.display = 'none';
 modal.style.zIndex = '30000';
 
 modal.innerHTML = `
-<div class="glass-modal-box">
+<div class="glass-modal-box" style="border-top:3px solid var(--accent-primary);">
 <div class="glass-modal-header">
 <h3 id="prompt-title"></h3>
 </div>
@@ -127,8 +128,7 @@ modal.innerHTML = `
 <p id="prompt-message"></p>
 <textarea id="prompt-input" style="width:100%; height:80px; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; resize:none; font-family:inherit; font-size:14px; margin-top:10px;"></textarea>
 </div>
-<div class="glass-modal-footer">
-<button id="prompt-cancel" class="btn-modal-cancel">Avbryt</button>
+<div class="glass-modal-footer" style="justify-content:flex-end;">
 <button id="prompt-confirm" class="btn-modal-confirm">OK</button>
 </div>
 </div>
@@ -140,13 +140,14 @@ const titleEl = modal.querySelector('#prompt-title');
 const msgEl = modal.querySelector('#prompt-message');
 const inputEl = modal.querySelector('#prompt-input');
 const confirmBtn = modal.querySelector('#prompt-confirm');
-const cancelBtn = modal.querySelector('#prompt-cancel');
 
 titleEl.textContent = title;
 msgEl.textContent = message;
+const _pHex = (typeof currentUser !== 'undefined' && currentUser?.agent_color?.startsWith?.('#')) ? currentUser.agent_color : '#0071e3';
+modal.querySelector('.glass-modal-box').style.borderTop = `3px solid ${_pHex}`;
 
 // Sätter defaultValue om det finns (t.ex. vid redigering), annars tomt
-inputEl.value = defaultValue; 
+inputEl.value = defaultValue;
 
 modal.style.display = 'flex';
 setTimeout(() => {
@@ -159,12 +160,15 @@ inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
 const close = (val) => {
 modal.style.display = 'none';
 confirmBtn.onclick = null;
-cancelBtn.onclick = null;
+document.removeEventListener('keydown', _pEsc);
+modal.onclick = null;
 resolve(val);
 };
+const _pEsc = (e) => { if (e.key === 'Escape') close(null); };
+document.addEventListener('keydown', _pEsc);
+modal.onclick = (e) => { if (e.target === modal) close(null); };
 
 confirmBtn.onclick = () => close(inputEl.value);
-cancelBtn.onclick = () => close(null);
 });
 }
 
@@ -356,9 +360,6 @@ ${svg}
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
 </button>
 <div style="flex:1"></div>
-<button class="btn-glass-icon" title="Avbryt" style="width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0;" onclick="document.getElementById('atlas-profile-modal').style.display='none'">
-${ADMIN_UI_ICONS.CANCEL}
-</button>
 <button class="btn-glass-icon" id="prof-save-btn" title="Spara ändringar" 
 style="width: 36px; height: 36px; border-radius: 8px; color: ${currentUser.agent_color || '#4cd964'}; border-color: ${currentUser.agent_color ? currentUser.agent_color + '4d' : 'rgba(76,217,100,0.3)'}; background: ${currentUser.agent_color ? currentUser.agent_color + '1a' : 'rgba(76,217,100,0.05)'}; display: flex; align-items: center; justify-content: center; padding: 0;">
 ${ADMIN_UI_ICONS.SAVE}
@@ -515,9 +516,8 @@ modal.className = 'custom-modal-overlay';
 modal.style.zIndex = '20000';
 modal.innerHTML = `
 <div class="glass-modal-box glass-effect" style="max-width:500px;">
-<div class="glass-modal-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+<div class="glass-modal-header">
 <h3 style="margin:0;">Om Admin-panelen</h3>
-<button onclick="this.closest('.custom-modal-overlay').remove()" style="background:none; border:none; color:var(--text-primary); opacity:0.6; cursor:pointer; padding:4px; font-size:18px; line-height:1; margin-top:-2px; flex-shrink:0;" title="Stäng">✕</button>
 </div>
 <div class="glass-modal-body" style="font-size:13px; line-height:1.7;">
 <div style="padding:12px; border-radius:8px; background:rgba(255,69,58,0.1); border:1px solid rgba(255,69,58,0.3); margin-bottom:16px; color:#ff6b6b;">
@@ -566,14 +566,15 @@ modal.style.display = 'none';
 document.body.appendChild(modal);
 }
 // Injicera fullt formulär-HTML (ersätter det tomma statiska skalet)
+const _nmHex = (typeof currentUser !== 'undefined' && currentUser?.agent_color?.startsWith?.('#')) ? currentUser.agent_color : '#0071e3';
 
 const mailIconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
 const internalIconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
 
 modal.innerHTML = `
-<div class="glass-modal-box glass-effect">
+<div class="glass-modal-box glass-effect" style="border-top:3px solid ${_nmHex};">
 <div class="glass-modal-header" style="flex-direction: column; align-items: flex-start; gap: 8px; padding:12px 18px;">
-<h3 style="display:flex; align-items:center; gap:12px; margin:0; font-size:1rem;">Nytt meddelande</h3>
+<h3 style="display:flex; align-items:center; gap:12px; margin:0; font-size:1rem; color:${_nmHex};">Nytt meddelande</h3>
 <div style="display:flex; background:rgba(255,255,255,0.1); border-radius:8px; padding:3px; width:100%;">
 <button id="btn-mode-external" class="toggle-mode-btn active" style="flex:1; border:none; background:var(--accent-primary); color:white; padding:6px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px;">
 ${mailIconSvg} Externt Mail
@@ -590,7 +591,7 @@ ${internalIconSvg} Internt
 <div id="composer-agent-grid" class="agent-grid" style="display:none; max-height: 120px; overflow-y: auto; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px;"></div>
 <input type="hidden" id="selected-internal-agent">
 </div>
-<div style="margin-bottom:10px;">
+<div id="composer-subject-row" style="margin-bottom:10px;">
 <label style="display:block; color:#aaa; font-size:10px; text-transform:uppercase; margin-bottom:4px; font-weight:bold;">Ämne / Rubrik:</label>
 <input type="text" id="composer-subject" placeholder="Vad gäller ärendet?" style="width:100%; padding:7px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4); color:white; font-size:13px;">
 </div>
@@ -600,10 +601,7 @@ ${internalIconSvg} Internt
 </div>
 </div>
 <div id="composer-info-box" style="margin-bottom:8px; padding:8px 12px; border-radius:8px; font-size:11px; line-height:1.5; background:rgba(0,113,227,0.07); border:1px solid rgba(0,113,227,0.2); color:rgba(255,255,255,0.5); display:none;"></div>
-<div class="glass-modal-footer" style="gap:8px;">
-<button id="composer-cancel" class="btn-glass-icon" style="width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; padding:0; color:rgba(255,255,255,0.45); flex-shrink:0;" title="Stäng">
-${ADMIN_UI_ICONS.CANCEL}
-</button>
+<div class="glass-modal-footer" style="justify-content:flex-end;">
 <button id="composer-send" class="btn-modal-confirm" style="width:38px; height:38px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:10px; flex-shrink:0;" title="Skicka">
 ${UI_ICONS.SEND}
 </button>
@@ -627,11 +625,10 @@ setMode(false);
 modal.style.display = 'flex';
 toInp.value = ''; subInp.value = ''; bodyInp.value = '';
 setTimeout(() => { if(!isInternalMode) toInp.focus(); }, 50);
-
-document.getElementById('composer-cancel').onclick = () => modal.style.display = 'none';
+modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
 
 document.getElementById('composer-send').onclick = async () => {
-const subject = subInp.value.trim();
+const subject = isInternalMode ? 'Internt meddelande' : subInp.value.trim();
 const body = bodyInp.value.trim();
 const recipient = isInternalMode ? document.getElementById('selected-internal-agent').value : toInp.value.trim();
 
@@ -639,8 +636,8 @@ if (isInternalMode) {
 if (!recipient) { showToast("⚠️ Välj en kollega att skicka till!"); return; }
 } else {
 if (!recipient || !recipient.includes('@')) { showToast("⚠️ Ange giltig e-postadress!"); return; }
-}
 if (!subject) { showToast("⚠️ Ange ett ämne!"); return; }
+}
 if (!body) { showToast("⚠️ Skriv ett meddelande!"); return; }
 
 const btn = document.getElementById('composer-send');
@@ -710,6 +707,8 @@ btnExt.style.color = '#aaa';
 toInp.style.display = 'none';
 agentGrid.style.display = 'grid';
 labelRec.innerText = "MOTTAGARE (INTERN):";
+const subjectRow = document.getElementById('composer-subject-row');
+if (subjectRow) subjectRow.style.display = 'none';
 if (infoBox) { infoBox.style.display = 'block'; infoBox.textContent = '🔒 Dessa ärenden kan ej läsas av andra i systemet och syns endast lokalt för dig i Garaget vid arkivering.'; }
 loadAgents();
 } else {
@@ -720,6 +719,8 @@ btnInt.style.color = '#aaa';
 agentGrid.style.display = 'none';
 toInp.style.display = 'block';
 labelRec.innerText = "MOTTAGARE (E-POST):";
+const subjectRow = document.getElementById('composer-subject-row');
+if (subjectRow) subjectRow.style.display = '';
 if (infoBox) { infoBox.style.display = 'block'; infoBox.textContent = '📧 Nytt ärende skapas via e-post och hamnar i kundens inkorg. Ärendet syns för hela teamet i systemet.'; }
 }
 }

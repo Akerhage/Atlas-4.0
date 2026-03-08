@@ -17,9 +17,8 @@ document.body.appendChild(modal);
 // Vi bygger om HTML varje gång för att garantera att vi har rätt ID:n och rensar gammalt skräp
 modal.innerHTML = `
 <div class="glass-modal-box" style="width: 480px; max-height: 75vh; display: flex; flex-direction: column;">
-<div class="glass-modal-header" style="display:flex; align-items:center; justify-content:space-between;">
+<div class="glass-modal-header">
 <h3 style="margin:0;">Interna kommentarer</h3>
-<button id="close-notes-btn" class="btn-glass-icon" style="width:28px; height:28px;" title="Stäng">✕</button>
 </div>
 <div class="glass-modal-body" style="flex: 1; overflow-y: auto; padding: 12px 15px;">
 <div id="notes-list-container" style="margin-bottom: 12px;">Laddar...</div>
@@ -41,6 +40,11 @@ style="width:100%; height:70px; padding-right:44px; box-sizing:border-box; resiz
 `;
 
 modal.style.display = 'flex';
+
+// Stäng via klick utanför eller ESC — rensa innerHTML för att stoppa ghosting
+modal.onclick = (e) => { if (e.target === modal) { modal.style.display = 'none'; modal.innerHTML = ''; } };
+const _notesEscFn = (e) => { if (e.key === 'Escape') { modal.style.display = 'none'; modal.innerHTML = ''; document.removeEventListener('keydown', _notesEscFn); } };
+document.addEventListener('keydown', _notesEscFn);
 
 // 1. Ladda anteckningarna
 loadNotes(conversationId);
@@ -77,11 +81,7 @@ saveBtn.style.opacity = '';
 }
 };
 
-// 3. Stängknapp
-document.getElementById('close-notes-btn').onclick = () => {
-modal.style.display = 'none';
-modal.innerHTML = ''; // TOTALRENSNING vid stängning för att stoppa ghosting
-};
+// Stängknapp ersatt av ESC/klick-utanför ovan
 }
 // =============================================================================
 // LOGIK: HÄMTA ANTECKNINGAR TILL MODAL
