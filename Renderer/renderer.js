@@ -948,19 +948,30 @@ function formatAtlasMessage(text) {
 if (!text) return "<i>(Ingen text hittades)</i>";
 let processedText = text.toString();
 
-// 1. HTML-Detektering (Behåll din logik)
+// 1. HTML-Detektering
 const hasHtml = /<[a-z][\s\S]*>/i.test(processedText) || processedText.includes("<div");
 if (hasHtml) {
-return processedText.replace(/^(<br\s*\/?>|\s)+/i, '').replace(/((<br\s*\/?>|\s)+)$/i, '');
+// Konvertera Quill/block-HTML (<p>...</p>) till inline-rendering med <br>
+let html = processedText;
+html = html.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_, inner) => {
+const trimmed = inner.trim();
+if (!trimmed || trimmed === '<br>' || trimmed === '<br/>') return '<br>';
+return trimmed + '<br>';
+});
+// Ta bort ledande/avslutande <br> och begränsa till max 2 på rad
+html = html.replace(/^(\s*<br\s*\/?>\s*)+/gi, '');
+html = html.replace(/(\s*<br\s*\/?>\s*)+$/gi, '');
+html = html.replace(/(<br\s*\/?>){3,}/gi, '<br><br>');
+return html;
 }
 
-// 2. Sanera och förbered text (Behåll din logik)
+// 2. Sanera och förbered text
 const sanitized = processedText
 .replace(/\r\n/g, '\n')
 .replace(/\r/g, '\n')
 .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-// 3. Bild- och filstöd (Dina smarta regex)
+// 3. Bild- och filstöd
 let content = sanitized.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
 const fullUrl = url.startsWith('/uploads') ? `${SERVER_URL}${url}` : url;
 return `<div class="chat-image-container" style="margin: 10px 0;"><img src="${fullUrl}" alt="${alt}" style="max-width:100%; border-radius:8px; cursor:pointer;" onclick="window.open('${fullUrl}')"></div>`;
@@ -978,11 +989,11 @@ const fullUrl = url.startsWith('/uploads') ? `${SERVER_URL}${url}` : url;
 return `<a href="${fullUrl}" target="_blank" class="atlas-link">${label}</a>`;
 });
 
-// 5. Splitta i rader, rensa tomma, slå ihop med <br> (undviker block-element som tvingar 100% bredd)
-return content.split('\n')
-.map(line => line.trim())
-.filter(line => line !== '')
-.join('<br>');
+// 5. Splitta i rader och slå ihop med <br> — bevara tomrader (paragrafavstånd) som <br><br>
+let result = content.split('\n').map(line => line.trim()).join('<br>');
+result = result.replace(/(<br>){3,}/g, '<br><br>');
+result = result.replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');
+return result;
 }
 
 // Hjälpfunktion för att visa ren text i ärendekortet (tar bort HTML-taggar)
@@ -1144,7 +1155,7 @@ if (DOM.menuItems) {
 DOM.menuItems.forEach(item => {
 const newItem = item.cloneNode(true);
 if (item.parentNode) item.parentNode.replaceChild(newItem, item);
-newItem.addEventListener('click', () => switchView(newItem.dataset.view));
+newItem.addEventListener('click', () => { switchView(newItem.dataset.view); if (window.closeMobileMenu) window.closeMobileMenu(); });
 });
 DOM.menuItems = document.querySelectorAll('.menu-item'); 
 }

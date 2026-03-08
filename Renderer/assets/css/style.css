@@ -1373,6 +1373,33 @@ color: white !important;
 transform: scale(1.05);
 }
 
+/* VARIANTER (GULD — AI Sammanfattning) */
+#btn-summarize {
+background: rgba(255, 196, 0, 0.05) !important;
+color: #ffc400 !important;
+border-color: rgba(255, 196, 0, 0.3) !important;
+}
+#btn-summarize:hover {
+background: rgba(255, 196, 0, 0.2) !important;
+border-color: #ffc400 !important;
+box-shadow: 0 0 20px rgba(255, 196, 0, 0.5) !important;
+color: white !important;
+transform: scale(1.05);
+}
+
+/* Inkorgens snabbsvar-knapp (hover glow) */
+#btn-quick-reply-send {
+transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease !important;
+}
+#btn-quick-reply-send:hover {
+filter: brightness(1.15) !important;
+box-shadow: 0 4px 16px rgba(0,0,0,0.45) !important;
+transform: translateY(-1px) !important;
+}
+#btn-quick-reply-send:active {
+transform: scale(0.95) !important;
+}
+
 .pill {
 display: inline-flex;
 align-items: center;
@@ -3094,9 +3121,10 @@ border-color: color-mix(in srgb, var(--agent-color, #fff) 30%, transparent) !imp
 }
 
 .team-ticket-card.active-ticket {
-background: linear-gradient(90deg, rgba(255, 255, 255, 0.07), transparent) !important;
-/* FIX: Hela ramen lyser i agentens färg när kortet är aktivt */
-border-color: color-mix(in srgb, var(--agent-color, #0071e3) 50%, rgba(255,255,255,0.15)) !important;
+/* Subtil bakgrundsgradient i kortets accentfärg */
+background: linear-gradient(90deg, color-mix(in srgb, var(--agent-color, #0071e3) 18%, transparent), transparent) !important;
+border-color: color-mix(in srgb, var(--agent-color, #0071e3) 60%, rgba(255,255,255,0.2)) !important;
+border-left-color: var(--agent-color, #0071e3) !important;
 box-shadow: none !important;
 }
 

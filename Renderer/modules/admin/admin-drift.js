@@ -107,7 +107,8 @@ ${buildDriftLockRow('jwt', 'jwt_expires_in', 'JWT-livslängd (t.ex. 24h, 7d)', s
 ${buildDriftLockRow('auto-exit', 'auto_human_exit', 'Auto-Human-Exit (återgå till AI när alla ärenden stängs)', s.auto_human_exit, 'checkbox')}
 <hr style="border:none; border-top:1px solid rgba(255,255,255,0.07); margin:24px 0;">
 <h4 style="margin:0 0 8px 0; font-size:12px; text-transform:uppercase;
-letter-spacing:0.5px; color:var(--accent-primary);">📢 Skicka systemmeddelande</h4>
+letter-spacing:0.5px; color:var(--accent-primary); display:flex; align-items:center; gap:7px;">
+${UI_ICONS.BROADCAST} Skicka systemmeddelande</h4>
 <p style="font-size:12px; color:var(--text-secondary); opacity:0.65; margin:0 0 12px 0;">
   Skickar ett popup-meddelande med plingljud till alla agenter som är inloggade just nu.
 </p>
@@ -118,9 +119,9 @@ resize:vertical; border:1px solid rgba(255,255,255,0.12);
 background:rgba(255,255,255,0.04); color:var(--text-primary);
 font-size:13px; font-family:inherit; outline:none; margin-bottom:10px;"></textarea>
 <div style="display:flex; align-items:center; gap:12px;">
-<button id="broadcast-send-btn" style="padding:9px 20px; border-radius:8px;
-background:var(--accent-primary); color:black; font-weight:700; border:none;
-cursor:pointer; font-size:13px;">Skicka till alla agenter</button>
+<button id="broadcast-send-btn" title="Skicka till alla agenter"
+style="display:flex; align-items:center; justify-content:center; padding:9px 14px; border-radius:8px;
+background:var(--accent-primary); color:var(--text-primary); border:none; cursor:pointer;">${UI_ICONS.SEND}</button>
 <span id="broadcast-confirm"
 style="display:none; font-size:12px; color:#4cd964;">✅ Skickat!</span>
 </div>

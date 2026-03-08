@@ -727,28 +727,25 @@ letter-spacing:0.5px; display:block; margin-bottom:6px;">AI Sammanfattning</span
 ${bodyContent}
 </div>
 ${canQuickReply ? `
-<div id="quick-reply-area" style="padding:8px 16px; border-top:1px solid ${styles.border}; background:${styles.bg}; display:flex; flex-direction:column; gap:4px;">
+<div id="quick-reply-area" style="padding:8px 16px; border-top:1px solid ${styles.border}; background:${styles.bg}; display:flex; flex-direction:column; gap:10px;">
 ${isMailTicket ? `<div style="font-size:11px; color:var(--text-secondary); opacity:0.55; padding:0 2px;">Till: ${ticket.contact_email}</div>` : ''}
 <div style="display:flex; align-items:flex-end; gap:8px;">
 <textarea id="quick-reply-input" placeholder="${isMailTicket ? 'Skriv mailsvar... (Ctrl+Enter)' : 'Snabbsvar... (Ctrl+Enter)'}"
 style="flex:1; min-height:44px; max-height:120px; resize:vertical; padding:8px 10px; border-radius:8px;
 background:rgba(255,255,255,0.07); border:1px solid ${styles.border};
 color:var(--text-primary); font-size:13px; font-family:inherit; box-sizing:border-box;"></textarea>
-<button id="btn-quick-reply-ai" title="AI Förslag" style="flex-shrink:0; width:36px; height:36px;
-border-radius:8px; background:rgba(255,255,255,0.07); border:1px solid ${styles.border};
-color:${styles.main}; cursor:pointer; display:flex; align-items:center; justify-content:center;">
-${UI_ICONS.AI}
-</button>
 <button id="btn-quick-reply-send" title="Skicka svar" style="flex-shrink:0; width:36px; height:36px; border-radius:8px;
 background:${styles.main}; color:white; border:none; cursor:pointer;
 display:flex; align-items:center; justify-content:center;">
 ${UI_ICONS.SEND}
 </button>
 </div>
+${State.templates?.length ? `<div style="flex:1;"><select id="inbox-template-select" class="filter-select"><option value="">📋 Välj mall att kopiera...</option>${(State.templates || []).map(t => `<option value="${t.id}">${t.title}</option>`).join('')}</select></div>` : ''}
 </div>` : ''}
 <div class="detail-footer-area">
 <div class="detail-footer-toolbar" style="padding: 12px 20px; border-top:1px solid var(--border-color); background:rgba(0,0,0,0.25); display:flex; justify-content:flex-end; gap:12px;">
-${isLongEnough ? `<button class="footer-icon-btn" id="btn-summarize" title="AI Sammanfattning">${UI_ICONS.AI}</button>` : ''}
+${canQuickReply ? `<button class="footer-icon-btn" id="btn-quick-reply-ai" title="AI Förslag">${UI_ICONS.AI}</button>` : ''}
+${isLongEnough ? `<button class="footer-icon-btn" id="btn-summarize" title="AI Sammanfattning">${UI_ICONS.SPARKLES}</button>` : ''}
 <button class="footer-icon-btn btn-archive-red" id="btn-archive" title="Arkivera">${UI_ICONS.ARCHIVE}</button>
 <button class="footer-icon-btn danger" id="btn-delete" title="Ta bort permanent">${UI_ICONS.TRASH}</button>
 </div>
@@ -763,6 +760,9 @@ refreshNotesGlow(ticket.conversation_id);
 
 // Koppla Quick Reply-logik efter HTML är i DOM
 if (canQuickReply) {
+// Håller mallens HTML tills användaren manuellt ändrar texten
+let inboxActiveTemplateHtml = null;
+
 const quickReply = async () => {
 const input = document.getElementById('quick-reply-input');
 const msg = (input?.value || '').trim();
@@ -780,10 +780,11 @@ if (isMailTicket) {
 window.socketAPI.emit('team:send_email_reply', {
 conversationId: ticket.conversation_id,
 message: msg,
-html: msg.replace(/\n/g, '<br>'),
+html: inboxActiveTemplateHtml || msg.replace(/\n/g, '<br>'),
 customerEmail: ticket.contact_email,
 subject: 'Re: ' + (ticket.subject || ticket.question || 'Ditt ärende')
 });
+inboxActiveTemplateHtml = null;
 } else {
 window.socketAPI.emit('team:agent_reply', {
 conversationId: ticket.conversation_id,
@@ -817,6 +818,36 @@ window.socketAPI.emit('team:agent_typing', { sessionId: ticket.conversation_id }
 });
 }
 }
+// Mall-picker för inkorg
+const inboxTSelect = document.getElementById('inbox-template-select');
+if (inboxTSelect) {
+inboxTSelect.onchange = () => {
+const tId = inboxTSelect.value;
+if (!tId) return;
+const t = (State.templates || []).find(x => x.id == tId);
+if (t && qrInput) {
+inboxActiveTemplateHtml = t.content;
+// Konvertera Quill HTML → text med bevarade radbrytningar
+qrInput.value = (t.content || '')
+.replace(/<br\s*\/?>/gi, '\n')
+.replace(/<\/p>/gi, '\n').replace(/<p[^>]*>/gi, '')
+.replace(/<\/div>/gi, '\n').replace(/<div[^>]*>/gi, '')
+.replace(/<[^>]+>/g, '')
+.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ')
+.replace(/\n{3,}/g, '\n\n')
+.trim();
+qrInput.focus();
+inboxTSelect.value = '';
+}
+};
+}
+// Nollställ HTML-mallen om användaren redigerar manuellt (isTrusted=false för programmatiska events)
+if (qrInput) {
+qrInput.addEventListener('input', (e) => {
+if (e.isTrusted) inboxActiveTemplateHtml = null;
+});
+}
+
 // AI-knapp för snabbsvar i inkorg
 const btnQrAI = document.getElementById('btn-quick-reply-ai');
 if (btnQrAI) {

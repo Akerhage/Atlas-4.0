@@ -13,6 +13,8 @@
 <title>Atlas</title>
 <!-- Atlas UI: CSS-variabler, layout, knappar, modaler -->
 <link rel="stylesheet" href="./assets/css/style.css">
+<!-- Mobilanpassning — laddas ENBART på skärmar ≤ 768px (påverkar ej Electron/desktop) -->
+<link rel="stylesheet" media="screen and (max-width: 768px)" href="./assets/css/mobile.css">
 <!-- Quill Rich Text Editor: stilar -->
 <link href="./assets/css/quill.snow.css" rel="stylesheet">
 <!-- Kontorsfärgstema (byts dynamiskt av renderer.js) -->
@@ -384,7 +386,11 @@ Garaget
 </svg>
 Kunder
 </h2>
-<div class="header-actions"></div>
+<div class="header-actions">
+<button class="header-button" onclick="showCustomersInfoModal()" title="Om Kundregistret" style="width:34px; height:34px; border-radius:50%; padding:0; display:flex; align-items:center; justify-content:center;">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+</button>
+</div>
 </header>
 <div class="templates-container">
 <div class="template-list-container">
@@ -568,6 +574,44 @@ Admin
 <div class="glass-modal-body" id="profile-modal-content"></div>
 </div>
 </div>
+
+
+<!-- Hamburger-knapp (dold på desktop via inline style, visas av mobile.css) -->
+<button id="mobile-hamburger" style="display:none;" title="Meny" aria-label="Öppna meny">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+<line x1="3" y1="6" x2="21" y2="6"/>
+<line x1="3" y1="12" x2="21" y2="12"/>
+<line x1="3" y1="18" x2="21" y2="18"/>
+</svg>
+</button>
+
+<!-- Tillbaka-knapp: visas av JS när ett ärende är öppet på mobil -->
+<button id="mobile-back-btn" style="display:none;" title="Tillbaka till listan" aria-label="Tillbaka">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="15 18 9 12 15 6"/>
+</svg>
+</button>
+
+<!-- Overlay bakom sidomenyn (dold på desktop, visas av mobile.css) -->
+<div id="mobile-overlay" style="display:none;"></div>
+
+<!-- Mobil-toggle: stänger/öppnar sidomenyn. Inline script körs direkt, påverkar ej desktop. -->
+<script>
+(function () {
+  if (window.innerWidth > 768) return;
+  var btn     = document.getElementById('mobile-hamburger');
+  var overlay = document.getElementById('mobile-overlay');
+  var sidebar = document.querySelector('.sidebar');
+  if (!btn || !overlay || !sidebar) return;
+  function closeMenu() { sidebar.classList.remove('mobile-open'); overlay.classList.remove('active'); }
+  function openMenu()  { sidebar.classList.add('mobile-open');    overlay.classList.add('active'); }
+  window.closeMobileMenu = closeMenu;
+  btn.addEventListener('click', function () {
+    sidebar.classList.contains('mobile-open') ? closeMenu() : openMenu();
+  });
+  overlay.addEventListener('click', closeMenu);
+}());
+</script>
 
 </body>
 </html>

@@ -38,7 +38,7 @@ ${u.is_online ? '<div style="position:absolute; bottom:0; right:0; width:8px; he
 <div style="flex: 1; overflow: hidden; padding-left: 6px;">
 <div style="display:flex; align-items:center; gap:6px;">
 <span style="font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${displayName}</span>
-${u.status_text ? `<span style="font-size:10px; color:var(--accent-primary); opacity:0.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;" title="${u.status_text}">💬 ${u.status_text.substring(0, 40)}</span>` : ''}
+${u.status_text ? `<span style="font-size:10px; color:var(--accent-primary); opacity:0.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; text-align:right;" title="${u.status_text}">💬 ${u.status_text.substring(0, 40)}</span>` : ''}
 </div>
 <div style="font-size:10px; color:var(--text-secondary); opacity:0.7;">
 ${isAdmin ? '★ ADMIN' : 'AGENT'} • @${u.username}

@@ -258,11 +258,8 @@ const uniqueVehicles = [...new Set(tickets.map(t => t.vehicle).filter(Boolean))]
 
 const firstOffice = uniqueOffices[0] ||
 (customerObj.offices ? customerObj.offices.split(',')[0].trim() : null);
-const agentStyleColor = (typeof currentUser !== 'undefined' && currentUser.agent_color)
-? currentUser.agent_color : null;
-const styles = agentStyleColor
-? getAgentStyles(currentUser.username)
-: getAgentStyles(firstOffice || 'unclaimed');
+// Använd kundens primära kontor för färger — konsekvent i header och kortlista
+const styles = getAgentStyles(firstOffice || 'unclaimed');
 
 const lastContactDate = customerObj.last_contact
 ? new Date(customerObj.last_contact * 1000).toLocaleDateString('sv-SE')
@@ -294,13 +291,30 @@ ${customerObj.phone
 </div>
 </div>
 </div>
-<!-- ÄNDRING 3: Notes-knapp i kundheadern -->
+<div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+${tickets.length >= 1 ? `<button class="btn-glass-icon" id="cust-detail-ai-btn"
+title="AI-summering av kundens historik"
+style="color:#ffc400; border-color:rgba(255,196,0,0.3);">
+${UI_ICONS.SPARKLES}
+</button>` : ''}
+${customerObj.email ? `<button class="btn-glass-icon" id="cust-detail-mail-btn"
+title="Skicka nytt mail till kunden"
+style="color:${styles.main}; border-color:${styles.border};">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+</button>` : ''}
 <button class="btn-glass-icon notes-trigger-btn"
 onclick="openCustomerNotesModal('${customerObj.email || ''}', '${(customerObj.name || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')"
 title="Interna anteckningar om kunden"
-style="color:${styles.main}; border-color:${styles.border}; flex-shrink:0;">
+style="color:${styles.main}; border-color:${styles.border};">
 ${UI_ICONS.NOTES}
 </button>
+</div>
+</div>
+
+<!-- AI-PANEL (collapsible) -->
+<div id="cust-detail-ai-panel" style="display:none; padding:12px 20px; border-bottom:1px solid rgba(255,196,0,0.12); background:rgba(255,196,0,0.04); flex-shrink:0;">
+<span style="font-size:10px; font-weight:600; color:#ffc400; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">✨ AI Kundanalys</span>
+<span id="cust-detail-ai-text" style="font-size:12px; line-height:1.65; color:var(--text-secondary);"></span>
 </div>
 
 <!-- STATISTIKRAD (4 rutor) -->
@@ -331,6 +345,43 @@ ${_buildTicketListHtml()}
 
 </div>
 `;
+
+// Event listeners för AI och mail-knappar i kundheadern
+const aiDetailBtn = detail.querySelector('#cust-detail-ai-btn');
+if (aiDetailBtn) {
+  // Visa cachat resultat direkt om det finns
+  if (_aiSummaryCache[customerObj.email]) {
+    const _ap = detail.querySelector('#cust-detail-ai-panel');
+    const _at = detail.querySelector('#cust-detail-ai-text');
+    if (_ap && _at) { _at.textContent = _aiSummaryCache[customerObj.email]; _ap.style.display = 'block'; }
+  }
+  aiDetailBtn.onclick = async () => {
+    const panel = detail.querySelector('#cust-detail-ai-panel');
+    const txt   = detail.querySelector('#cust-detail-ai-text');
+    if (!panel) return;
+    // Toggle av: göm panelen om den redan visar ett resultat
+    if (panel.style.display !== 'none' && txt.textContent && txt.textContent !== '🤖 Analyserar...') {
+      panel.style.display = 'none'; return;
+    }
+    const email = customerObj.email;
+    if (_aiSummaryCache[email]) { txt.textContent = _aiSummaryCache[email]; panel.style.display = 'block'; return; }
+    panel.style.display = 'block'; txt.textContent = '🤖 Analyserar...'; aiDetailBtn.disabled = true;
+    try {
+      const r = await fetch(`${SERVER_URL}/api/customers/summarize`, {
+        method: 'POST', headers: { ...fetchHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await r.json();
+      const summary = data.summary || data.error || 'Inget svar.';
+      _aiSummaryCache[email] = summary; txt.textContent = summary;
+    } catch (e) { txt.textContent = 'Kunde inte nå servern.'; }
+    finally { aiDetailBtn.disabled = false; }
+  };
+}
+const mailDetailBtn = detail.querySelector('#cust-detail-mail-btn');
+if (mailDetailBtn) {
+  mailDetailBtn.onclick = () => openCustomerMailCompose(customerObj.email, customerObj.name);
+}
 }
 
 // ============================================================================
@@ -344,8 +395,7 @@ return '<div class="template-item-empty">Inga ärenden hittades.</div>';
 const header = `<h4 style="margin:0 0 12px 0; font-size:10px; opacity:0.5; text-transform:uppercase;">Ärendehistorik (${_currentTickets.length})</h4>`;
 
 const cards = _currentTickets.map((t, i) => {
-const agentColor = (typeof currentUser !== 'undefined' && currentUser.agent_color)
-? currentUser.agent_color : '#0071e3';
+const agentColor = getAgentStyles(t.routing_tag || 'unclaimed').main;
 const isMail   = t.session_type === 'message';
 const typeIcon = isMail ? UI_ICONS.MAIL : UI_ICONS.CHAT;
 const dateStr  = new Date(t.timestamp).toLocaleString('sv-SE', {
@@ -406,12 +456,8 @@ const idx = _currentTicketIdx;
 const t   = _currentTickets[idx];
 if (!t) return;
 
-// Använd inloggad agents färg (samma som i ärendelistorna) med fallback till routing_tag
-const agentColor = (typeof currentUser !== 'undefined' && currentUser.agent_color)
-  ? currentUser.agent_color : null;
-const tStyles = (typeof currentUser !== 'undefined' && currentUser.username)
-  ? getAgentStyles(currentUser.username)
-  : getAgentStyles(t.routing_tag || t.owner || 'unclaimed');
+// Använd ärendets kontor för färger
+const tStyles = getAgentStyles(t.routing_tag || t.owner || 'unclaimed');
 const titleDisplay = t.subject || t.question || 'Ärende';
 const hasPrev      = idx > 0;
 const hasNext      = idx < _currentTickets.length - 1;
@@ -440,7 +486,7 @@ const isUser   = m.role === 'user';
 const rawText  = m.content || m.text || '';
 const clean    = rawText.replace(/^📧\s*(\((Mail|Svar)\):)?\s*/i, '');
 const rendered = (typeof formatAtlasMessage === 'function') ? formatAtlasMessage(clean) : clean;
-const label    = isUser ? 'KUND' : (m.role === 'agent' ? (m.sender || 'AGENT').toUpperCase() : 'ATLAS');
+const label    = isUser ? (_currentCustomerObj?.name || 'KUND').toUpperCase() : (m.role === 'agent' ? (m.sender || 'AGENT').toUpperCase() : 'ATLAS');
 
 return `
 <div style="display:flex; flex-direction:column; align-items:${isUser ? 'flex-start' : 'flex-end'}; margin-bottom:10px;">
@@ -499,11 +545,6 @@ ${t.is_archived === 1
 
 <!-- Höger: notes + paginering — aldrig krympt -->
 <div style="display:flex; align-items:center; gap:4px; flex-shrink:0; margin-left:8px;">
-${hasHistory ? `<button class="btn-glass-icon" id="cust-reader-ai-btn"
-title="AI-summering av kund"
-style="color:${tStyles.main}; border-color:${tStyles.border};">
-${UI_ICONS.AI}
-</button>` : ''}
 <button class="btn-glass-icon notes-trigger-btn"
 data-id="${t.conversation_id}"
 onclick="openNotesModal('${t.conversation_id}')"
@@ -529,16 +570,6 @@ ${ADMIN_UI_ICONS.ARROW_RIGHT}
 </div>
 </div>
 
-${hasHistory ? `
-<div id="cust-ai-panel" style="display:${_aiSummaryCache[_currentCustomerObj?.email] ? 'block' : 'none'};
-padding:10px 18px; border-bottom:1px solid rgba(0,113,227,0.15);
-background:rgba(0,113,227,0.06); flex-shrink:0;">
-<span style="font-size:10px; font-weight:600; color:#0071e3; text-transform:uppercase;
-letter-spacing:0.5px; display:block; margin-bottom:4px;">AI Kundanalys</span>
-<span id="cust-ai-text" style="font-size:12px; line-height:1.65; color:var(--text-secondary);">
-${_aiSummaryCache[_currentCustomerObj?.email] || ''}
-</span>
-</div>` : ''}
 
 <!-- MEDDELANDEBUBBLAR -->
 <div style="flex:1; overflow-y:auto; padding:16px 18px;
@@ -564,33 +595,6 @@ const prevBtn = modal.querySelector('#cust-reader-prev');
 const nextBtn = modal.querySelector('#cust-reader-next');
 if (prevBtn && hasPrev) prevBtn.onclick = () => { _currentTicketIdx--; _renderCustomerReaderModal(); };
 if (nextBtn && hasNext) nextBtn.onclick = () => { _currentTicketIdx++; _renderCustomerReaderModal(); };
-
-// AI-summering av hela kundhistoriken (cachas per email, överlever ticket-navigering)
-const aiBtn = modal.querySelector('#cust-reader-ai-btn');
-if (aiBtn) {
-  aiBtn.onclick = async () => {
-    const email = _currentCustomerObj?.email;
-    aiBtn.disabled = true;
-    const panel = modal.querySelector('#cust-ai-panel');
-    const txt   = modal.querySelector('#cust-ai-text');
-    if (panel && txt) { panel.style.display = 'block'; txt.textContent = '🤖 Analyserar...'; }
-    try {
-      const r = await fetch(`${SERVER_URL}/api/customers/summarize`, {
-        method: 'POST',
-        headers: { ...fetchHeaders, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await r.json();
-      const summary = data.summary || data.error || 'Inget svar.';
-      if (email) _aiSummaryCache[email] = summary; // Cacha för navigering
-      if (txt) txt.textContent = summary;
-    } catch (e) {
-      if (txt) txt.textContent = 'Kunde inte nå servern.';
-    } finally {
-      aiBtn.disabled = false;
-    }
-  };
-}
 
 // ESC stänger
 const escHandler = (e) => {
@@ -794,3 +798,113 @@ _currentTicketIdx = 0;
 
 _renderCustomerReaderModal();
 };
+
+// ============================================================================
+// SKICKA NYTT MAIL — öppnar komposeringsdialog med kundens mail förifyllt
+// ============================================================================
+function openCustomerMailCompose(email, name) {
+const overlay = document.createElement('div');
+overlay.className = 'custom-modal-overlay';
+overlay.style.zIndex = '10001';
+overlay.innerHTML = `
+<div class="glass-modal-box glass-effect" style="width:520px; max-width:92vw;">
+  <div style="padding:18px 22px 14px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:space-between;">
+    <div>
+      <div style="font-size:15px; font-weight:700;">Nytt mail</div>
+      <div style="font-size:11px; opacity:0.4; margin-top:2px;">Skapar ett nytt mailärende</div>
+    </div>
+    <button onclick="this.closest('.custom-modal-overlay').remove()" style="background:none; border:none; color:rgba(255,255,255,0.35); cursor:pointer; font-size:20px; padding:4px; line-height:1;">✕</button>
+  </div>
+  <div style="padding:18px 22px; display:flex; flex-direction:column; gap:12px;">
+    <div>
+      <label style="font-size:10px; font-weight:700; opacity:0.4; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px;">Till</label>
+      <input id="cust-mail-to" class="filter-input" value="${(email || '').replace(/"/g,'&quot;')}" style="width:100%; box-sizing:border-box; font-size:13px;">
+    </div>
+    <div>
+      <label style="font-size:10px; font-weight:700; opacity:0.4; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px;">Ämne</label>
+      <input id="cust-mail-subject" class="filter-input" placeholder="Ämne..." style="width:100%; box-sizing:border-box; font-size:13px;">
+    </div>
+    <div>
+      <label style="font-size:10px; font-weight:700; opacity:0.4; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px;">Meddelande</label>
+      <textarea id="cust-mail-body" placeholder="Skriv ditt meddelande..." style="width:100%; height:130px; resize:vertical; box-sizing:border-box; padding:10px 12px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-primary); font-size:13px; font-family:inherit; outline:none; transition:border-color 0.2s;"></textarea>
+    </div>
+  </div>
+  <div style="padding:12px 22px 18px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid rgba(255,255,255,0.06);">
+    <button id="cust-mail-cancel" class="header-button" style="padding:8px 16px; font-size:13px; height:36px; border-radius:8px;">Avbryt</button>
+    <button id="cust-mail-send" class="send-button-ticket" style="height:36px; width:auto; padding:0 20px; border-radius:10px; font-size:13px; font-weight:600;">Skicka mail</button>
+  </div>
+</div>`;
+document.body.appendChild(overlay);
+overlay.style.display = 'flex';
+overlay.querySelector('#cust-mail-cancel').onclick = () => overlay.remove();
+overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+overlay.querySelector('#cust-mail-send').onclick = () => {
+  const to      = overlay.querySelector('#cust-mail-to').value.trim();
+  const subject = overlay.querySelector('#cust-mail-subject').value.trim() || 'Kontakt från kundtjänst';
+  const body    = overlay.querySelector('#cust-mail-body').value.trim();
+  if (!to || !to.includes('@')) { showToast('❌ Ange en giltig mailadress.'); return; }
+  if (!body) { showToast('❌ Meddelandet kan inte vara tomt.'); return; }
+  const sendBtn = overlay.querySelector('#cust-mail-send');
+  sendBtn.disabled = true; sendBtn.textContent = 'Skickar...';
+  const newId = `mail-${Date.now()}-${Math.random().toString(36).substr(2,6)}`;
+  window.socketAPI.emit('team:send_email_reply', {
+    conversationId: newId,
+    message: body,
+    customerEmail: to,
+    subject: subject,
+    html: body.replace(/\n/g, '<br>')
+  });
+  showToast('✅ Mail skickat!');
+  overlay.remove();
+};
+}
+
+// ============================================================================
+// INFO-MODAL — förklarar Kundregistret för agenter
+// ============================================================================
+function showCustomersInfoModal() {
+const overlay = document.createElement('div');
+overlay.className = 'custom-modal-overlay';
+overlay.style.zIndex = '10001';
+overlay.innerHTML = `
+<div class="glass-modal-box glass-effect" style="width:460px; max-width:90vw;">
+  <div style="padding:20px 22px 14px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; gap:12px;">
+    <div style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    </div>
+    <div>
+      <div style="font-size:15px; font-weight:700; color:white;">Kundregistret</div>
+      <div style="font-size:11px; opacity:0.4; margin-top:1px;">Ärendehistorik och kundanalys</div>
+    </div>
+    <button onclick="this.closest('.custom-modal-overlay').remove()" style="margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); cursor:pointer; font-size:20px; padding:4px; line-height:1;">✕</button>
+  </div>
+  <div style="padding:18px 22px; display:flex; flex-direction:column; gap:10px;">
+    <div style="font-size:12px; line-height:1.6; color:var(--text-secondary);">Kundregistret samlar alla kunder som kontaktat er, oavsett kanal (chatt eller mail).</div>
+    <div style="display:flex; flex-direction:column; gap:8px; margin-top:2px;">
+      <div style="display:flex; align-items:flex-start; gap:10px;">
+        <span style="font-size:14px; flex-shrink:0; margin-top:1px;">🔍</span>
+        <span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Sök</strong> — skriv namn, e-post eller telefon. Minst 3 tecken för att trigga sökning.</span>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:10px;">
+        <span style="font-size:14px; flex-shrink:0; margin-top:1px;">📋</span>
+        <span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Kundkort</strong> — klicka för att se statistik och hela ärendehistoriken. Klicka ett ärende för att bläddra i konversationen.</span>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:10px;">
+        <span style="font-size:14px; flex-shrink:0; margin-top:1px;">✨</span>
+        <span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">AI-analys</strong> — knappen i kundheadern sammanfattar hela kundens historik med AI. Resultatet cachas under sessionen.</span>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:10px;">
+        <span style="font-size:14px; flex-shrink:0; margin-top:1px;">✉️</span>
+        <span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Skicka mail</strong> — starta ett nytt mailärende direkt från kundkortet. Mailadressen är förifylld automatiskt.</span>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:10px;">
+        <span style="font-size:14px; flex-shrink:0; margin-top:1px;">📝</span>
+        <span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Anteckningar</strong> — interna noteringar om kunden, synliga för alla agenter.</span>
+      </div>
+    </div>
+  </div>
+</div>`;
+document.body.appendChild(overlay);
+overlay.style.display = 'flex';
+overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+}

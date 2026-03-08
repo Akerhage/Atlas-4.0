@@ -680,7 +680,7 @@ body: JSON.stringify({ type, customQuery })
 
 if (!res.ok) {
 const err = await res.json().catch(() => ({}));
-throw new Error(err.error || `HTTP ${res.status}`);
+throw new Error(err.details || err.error || `HTTP ${res.status}`);
 }
 
 const { markdown, title, generatedAt } = await res.json();

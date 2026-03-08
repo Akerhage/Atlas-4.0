@@ -1231,6 +1231,7 @@ res.status(500).json({ error: 'Kunde inte spara booking-links.json.' });
 // =============================================================================
 router.post('/api/admin/generate-report', authenticateToken, async (req, res) => {
 if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'AI ej aktiverat', details: 'OPENAI_API_KEY saknas i milj√∂variabler (.env).' });
 const { type, customQuery } = req.body;
 if (!type) return res.status(400).json({ error: 'type saknas' });
 if (type === 'custom' && !customQuery?.trim()) {
@@ -1261,11 +1262,11 @@ FROM chat_v2_state
 WHERE session_type != 'internal' AND owner IS NOT NULL
 GROUP BY owner ORDER BY totalt DESC`),
 query(`
-SELECT routing_tag as kontor, COUNT(*) as totalt,
+SELECT office as kontor, COUNT(*) as totalt,
 SUM(CASE WHEN is_archived=1 THEN 1 ELSE 0 END) as arkiverade
 FROM chat_v2_state
-WHERE session_type != 'internal' AND routing_tag IS NOT NULL
-GROUP BY routing_tag ORDER BY totalt DESC`),
+WHERE session_type != 'internal' AND office IS NOT NULL
+GROUP BY office ORDER BY totalt DESC`),
 query(`
 SELECT
 COUNT(*) as totalt_alla,
@@ -1315,7 +1316,7 @@ dataContext = `TOTALT ANTAL FAILURES: ${total[0]?.totalt || 0}\n\nVANLIGASTE FR√
 reportTitle = 'Kundkontakter';
 const [contacts, stats] = await Promise.all([
 query(`
-SELECT name, email, phone, routing_tag, session_type,
+SELECT name, email, phone, office as kontor, session_type,
 datetime(updated_at, 'unixepoch') as datum,
 close_reason
 FROM chat_v2_state

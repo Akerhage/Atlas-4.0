@@ -134,6 +134,11 @@ title="Interna anteckningar"
 style="color:${rStyles.main}; border-color:${rStyles.border};">
 ${UI_ICONS.NOTES}
 </button>
+<button id="reader-ai-btn" class="btn-glass-icon"
+style="color:${rStyles.main}; border-color:${rStyles.border}; background:rgba(255,255,255,0.07);"
+title="AI Förslag">
+${UI_ICONS.AI}
+</button>
 <div style="width:1px; height:16px; background:rgba(255,255,255,0.1); margin:0 3px;"></div>
 <button class="btn-glass-icon" onclick="assignTicketFromReader('${t.conversation_id}')"
 title="Tilldela ärende till agent"
@@ -174,11 +179,6 @@ placeholder="Snabbsvar till kunden... (Ctrl+Enter för att skicka)"
 style="flex:1; height:58px; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:var(--text-primary); resize:none; font-family:inherit; font-size:13px; line-height:1.5; outline:none; transition:border-color 0.2s;"
 onfocus="this.style.borderColor='${rStyles.main}66'"
 onblur="this.style.borderColor='rgba(255,255,255,0.12)'"></textarea>
-<button id="reader-ai-btn" class="btn-glass-icon"
-style="width:38px; height:38px; flex-shrink:0; color:${rStyles.main}; border-color:${rStyles.border}; background:rgba(255,255,255,0.07);"
-title="AI Förslag">
-${UI_ICONS.AI}
-</button>
 <button id="reader-send-btn" class="btn-glass-icon"
 style="width:38px; height:38px; flex-shrink:0; color:${rStyles.main}; border-color:${rStyles.border}; background:${rStyles.main}1a;"
 title="Skicka svar och ta ärendet (Ctrl+Enter)">

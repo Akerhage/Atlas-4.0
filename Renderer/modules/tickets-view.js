@@ -228,7 +228,6 @@ card.style.setProperty('--atp-color', styles.main);
 
 if (currentId === t.conversation_id) {
 card.classList.add('active-ticket');
-card.style.background = "rgba(255,255,255,0.1)";
 }
 
 // Rensat dubbel-taggar och trasiga knappar
@@ -257,12 +256,8 @@ ${UI_ICONS.ARCHIVE}
 </button>`;
 
 card.onclick = () => {
-container.querySelectorAll('.team-ticket-card').forEach(c => {
-c.classList.remove('active-ticket');
-c.style.background = ''; 
-});
+container.querySelectorAll('.team-ticket-card').forEach(c => c.classList.remove('active-ticket'));
 card.classList.add('active-ticket');
-card.style.background = "rgba(255,255,255,0.1)";
 openMyTicketDetail(t);
 };
 
@@ -487,12 +482,12 @@ ${bodyContent}
 ${UI_ICONS.SEND}
 </button>
 </form>
-${!ticket.is_archived ? '<p style="font-size:10px; opacity:0.3; text-align:right; padding:2px 20px 0; margin:0; color:var(--text-secondary);">Enter skickar · Shift+Enter ny rad</p>' : ''}
+${!ticket.is_archived ? '<p style="font-size:10px; opacity:0.3; text-align:right; padding:2px 20px 6px; margin:0; color:var(--text-secondary);">Enter skickar · Shift+Enter ny rad</p>' : ''}
 <div style="display:flex; justify-content: space-between; align-items:center; padding: 0 20px 15px 20px;">
 <div style="flex:1; max-width:60%;"><select id="quick-template-select" class="filter-select">${templateOptions}</select></div>
 <div style="display:flex; gap:10px;">
 ${!ticket.is_archived ? `<button type="button" class="footer-icon-btn" id="btn-ai-draft" title="AI Förslag">${UI_ICONS.AI}</button>` : ''}
-${isLongEnough ? `<button type="button" class="footer-icon-btn" id="btn-summarize" title="AI Sammanfattning">${UI_ICONS.AI}</button>` : ''}
+${isLongEnough ? `<button type="button" class="footer-icon-btn" id="btn-summarize" title="AI Sammanfattning">${UI_ICONS.SPARKLES}</button>` : ''}
 <button type="button" class="footer-icon-btn btn-archive-red" id="btn-archive-my" title="Arkivera">${UI_ICONS.ARCHIVE}</button>
 <button type="button" class="footer-icon-btn danger" id="btn-delete-my" title="Radera">${UI_ICONS.TRASH}</button>
 </div>
@@ -538,7 +533,20 @@ attachMyTicketListeners(ticket, isMail);
 function attachMyTicketListeners(ticket, isMail) {
 
 // Variabel för att spara mallens "snygga" HTML (med bilder/fetstil) i bakgrunden
-let activeTemplateHtml = null; 
+let activeTemplateHtml = null;
+
+// Hjälpfunktion: Quill HTML → ren text med bevarade radbrytningar
+// Använder regex istf innerText (detached divs tappar block-element \n i Electron)
+function templateHtmlToText(html) {
+return (html || '')
+.replace(/<br\s*\/?>/gi, '\n')
+.replace(/<\/p>/gi, '\n').replace(/<p[^>]*>/gi, '')
+.replace(/<\/div>/gi, '\n').replace(/<div[^>]*>/gi, '')
+.replace(/<[^>]+>/g, '')
+.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ')
+.replace(/\n{3,}/g, '\n\n')
+.trim();
+}
 
 // 1. VÄLJ MALL -> SPARA HTML & VISA TEXT
 const tSelect = document.getElementById('quick-template-select');
@@ -554,29 +562,26 @@ if (inp) {
 // Spara original-HTML (med bilder etc) i minnet
 activeTemplateHtml = t.content;
 
-// Visa ren text i rutan så du ser vad du skickar
-const tempDiv = document.createElement('div');
-tempDiv.innerHTML = t.content;
-const cleanText = (tempDiv.innerText || tempDiv.textContent || '').trim();
+// Visa ren text med bevarade radbrytningar i rutan
+inp.value = templateHtmlToText(t.content);
+inp.focus();
 
-inp.value = cleanText; 
-inp.focus(); 
-
-// Trigga input-eventet så att rutan kan auto-expandera om det behövs
+// Trigga resize utan att trigga isTrusted-lyssnaren (programmatiska events har isTrusted=false)
 inp.dispatchEvent(new Event('input'));
 
-tSelect.value = ""; 
+tSelect.value = "";
 }
 }
 };
 }
 
-// Lyssna om du ändrar texten manuellt
+// Lyssna om du ändrar texten MANUELLT (isTrusted=false för programmatiska events — skyddar mallens HTML)
 const inpField = document.getElementById('my-ticket-chat-input');
 if (inpField) {
-inpField.addEventListener('input', () => {
-// Om du ändrar texten manuellt, måste vi släppa mallens HTML
+inpField.addEventListener('input', (e) => {
+if (e.isTrusted) {
 activeTemplateHtml = null;
+}
 });
 }
 

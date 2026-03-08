@@ -12,7 +12,11 @@
       "WebSearch",
       "Bash(wc:*)",
       "Bash(du:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:lucide.dev)",
+      "WebFetch(domain:unpkg.com)",
+      "Bash(curl:*)",
+      "Bash(sort:*)"
     ]
   }
 }
