@@ -107,7 +107,6 @@ document.head.appendChild(script);
 return;
 }
 } catch (err) {
-// Servern startar upp... uppdatera UI
 const statusEl = document.getElementById('server-status');
 if (statusEl) {
 statusEl.textContent = `⏳ Startar servern... (${Math.round((i/retries)*100)}%)`;
@@ -122,7 +121,7 @@ addBubble("⚠️ Kunde inte ansluta till servern. Kontrollera att den är igån
 }
 
 // ==========================================================
-// SOCKET-LYSSNARE / EVENTS (SÄKRAD
+// SOCKET-LYSSNARE / EVENTS
 // ==========================================================
 function setupSocketListeners() {
 if (!window.socketAPI) return;
@@ -159,7 +158,7 @@ window.socketAPI.on('server:error', (err) => {
 addBubble(`⚠️ Serverfel: ${err.message}`, 'atlas');
 });
 
-// 4. TEAM UPDATE (INKORG / MINA ÄRENDEN / ARKIV) - NU SAMLAD HÄR
+// 4. TEAM UPDATE (INKORG / MINA ÄRENDEN / ARKIV)
 // Debounce-timer: förhindrar scrollbar-flimmer vid snabba socket-events
 let _teamUpdateDebounce = null;
 window.socketAPI.on('team:update', (evt) => {
@@ -197,7 +196,6 @@ console.log("📩 Nytt kundmeddelande via API:", data);
 updateInboxBadge();
 if (State.soundEnabled) playNotificationSound();
 
-// Vi triggar en render för att se det nya meddelandet i listan direkt
 if (DOM.views.inbox.style.display === 'flex') renderInbox();
 });
 
@@ -207,7 +205,6 @@ console.log("🆕 Nytt ärende i kön:", data);
 updateInboxBadge();
 if (State.soundEnabled) playNotificationSound();
 
-// Uppdatera vyn om användaren står i inkorgen
 if (DOM.views.inbox.style.display === 'flex') renderInbox();
 });
 
@@ -306,7 +303,7 @@ behavior: 'smooth'
 });
 
 // ===============================
-// KUNDEN SKRIVER (BEHÅLL DENNA!)
+// KUNDEN SKRIVER
 // ===============================
 let typingTimer = null;
 
@@ -344,7 +341,6 @@ const el = document.getElementById(id);
 return el && el.getAttribute('data-current-id') === conversationId;
 });
 
-// Stäng detaljvyn och visa placeholder om ärendet är öppet
 checkAndResetDetail('inbox-detail', conversationId);
 checkAndResetDetail('my-ticket-detail', conversationId);
 
@@ -368,18 +364,17 @@ showToast(`⚠️ ${takenBy} tog över detta ärende`);
 });
 
 // ==========================================================
-// 📩 LYSSNA PÅ AI-SVAR (SKRÄDDARSYDD FÖR DIN RENDERER.JS)
+// LYSSNA PÅ AI-SVAR
 // ==========================================================
 window.socketAPI.on('ai:prediction', async (data) => {
-console.log("📡 Meddelande mottaget från servern:", data); 
+console.log("📡 Meddelande mottaget från servern:", data);
 
-// --- NY LOGIK: HÄMTA TILL RUTAN OM VI ÄR I "MINA ÄRENDEN" ---
+// Hämta till rutan om vi är i "Mina Ärenden"
 const myTicketInput = document.getElementById('my-ticket-chat-input');
 const detailView = document.getElementById('my-ticket-detail');
 
 // Om detaljvyn syns OCH rutan finns -> Lägg in texten där
 if (detailView && detailView.style.display === 'flex' && myTicketInput) {
-console.log("🤖 AI lägger svaret i textrutan direkt.");
 myTicketInput.value = data.answer; // Klistra in svaret
 myTicketInput.disabled = false;    // Lås upp om den var låst
 myTicketInput.focus();             // Sätt markören där
@@ -408,7 +403,7 @@ if (typeof playNotificationSound === 'function') playNotificationSound();
 return;
 }
 
-// --- DIN GAMLA LOGIK (FALLBACK FÖR URKLIPP) ---
+// --- FALLBACK: KOPIERA TILL URKLIPP ---
 if (data.is_email_draft) {
 console.log("🤖 AI har genererat ett mail-svar! Tvingar kopiering...");
 
@@ -418,7 +413,7 @@ year: 'numeric', month: '2-digit', day: '2-digit',
 hour: '2-digit', minute: '2-digit' 
 });
 
-// 1. Skapa Plain Text-version (Använder din lastEmailContext)
+// 1. Skapa Plain Text-version
 const finalContentPlain = `${data.answer}\n\n` + 
 `--------------------------------------------------\n` +
 `URSPRUNGLIGT MEDDELANDE (Mottaget: ${timeStamp}):\n` +
@@ -426,7 +421,7 @@ const finalContentPlain = `${data.answer}\n\n` +
 `Med vänlig hälsning\n` +
 `Supporten My Driving Academy`;
 
-// 2. Skapa Rich Text-version (HTML) med din formatAtlasMessage-funktion
+// 2. Skapa Rich Text-version (HTML)
 const answerHtml = formatAtlasMessage(data.answer);
 const contextHtml = lastEmailContext.replace(/\n/g, '<br>');
 
@@ -444,10 +439,10 @@ Med vänlig hälsning,<br>
 </div>
 `;
 
-// 3. Hantera kopiering baserat på din miljö (Electron vs Webb)
+// 3. Hantera kopiering (Electron vs Webb)
 if (window.electronAPI && typeof window.electronAPI.send === 'function') {
 
-// ELECTRON-LÄGE (Patric)
+// ELECTRON-LÄGE
 window.electronAPI.send('force-copy-html-to-clipboard', {
 html: finalContentHtml,
 text: finalContentPlain
@@ -479,9 +474,6 @@ if (typeof playNotificationSound === 'function') playNotificationSound();
 }
 }
 });
-// ==========================================================
-// ✨ AI SAMMANFATTNING (svar från server)
-// ==========================================================
 // ==========================================================
 // 📢 ADMIN BROADCAST — systemmeddelande till alla agenter
 // ==========================================================
@@ -553,7 +545,7 @@ renderMyTickets();
 if (document.getElementById('view-archive')?.style.display === 'flex') renderArchive();
 });
 
-// 🔥 LIVE KONTOR-SYNK: Uppdaterar agentens routing_tag direkt när admin ändrar
+// LIVE KONTOR-SYNK: Uppdaterar agentens routing_tag direkt när admin ändrar
 window.socketAPI.on('agent:offices_updated', ({ username, newTags }) => {
 console.log(`🏢 [LIVE] Kontorsroll uppdaterad: ${username} -> ${newTags}`);
 

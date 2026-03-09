@@ -13,7 +13,7 @@ if (window.atlasTeam && window.atlasTeam.claimTicket) {
 try {
 await window.atlasTeam.claimTicket(conversationId, currentUser.username);
 if (typeof renderInbox === 'function') renderInbox();
-if (typeof renderMyTickets === 'function') renderMyTickets(); // Uppdatera Mina Ärenden
+if (typeof renderMyTickets === 'function') renderMyTickets();
 } catch (err) { console.error("❌ IPC Claim Error:", err); }
 }
 };
@@ -32,7 +32,7 @@ showAssignModal({ conversation_id: conversationId });
 }
 };
 
-// --- MALL & URKLIPP BRYGGOR (Lagar anropen som flaggades i audit) ---
+// --- MALL & URKLIPP BRYGGOR ---
 
 window.saveTemplates = async (templates) => {
 // Kopplar anropet till window.electronAPI.saveTemplates (Rad 5083)

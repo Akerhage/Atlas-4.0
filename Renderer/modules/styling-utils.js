@@ -153,7 +153,6 @@ border: hexToRgba(hex, 0.3)
 
 // Visa toast-notifiering
 function showToast(message, duration = 3000) {
-// Skapa toast-element
 const toast = document.createElement('div');
 toast.className = 'toast-notification';
 toast.textContent = message;
@@ -175,7 +174,6 @@ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
 document.body.appendChild(toast);
 
-// Automatisk borttagning
 setTimeout(() => {
 toast.style.animation = 'slideOut 0.3s ease';
 setTimeout(() => toast.remove(), 300);

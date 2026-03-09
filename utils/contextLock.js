@@ -2,7 +2,6 @@
 // contextLock.js
 // VAD DEN GÖR: Löser konflikter i kontext-slots (stad/område/fordon) och hindrar stale area vid stadsbyte.
 // ANVÄNDS AV: legacy_engine.js
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 
 module.exports = {
@@ -38,7 +37,6 @@ module.exports = {
    * Denna funktion anropas nu med vetskap om staden ändrats.
    */
   resolveArea({ savedArea, explicitArea, cityChanged }) {
-    // Om användaren säger ett nytt område explicit, använd det.
     if (explicitArea && typeof explicitArea === "string") {
       return explicitArea;
     }
@@ -48,7 +46,6 @@ module.exports = {
       return null;
     }
 
-    // Annars, behåll sparat område.
     if (savedArea && typeof savedArea === "string") {
       return savedArea;
     }

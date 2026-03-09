@@ -7,7 +7,6 @@
 //             + webhookRoutes.init({ io, sendToLHC,
 //               parseContextData, HUMAN_TRIGGERS,
 //               HUMAN_RESPONSE_TEXT })
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 const express = require('express');
 const router = express.Router();
@@ -68,7 +67,6 @@ return res.status(403).send("Forbidden");
 
 const { chat_id, id: incomingId, msg, type: ingestType } = req.body;
 
-// 🔧 F2.4: Type-guard flyttad hit (utanför mail-blocket) — täcker nu även chat och okända typer
 if (!ingestType || (ingestType !== 'chat' && ingestType !== 'mail')) {
 console.error(`[WEBHOOK] Okänd ingest-typ: "${ingestType}". Avbryter.`);
 return res.status(400).json({
@@ -134,11 +132,10 @@ console.log(`[HUMAN-MODE] Aktiveras för ${chat_id}`);
 // 1. Spara meddelandet i historiken
 let storedContext = await getContextRow(chat_id);
 
-// 🔥 FIX: Parsa om sträng (Viktig säkerhetsåtgärd - här togs syntaxfelet bort)
 let raw = storedContext?.context_data;
 let contextData = parseContextData(raw);
 
-// Säkra att messages är en array innan push (Bevarar din hängsle-och-livrem check)
+// Säkra att messages är en array
 if (!Array.isArray(contextData.messages)) contextData.messages = [];
 
 contextData.messages.push({ role: 'user', content: msg, timestamp: Date.now() });
@@ -199,7 +196,7 @@ updatedContextData.messages.push({ role: 'atlas', content: result.response_paylo
 await upsertContextRow({
 conversation_id: chat_id,
 last_message_id: incomingId,
-context_data: updatedContextData, // 🔧 F1.4: var contextData (gammal variabel) — nu rätt
+context_data: updatedContextData,
 updated_at: now
 });
 

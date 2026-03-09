@@ -3,7 +3,6 @@
 // VAD DEN GÖR: CRUD för mailmallar + cache-hantering
 // ANVÄNDS AV: server.js via app.use('/api', templatesRoutes)
 //             getTemplatesCached exporteras för övriga delar av server.js
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 const express = require('express');
 const router = express.Router();
@@ -60,7 +59,7 @@ console.error("Template Save Error:", err);
 return res.status(500).json({ error: "Kunde inte spara mallen" });
 }
 
-cachedTemplates = null; // Rensa cachen (om variabeln finns globalt)
+cachedTemplates = null; // Rensa cachen
 res.json({ status: 'success' });
 });
 });

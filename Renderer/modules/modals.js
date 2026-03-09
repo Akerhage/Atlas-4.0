@@ -44,7 +44,7 @@
 // ⚠️  ╚══════════════════════════════════════════════════════════════╝
 
 // ============================================================================
-// 🎨 ATLAS CONFIRM - Snygg Ja/Nej-ruta (SÄKRAD)
+// ATLAS CONFIRM — Snygg Ja/Nej-ruta
 // ============================================================================
 function atlasConfirm(title, message) {
 return new Promise((resolve) => {
@@ -300,7 +300,6 @@ document.body.appendChild(overlay);
 let selectedAvatarId = me.avatar_id || 0;
 const initialColor = me.agent_color || '#0071e3';
 
-// TAJTAD LAYOUT - Optimerad för att slippa scroll
 overlay.innerHTML = `
 <div class="glass-modal-box glass-effect" style="width: 400px; max-height: 92vh; display: flex; flex-direction: column; padding: 0 !important;">
 <div class="glass-modal-header" style="flex-shrink: 0; display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
@@ -375,7 +374,7 @@ const colorHexDisplay = overlay.querySelector('#pref-color-hex');
 const previewContainer = overlay.querySelector('#profile-preview-avatar');
 const avatarOptions = overlay.querySelectorAll('.avatar-option');
 
-// LIVE SYNC LOGIK (KOMPLETT: Realtid, Inga dubbletter & Korrekt Logik)
+// LIVE SYNC LOGIK
 const syncProfileUI = (color, avatarId, statusText) => {
 // 0. Uppdatera CSS-accentvariabeln direkt (styr HEM-vyn, knappar, statusrad m.m.)
 document.documentElement.style.setProperty('--accent-primary', color);
@@ -410,7 +409,7 @@ const statusHtml = statusText ? '<span class="user-status-text" style="display:b
 nameEl.innerHTML = '<span style="display:block; font-weight:600; color:white;">' + (displayName.charAt(0).toUpperCase() + displayName.slice(1)) + '</span>' + statusHtml;
 }
 
-// 4. Spara-knappen (Döda det hårdkodade gröna)
+// 4. Spara-knappen
 const saveBtn = document.getElementById('prof-save-btn');
 if (saveBtn) {
 saveBtn.style.setProperty('color', color, 'important');
@@ -472,7 +471,7 @@ document.documentElement.style.setProperty('--accent-primary', profileData.agent
 // Uppdatera sidofältets avatar, namn och statustext via den centrala funktionen
 if (typeof updateProfileUI === 'function') updateProfileUI();
 
-// KIRURGISK TILLÄGG: Live-uppdatering av kundvyn vid profilfärgsändring
+// Live-uppdatering av kundvyn vid profilfärgsändring
 const _newColor = colorInput.value;
 document.querySelectorAll('#customer-list .team-ticket-card').forEach(card => {
 card.style.setProperty('border-left', `4px solid ${_newColor}`, 'important');
@@ -542,7 +541,7 @@ modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 };
 
 // ==================================================
-// 📧 NYTT MAIL – GLOBAL SCOPE (UTANFÖR ALLA FUNKTIONER)
+// NYTT MAIL — KOMPOSITOR
 // ==================================================
 function showNewMailComposer() {
 let modal = document.getElementById('atlas-mail-composer');
@@ -655,7 +654,7 @@ const data = await res.json();
 if (!data.success) throw new Error(data.error);
 newConversationId = data.conversationId;
 } else {
-// 🔧 FIX: team:create_mail_ticket — servern skapar ärendet, skickar mail och
+// team:create_mail_ticket — servern skapar ärendet, skickar mail och
 // sparar sentInfo.messageId direkt → korrekt e-posttrådning från svar #1.
 // socketAPI.once() finns via socket-client.js — avregistreras automatiskt efter första svar.
 if (!window.socketAPI) throw new Error("Ingen socket-anslutning");

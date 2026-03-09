@@ -6,7 +6,6 @@
 // ANVÄNDS AV: server.js via app.use('/', archiveRoutes)
 //             + archiveRoutes.init({ io, parseContextData,
 //               assertValidContext, mergeContext })
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 const express = require('express');
 const router = express.Router();
@@ -33,7 +32,6 @@ mergeContext = _mc;
 // ENDPOINT: // POST /search_all - Renderer Client Search (Requires API Key)
 // -------------------------------------------------------------------------
 router.post('/search_all', async (req, res) => {
-console.log("🧪 /search_all HIT", req.body);
 const clientKey = req.headers['x-api-key'];
 if (clientKey !== process.env.CLIENT_API_KEY) {
 return res.status(401).json({ error: 'Ogiltig API-nyckel' });
@@ -57,7 +55,7 @@ linksSentByVehicle: { AM: false, MC: false, CAR: false, INTRO: false, RISK1: fal
 let lastMessageId = 0;
 
 if (!storedContext || storedContext.updated_at < now - TTL_SECONDS) {
-console.log(`[SESSION] Ny/Reset: ${sessionId}`);
+// Ny session eller utgången TTL — börja med tomt context
 } else {
 if (storedContext.context_data) {
 contextData = parseContextData(storedContext.context_data);
@@ -90,7 +88,6 @@ responseText = JSON.stringify(result.response_payload);
 // 4. Lägg till ATLAS svar i historiken
 contextData.messages.push({ role: 'atlas', content: responseText, timestamp: Date.now() });;
 
-/* --- UPPDATERA VARIABLER: 2/2 SÄKRAD RAG-ÅTERFÖRING --- */
 assertValidContext(result.new_context, 'ragSync');
 contextData = mergeContext(contextData, result.new_context);
 
@@ -214,7 +211,6 @@ return res.status(500).json({ error: 'Kunde inte verifiera ärendeägarskap' });
 
 const now = Math.floor(Date.now() / 1000);
 
-// 🔥 FIX: Sätter is_archived = 1 i BÅDE chat_v2_state OCH local_qa_history
 const closeReason = `agent:${req.user.username}`;
 db.serialize(() => {
 // 1. Uppdatera chat_v2_state (om ärendet finns där)

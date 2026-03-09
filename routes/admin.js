@@ -9,7 +9,6 @@
 //               getFilePaths, BLOCKED_CONFIG_KEYS,
 //               recreateMailTransporter, setSetting,
 //               runDatabaseBackup, authRoutes })
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 const express = require('express');
 const router = express.Router();
@@ -86,11 +85,9 @@ res.json({ success: true, userId: this.lastID });
 router.post('/api/admin/update-user-profile', authenticateToken, async (req, res) => {
 if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 
-// ÄNDRING: Vi hämtar userId istället för id från req.body
 const { userId, username, password, role, display_name, agent_color, avatar_id, routing_tag } = req.body;
 
 try {
-// SQL-frågan använder fortfarande kolumnnamnet "id", men vi mappar in variabeln "userId"
 let sql = `UPDATE users SET role = ?, display_name = ?, agent_color = ?, avatar_id = ?, routing_tag = ? WHERE id = ?`;
 let params = [role, display_name, agent_color, avatar_id, routing_tag, userId];
 
@@ -106,7 +103,6 @@ if (err) {
 console.error("Update profile error:", err);
 return res.status(500).json({ error: "Kunde inte uppdatera profil" });
 }
-// Loggar med userId så det matchar dina andra admin-loggar
 console.log(`👤 [ADMIN] Uppdaterade profil för @${username} (ID: ${userId})`);
 res.json({ success: true });
 });

@@ -2,8 +2,11 @@
 // middleware/auth.js — JWT-autentisering
 // VAD DEN GÖR: Express-middleware som verifierar
 //              JWT Bearer-token och intern API-nyckel
-// ANVÄNDS AV: server.js, routes/auth.js
-// SENAST STÄDAD: 2026-02-27
+// ANVÄNDS AV: server.js, routes/admin.js, routes/archive.js,
+//             routes/auth.js, routes/customers.js,
+//             routes/knowledge.js, routes/notes.js,
+//             routes/team.js, routes/templates.js,
+//             routes/webhook.js
 // ============================================
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;

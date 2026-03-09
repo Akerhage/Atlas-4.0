@@ -212,7 +212,7 @@ router.post('/customers/summarize', authenticateToken, async (req, res) => {
 module.exports = router;
 
 // -------------------------------------------------------------------------
-// KUNDANTECKNINGAR — ÄNDRING 4
+// KUNDANTECKNINGAR
 // -------------------------------------------------------------------------
 
 // GET /api/customer-notes?email=X

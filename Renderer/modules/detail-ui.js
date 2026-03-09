@@ -37,7 +37,7 @@
 // ⚠️  ╚══════════════════════════════════════════════════════════════╝
 
 // ===================================================
-// 4. STÄDAR VYERNA OCH RENDERAR OM
+// STÄDAR VYERNA OCH RENDERAR OM
 // ===================================================
 function checkAndResetDetail(detailId, affectedId = null) {
 const detail = document.getElementById(detailId);
@@ -59,7 +59,7 @@ const placeholderMap = {
 'inbox-detail': 'inbox-placeholder',
 'my-ticket-detail': 'my-detail-placeholder',
 'archive-detail': 'archive-placeholder',
-'admin-detail-content': 'admin-placeholder' // 🔥 TILLAGD: Nu hittar även Admin hem till sin Hero!
+'admin-detail-content': 'admin-placeholder'
 };
 
 const placeholderId = placeholderMap[detailId];

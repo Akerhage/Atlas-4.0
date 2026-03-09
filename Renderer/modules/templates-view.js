@@ -6,7 +6,7 @@
 // ============================================
 
 // ==========================================================
-// 5. MALL-HANTERARE (1 - LADDA)
+// MALL-HANTERARE — LADDA
 // ==========================================================
 async function loadTemplates() {
 try {
@@ -24,7 +24,7 @@ console.error("Mall-fel:", err);
 }
 
 // ==========================================================
-// 5. MALL-HANTERARE (2 - RENDERA) - SÄKRAD
+// MALL-HANTERARE — RENDERA
 // ==========================================================
 function renderTemplates(list = State.templates) {
 // Säkra att både användare och list-elementet existerar
@@ -33,8 +33,7 @@ if (!DOM.templateList) console.warn("⚠️ DOM.templateList saknas - kan inte r
 return;
 }
 
-// KIRURGISK FIX: Hämta stilar baserat på agentens profilfärg (istället för routing_tag)
-// Detta utrotar de 52 blåa träffarna och synkar mallarna med ditt lila tema.
+// Agentens profilfärg styr mallarnas färgtema
 const styles = getAgentStyles(currentUser.username);
 DOM.templateList.innerHTML = '';
 
@@ -56,7 +55,6 @@ groups[gName].sort((a, b) => a.title.localeCompare(b.title, 'sv'));
 const header = document.createElement('div');
 header.className = 'template-group-header';
 
-// Injicera färgtemat kirurgiskt i grupp-rubriken (vinner över style.css)
 header.style.setProperty('--group-bg', styles.bg, 'important');
 header.style.setProperty('--group-text', styles.main, 'important');
 header.style.setProperty('--group-border', styles.border, 'important');
@@ -93,7 +91,6 @@ item.innerHTML = `
 </div>
 `;
 
-// Din befintliga funktionskontroll
 item.onclick = () => {
 if (typeof openTemplateEditor === 'function') {
 openTemplateEditor(t);
@@ -116,7 +113,7 @@ DOM.templateList.appendChild(content);
 }
 
 // ==========================================================
-// 5. MALL-HANTERARE (3 - ÖPPNA)
+// MALL-HANTERARE — ÖPPNA
 // ==========================================================
 function openTemplateEditor(t) {
 console.log("📂 Öppnar mall:", t.title);
@@ -131,7 +128,6 @@ if (editorContainer) {
 editorContainer.style.setProperty('border-top', `4px solid ${styles.main}`, 'important');
 editorContainer.style.setProperty('background', `linear-gradient(to bottom, ${styles.bg}, transparent)`, 'important');
 
-// 2. SYMMETRI-FIX: Luft mellan etikett och rutor (Drar upp fälten i linje med knapparna)
 editorContainer.querySelectorAll('#template-editor-form label').forEach(label => {
 label.style.setProperty('margin-bottom', '4px', 'important');
 label.style.setProperty('display', 'block', 'important');
@@ -140,8 +136,7 @@ label.style.setProperty('font-size', '11px', 'important');
 });
 }
 
-// --- SÄKRAD LOGIK FÖR DETALJVY ---
-// Gömmer placeholdern och visar formuläret
+// Döljer placeholdern och visar formuläret
 if (DOM.editorPlaceholder) DOM.editorPlaceholder.style.setProperty('display', 'none', 'important');
 if (DOM.editorForm) DOM.editorForm.style.setProperty('display', 'flex', 'important');
 
@@ -157,7 +152,6 @@ quill.root.innerHTML = t.content;
 const deleteBtn = document.getElementById('delete-template-btn');
 if(deleteBtn) deleteBtn.style.display = 'block';
 
-// Säkrad sökning med optional chaining (?.)
 const saveBtn = DOM.editorForm?.querySelector('button[type="submit"]');
 if (saveBtn) {
 saveBtn.disabled = true;

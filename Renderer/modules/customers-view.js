@@ -151,7 +151,7 @@ el.className = 'team-ticket-card';
 
 const firstOffice = customer.offices ? customer.offices.split(',')[0].trim() : null;
 
-// ÄNDRING A: Agentfärg (inloggad agent) styr korten i kundvyn, inte kontorsfärg
+// Agentfärg styr korten i kundvyn
 const agentColor = (typeof currentUser !== 'undefined' && currentUser.agent_color)
 ? currentUser.agent_color
 : '#0071e3';
@@ -635,7 +635,6 @@ modal.style.pointerEvents = 'none';
 
 // ============================================================================
 // KUNDANTECKNINGAR MODAL — Öppnar notes-modal kopplad till kundprofil (email)
-// ÄNDRING 3: Ny funktion, återanvänder modal-strukturen från notes-system.js
 // ============================================================================
 async function openCustomerNotesModal(email, customerName) {
 if (!email) {
@@ -781,7 +780,7 @@ openCustomerDetail(customer);
 };
 
 // ================================================
-// NY FUNKTION: Öppna ärende-modal direkt från header-ikon
+// Öppna ärende-modal direkt från header-ikon
 // ================================================
 window.showCustomerReaderModal = async (email) => {
 if (!email) {
@@ -867,7 +866,7 @@ if (!to || !to.includes('@')) { showToast('❌ Ange en giltig mailadress.'); ret
 if (!body) { showToast('❌ Meddelandet kan inte vara tomt.'); return; }
 const sendBtn = overlay.querySelector('#cust-mail-send');
 sendBtn.disabled = true;
-// 🔧 FIX: team:create_mail_ticket — servern skapar ärendet, skickar mail och
+// team:create_mail_ticket — servern skapar ärendet, skickar mail och
 // sparar sentInfo.messageId direkt → korrekt e-posttrådning från svar #1.
 // socketAPI.once() finns via socket-client.js — avregistreras automatiskt efter första svar.
 try {

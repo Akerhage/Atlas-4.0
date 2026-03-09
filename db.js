@@ -1,7 +1,8 @@
 // ============================================
 // db.js
 // VAD DEN GÖR: SQLite-hantering — tabellinitiering, migrationer och alla query-funktioner.
-// ANVÄNDS AV: server.js
+// ANVÄNDS AV: server.js, routes/team.js, routes/admin.js, routes/archive.js,
+//             routes/customer.js, routes/customers.js, routes/auth.js, main.js
 // SENAST STÄDAD: 2026-02-27
 // ============================================
 
@@ -166,7 +167,7 @@ updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 if (err) console.error('❌ Could not create ticket_notes table:', err);
 else { 
 console.log('✅ Table "ticket_notes" ready');
-checkAllTablesCreated(); // Åttonde och sista tabellen — räknaren når 8/8
+checkAllTablesCreated();
 }
 });
 
@@ -361,7 +362,6 @@ console.warn('[DB] Column migration warning:', err.message);
 // getAllTemplates - Fetch All Templates from Database
 db.getAllTemplates = () => {
 return new Promise((resolve, reject) => {
-// Använder db.all
 db.all("SELECT * FROM templates", [], (err, rows) => {
 if (err) reject(err);
 else resolve(rows);
@@ -546,11 +546,6 @@ resolve(true);
 
 // updateTicketFlags - Set Metadata (vehicle, topic, office, etc.)
 function updateTicketFlags(conversationId, flags) {
-console.log("🟦 [DB] updateTicketFlags()", {
-conversationId,
-flags
-});
-
 // 🔒 F1.1: Whitelist — endast kända kolumner tillåts för att förhindra SQL-injektion
 const ALLOWED_FLAGS = ['vehicle', 'office', 'sender', 'session_type', 'human_mode', 'is_archived', 'name', 'email', 'phone', 'source'];
 const fields = [];
@@ -569,8 +564,8 @@ if (fields.length === 0) {
 return Promise.resolve(); // Inget att uppdatera efter filtrering
 }
 
-// FIX: Vi använder millisekunder (13 siffror) för att matcha frontend och undvika 1970-buggen
-const now = Math.floor(Date.now() / 1000); 
+// Vi använder sekunder (10 siffror) för timestamps — matchar övriga DB-fält
+const now = Math.floor(Date.now() / 1000);
 
 // Vi pushar nu-tiden först (för updated_at) och conversationId sist (för WHERE-klausulen)
 values.push(now, conversationId);
@@ -583,12 +578,8 @@ updated_at = ?
 WHERE conversation_id = ?`,
 values,
 err => {
-if (err) {
-reject(err);
-} else {
-console.log(`🟩 [DB] Flags sparade för ${conversationId} med timestamp ${now}`);
-resolve();
-}
+if (err) reject(err);
+else resolve();
 }
 );
 });

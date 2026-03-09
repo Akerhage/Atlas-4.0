@@ -56,7 +56,7 @@
 // ⚠️  ╚══════════════════════════════════════════════════════════════╝
 
 /* ===============================================================
-RENDER ARCHIVE (GARAGET) - MED SÖKFUNKTION & OPTIMERING (FIXAD)
+RENDER ARCHIVE (GARAGET) — Sökfunktion och filtrering
 =============================================================== */
 async function renderArchive(applyFilters = false) {
 // 🛡️ SÄKERHETSSPÄRR
@@ -82,7 +82,6 @@ try {
 const localAll = await window.electronAPI.loadQAHistory();
 const localArchived = localAll.filter(item => item.is_archived === 1);
 
-// --- FIX: DUBBLETT-KOLL BÖRJAR HÄR ---
 localArchived.forEach(x => {
 // Kolla om ärendet redan laddats från servern (via conversation_id)
 const exists = State.archiveItems.some(serverItem =>
@@ -101,7 +100,7 @@ State.archiveItems.push(x);
 populateArchiveDropdowns();
 }
 
-// 2. HÄMTA VÄRDEN FRÅN FILTER & SÖK (UPPDATERAD: OFFICE & SUPER-SEARCH)
+// 2. Hämta filtervärden
 const typeVal = document.getElementById('filter-type')?.value || 'all';
 const agentVal = document.getElementById('filter-agent')?.value || 'all';
 const vehicleVal = document.getElementById('filter-vehicle')?.value || 'all';
@@ -111,7 +110,6 @@ const dateStart = document.getElementById('filter-date-start')?.value;
 const dateEnd = document.getElementById('filter-date-end')?.value;
 const searchText = document.getElementById('filter-search')?.value.toLowerCase().trim() || '';
 
-// Hämta värdet från AI-checkboxen
 const showAI = document.getElementById('archive-show-ai')?.checked || false;
 
 let filtered = State.archiveItems.filter(item => {
@@ -126,7 +124,7 @@ const isSender = item.sender && item.sender.toLowerCase() === myName;
 if (!isOwner && !isSender) return false;
 }
 
-// --- 🔥 H. AI-FILTER (MÅSTE VARA FÖRST FÖR ATT REAGERA DIREKT) ---
+// H. AI-FILTER — döljer rena AI-svar om checkboxen är avbockad
 // Om ärendet är ett rent AI-svar (human_mode === 0) och checkboxen INTE är ikryssad -> Dölj det.
 if (item.human_mode === 0 && !showAI) return false;
 
@@ -243,12 +241,11 @@ let previewDisplay = (item._isLocal || isInternal)
 
 const isAI = item.human_mode === 0; // 0 = AI-besvarat
 
-// Sätt Master-klasserna för layout - NU MED internal-ticket KLASSEN
+// Sätt klasser för layout
 el.className = `team-ticket-card ${internalClass} archive-card ${isAI ? 'is-ai-chat' : 'is-human-chat'}`;
 el.style.setProperty('border-left', `4px solid ${styles.main}`, 'important');
 el.style.setProperty('--agent-color', styles.main); // För hover/glöd
 
-// Rendera kortets HTML
 el.innerHTML = `
 <div class="ticket-header-row">
 <div class="ticket-title" style="color: ${isInternal ? styles.main : 'var(--text-primary)'} !important;">
@@ -300,7 +297,6 @@ bubbleBg: 'rgba(241, 196, 15, 0.15)'
 // themeStyles styr header, bakgrund och kund-avatarfärg i hela detaljvyn. Se regel 4 ovan.
 const themeStyles = isInternalItem ? internalYellow : getAgentStyles(item.routing_tag || item.owner || 'unclaimed');
 
-// DÖDAR LINJEN OCH BAKGRUNDEN HÄR
 detail.className = 'detail-container';
 detail.style.borderTop = 'none';
 detail.style.borderBottom = 'none';
@@ -395,7 +391,6 @@ ${currentUser?.role === 'admin' ? `<button class="footer-icon-btn danger" id="ar
 </div>
 `;
 
-// 🎯 DÖDAR LINJEN PÅ DET NYA ELEMENTET INNAN DET APPENDAS
 fullView.style.setProperty('border-top', 'none', 'important');
 fullView.style.setProperty('border-bottom', 'none', 'important');
 fullView.style.setProperty('box-shadow', 'none', 'important');
@@ -427,7 +422,6 @@ if (typeof switchView === 'function') switchView('my-tickets');
 
 container.appendChild(el);
 });
-// Event listener är borta härifrån eftersom filtreringen nu sker i toppen!
 }
 
 // ============================================================================

@@ -3,7 +3,6 @@
 // VAD DEN GÖR: CRUD för agentanteckningar
 //              kopplade till ett ärende
 // ANVÄNDS AV: server.js via app.use('/api', notesRoutes)
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 const express = require('express');
 const router = express.Router();

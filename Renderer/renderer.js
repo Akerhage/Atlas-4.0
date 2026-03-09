@@ -1199,7 +1199,7 @@ updateInboxBadge();
 setInterval(() => {
 if (!authToken) return;
 updateInboxBadge();
-}, 10000);
+}, 60000);
 
 // =====================================
 // 3. Init Quill & Globala lyssnare (SÄKRAD)

@@ -77,7 +77,7 @@
 // ============================================
 
 // ============================================================================
-// MINA ÄRENDEN: LISTA (FIXAD: Rätt namn & Agent-etikett)
+// MINA ÄRENDEN: LISTA
 // ============================================================================
 async function renderMyTickets() {
 // 🛡️ SÄKERHETSSPÄRR
@@ -110,7 +110,6 @@ return false;
 });
 }
 
-// 🔥 KIRURGISK FIX: Ta bort "Inga ärenden"-vyn om vi faktiskt har ärenden nu
 if (tickets.length > 0) {
 const existingPlaceholder = container.querySelector('.template-item-empty');
 if (existingPlaceholder) existingPlaceholder.remove();
@@ -137,7 +136,7 @@ placeholder.style.display = 'flex';
 const stillMine = tickets.find(t => t.conversation_id === currentId);
 if (!stillMine) {
 console.log("🧹 Ärendet borta - totalrensar Mina Ärenden-vyn.");
-detail.innerHTML = ''; // <--- VIKTIGT: Rensar bort "skiten" som annars fastnar
+detail.innerHTML = '';
 detail.style.display = 'none';
 detail.removeAttribute('data-current-id');
 placeholder.style.display = 'flex';
@@ -145,8 +144,6 @@ placeholder.style.display = 'flex';
 }
 }
 
-// 🔥 RENSA LISTAN INNAN RENDER
-//container.innerHTML = '';
 
 if (tickets.length === 0) {
 container.innerHTML = `
@@ -230,8 +227,6 @@ if (currentId === t.conversation_id) {
 card.classList.add('active-ticket');
 }
 
-// Rensat dubbel-taggar och trasiga knappar
-// ERSÄTT card.innerHTML i renderMyTickets med detta:
 card.innerHTML = `
 <div class="ticket-header-row">
 <div class="ticket-title">
@@ -311,7 +306,7 @@ detail.removeAttribute('data-current-id');
 }
 
 // =========================================================
-// 🧹 MINA ÄRENDEN - FUNKTIONEN (KOMPLETT VERSION)
+// MINA ÄRENDEN — DETALJVY
 // =========================================================
 function openMyTicketDetail(ticket) {
 const detail = document.getElementById('my-ticket-detail');
@@ -355,7 +350,7 @@ detail.style.setProperty('box-shadow', 'none', 'important');
 
 detail.innerHTML = '';
 
-// 2. DATA-PREPP (KIRURGISK FIX FÖR MAIL-TYP)
+// 2. Förbered data
 const displayTitle = resolveTicketTitle(ticket);
 const isMail = ticket.session_type === 'mail' || ticket.session_type === 'message' || ticket.routing_tag === 'MAIL';
 
@@ -365,7 +360,6 @@ let bodyContent = '';
 if (isMail) {
 const messages = ticket.messages || [];
 
-// Oscar Berg-fix: Om historik saknas, använd ticket.last_message
 if (messages.length === 0) {
 const raw = ticket.last_message || ticket.content || "Inget innehåll...";
 const clean = raw.replace(/^📧\s*(\((Mail|Svar)\):)?\s*/i, '');
@@ -528,7 +522,7 @@ attachMyTicketListeners(ticket, isMail);
 }
 
 // =========================================================
-// 🔌 KNAPPAR & LYSSNARE (SMART HTML-HANTERING)
+// KNAPPAR & LYSSNARE
 // =========================================================
 function attachMyTicketListeners(ticket, isMail) {
 
@@ -634,7 +628,7 @@ activeTemplateHtml = null; // Nollställ
 };
 }
 
-// 3. AI TROLLSTAV
+// AI Förslag
 const btnAI = document.getElementById('btn-ai-draft');
 if (btnAI) {
 btnAI.onclick = () => {
@@ -703,7 +697,6 @@ const idToDelete = ticket.id || ticket.conversation_id;
 if(idToDelete) await window.electronAPI.deleteQA(idToDelete).catch(e => console.log("Lokal städning ej nödvändig"));
 }
 
-// 3. Visa toast-notifiering
 showToast("✅ Ärendet raderat");
 
 // 4. Ta bort från UI utan att göra full refresh
@@ -733,7 +726,7 @@ showToast("❌ Kunde inte radera ärendet");
 }
 };
 }
-} // End of attachMyTicketListeners function -- stänger if(btnDel) + funktionen
+}
 } // stänger attachMyTicketListeners
 
 // Hjälpfunktion för att faktiskt utföra arkiveringen mot servern

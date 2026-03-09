@@ -54,7 +54,7 @@
 // ⚠️  ╚══════════════════════════════════════════════════════════════╝
 
 // ============================================================================
-// FIX 1: BADGE-HANTERING + WINDOWS TASKBAR ICON (SÄKRAD)
+// BADGE-HANTERING + WINDOWS TASKBAR ICON
 // ============================================================================
 async function updateInboxBadge() {
 if (typeof authToken === 'undefined' || !authToken) return;
@@ -107,7 +107,7 @@ window.electronAPI.setTaskbarIcon(null, '');
 console.warn("Badge-systemet väntar...");
 }
 }
-// Hjälpfunktion: Ritar röd cirkel - BEVARAD EXAKT
+// Hjälpfunktion: Ritar röd cirkel
 function drawTaskbarBadge(number) {
 const size = 32; 
 const canvas = document.createElement('canvas');
@@ -131,7 +131,7 @@ return canvas.toDataURL();
 window.updateInboxBadge = updateInboxBadge;
 
 // ===================================================
-// 4. UNIFIED INBOX (RENDER) - MED NYA RÖDA BADGES
+// UNIFIED INBOX (RENDER)
 // ===================================================
 async function renderInbox() {
 // 🛡️ SÄKERHETSSPÄRR
@@ -195,17 +195,15 @@ unassignedChats.sort(sortFn);
 unassignedMails.sort(sortFn);
 claimedByOthers.sort(sortFn);
 
-// 🔥 RENSA FÖRST NU - Efter att vi fixat vyer
-container.innerHTML = ''; 
+container.innerHTML = '';
 
-// NY RENDER GROUP med minne och Custom Badges
+// Renderfunktion för varje grupp
 const renderGroup = (title, tickets, icon, groupKey, badgeClass) => {
 const defaultExpanded = State.inboxExpanded[groupKey];
 const header = document.createElement('div');
 header.className = 'template-group-header'; 
 
-// 🔥 HÄR ANVÄNDER VI DIN NYA CSS-KLASS FÖR BADGEN!
-const countHtml = tickets.length > 0 
+const countHtml = tickets.length > 0
 ? `<span class="group-badge ${badgeClass}">${tickets.length}</span>` 
 : `<span class="group-count empty">0</span>`;
 
@@ -242,12 +240,10 @@ card.className = `team-ticket-card${isInternal ? ' internal-ticket' : ''}`;
 card.setAttribute('data-id', t.conversation_id);
 card.setAttribute('data-owner', (t.owner || '').toUpperCase());
 
-// KIRURGISK FIX: Uppdatera båda variablerna och tvinga kanten direkt
 card.style.borderLeft = `4px solid ${styles.main}`;
 card.style.setProperty('--agent-color', styles.main);
 card.style.setProperty('--atp-color', styles.main);
 
-// Variabler deklareras INNAN de används i sökindex och HTML
 const displayTitle = esc(resolveTicketTitle(t));
 
 // Hämtar text från context_data för att slippa "Ingen text"
@@ -362,7 +358,6 @@ container.appendChild(header);
 container.appendChild(content);
 };
 
-// 🔥 RENDER GROUP MED NYA CSS-KLASSERNA FÖR BADGES (Emoji-fria)
 renderGroup("Live-Chattar", unassignedChats, `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>`, "Live-Chattar", "live-badge"); 
 
 renderGroup("Inkomna MAIL", unassignedMails, `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>`, "Inkomna MAIL", "mail-badge");
@@ -380,7 +375,7 @@ container.innerHTML = `<div class="template-item-empty" style="color:#ff6b6b">Ku
 const detail = document.getElementById('inbox-detail');
 const placeholder = document.getElementById('inbox-placeholder');
 if (detail && placeholder) {
-detail.innerHTML = ''; // LÄGG TILL DENNA
+detail.innerHTML = '';
 detail.style.display = 'none';
 placeholder.style.display = 'flex';
 detail.removeAttribute('data-current-id');
@@ -422,7 +417,6 @@ header.innerHTML = `
 Markera alla
 </button>`;
 
-// Samma ordning som i din kod
 container.appendChild(header);
 
 const content = document.createElement('div');
@@ -451,7 +445,6 @@ const vehicleHtml = vIcon ? `<span style="color:${styles.main}; display:flex; al
 
 card.className = 'team-ticket-card';
 card.setAttribute('data-id', t.conversation_id);
-// KIRURGISK FIX: Uppdatera båda variablerna och tvinga kanten direkt
 card.style.borderLeft = `4px solid ${styles.main}`;
 card.style.setProperty('--agent-color', styles.main);
 card.style.setProperty('--atp-color', styles.main);
@@ -537,7 +530,6 @@ if (searchEl) searchEl.value = '';
 content.appendChild(card);
 });
 
-// 2. APPEND CONTENT (Samma plats som i din kod)
 container.appendChild(content);
 
 // 3. LOGIK FÖR "MARKERA ALLA" (Ligger sist i funktionen)
@@ -578,7 +570,7 @@ hideBulkToolbar();
 }
 
 // ============================================================================
-// 2. DETALJVY FÖR INKORG (FIXAD: OPTIMISTISK STÄNGNING)
+// DETALJVY FÖR INKORG
 // ============================================================================
 function openInboxDetail(ticket) {
 const detailView = document.getElementById('inbox-detail');

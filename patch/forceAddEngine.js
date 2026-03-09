@@ -2,7 +2,6 @@
 // forceAddEngine.js
 // VAD DEN GÖR: Tvångsinjicerar relevanta kunskapsblock (chunks) i RAG-kontexten baserat på sökord och intent.
 // ANVÄNDS AV: legacy_engine.js
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 
 class forceAddEngine {
@@ -319,7 +318,6 @@ return 0;
 
 // --- C4: PAKET BIL---
 rule_C4_Paket_Bil(queryLower, intent, slots) {
-// Tillåter avgifter/appar att visas (hård return 0 är borttagen)
 const has_paket_keywords = this.qHas(queryLower, 'paket', 'totalpaket', 'minipaket', 'mellanpaket', 'baspaket', 'lektionspaket', 'avgift', 'avgifter');
 
 if (slots.vehicle === 'BIL' || (has_paket_keywords && slots.vehicle === null)) {
@@ -614,8 +612,6 @@ return 0;
 }
 
 // Lastbil Generell & YKB
-// FIXAD: Sätt HÖGSTA prioritet (18000) för att slå ut pris-chunks
-// och använd prepend: true för att säkerställa basfakta hamnar först
 rule_Fix_Lastbil_YKB(queryLower, intent) {
   // Triggers för YKB och lastbilsutbildning (regelverk + tid + förnyelse)
   const isYKBQuery = this.qHas(queryLower, 'ykb', 'yrkeskompetensbevis', 'grundutbildning', 'fortbildning', '140 tim', '35 tim');
@@ -716,26 +712,18 @@ console.log(`[META-PRIS] Lade till ${metaChunks.length} meta-prischunks (score: 
 
 // 1b. FAKTURAADRESS GENERELL (Täcker alla varianter av fakturaadress-frågor)
 if (this.qHas(queryLower, 'faktura', 'fakturaadress')) {
-console.log(`[DEBUG-FAKTURA] Query matchar faktura-trigger`);
-
 const fakturaChunks = this.allChunks.filter(c => {
 const isBasfakta = this.isBasfakta(c);
 const hasSource = c.source && c.source.includes('basfakta_om_foretaget.json');
 const hasTitle = (c.title || '').toLowerCase().includes('faktura');
-
-console.log(`[DEBUG-CHUNK] id=${c.id}, isBasfakta=${isBasfakta}, hasSource=${hasSource}, hasTitle=${hasTitle}`);
-
 return isBasfakta && hasSource && hasTitle;
 });
-
-console.log(`[DEBUG-FAKTURA] Hittade ${fakturaChunks.length} chunks`);
 
 if (fakturaChunks.length > 0) {
 totalAdded += this.addChunks(fakturaChunks, 22000, true);
 if (highConfCount++ < 2) this.forceHighConfidence = true;
 console.log(`[FAKTURAADRESS-GENERELL] Lade till ${fakturaChunks.length} chunks (score: 22000)`);
 } else {
-console.log(`[DEBUG-FAKTURA] ❌ INGA CHUNKS HITTADES - Fallback till hela filen`);
 const allCompanyChunks = this.findBasfaktaBySource('basfakta_om_foretaget.json');
 totalAdded += this.addChunks(allCompanyChunks, 18000, true);
 }

@@ -257,8 +257,6 @@ isFirstMessage,
 session_type,
 providedContext
 }) {
-console.log(`[CHAT] Message received:`, query);
-
 if (!query || !sessionId) {
 return { answer: "", sessionId };
 }
@@ -303,8 +301,6 @@ contextData.locked_context = {
 ...contextData.locked_context,
 ...providedContext.locked_context
 };
-console.log('🎯 [CONTEXT PRE-SAVE] Sparar namn innan trigger-check:', providedContext.locked_context);
-
 // Spara direkt till DB
 await upsertContextRow({
 conversation_id: sessionId,
@@ -398,7 +394,6 @@ email:   lc.email      || pc.email      || null,
 phone:   lc.phone      || pc.phone      || null
 };
 const activeFlags = Object.fromEntries(Object.entries(flags).filter(([_, v]) => v !== null));
-console.log('🔍 [FLAG-DEBUG] activeFlags som skickas till updateTicketFlags:', JSON.stringify(activeFlags));
 if (Object.keys(activeFlags).length > 0) {
 await updateTicketFlags(sessionId, activeFlags);
 }
@@ -819,8 +814,6 @@ if (!query || !sessionId) return;
 // Detta garanterar att "Anna Andersson" sparas även om hon triggar "Människa" direkt
 // ==================================================================
 if (context?.locked_context) {
-console.log('🎯 [SOCKET PRE-SAVE] Sparar namn/context från socket:', context.locked_context);
-
 let tempStored = await getContextRow(sessionId);
 
 // 🔥 FIX: Använd den säkra funktionen för att packa upp data 24/2-gemini
@@ -964,10 +957,6 @@ locked_context: contextData.locked_context,
 linksSentByVehicle: contextData.linksSentByVehicle
 };
 
-console.log("------------------------------------------");
-console.log("RAG INPUT (Ska innehålla locked_context + linksSentByVehicle):", JSON.stringify(ragContext));
-console.log("------------------------------------------");
-
 contextData.messages.push({ role: 'user', content: query, timestamp: Date.now() });
 const templates = await getTemplatesCached();
 
@@ -977,23 +966,6 @@ const result = await runLegacyFlow(
 ragContext,
 templates
 );
-
-// ✅ DEBUG: Logga RAW result
-console.log("🔍 [DEBUG] runLegacyFlow result:", JSON.stringify({
-has_response_payload: !!result.response_payload,
-has_new_context: !!result.new_context,
-response_type: typeof result.response_payload,
-first_100_chars: typeof result.response_payload === 'string' 
-? result.response_payload.substring(0, 100)
-: JSON.stringify(result.response_payload).substring(0, 100)
-}));
-
-/* --- SÄKERHETSKONTROLL --- */
-if (result.new_context?.locked_context) {
-console.log("✅ MOTORN RETURNERADE STATE:", JSON.stringify(result.new_context.locked_context));
-} else {
-console.log("⚠️ VARNING: Motorn returnerade inget locked_context!");
-}
 
 /* --- UPPDATERA VARIABLER 1/2: SÄKRAD RAG-ÅTERFÖRING --- */
 // ✅ 26/12 Synka ALLA fält från motorn OBS SKALL FINNAS ÄVEN LÄNGRE NER, TA INTE BORT!
@@ -1021,13 +993,6 @@ console.log('🏷️ [TICKET FLAGS] Sätter initial metadata:', flags);
 await updateTicketFlags(sessionId, flags);
 }
 }
-
-console.log("------------------------------------------");
-console.log("📥 EFTER SYNK:", JSON.stringify({
-locked_context: contextData.locked_context,
-messages_count: contextData.messages.length
-}));
-console.log("------------------------------------------");
 
 // Extrahera svaret säkert
 let responseText = (typeof result.response_payload === 'string')
@@ -1063,9 +1028,6 @@ db.run(
 );
 }
 
-// DEBUG: Verifiera att vi har ett svar
-console.log("🔍 [DEBUG] responseText extracted:", responseText.substring(0, 100));
-
 contextData.messages.push({ role: 'atlas', content: responseText, timestamp: Date.now() });
 
 // 4. SPARA TILL DATABAS (V2-struktur)
@@ -1097,8 +1059,6 @@ answer: responseText,
 sessionId: sessionId,
 locked_context: contextData.locked_context
 });
-
-console.log("✅ [SOCKET] Svar skickat!");
 
 // 🔒 KRITISK GUARD: Endast kundärenden får trigga Team Inbox
 if (v2State.session_type === 'customer') {

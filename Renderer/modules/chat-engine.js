@@ -13,7 +13,7 @@
 // ============================================
 
 // ==========================================================
-// 3. CHATT MOTOR (Session & Logic)
+// CHATT MOTOR (Session & Logic)
 // ==========================================================
 class ChatSession {
 constructor() {
@@ -22,7 +22,7 @@ this.id = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 this.messages = [];
 this.startTime = new Date();
 
-// 👈 KRITISK FIX: HEM-vyn är ALLTID privat
+// HEM-vyn är ALLTID privat
 this.session_type = 'private';
 
 this.context = {
@@ -77,11 +77,6 @@ saveLocalQA(State.currentSession);
 
 State.currentSession = new ChatSession();
 
-// 🛑 ULTRA-KOMPAKT FIX:
-// padding: 15px (Mindre ram runt texten)
-// max-width: 380px (Smalare box totalt)
-
-console.log("  Rendering intro message...");
 
 if (DOM.chatMessages) {
 DOM.chatMessages.innerHTML = `
@@ -179,7 +174,7 @@ wrapper.className = `message ${role}`;
 const bubble = document.createElement('div');
 bubble.className = 'bubble';
 
-// Markdown-lite parsing - BEVARAD EXAKT
+// Markdown-lite parsing
 let html = text
 .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
 .replace(/\n/g, '<br>')
@@ -227,7 +222,6 @@ const shortId = t.conversation_id.replace('session_', '').substring(0, 6);
 return `Ärende #${shortId}`;
 }
 
-// Add missing function declaration for saveLocalQA
 function saveLocalQA(session, forceArchive = false) {
 // Implementation for saving local QA session
 if (window.electronAPI && window.electronAPI.saveQA) {

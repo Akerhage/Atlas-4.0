@@ -5,7 +5,6 @@
 //              och mina ärenden för agenter.
 // ANVÄNDS AV: server.js via app.use('/', teamRoutes)
 //             + teamRoutes.init({ io })
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 
 // ⚠️  ╔══════════════════════════════════════════════════════════════╗
@@ -105,7 +104,7 @@ contextData.messages.push({
 role: role || 'agent',
 content: message,
 sender: agentName,
-timestamp: Date.now() // <--- LÄGG TILL DENNA RAD
+timestamp: Date.now()
 });
 
 // 3. Spara till DB
@@ -161,7 +160,7 @@ const initialContext = {
 messages: [{
 id: crypto.randomUUID(),
 sender: sender,
-role: 'agent', // <--- LÄGG TILL DENNA! VIKTIGT FÖR RENDERER!
+role: 'agent',
 text: message,
 timestamp: Date.now()
 }],
@@ -453,8 +452,6 @@ return res.status(400).json({ error: "Missing conversationId" });
 // 1. Grundregel: Använd inloggad användare
 let finalAgentName = req.user ? req.user.username : 'Agent';
 
-console.log(`[CLAIM DEBUG] Inloggad: "${finalAgentName}", Skickat namn: "${agentName}"`);
-
 // 2. UNDANTAG: Om anropet kommer från "System" (Electron) ELLER "admin"
 // så litar vi på namnet som frontend skickar — men vi verifierar att agenten existerar.
 if ((finalAgentName === 'System' || finalAgentName === 'admin') && agentName) {
@@ -470,8 +467,6 @@ finalAgentName = agentName;
 // 3. SÄKERHET: Om namnet fortfarande är "System" (frontend glömde skicka namn),
 // försök sätta det till "Agent" så det inte ser trasigt ut.
 if (finalAgentName === 'System') finalAgentName = 'Agent';
-
-console.log(`[TEAM] Slutgiltig ägare för ${conversationId}: ${finalAgentName}`);
 
 // Kontrollera sessionstyp
 const preState = await getV2State(conversationId);
@@ -591,7 +586,6 @@ const ctx = stored?.context_data || {};
 const messages = ctx.messages || [];
 const locked = ctx.locked_context || {};
 
-// 🔥 SMART NAMN-HÄMTNING (Fixad mappning)
 const finalName =
 locked.name ||
 locked.contact_name ||
@@ -603,7 +597,7 @@ return {
 ...t,
 messages,
 last_message: messages.length > 0 ? messages[messages.length - 1].content : "Ingen text",
-office_color: t.office_color, // ✅ DEFINITIV FIX: Tvingar med färgen
+office_color: t.office_color,
 // Skicka med kontaktinfo så frontend kan visa "Anna Andersson" korrekt
 contact_name: finalName,
 contact_email: locked.email || locked.contact_email || null,

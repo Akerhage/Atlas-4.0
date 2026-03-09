@@ -5,7 +5,6 @@
 //              Ingen auth krävs (publika endpoints).
 // ANVÄNDS AV: server.js via app.use('/api', customerRoutes)
 //             + customerRoutes.init({ io, handleChatMessage })
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 const express = require('express');
 const router = express.Router();
@@ -156,7 +155,7 @@ error: "name, email and message are required"
 const conversationId = crypto.randomUUID();
 const now = Math.floor(Date.now() / 1000);
 
-// 1. Spara till chat_v2_state (Nu med dedikerade kolumner för sökbarhet och snyggare Inkorg)
+// 1. Spara till chat_v2_state
 const { agent_id } = req.body;
 await new Promise((resolve, reject) => {
 db.run(

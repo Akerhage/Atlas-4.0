@@ -2,7 +2,6 @@
 // priceResolver.js
 // VAD DEN GÖR: Slår upp priser från chunk-kartan med exakt stad+tjänst-matchning och fallback-logik.
 // ANVÄNDS AV: legacy_engine.js
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 
 function median(values) {

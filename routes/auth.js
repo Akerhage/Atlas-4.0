@@ -3,7 +3,6 @@
 // VAD DEN GÖR: Hanterar inloggning, lösenordsbyte,
 //              profiländring, seed och versionsinfo
 // ANVÄNDS AV: server.js via app.use('/api', authRoutes)
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 const express = require('express');
 const router = express.Router();
@@ -97,7 +96,7 @@ res.status(500).json({ error: "Internt serverfel" });
 // -------------------------------------------------------------------------
 router.post('/auth/change-password', authenticateToken, async (req, res) => {
 const { oldPassword, newPassword } = req.body;
-const username = req.user.username; // Vi tar namnet från token (säkert)
+const username = req.user.username;
 
 if (!oldPassword || !newPassword) {
 return res.status(400).json({ error: "Fyll i både gammalt och nytt lösenord" });

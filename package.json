@@ -43,7 +43,11 @@
     "build:win": "electron-builder --win",
     "build:client": "electron-builder --win --config electron-builder-client.json",
     "build:mac": "electron-builder --mac",
-    "build:all": "electron-builder -mwl"
+    "build:all": "electron-builder -mwl",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop atlas",
+    "pm2:logs": "pm2 logs atlas",
+    "pm2:restart": "pm2 restart atlas"
   },
   "keywords": [
     "trafikskola",

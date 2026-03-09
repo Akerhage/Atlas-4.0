@@ -70,7 +70,7 @@ if (res.ok) {
 textarea.value = '';
 await loadNotes(conversationId);
 if (typeof refreshNotesGlow === 'function') {
-refreshNotesGlow(conversationId);  // ← bara här
+refreshNotesGlow(conversationId);
 }
 }
 } catch (err) {
@@ -131,7 +131,7 @@ container.innerHTML = '<div style="color: #ff6b6b;">Kunde inte ladda anteckninga
 window.loadNotes = loadNotes;
 
 // =============================================================================
-// FIX 3b — Redigera not (ROBUST: data-content + .value = undviker HTML-stripping)
+// REDIGERA NOT (data-content + .value undviker HTML-stripping)
 // =============================================================================
 window.editNote = function(id, convId) {
 const card = document.getElementById(`note-card-${id}`);
@@ -169,7 +169,7 @@ else showToast('Kunde inte spara anteckning.');
 };
 
 // =============================================================================
-// FIX 3c — Radera not
+// RADERA NOT
 // =============================================================================
 window.deleteNote = async function(id, convId) {
 try {

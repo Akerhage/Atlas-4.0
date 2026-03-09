@@ -4,7 +4,6 @@
 //              laddar renderer, hanterar
 //              app-livscykel
 // ANVÄNDS AV: Electron runtime
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 
 const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, session, nativeImage } = require('electron');
@@ -141,10 +140,7 @@ sandbox: false
 });
 loaderWindow.loadURL(`file://${loaderPath}`);
 
-// DEBUG: Logga när loader-window skapas
-loaderWindow.on('show', () => console.log('[LOADER] Window displayed'));
 loaderWindow.on('closed', () => {
-console.log('[LOADER] Window closed');
 loaderWindow = null;
 });
 }
@@ -273,7 +269,6 @@ console.log(`[Server]: ${out}`);
 
 // Detekterar "ONLINE"-signal från server och informerar loader-fönstret
 if (out.includes("ONLINE")) {
-console.log("🟢 BINGO! Server är redo.");
 serverReady = true;
 if (loaderWindow && !loaderWindow.isDestroyed()) {
 loaderWindow.webContents.send('server-status', true);
@@ -509,7 +504,6 @@ return os.userInfo().username || 'Agent';
 // force-copy-to-clipboard - Tvingad kopiering (fokus-oberoende)
 ipcMain.on('force-copy-to-clipboard', (event, text) => {
 clipboard.writeText(text);
-console.log("📋 [MAIN] Text tvingad till systemets urklipp (fokus-oberoende)");
 });
 
 // force-copy-html-to-clipboard - Kopierar Rich Text (HTML) till urklipp
@@ -518,7 +512,6 @@ clipboard.write({
 html: html,
 text: text
 });
-console.log("📋 [MAIN] Rich Text (HTML) tvingad till systemets urklipp");
 });
 
 // TASKBAR BADGE (WINDOWS OVERLAY)
@@ -541,9 +534,7 @@ console.error("Failed to set overlay icon:", err);
 
 // LOADER COMPLETION SIGNAL
 ipcMain.on('loader:done', () => {
-console.log('[LOADER] 🟢 Klar signal mottagen - stänger loader och startar main window...');
 if (loaderWindow && !loaderWindow.isDestroyed()) {
-console.log('[LOADER] Stänger loader-window...');
 loaderWindow.close();
 }
 createMainWindow();

@@ -2,7 +2,6 @@
 // intentEngine.js
 // VAD DEN GÖR: Identifierar användarens avsikt (intent) och extraherar stad/fordon/tjänst från fritext.
 // ANVÄNDS AV: legacy_engine.js
-// SENAST STÄDAD: 2026-03-03
 // ============================================
 
 const INTENT_PATTERNS = {
@@ -86,15 +85,11 @@ if (/\b(ykb|grundutbildning|fortbildning|140 timmar|35 timmar)\b/i.test(queryLow
 return 'LASTBIL';
 }
 
-// 🔥 FIX: Om frågan handlar om tung trafik/lastbil, låt inte "b-körkort" eller "b" stjäla vehicle
-// Exempel: "måste jag ha b-körkort innan lastbilsutbildningen" → LASTBIL, inte BIL
 const isHeavyVehicleQuery = /\b(lastbil|c-körkort|ce-körkort|c1-körkort|c1e|tung trafik|lastbilsutbildning|lastbilskörkort|tungt fordon)\b/i.test(queryLower);
 if (isHeavyVehicleQuery) {
 return 'LASTBIL';
 }
 
-// 🔥 FIX: Om kontext redan är LASTBIL och frågan inte explicit nämner ett annat fordon,
-// behåll LASTBIL. "b-körkort" i en fråga är ett krav, inte ett fordonsval.
 if (vehicle === 'LASTBIL') {
 const explicitOtherVehicle = /\b(mc-körkort|motorcykel|moped|am-körkort|personbil)\b/i.test(queryLower);
 if (!explicitOtherVehicle) {

@@ -3,7 +3,6 @@
 // VAD DEN GÖR: Läser och uppdaterar kontors-JSON-filer
 //              för RAG-motorn. PUT triggar hot-reload.
 // ANVÄNDS AV: server.js via app.use('/api', knowledgeRoutes)
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 const express = require('express');
 const router = express.Router();
@@ -46,7 +45,7 @@ if (err) reject(err); else resolve(row);
 });
 
 if (office) {
-// Bygg ett "fake" knowledge-objekt från DB-datan så frontend blir glad
+// Bygg fallback-objekt från DB-data
 const fallbackData = {
 id: routingTag,
 city: office.city,
@@ -58,7 +57,7 @@ email: office.email,
 address: office.address
 },
 description: "Information hämtad från databasen (Ingen JSON-fil hittades).",
-prices: [], // Tom lista som fallback
+prices: [],
 services_offered: []
 };
 return res.json(fallbackData);
