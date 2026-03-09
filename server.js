@@ -119,6 +119,7 @@ linksSentByVehicle: { AM: false, MC: false, CAR: false, INTRO: false, RISK1: fal
 // HELPERS: Drift-inställningar (settings-tabellen)
 // =============================================================================
 let imapEnabled    = true;
+let imapInbound    = false; // Skapar nya ärenden från rå inkommande mail (Intercom-funktionen)
 let backupInterval = 24;   // timmar
 let backupPath = getWritablePath('backups');
 let jwtExpiresIn   = '24h';
@@ -143,11 +144,12 @@ db.run("INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE S
 
 async function loadOperationSettings() {
 imapEnabled    = (await getSetting('imap_enabled',   'true')) === 'true';
+imapInbound    = (await getSetting('imap_inbound',   'false')) === 'true';
 backupInterval = parseInt(await getSetting('backup_interval_hours', '24'), 10) || 24;
 backupPath     = await getSetting('backup_path', path.join(__dirname, 'backups'));
 jwtExpiresIn   = await getSetting('jwt_expires_in', '24h');
 autoHumanExit  = (await getSetting('auto_human_exit', 'false')) === 'true';
-console.log(`✅ [Settings] IMAP:${imapEnabled} Backup:${backupInterval}h JWT:${jwtExpiresIn} AutoExit:${autoHumanExit}`);
+console.log(`✅ [Settings] IMAP:${imapEnabled} Inbound:${imapInbound} Backup:${backupInterval}h JWT:${jwtExpiresIn} AutoExit:${autoHumanExit}`);
 }
 
 // === MAIL CONFIGURATION (NODEMAILER) ===
@@ -200,49 +202,49 @@ const OpenAI = require('openai');
 // ✨ AUTO-SUBJECT — Generera kort ärenderubrik vid human mode
 // ==================================================
 async function generateAutoSubject(sessionId, contextData) {
-  if (!process.env.OPENAI_API_KEY) return;
-  try {
-    // Hoppa över om ämne redan finns
-    if (contextData.locked_context?.subject) return;
+if (!process.env.OPENAI_API_KEY) return;
+try {
+// Hoppa över om ämne redan finns
+if (contextData.locked_context?.subject) return;
 
-    const customerMsgs = (contextData.messages || [])
-      .filter(m => m.role === 'user')
-      .slice(-8)
-      .map(m => m.content)
-      .join('\n');
-    if (!customerMsgs.trim()) return;
+const customerMsgs = (contextData.messages || [])
+.filter(m => m.role === 'user')
+.slice(-8)
+.map(m => m.content)
+.join('\n');
+if (!customerMsgs.trim()) return;
 
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'Du är assistent för ett ärendehanteringssystem för svenska trafikskolor. Generera ett kort ämne (max 6 ord) på svenska som beskriver vad kunden frågar om. Exempel: "MC-körkort pris — ny kund", "Fråga om teoriprov", "Bokning intensivkurs Göteborg". Svara ENBART med ämnet, inga förklaringar.' },
-        { role: 'user', content: customerMsgs }
-      ],
-      max_tokens: 30,
-      temperature: 0.2
-    });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const completion = await openai.chat.completions.create({
+model: 'gpt-4o-mini',
+messages: [
+{ role: 'system', content: 'Du är assistent för ett ärendehanteringssystem för svenska trafikskolor. Generera ett kort ämne (max 6 ord) på svenska som beskriver vad kunden frågar om. Exempel: "MC-körkort pris — ny kund", "Fråga om teoriprov", "Bokning intensivkurs Göteborg". Svara ENBART med ämnet, inga förklaringar.' },
+{ role: 'user', content: customerMsgs }
+],
+max_tokens: 30,
+temperature: 0.2
+});
 
-    const subject = completion.choices[0]?.message?.content?.trim();
-    if (!subject) return;
+const subject = completion.choices[0]?.message?.content?.trim();
+if (!subject) return;
 
-    // Läs senaste context, sätt subject, skriv tillbaka
-    const row = await getContextRow(sessionId);
-    if (!row?.context_data) return;
-    const ctx = row.context_data;
-    if (!ctx.locked_context) ctx.locked_context = {};
-    if (ctx.locked_context.subject) return; // Dubbelkoll — kan ha satts medan vi väntade
-    ctx.locked_context.subject = subject;
-    await upsertContextRow({
-      conversation_id: sessionId,
-      last_message_id: row.last_message_id,
-      context_data: ctx,
-      updated_at: Math.floor(Date.now() / 1000)
-    });
-    console.log(`✨ [AUTO-SUBJECT] ${sessionId}: "${subject}"`);
-  } catch (err) {
-    console.error('[AUTO-SUBJECT] Fel:', err.message);
-  }
+// Läs senaste context, sätt subject, skriv tillbaka
+const row = await getContextRow(sessionId);
+if (!row?.context_data) return;
+const ctx = row.context_data;
+if (!ctx.locked_context) ctx.locked_context = {};
+if (ctx.locked_context.subject) return; // Dubbelkoll — kan ha satts medan vi väntade
+ctx.locked_context.subject = subject;
+await upsertContextRow({
+conversation_id: sessionId,
+last_message_id: row.last_message_id,
+context_data: ctx,
+updated_at: Math.floor(Date.now() / 1000)
+});
+console.log(`✨ [AUTO-SUBJECT] ${sessionId}: "${subject}"`);
+} catch (err) {
+console.error('[AUTO-SUBJECT] Fel:', err.message);
+}
 }
 
 // ==================================================
@@ -1225,20 +1227,33 @@ if (contextData.locked_context) {
 contextData.locked_context.email = customerEmail;
 }
 
-// -- C. Konfigurera Mail --
+// -- C. Bygg trådnings-headers (RFC 2822) --
+const allMessages = contextData.messages || [];
+const lastMsgWithId = [...allMessages].reverse().find(m => m.messageId);
+const inReplyToId = lastMsgWithId?.messageId || null;
+const referencesHeader = allMessages
+.filter(m => m.messageId)
+.map(m => m.messageId)
+.join(' ') || null;
+
+// -- D. Konfigurera Mail --
 const mailOptions = {
 from: `"My Driving Academy Support" <${process.env.EMAIL_USER}>`,
 to: customerEmail,
 subject: cleanSubject,
 text: message,
 html: finalHtml,
-headers: { 'X-Atlas-Ticket-ID': conversationId }
+headers: {
+'X-Atlas-Ticket-ID': conversationId,
+...(inReplyToId      ? { 'In-Reply-To': inReplyToId }      : {}),
+...(referencesHeader ? { 'References': referencesHeader } : {})
+}
 };
 
-// -- D. SKICKA FÖRST --
+// -- E. SKICKA FÖRST --
 const sentInfo = await mailTransporter.sendMail(mailOptions);
 
-// -- E. SPARA I DB ENDAST OM SÄNDNING LYCKADES --
+// -- F. SPARA I DB ENDAST OM SÄNDNING LYCKADES --
 await new Promise((resolve, reject) => {
 db.run(
 `INSERT INTO chat_v2_state (conversation_id, session_type, human_mode, owner, updated_at)
@@ -1267,7 +1282,7 @@ context_data: contextData,
 updated_at: now
 });
 
-// -- F. Notifiera UI (Global Sync) --
+// -- G. Notifiera UI (Global Sync) --
 if (typeof io !== 'undefined') {
 io.emit('team:customer_reply', { conversationId, message: `📧 ${html || message}`, sender: agentName, timestamp: Date.now(), isEmail: true });
 io.emit('team:update', { type: 'new_message', sessionId: conversationId });
@@ -1356,33 +1371,125 @@ socket.emit('ai:prediction', { conversationId, answer: 'Kunde inte generera för
 });
 
 // ==================================================
+// 📧 NYTT MAILÄRENDE FRÅN KUNDVYN (team:create_mail_ticket)
+// Skapar ärendet i DB, skickar mail och sparar sentInfo.messageId
+// direkt — garanterar korrekt e-posttrådning från första svaret.
+// ==================================================
+socket.on('team:create_mail_ticket', async (data) => {
+if (!socket.user) return; // 🔒 Blockera oautentiserade
+const { customerEmail, customerName, subject, message, html } = data;
+const agentName = socket.user?.username || 'Support';
+
+// GUARD: giltig mottagare
+if (!customerEmail || !customerEmail.includes('@')) {
+return socket.emit('server:error', { message: 'Kan inte skicka: Ogiltig eller saknad mottagaradress.' });
+}
+if (!message?.trim()) {
+return socket.emit('server:error', { message: 'Meddelandet kan inte vara tomt.' });
+}
+
+try {
+const now = Math.floor(Date.now() / 1000);
+
+// -- A. Generera unikt ärende-ID (server-side, samma format som IMAP-inbound) --
+const { randomUUID } = require('crypto');
+const conversationId = `session_mail_${Date.now()}_${randomUUID().substring(0, 6)}`;
+
+// -- B. Bygg ämnesrad med ärende-ID-tagg --
+const idTag = `[Ärende: ${conversationId}]`;
+let cleanSubject = (subject || 'Kontakt från kundtjänst').replace(/\[Ärende:\s*[^\]]+\]/gi, '').trim();
+const finalSubject = `${cleanSubject} ${idTag}`;
+const finalHtml = html || message.replace(/\n/g, '<br>');
+
+// -- C. Skapa ärendet i chat_v2_state --
+await new Promise((resolve, reject) => {
+db.run(
+`INSERT INTO chat_v2_state
+(conversation_id, session_type, human_mode, owner, updated_at, name, email, source)
+VALUES (?, 'message', 1, ?, ?, ?, ?, 'agent')`,
+[conversationId, agentName, now, customerName || customerEmail, customerEmail],
+(err) => err ? reject(err) : resolve()
+);
+});
+
+// -- D. Skicka mail --
+const mailOptions = {
+from: `"My Driving Academy Support" <${process.env.EMAIL_USER}>`,
+to: customerEmail,
+subject: finalSubject,
+text: message,
+html: finalHtml,
+headers: { 'X-Atlas-Ticket-ID': conversationId }
+};
+const sentInfo = await mailTransporter.sendMail(mailOptions);
+
+// -- E. Spara i context_store med sentInfo.messageId (möjliggör trådning vid svar) --
+const contextData = {
+messages: [{
+role: 'agent',
+content: finalHtml,
+sender: agentName,
+timestamp: Date.now(),
+messageId: sentInfo.messageId, // ← kärnan: används som In-Reply-To vid nästa svar
+isEmail: true
+}],
+locked_context: {
+email: customerEmail,
+name: customerName || null,
+subject: cleanSubject
+},
+linksSentByVehicle: { AM: false, MC: false, CAR: false, INTRO: false, RISK1: false, RISK2: false }
+};
+
+await upsertContextRow({
+conversation_id: conversationId,
+last_message_id: 1,
+context_data: contextData,
+updated_at: now
+});
+
+// -- F. Notifiera UI --
+if (typeof io !== 'undefined') {
+io.emit('team:update', { type: 'new_message', sessionId: conversationId });
+}
+
+socket.emit('mail:ticket_created', { conversationId, subject: finalSubject });
+console.log(`✅ [CREATE_MAIL] Nytt mailärende ${conversationId} → ${customerEmail}`);
+
+} catch (err) {
+console.error('❌ [CREATE_MAIL] Fel:', err);
+socket.emit('server:error', { message: 'Kunde inte skapa mailärende. Kontrollera mottagarens adress.' });
+}
+});
+
+// ==================================================
 // ✨ AI SAMMANFATTNING AV ÄRENDE (on-demand)
 // ==================================================
 socket.on('team:summarize_ticket', async (data) => {
-  const { conversationId, messages } = data;
-  if (!messages || messages.length === 0) return;
-  if (!process.env.OPENAI_API_KEY) {
-    return socket.emit('ticket:summary', { conversationId, summary: 'AI ej aktiverat (API-nyckel saknas).' });
-  }
-  try {
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); // Ny instans = hanterar hot-reload
-    const chatHistory = messages
-      .map(m => `${m.role === 'user' ? 'Kund' : 'Agent'}: ${(m.content || m.text || '').substring(0, 500)}`)
-      .join('\n');
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'Du är ett hjälpmedel för kundtjänst. Sammanfatta konversationen nedan i 2-3 korta meningar på svenska. Fokusera på: vad kunden vill ha, kundens ton, och viktig info (stad, körkort-typ etc). Inga punktlistor, bara löpande text.' },
-        { role: 'user', content: chatHistory }
-      ],
-      max_tokens: 180
-    });
-    const summary = completion.choices[0].message.content.trim();
-    socket.emit('ticket:summary', { conversationId, summary });
-  } catch (err) {
-    console.error('[summarize_ticket] Fel:', err);
-    socket.emit('ticket:summary', { conversationId, summary: 'Kunde inte generera sammanfattning.' });
-  }
+const { conversationId, messages } = data;
+if (!messages || messages.length === 0) return;
+if (!process.env.OPENAI_API_KEY) {
+return socket.emit('ticket:summary', { conversationId, summary: 'AI ej aktiverat (API-nyckel saknas).' });
+}
+try {
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); // Ny instans = hanterar hot-reload
+const chatHistory = messages
+.map(m => `${m.role === 'user' ? 'Kund' : 'Agent'}: ${(m.content || m.text || '').substring(0, 500)}`)
+.join('\n');
+const completion = await openai.chat.completions.create({
+model: 'gpt-4o-mini',
+messages: [
+{ role: 'system', content: 'Du är ett hjälpmedel för kundtjänst. Sammanfatta konversationen nedan i 2-3 korta meningar på svenska. Fokusera på: vad kunden vill ha, kundens ton, och viktig info (stad, körkort-typ etc). Inga punktlistor, bara löpande text.' },
+{ role: 'user', content: chatHistory }
+],
+max_tokens: 180
+});
+const summary = completion.choices[0].message.content.trim();
+socket.emit('ticket:summary', { conversationId, summary });
+} catch (err) {
+console.error('[summarize_ticket] Fel:', err);
+socket.emit('ticket:summary', { conversationId, summary: 'Kunde inte generera sammanfattning.' });
+}
 });
 
 // ==================================================
@@ -1428,15 +1535,15 @@ io.emit('team:update', { type: 'ticket_archived', sessionId });
 });
 // ADMIN BROADCAST — systemmeddelande till alla inloggade agenter
 socket.on('admin:broadcast', (data) => {
-  if (!socket.user || socket.user.role !== 'admin') return;
-  const message = (data?.message || '').trim();
-  if (!message) return;
-  console.log(`📢 [BROADCAST] ${socket.user.username}: "${message.substring(0, 60)}"`);
-  io.emit('admin:notification', {
-    message,
-    sentBy: socket.user.username,
-    timestamp: Date.now()
-  });
+if (!socket.user || socket.user.role !== 'admin') return;
+const message = (data?.message || '').trim();
+if (!message) return;
+console.log(`📢 [BROADCAST] ${socket.user.username}: "${message.substring(0, 60)}"`);
+io.emit('admin:notification', {
+message,
+sentBy: socket.user.username,
+timestamp: Date.now()
+});
 });
 
 socket.on('disconnect', () => {
@@ -1515,7 +1622,11 @@ webhookRoutes.init({ io, sendToLHC, parseContextData, HUMAN_TRIGGERS, HUMAN_RESP
 let isScanning = false;
 
 async function checkEmailReplies() {
-if (!imapEnabled) return;
+// ✅ FIX: imapEnabled styr INTE längre om befintliga ärenden kan ta emot svar.
+// Svar på ärenden med [Ärende: X] i subject skall alltid gå igenom.
+// imapEnabled styr enbart om OKOPPLADE inkommande mail skapar nya ärenden.
+// Den distinktionen hanteras längre ned i loopen vid conversationId-kontrollen.
+
 // 1. Lås för att förhindra dubbla körningar
 if (isScanning) return;
 isScanning = true;
@@ -1602,7 +1713,85 @@ break;
 }
 
 if (!conversationId) {
-console.log(`⚠️ Kunde inte hitta ärende-ID i mail. Ignorerar.`);
+// Inget ärende-ID i mailet — antingen ett nytt råinkommande mail eller skräp.
+if (!imapInbound) {
+// Intercom-funktionen är avaktiverad: ignorera alltid okopplade mail.
+if (!imapEnabled) {
+console.log(`📵 [IMAP-OFF] Ignorerar okopplat inkommande mail (IMAP-polling avaktiverad).`);
+} else {
+console.log(`⚠️ Inget ärende-ID i mail och Intercom-funktionen är avaktiverad. Ignorerar.`);
+}
+await connection.addFlags(item.attributes.uid, '\\Seen');
+continue;
+}
+
+// ✅ INTERCOM: imapInbound är PÅ — skapa ett nytt ärende från detta mail.
+console.log(`📬 [INTERCOM] Nytt inkommande mail utan ärende-ID — skapar nytt ärende.`);
+
+// Extrahera avsändarens e-postadress ur "Namn <email@adress.se>" eller bare "email@adress.se"
+const extractEmail = (raw) => {
+const match = raw.match(/<([^>]+)>/);
+return match ? match[1].toLowerCase() : raw.toLowerCase().replace(/[^a-z0-9@._+-]/g, '');
+};
+const extractName = (raw) => {
+const match = raw.match(/^([^<]+)</);
+return match ? match[1].trim().replace(/^["']|["']$/g, '') : null;
+};
+
+const senderEmail = extractEmail(fromRaw);
+const senderName  = extractName(fromRaw) || senderEmail;
+const inboundSubject = subject !== '(Inget ämne)' ? subject : null;
+
+// Generera ett unikt ärende-ID med prefix MAIL_ för enkel identifiering
+const { randomUUID } = require('crypto');
+const newConversationId = `MAIL_INBOUND_${randomUUID().substring(0, 8).toUpperCase()}`;
+const nowInbound = Math.floor(Date.now() / 1000);
+
+// Skapa raden i chat_v2_state
+await new Promise((resolve) => {
+db.run(
+`INSERT INTO chat_v2_state
+(conversation_id, session_type, human_mode, owner, office, updated_at, name, email, source, is_archived)
+VALUES (?, 'message', 1, NULL, NULL, ?, ?, ?, 'imap', 0)`,
+[newConversationId, nowInbound, senderName, senderEmail],
+() => resolve()
+);
+});
+
+// Spara meddelandet i context_store
+const inboundContextData = {
+messages: [{
+role: 'user',
+content: '(Fulltext laddas efter parsing)',  // ersätts nedan
+timestamp: Date.now(),
+messageId: messageId,
+isEmail: true
+}],
+locked_context: {
+name:    senderName,
+email:   senderEmail,
+subject: inboundSubject
+}
+};
+
+// Sätt conversationId så att resten av loopen (text-extraktion + spara) körs normalt
+conversationId = newConversationId;
+
+// ✅ Spara initial context med kontaktinfo direkt — annars förlorar vi namn/email/subject
+// när getContextRow() anropas längre ned och returnerar null för det nya ärendet.
+await upsertContextRow({
+conversation_id: newConversationId,
+last_message_id: 0,
+context_data: inboundContextData,
+updated_at: nowInbound
+});
+
+// Flagga att detta är ett nytt ärende (används för IO-emit nedan)
+item._isNewInbound = true;
+}
+
+// Om vi fortfarande saknar conversationId här (vilket inte borde hända) — avbryt säkert
+if (!conversationId) {
 await connection.addFlags(item.attributes.uid, '\\Seen');
 continue;
 }
@@ -1637,6 +1826,7 @@ let cleanMessage = mailContent
 .split(/Den .* skrev:/i)[0]
 .split(/-----Original Message-----/i)[0]
 .split(/Från: /i)[0]
+.split(/_{10,}/)[0]   // Outlook-separator (________________________________)
 .trim();
 
 // FIX: Om städningen raderade allt (Outlook-bugg), använd originaltexten
@@ -1705,10 +1895,17 @@ last_message_id: (stored?.last_message_id || 0) + 1,
 context_data: contextData,
 updated_at: now
 });
-// ✅ GLOBAL INBOUND: Garanterar att inkommande mail-svar visas direkt i UI för alla agenter
+// ✅ GLOBAL INBOUND: Garanterar att inkommande mail visas direkt i UI för alla agenter
 if (typeof io !== 'undefined') {
+if (item._isNewInbound) {
+// Nytt Intercom-ärende — skicka new_ticket-event så Inkorgen plingas
+console.log(`📬 [INTERCOM] Nytt ärende skapat: ${conversationId}`);
+io.emit('team:update', { type: 'new_message', sessionId: conversationId });
+} else {
+// Svar på befintligt ärende
 io.emit('team:customer_reply', { conversationId, message: `📧 (Svar): ${cleanMessage}`, sender: 'user', timestamp: Date.now(), isEmail: true });
 io.emit('team:update', { type: 'new_message', sessionId: conversationId });
+}
 }
 
 await connection.addFlags(item.attributes.uid, '\\Seen');
@@ -1814,11 +2011,11 @@ if (beginErr) return reject(beginErr);
 db.run("UPDATE chat_v2_state SET is_archived = 1, close_reason = 'inactivity', updated_at = ? WHERE conversation_id = ?", [now, id], (e1) => {
 if (e1) { db.run('ROLLBACK'); return reject(e1); }
 db.run("UPDATE local_qa_history SET is_archived = 1 WHERE id = ?", [id], (e2) => {
-  if (e2) { db.run('ROLLBACK'); return reject(e2); }
-  db.run('COMMIT', (commitErr) => {
-	if (commitErr) { db.run('ROLLBACK'); return reject(commitErr); }
-	resolve();
-  });
+if (e2) { db.run('ROLLBACK'); return reject(e2); }
+db.run('COMMIT', (commitErr) => {
+if (commitErr) { db.run('ROLLBACK'); return reject(commitErr); }
+resolve();
+});
 });
 });
 });
@@ -2041,6 +2238,7 @@ adminRoutes.init({ io, getEnvPath, getFilePaths, BLOCKED_CONFIG_KEYS, recreateMa
 app.get('/api/admin/operation-settings', authenticateToken, async (req, res) => {
 res.json({
 imap_enabled:          imapEnabled,
+imap_inbound:          imapInbound,
 backup_interval_hours: backupInterval,
 backup_path:           backupPath,
 jwt_expires_in:        jwtExpiresIn,
@@ -2052,7 +2250,7 @@ app.post('/api/admin/operation-settings', authenticateToken, async (req, res) =>
 if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 const { field, value } = req.body;
 const allowed = [
-'imap_enabled', 'backup_interval_hours', 'backup_path',
+'imap_enabled', 'imap_inbound', 'backup_interval_hours', 'backup_path',
 'jwt_expires_in', 'auto_human_exit',
 'OPENAI_API_KEY' // Tillåten att uppdatera via operation-settings (exponeras ej i GET)
 ];
@@ -2065,6 +2263,11 @@ if (field === 'imap_enabled') {
 imapEnabled = (value === 'true' || value === true);
 // IMAP-intervallet körs alltid men checkar imapEnabled-flaggan i sin loop — ingen restart behövs
 console.log(`✅ [HotReload] IMAP ${imapEnabled ? 'aktiverat' : 'inaktiverat'}`);
+}
+
+if (field === 'imap_inbound') {
+imapInbound = (value === 'true' || value === true);
+console.log(`✅ [HotReload] IMAP Inbound (Intercom) ${imapInbound ? 'aktiverat' : 'inaktiverat'}`);
 }
 
 if (field === 'backup_interval_hours') {

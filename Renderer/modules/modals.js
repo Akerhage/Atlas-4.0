@@ -316,10 +316,10 @@ ${AVATAR_ICONS[selectedAvatarId]}
 <div class="glass-modal-body" style="padding: 15px 20px; overflow-y: auto; flex: 1;">
 <div class="settings-group">
 <label style="font-size: 10px; text-transform: uppercase; opacity: 0.4; margin-bottom: 4px;">Visningsnamn</label>
-<input type="text" id="pref-display-name" value="${me.display_name || ''}" placeholder="${formatName(me.username)}" style="padding: 8px 12px; font-size: 13px;">
+<input type="text" id="pref-display-name" autocomplete="off" value="${me.display_name || ''}" placeholder="${formatName(me.username)}" style="padding: 8px 12px; font-size: 13px;">
 
 <label style="margin-top: 10px; font-size: 10px; text-transform: uppercase; opacity: 0.4; margin-bottom: 4px;">Statusmeddelande</label>
-<input type="text" id="pref-status-text" value="${me.status_text || ''}" placeholder="Vad gör du just nu?" maxlength="40" style="padding: 8px 12px; font-size: 13px;">
+<input type="text" id="pref-status-text" autocomplete="off" value="${me.status_text || ''}" placeholder="Vad gör du just nu?" maxlength="40" style="padding: 8px 12px; font-size: 13px;">
 </div>
 
 <div class="settings-group" style="margin-top: 15px;">
@@ -347,10 +347,10 @@ ${svg}
 
 <div class="settings-group">
 <label style="color:#888; font-size: 10px; text-transform: uppercase; margin-bottom: 6px;">Byt Lösenord</label>
-<input type="password" id="old-pass" placeholder="Nuvarande" style="margin-top:0; font-size: 12px; padding: 8px 12px;">
+<input type="password" id="old-pass" autocomplete="new-password" placeholder="Nuvarande" style="margin-top:0; font-size: 12px; padding: 8px 12px;">
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-<input type="password" id="new-pass" placeholder="Nytt" style="font-size: 12px; padding: 8px 12px;">
-<input type="password" id="confirm-pass" placeholder="Bekräfta" style="font-size: 12px; padding: 8px 12px;">
+<input type="password" id="new-pass" autocomplete="new-password" placeholder="Nytt" style="font-size: 12px; padding: 8px 12px;">
+<input type="password" id="confirm-pass" autocomplete="new-password" placeholder="Bekräfta" style="font-size: 12px; padding: 8px 12px;">
 </div>
 </div>
 </div>
@@ -641,7 +641,6 @@ if (!subject) { showToast("⚠️ Ange ett ämne!"); return; }
 if (!body) { showToast("⚠️ Skriv ett meddelande!"); return; }
 
 const btn = document.getElementById('composer-send');
-btn.innerText = "Skickar...";
 btn.disabled = true;
 
 try {
@@ -656,15 +655,22 @@ const data = await res.json();
 if (!data.success) throw new Error(data.error);
 newConversationId = data.conversationId;
 } else {
-const tempId = `session_mail_${Date.now()}`;
+// 🔧 FIX: team:create_mail_ticket — servern skapar ärendet, skickar mail och
+// sparar sentInfo.messageId direkt → korrekt e-posttrådning från svar #1.
+// socketAPI.once() finns via socket-client.js — avregistreras automatiskt efter första svar.
 if (!window.socketAPI) throw new Error("Ingen socket-anslutning");
-window.socketAPI.emit('team:send_email_reply', {
-conversationId: tempId,
-message: body,
+newConversationId = await new Promise((resolve, reject) => {
+const timeout = setTimeout(() => reject(new Error('Timeout — inget svar från servern')), 10000);
+window.socketAPI.once('mail:ticket_created', (data) => { clearTimeout(timeout); resolve(data.conversationId); });
+window.socketAPI.once('server:error', (data) => { clearTimeout(timeout); reject(new Error(data.message)); });
+window.socketAPI.emit('team:create_mail_ticket', {
 customerEmail: recipient,
-subject: subject
+customerName: null,
+subject: subject,
+message: body,
+html: body.replace(/\n/g, '<br>')
 });
-newConversationId = tempId;
+});
 }
 
 modal.style.display = 'none';

@@ -616,16 +616,10 @@ customerEmail: ticket.contact_email || '',
 subject: ticket.subject || 'Svar'
 });
 
-// Visuell feedback på knappen
+// Tillfälligt inaktivera knappen
 const btn = form.querySelector('button[type="submit"]');
-const originalText = btn.innerHTML;
-btn.innerHTML = "⏳ Skickar...";
 btn.disabled = true;
-
-setTimeout(() => {
-btn.innerHTML = originalText;
-btn.disabled = false;
-}, 2000);
+setTimeout(() => { btn.disabled = false; }, 2000);
 
 } else {
 

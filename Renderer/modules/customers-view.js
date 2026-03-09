@@ -65,7 +65,7 @@ if (mainEl) mainEl.value = '';
 
 // Autofokusera placeholder-sökfältet
 setTimeout(() => {
-  if (mainEl) mainEl.focus();
+if (mainEl) mainEl.focus();
 }, 50);
 
 // Sync-flagga för att undvika rekursiv loop
@@ -261,7 +261,7 @@ const uniqueVehicles = [...new Set(tickets.map(t => t.vehicle).filter(Boolean))]
 const firstOffice = uniqueOffices[0] ||
 (customerObj.offices ? customerObj.offices.split(',')[0].trim() : null);
 const _agentHex = (typeof currentUser !== 'undefined' && currentUser?.agent_color?.startsWith?.('#'))
-  ? currentUser.agent_color : '#0071e3';
+? currentUser.agent_color : '#0071e3';
 const _hx = (h, a) => { try { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; } catch(e){ return `rgba(0,113,227,${a})`; } };
 const styles = { main: _agentHex, bg: _hx(_agentHex,0.08), tagBg: _hx(_agentHex,0.2), bubbleBg: _hx(_agentHex,0.12), border: _hx(_agentHex,0.3) };
 
@@ -353,54 +353,54 @@ ${_buildTicketListHtml()}
 // Event listeners för AI och mail-knappar i kundheadern
 const aiDetailBtn = detail.querySelector('#cust-detail-ai-btn');
 if (aiDetailBtn) {
-  // Visa cachat resultat direkt om det finns
-  if (_aiSummaryCache[customerObj.email]) {
-    const _ap = detail.querySelector('#cust-detail-ai-panel');
-    const _at = detail.querySelector('#cust-detail-ai-text');
-    if (_ap && _at) { _at.textContent = _aiSummaryCache[customerObj.email]; _ap.style.display = 'block'; }
-  }
-  aiDetailBtn.onclick = async () => {
-    const panel = detail.querySelector('#cust-detail-ai-panel');
-    const txt   = detail.querySelector('#cust-detail-ai-text');
-    if (!panel) return;
-    // Toggle av: göm panelen om den redan visar ett resultat
-    if (panel.style.display !== 'none' && txt.textContent && txt.textContent !== '🤖 Analyserar...') {
-      panel.style.display = 'none'; return;
-    }
-    const email = customerObj.email;
-    if (_aiSummaryCache[email]) { txt.textContent = _aiSummaryCache[email]; panel.style.display = 'block'; return; }
-    panel.style.display = 'block'; txt.textContent = '🤖 Analyserar...'; aiDetailBtn.disabled = true;
-    try {
-      const r = await fetch(`${SERVER_URL}/api/customers/summarize`, {
-        method: 'POST', headers: { ...fetchHeaders, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await r.json();
-      const summary = data.summary || data.error || 'Inget svar.';
-      _aiSummaryCache[email] = summary; txt.textContent = summary;
-    } catch (e) { txt.textContent = 'Kunde inte nå servern.'; }
-    finally { aiDetailBtn.disabled = false; }
-  };
+// Visa cachat resultat direkt om det finns
+if (_aiSummaryCache[customerObj.email]) {
+const _ap = detail.querySelector('#cust-detail-ai-panel');
+const _at = detail.querySelector('#cust-detail-ai-text');
+if (_ap && _at) { _at.textContent = _aiSummaryCache[customerObj.email]; _ap.style.display = 'block'; }
+}
+aiDetailBtn.onclick = async () => {
+const panel = detail.querySelector('#cust-detail-ai-panel');
+const txt   = detail.querySelector('#cust-detail-ai-text');
+if (!panel) return;
+// Toggle av: göm panelen om den redan visar ett resultat
+if (panel.style.display !== 'none' && txt.textContent && txt.textContent !== '🤖 Analyserar...') {
+panel.style.display = 'none'; return;
+}
+const email = customerObj.email;
+if (_aiSummaryCache[email]) { txt.textContent = _aiSummaryCache[email]; panel.style.display = 'block'; return; }
+panel.style.display = 'block'; txt.textContent = '🤖 Analyserar...'; aiDetailBtn.disabled = true;
+try {
+const r = await fetch(`${SERVER_URL}/api/customers/summarize`, {
+method: 'POST', headers: { ...fetchHeaders, 'Content-Type': 'application/json' },
+body: JSON.stringify({ email })
+});
+const data = await r.json();
+const summary = data.summary || data.error || 'Inget svar.';
+_aiSummaryCache[email] = summary; txt.textContent = summary;
+} catch (e) { txt.textContent = 'Kunde inte nå servern.'; }
+finally { aiDetailBtn.disabled = false; }
+};
 }
 const mailDetailBtn = detail.querySelector('#cust-detail-mail-btn');
 if (mailDetailBtn) {
-  mailDetailBtn.onclick = () => openCustomerMailCompose(customerObj.email, customerObj.name);
+mailDetailBtn.onclick = () => openCustomerMailCompose(customerObj.email, customerObj.name);
 }
 
 // Async: Lysa upp notes-ikonen om kunden har anteckningar
 if (customerObj.email) {
-  (async () => {
-    try {
-      const res = await fetch(`${SERVER_URL}/api/customer-notes?email=${encodeURIComponent(customerObj.email)}`, { headers: fetchHeaders });
-      if (!res.ok) return;
-      const data = await res.json();
-      const notesBtn = detail.querySelector('.notes-trigger-btn');
-      if (notesBtn) {
-        if ((data.notes || []).length > 0) notesBtn.classList.add('has-notes-active');
-        else notesBtn.classList.remove('has-notes-active');
-      }
-    } catch (e) { /* Tyst felhantering */ }
-  })();
+(async () => {
+try {
+const res = await fetch(`${SERVER_URL}/api/customer-notes?email=${encodeURIComponent(customerObj.email)}`, { headers: fetchHeaders });
+if (!res.ok) return;
+const data = await res.json();
+const notesBtn = detail.querySelector('.notes-trigger-btn');
+if (notesBtn) {
+if ((data.notes || []).length > 0) notesBtn.classList.add('has-notes-active');
+else notesBtn.classList.remove('has-notes-active');
+}
+} catch (e) { /* Tyst felhantering */ }
+})();
 }
 }
 
@@ -417,7 +417,7 @@ const header = `<h4 style="margin:0 0 12px 0; font-size:10px; opacity:0.5; text-
 const cards = _currentTickets.map((t, i) => {
 // Visa alltid inloggad agents färg — kundvyn är agentens perspektiv
 const agentColor = (typeof currentUser !== 'undefined' && currentUser?.agent_color?.startsWith?.('#'))
-  ? currentUser.agent_color : '#0071e3';
+? currentUser.agent_color : '#0071e3';
 const isMail   = t.session_type === 'message';
 const typeIcon = isMail ? UI_ICONS.MAIL : UI_ICONS.CHAT;
 const dateStr  = new Date(t.timestamp).toLocaleString('sv-SE', {
@@ -609,7 +609,7 @@ modal.onclick = (e) => { if (e.target === modal) _closeCustomerReader(); };
 
 // Lysa upp notes-ikonen om det finns anteckningar för detta ärende
 if (t.conversation_id && typeof refreshNotesGlow === 'function') {
-  refreshNotesGlow(t.conversation_id);
+refreshNotesGlow(t.conversation_id);
 }
 
 // Koppla paginerings-knappar efter inject
@@ -829,29 +829,29 @@ overlay.className = 'custom-modal-overlay';
 overlay.style.zIndex = '10001';
 overlay.innerHTML = `
 <div class="glass-modal-box glass-effect" style="width:520px; max-width:92vw; border-top:3px solid ${_mHex};">
-  <div style="padding:18px 22px 14px; border-bottom:1px solid ${_mRgba(0.15)}; background:linear-gradient(90deg,${_mRgba(0.06)},transparent); display:flex; align-items:center;">
-    <div>
-      <div style="font-size:15px; font-weight:700; color:${_mHex};">Nytt mail</div>
-      <div style="font-size:11px; opacity:0.4; margin-top:2px;">Skapar ett nytt mailärende</div>
-    </div>
-  </div>
-  <div style="padding:18px 22px; display:flex; flex-direction:column; gap:12px;">
-    <div>
-      <label style="font-size:10px; font-weight:700; opacity:0.4; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px;">Till</label>
-      <input id="cust-mail-to" class="filter-input" value="${(email || '').replace(/"/g,'&quot;')}" style="width:100%; box-sizing:border-box; font-size:13px;">
-    </div>
-    <div>
-      <label style="font-size:10px; font-weight:700; opacity:0.4; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px;">Ämne</label>
-      <input id="cust-mail-subject" class="filter-input" placeholder="Ämne..." style="width:100%; box-sizing:border-box; font-size:13px;">
-    </div>
-    <div>
-      <label style="font-size:10px; font-weight:700; opacity:0.4; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px;">Meddelande</label>
-      <textarea id="cust-mail-body" placeholder="Skriv ditt meddelande..." style="width:100%; height:130px; resize:vertical; box-sizing:border-box; padding:10px 12px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-primary); font-size:13px; font-family:inherit; outline:none; transition:border-color 0.2s;"></textarea>
-    </div>
-  </div>
-  <div style="padding:12px 22px 18px; display:flex; justify-content:flex-end; border-top:1px solid rgba(255,255,255,0.06);">
-    <button id="cust-mail-send" class="btn-glass-icon" title="Skicka mail" style="width:38px; height:38px;">${UI_ICONS.SEND}</button>
-  </div>
+<div style="padding:18px 22px 14px; border-bottom:1px solid ${_mRgba(0.15)}; background:linear-gradient(90deg,${_mRgba(0.06)},transparent); display:flex; align-items:center;">
+<div>
+<div style="font-size:15px; font-weight:700; color:${_mHex};">Nytt mail</div>
+<div style="font-size:11px; opacity:0.4; margin-top:2px;">Skapar ett nytt mailärende</div>
+</div>
+</div>
+<div style="padding:18px 22px; display:flex; flex-direction:column; gap:12px;">
+<div>
+<label style="font-size:10px; font-weight:700; opacity:0.4; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px;">Till</label>
+<input id="cust-mail-to" class="filter-input" value="${(email || '').replace(/"/g,'&quot;')}" style="width:100%; box-sizing:border-box; font-size:13px;">
+</div>
+<div>
+<label style="font-size:10px; font-weight:700; opacity:0.4; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px;">Ämne</label>
+<input id="cust-mail-subject" class="filter-input" placeholder="Ämne..." style="width:100%; box-sizing:border-box; font-size:13px;">
+</div>
+<div>
+<label style="font-size:10px; font-weight:700; opacity:0.4; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px;">Meddelande</label>
+<textarea id="cust-mail-body" placeholder="Skriv ditt meddelande..." style="width:100%; height:130px; resize:vertical; box-sizing:border-box; padding:10px 12px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-primary); font-size:13px; font-family:inherit; outline:none; transition:border-color 0.2s;"></textarea>
+</div>
+</div>
+<div style="padding:12px 22px 18px; display:flex; justify-content:flex-end; border-top:1px solid rgba(255,255,255,0.06);">
+<button id="cust-mail-send" class="btn-glass-icon" title="Skicka mail" style="width:38px; height:38px;">${UI_ICONS.SEND}</button>
+</div>
 </div>`;
 document.body.appendChild(overlay);
 overlay.style.display = 'flex';
@@ -859,24 +859,37 @@ overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.rem
 const _mailEscHandler = (e) => { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', _mailEscHandler); } };
 document.addEventListener('keydown', _mailEscHandler);
 overlay.addEventListener('remove', () => document.removeEventListener('keydown', _mailEscHandler));
-overlay.querySelector('#cust-mail-send').onclick = () => {
-  const to      = overlay.querySelector('#cust-mail-to').value.trim();
-  const subject = overlay.querySelector('#cust-mail-subject').value.trim() || 'Kontakt från kundtjänst';
-  const body    = overlay.querySelector('#cust-mail-body').value.trim();
-  if (!to || !to.includes('@')) { showToast('❌ Ange en giltig mailadress.'); return; }
-  if (!body) { showToast('❌ Meddelandet kan inte vara tomt.'); return; }
-  const sendBtn = overlay.querySelector('#cust-mail-send');
-  sendBtn.disabled = true; sendBtn.textContent = 'Skickar...';
-  const newId = `mail-${Date.now()}-${Math.random().toString(36).substr(2,6)}`;
-  window.socketAPI.emit('team:send_email_reply', {
-    conversationId: newId,
-    message: body,
-    customerEmail: to,
-    subject: subject,
-    html: body.replace(/\n/g, '<br>')
-  });
-  showToast('✅ Mail skickat!');
-  overlay.remove();
+overlay.querySelector('#cust-mail-send').onclick = async () => {
+const to      = overlay.querySelector('#cust-mail-to').value.trim();
+const subject = overlay.querySelector('#cust-mail-subject').value.trim() || 'Kontakt från kundtjänst';
+const body    = overlay.querySelector('#cust-mail-body').value.trim();
+if (!to || !to.includes('@')) { showToast('❌ Ange en giltig mailadress.'); return; }
+if (!body) { showToast('❌ Meddelandet kan inte vara tomt.'); return; }
+const sendBtn = overlay.querySelector('#cust-mail-send');
+sendBtn.disabled = true;
+// 🔧 FIX: team:create_mail_ticket — servern skapar ärendet, skickar mail och
+// sparar sentInfo.messageId direkt → korrekt e-posttrådning från svar #1.
+// socketAPI.once() finns via socket-client.js — avregistreras automatiskt efter första svar.
+try {
+await new Promise((resolve, reject) => {
+const timeout = setTimeout(() => reject(new Error('Timeout — inget svar från servern')), 10000);
+window.socketAPI.once('mail:ticket_created', (data) => { clearTimeout(timeout); resolve(data.conversationId); });
+window.socketAPI.once('server:error', (data) => { clearTimeout(timeout); reject(new Error(data.message)); });
+window.socketAPI.emit('team:create_mail_ticket', {
+customerEmail: to,
+customerName: name || null,
+subject: subject,
+message: body,
+html: body.replace(/\n/g, '<br>')
+});
+});
+showToast('✅ Mail skickat!');
+overlay.remove();
+} catch (err) {
+showToast('❌ ' + err.message);
+sendBtn.disabled = false;
+sendBtn.textContent = 'Skicka';
+}
 };
 }
 
@@ -891,40 +904,40 @@ overlay.className = 'custom-modal-overlay';
 overlay.style.zIndex = '10001';
 overlay.innerHTML = `
 <div class="glass-modal-box glass-effect" style="width:460px; max-width:90vw; border-top:3px solid ${_iHex};">
-  <div style="padding:20px 22px 14px; border-bottom:1px solid ${_iRgba(0.15)}; background:linear-gradient(90deg,${_iRgba(0.06)},transparent); display:flex; align-items:center; gap:12px;">
-    <div style="width:36px; height:36px; border-radius:50%; background:${_iRgba(0.12)}; border:1px solid ${_iRgba(0.3)}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${_iHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-    </div>
-    <div>
-      <div style="font-size:15px; font-weight:700; color:${_iHex};">Kundregistret</div>
-      <div style="font-size:11px; opacity:0.4; margin-top:1px;">Ärendehistorik och kundanalys</div>
-    </div>
-  </div>
-  <div style="padding:18px 22px; display:flex; flex-direction:column; gap:10px;">
-    <div style="font-size:12px; line-height:1.6; color:var(--text-secondary);">Kundregistret samlar alla kunder som kontaktat er, oavsett kanal (chatt eller mail).</div>
-    <div style="display:flex; flex-direction:column; gap:8px; margin-top:2px;">
-      <div style="display:flex; align-items:flex-start; gap:10px;">
-        <span style="font-size:14px; flex-shrink:0; margin-top:1px;">🔍</span>
-        <span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Sök</strong> — skriv namn, e-post eller telefon. Minst 3 tecken för att trigga sökning.</span>
-      </div>
-      <div style="display:flex; align-items:flex-start; gap:10px;">
-        <span style="font-size:14px; flex-shrink:0; margin-top:1px;">📋</span>
-        <span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Kundkort</strong> — klicka för att se statistik och hela ärendehistoriken. Klicka ett ärende för att bläddra i konversationen.</span>
-      </div>
-      <div style="display:flex; align-items:flex-start; gap:10px;">
-        <span style="font-size:14px; flex-shrink:0; margin-top:1px;">✨</span>
-        <span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">AI-analys</strong> — knappen i kundheadern sammanfattar hela kundens historik med AI. Resultatet cachas under sessionen.</span>
-      </div>
-      <div style="display:flex; align-items:flex-start; gap:10px;">
-        <span style="font-size:14px; flex-shrink:0; margin-top:1px;">✉️</span>
-        <span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Skicka mail</strong> — starta ett nytt mailärende direkt från kundkortet. Mailadressen är förifylld automatiskt.</span>
-      </div>
-      <div style="display:flex; align-items:flex-start; gap:10px;">
-        <span style="font-size:14px; flex-shrink:0; margin-top:1px;">📝</span>
-        <span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Anteckningar</strong> — interna noteringar om kunden, synliga för alla agenter.</span>
-      </div>
-    </div>
-  </div>
+<div style="padding:20px 22px 14px; border-bottom:1px solid ${_iRgba(0.15)}; background:linear-gradient(90deg,${_iRgba(0.06)},transparent); display:flex; align-items:center; gap:12px;">
+<div style="width:36px; height:36px; border-radius:50%; background:${_iRgba(0.12)}; border:1px solid ${_iRgba(0.3)}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${_iHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+</div>
+<div>
+<div style="font-size:15px; font-weight:700; color:${_iHex};">Kundregistret</div>
+<div style="font-size:11px; opacity:0.4; margin-top:1px;">Ärendehistorik och kundanalys</div>
+</div>
+</div>
+<div style="padding:18px 22px; display:flex; flex-direction:column; gap:10px;">
+<div style="font-size:12px; line-height:1.6; color:var(--text-secondary);">Kundregistret samlar alla kunder som kontaktat er, oavsett kanal (chatt eller mail).</div>
+<div style="display:flex; flex-direction:column; gap:8px; margin-top:2px;">
+<div style="display:flex; align-items:flex-start; gap:10px;">
+<span style="font-size:14px; flex-shrink:0; margin-top:1px;">🔍</span>
+<span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Sök</strong> — skriv namn, e-post eller telefon. Minst 3 tecken för att trigga sökning.</span>
+</div>
+<div style="display:flex; align-items:flex-start; gap:10px;">
+<span style="font-size:14px; flex-shrink:0; margin-top:1px;">📋</span>
+<span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Kundkort</strong> — klicka för att se statistik och hela ärendehistoriken. Klicka ett ärende för att bläddra i konversationen.</span>
+</div>
+<div style="display:flex; align-items:flex-start; gap:10px;">
+<span style="font-size:14px; flex-shrink:0; margin-top:1px;">✨</span>
+<span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">AI-analys</strong> — knappen i kundheadern sammanfattar hela kundens historik med AI. Resultatet cachas under sessionen.</span>
+</div>
+<div style="display:flex; align-items:flex-start; gap:10px;">
+<span style="font-size:14px; flex-shrink:0; margin-top:1px;">✉️</span>
+<span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Skicka mail</strong> — starta ett nytt mailärende direkt från kundkortet. Mailadressen är förifylld automatiskt.</span>
+</div>
+<div style="display:flex; align-items:flex-start; gap:10px;">
+<span style="font-size:14px; flex-shrink:0; margin-top:1px;">📝</span>
+<span style="font-size:12px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">Anteckningar</strong> — interna noteringar om kunden, synliga för alla agenter.</span>
+</div>
+</div>
+</div>
 </div>`;
 document.body.appendChild(overlay);
 overlay.style.display = 'flex';

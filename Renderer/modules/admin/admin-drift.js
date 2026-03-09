@@ -13,14 +13,16 @@ function unlockDriftField(id, field) {
 const inp = document.getElementById(`drift-${id}`);
 const lockBtn = document.getElementById(`drift-lock-${id}`);
 const saveBtn = document.getElementById(`drift-save-${id}`);
-if (!inp || !lockBtn) return;
-inp.disabled = false;
-if (inp.type !== 'checkbox') inp.focus();
+const toggleBtn = document.getElementById(`drift-toggle-${id}`);
+if (!lockBtn) return;
+if (inp) { inp.disabled = false; if (inp.type !== 'checkbox') inp.focus(); }
+if (toggleBtn) toggleBtn.style.pointerEvents = 'auto';
 lockBtn.textContent = '🔓 Låst upp';
 lockBtn.classList.add('unlocked');
 if (saveBtn) saveBtn.style.display = 'inline-block';
 lockBtn.onclick = () => {
-inp.disabled = true;
+if (inp) inp.disabled = true;
+if (toggleBtn) toggleBtn.style.pointerEvents = 'none';
 lockBtn.textContent = '🔒 Låst';
 lockBtn.classList.remove('unlocked');
 lockBtn.onclick = () => unlockDriftField(id, field);
@@ -28,16 +30,39 @@ if (saveBtn) saveBtn.style.display = 'none';
 };
 }
 
+function _driftToggle(id) {
+const inp = document.getElementById(`drift-${id}`);
+const toggleBtn = document.getElementById(`drift-toggle-${id}`);
+if (!inp || inp.disabled) return;
+inp.checked = !inp.checked;
+_driftUpdateToggleBtn(toggleBtn, inp.checked);
+}
+
+function _driftUpdateToggleBtn(btn, isActive) {
+if (!btn) return;
+if (isActive) {
+btn.textContent = '● Aktiverad';
+btn.style.color = '#4cd964';
+btn.style.background = 'rgba(76,217,100,0.12)';
+btn.style.border = '1px solid rgba(76,217,100,0.4)';
+} else {
+btn.textContent = 'Avaktiverad';
+btn.style.color = 'var(--text-secondary)';
+btn.style.background = 'rgba(255,255,255,0.05)';
+btn.style.border = '1px solid rgba(255,255,255,0.12)';
+}
+}
+
 async function saveDriftFieldAndLock(id, field) {
 const inp = document.getElementById(`drift-${id}`);
 const lockBtn = document.getElementById(`drift-lock-${id}`);
 const saveBtn = document.getElementById(`drift-save-${id}`);
+const toggleBtn = document.getElementById(`drift-toggle-${id}`);
 if (!inp) return;
 const value = inp.type === 'checkbox' ? inp.checked.toString() : inp.value.trim();
-const labelEl = document.getElementById(`drift-${id}-label`);
-if (labelEl) labelEl.textContent = inp.checked ? 'Aktiverad' : 'Avaktiverad';
 await saveDriftSetting(field, value);
-inp.disabled = true;
+if (inp) inp.disabled = true;
+if (toggleBtn) toggleBtn.style.pointerEvents = 'none';
 if (lockBtn) {
 lockBtn.textContent = '🔒 Låst';
 lockBtn.classList.remove('unlocked');
@@ -64,12 +89,22 @@ function renderDriftSecuritySection(detailBox, s) {
 function buildDriftLockRow(id, field, label, value, inputType) {
 if (inputType === 'checkbox') {
 const checked = value === true || value === 'true';
+const pillColor    = checked ? '#4cd964' : 'var(--text-secondary)';
+const pillBg       = checked ? 'rgba(76,217,100,0.12)' : 'rgba(255,255,255,0.05)';
+const pillBorder   = checked ? '1px solid rgba(76,217,100,0.4)' : '1px solid rgba(255,255,255,0.12)';
+const pillText     = checked ? '● Aktiverad' : 'Avaktiverad';
 return `
 <div class="admin-config-row" style="margin-bottom:18px;">
 <label style="font-size:13px; color:var(--text-secondary); margin-bottom:6px; display:block;">${label}</label>
 <div style="display:flex; align-items:center; gap:12px; width:100%;">
-<input type="checkbox" id="drift-${id}" ${checked ? 'checked' : ''} disabled>
-<span style="font-size:13px;" id="drift-${id}-label">${checked ? 'Aktiverad' : 'Avaktiverad'}</span>
+<input type="checkbox" id="drift-${id}" ${checked ? 'checked' : ''} disabled style="display:none;">
+<button id="drift-toggle-${id}"
+onclick="_driftToggle('${id}')"
+style="pointer-events:none; cursor:pointer; padding:5px 14px; border-radius:20px;
+font-size:13px; font-weight:600; transition:all 0.2s;
+color:${pillColor}; background:${pillBg}; border:${pillBorder};">
+${pillText}
+</button>
 <button class="admin-lock-btn" id="drift-lock-${id}" style="margin-left:auto;" onclick="unlockDriftField('${id}','${field}')">🔒 Låst</button>
 <button class="btn-glass-small" style="display:none;" id="drift-save-${id}" onclick="saveDriftFieldAndLock('${id}','${field}')">Spara</button>
 </div>
@@ -101,6 +136,7 @@ Driftkritiska inställningar som påverkar systemets beteende direkt: hur ofta d
 <span>Felaktiga ändringar här kan påverka systemets tillgänglighet och datasäkerhet. Ändra endast om du vet vad du gör.</span>
 </div>
 ${buildDriftLockRow('imap', 'imap_enabled', 'IMAP-polling (e-post)', s.imap_enabled, 'checkbox')}
+${buildDriftLockRow('imap-inbound', 'imap_inbound', 'Inkommande mail skapar nya ärenden (Intercom)', s.imap_inbound, 'checkbox')}
 ${buildDriftLockRow('backup-interval', 'backup_interval_hours', 'Backup-intervall (timmar)', s.backup_interval_hours, 'number')}
 ${buildDriftLockRow('backup-path', 'backup_path', 'Backup-sökväg', s.backup_path, 'text')}
 ${buildDriftLockRow('jwt', 'jwt_expires_in', 'JWT-livslängd (t.ex. 24h, 7d)', s.jwt_expires_in, 'jwt')}

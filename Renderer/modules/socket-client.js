@@ -43,7 +43,9 @@ reconnectionAttempts: 10
 window.socketAPI = {
 isConnected: () => socket && socket.connected,
 emit: (event, data) => socket && socket.emit(event, data),
-on: (event, cb) => socket && socket.on(event, cb)
+on: (event, cb) => socket && socket.on(event, cb),
+once: (event, cb) => socket && socket.once(event, cb),
+off: (event, cb) => socket && socket.off(event, cb)
 };
 
 socket.on('connect', () => {
@@ -484,42 +486,42 @@ if (typeof playNotificationSound === 'function') playNotificationSound();
 // 📢 ADMIN BROADCAST — systemmeddelande till alla agenter
 // ==========================================================
 window.socketAPI.on('admin:notification', (data) => {
-  const modal = document.getElementById('admin-broadcast-modal');
-  if (!modal) return;
-  const time = new Date(data.timestamp).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-  modal.innerHTML = `
-    <div class="glass-modal-box glass-effect"
-    style="width:460px; max-width:88vw; border-top:3px solid var(--accent-primary);
-    text-align:center; padding:30px 28px 24px;">
-      <div style="font-size:30px; margin-bottom:10px;">📢</div>
-      <div style="font-size:16px; font-weight:700; color:white; margin-bottom:5px;">Systemmeddelande</div>
-      <div style="font-size:11px; color:var(--text-secondary); opacity:0.55; margin-bottom:18px;">
-        Från: ${data.sentBy} • ${time}
-      </div>
-      <div style="font-size:14px; line-height:1.7; color:var(--text-primary);
-      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09);
-      border-radius:10px; padding:14px 16px; text-align:left;
-      white-space:pre-wrap; word-break:break-word;">${data.message}</div>
-    </div>`;
-  modal.style.display = 'flex';
-  modal.style.pointerEvents = 'all';
-  const _closeBroadcast = () => { modal.style.display = 'none'; modal.style.pointerEvents = 'none'; };
-  modal.onclick = (e) => { if (e.target === modal) _closeBroadcast(); };
-  const _bcEsc = (e) => { if (e.key === 'Escape') { _closeBroadcast(); document.removeEventListener('keydown', _bcEsc); } };
-  document.addEventListener('keydown', _bcEsc);
-  if (typeof playNotificationSound === 'function') playNotificationSound();
+const modal = document.getElementById('admin-broadcast-modal');
+if (!modal) return;
+const time = new Date(data.timestamp).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+modal.innerHTML = `
+<div class="glass-modal-box glass-effect"
+style="width:460px; max-width:88vw; border-top:3px solid var(--accent-primary);
+text-align:center; padding:30px 28px 24px;">
+<div style="font-size:30px; margin-bottom:10px;">📢</div>
+<div style="font-size:16px; font-weight:700; color:white; margin-bottom:5px;">Systemmeddelande</div>
+<div style="font-size:11px; color:var(--text-secondary); opacity:0.55; margin-bottom:18px;">
+Från: ${data.sentBy} • ${time}
+</div>
+<div style="font-size:14px; line-height:1.7; color:var(--text-primary);
+background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09);
+border-radius:10px; padding:14px 16px; text-align:left;
+white-space:pre-wrap; word-break:break-word;">${data.message}</div>
+</div>`;
+modal.style.display = 'flex';
+modal.style.pointerEvents = 'all';
+const _closeBroadcast = () => { modal.style.display = 'none'; modal.style.pointerEvents = 'none'; };
+modal.onclick = (e) => { if (e.target === modal) _closeBroadcast(); };
+const _bcEsc = (e) => { if (e.key === 'Escape') { _closeBroadcast(); document.removeEventListener('keydown', _bcEsc); } };
+document.addEventListener('keydown', _bcEsc);
+if (typeof playNotificationSound === 'function') playNotificationSound();
 });
 
 window.socketAPI.on('ticket:summary', (data) => {
-  const txt = document.getElementById('ticket-summary-text');
-  const panel = document.getElementById('ticket-summary-panel');
-  if (txt) {
-    txt.textContent = data.summary;
-    if (panel) panel.style.display = 'block';
-    if (typeof playNotificationSound === 'function') playNotificationSound();
-  }
-  const btn = document.getElementById('btn-summarize');
-  if (btn) btn.disabled = false;
+const txt = document.getElementById('ticket-summary-text');
+const panel = document.getElementById('ticket-summary-panel');
+if (txt) {
+txt.textContent = data.summary;
+if (panel) panel.style.display = 'block';
+if (typeof playNotificationSound === 'function') playNotificationSound();
+}
+const btn = document.getElementById('btn-summarize');
+if (btn) btn.disabled = false;
 });
 
 // ==========================================================
