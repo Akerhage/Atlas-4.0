@@ -17,7 +17,8 @@
       "WebFetch(domain:unpkg.com)",
       "Bash(curl:*)",
       "Bash(sort:*)",
-      "Bash(pm2 list:*)"
+      "Bash(pm2 list:*)",
+      "Bash(\"C:/Atlas/AUDIT.md\":*)"
     ]
   }
 }

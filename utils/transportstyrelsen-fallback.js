@@ -101,12 +101,10 @@ const COMPANY_SPECIFIC_KEYWORDS = [
 function classifyRegulatoryTopic(query) {
   const q = (query || '').toLowerCase();
 
-  // Blockera om frågan är företagsspecifik
   for (const kw of COMPANY_SPECIFIC_KEYWORDS) {
     if (q.includes(kw)) return null;
   }
 
-  // Matcha mot TOPIC_URL_MAP
   for (const entry of TOPIC_URL_MAP) {
     for (const pattern of entry.patterns) {
       if (q.includes(pattern.toLowerCase())) {

@@ -71,6 +71,37 @@
 // ⚠️  ╚══════════════════════════════════════════════════════════════╝
 
 // ===================================================
+// LANG PILL HELPER — anropas från template literal
+// Måste vara en namngiven funktion (ej IIFE) för att
+// undvika syntax-konflikter med nästlade backticks.
+// ===================================================
+window._buildLangPills = function(languages, oc) {
+const fixed = ['svenska', 'engelska', 'arabiska'];
+const fromFile = languages.map(function(x) { return x.toLowerCase(); });
+const extra = fromFile.filter(function(l) { return !fixed.includes(l); });
+const all = fixed.concat(extra);
+return all.map(function(l) {
+const active = fromFile.includes(l);
+const isExtra = !fixed.includes(l);
+const borderCol = active ? oc : 'rgba(255,255,255,0.12)';
+const textCol   = active ? oc : 'rgba(255,255,255,0.3)';
+const bgCol     = active ? oc + '18' : 'transparent';
+const fw        = active ? '600' : '400';
+const cap       = l.charAt(0).toUpperCase() + l.slice(1);
+return '<span class="lang-pill"'
++ ' data-lang="' + l + '"'
++ ' data-extra="' + isExtra + '"'
++ ' data-active="' + active + '"'
++ ' onclick="window._toggleLangPill&&window._toggleLangPill(this)"'
++ ' style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:20px;cursor:not-allowed;transition:all 0.15s;'
++ 'border:1px solid ' + borderCol + ';color:' + textCol + ';background:' + bgCol + ';font-weight:' + fw + ';">'
++ cap
++ '<span class="lang-remove-x" style="display:none;font-size:13px;line-height:1;margin-left:2px;opacity:0.6;">&#215;</span>'
++ '</span>';
+}).join('');
+};
+
+// ===================================================
 // ADMIN - RENDER OFFICE LIST
 // ===================================================
 async function renderAdminOfficeList() {
@@ -78,7 +109,6 @@ const listContainer = document.getElementById('admin-main-list');
 listContainer.innerHTML = '<div class="spinner-small"></div>';
 
 try {
-// Använder din nya fetchHeaders som nu fungerar
 const res = await fetch(`${SERVER_URL}/api/public/offices`, { headers: fetchHeaders });
 const offices = await res.json();
 
@@ -209,9 +239,67 @@ ${UI_ICONS.TRASH}
 </div>
 </div>
 
+
+<div class="glass-panel" id="box-info" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid ${oc}44;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+<h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Kontorsinformation</h4>
+<button class="admin-lock-btn" onclick="unlockOfficeSection('box-info', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
+</div>
+<div style="display:grid; gap:16px;">
+<div>
+<div style="font-size:10px; opacity:0.5; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Öppettider</div>
+<div style="display:grid; gap:8px;" id="opening-hours-grid">
+${(data.opening_hours || [{days:'Mån – Tors',hours:'08:30 – 17:00'},{days:'Fredag',hours:'08:00 – 14:00'}]).map((h,i) => `
+<div class="hours-row" style="display:flex; gap:8px; align-items:center;">
+<input type="text" id="inp-hours-days-${i}" class="filter-input hours-days" value="${h.days}" disabled placeholder="T.ex. Mån – Tors" style="flex:1;">
+<input type="text" id="inp-hours-time-${i}" class="filter-input hours-time" value="${h.hours}" disabled placeholder="T.ex. 08:30 – 17:00" style="flex:1;">
+<button class="hours-remove-btn" disabled onclick="this.closest('.hours-row').remove(); window._adminFormDirty=true;"
+style="display:none; width:22px; height:22px; border-radius:50%; background:rgba(255,69,58,0.15); border:1px solid rgba(255,69,58,0.3); color:#ff453a; cursor:pointer; font-size:14px; align-items:center; justify-content:center; padding:0; line-height:1; flex-shrink:0;">×</button>
+</div>`).join('')}
+</div>
+<button id="add-hours-btn" style="display:none; margin-top:8px; width:100%;" class="btn-glass-small" onclick="
+(function(){
+const grid = document.getElementById('opening-hours-grid');
+const rows = grid.querySelectorAll('.hours-row');
+const i = rows.length;
+const div = document.createElement('div');
+div.className = 'hours-row';
+div.style.cssText = 'display:flex; gap:8px; align-items:center;';
+div.innerHTML = \`<input type='text' id='inp-hours-days-\${i}' class='filter-input hours-days' placeholder='T.ex. Lördag' style='flex:1; border-color:var(--accent-primary); background:rgba(255,255,255,0.08);'><input type='text' id='inp-hours-time-\${i}' class='filter-input hours-time' placeholder='T.ex. 10:00 – 14:00' style='flex:1; border-color:var(--accent-primary); background:rgba(255,255,255,0.08);'><button class='hours-remove-btn' onclick='this.closest(\'.hours-row\').remove(); window._adminFormDirty=true;' style='display:flex; width:22px; height:22px; border-radius:50%; background:rgba(255,69,58,0.15); border:1px solid rgba(255,69,58,0.3); color:#ff453a; cursor:pointer; font-size:14px; align-items:center; justify-content:center; padding:0; line-height:1; flex-shrink:0;'>×</button>\`;
+grid.appendChild(div);
+window._adminFormDirty = true;
+})()
+">+ Lägg till rad</button>
+</div>
+<div>
+<div style="font-size:10px; opacity:0.5; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Språk</div>
+<div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;" id="lang-pill-group">
+${window._buildLangPills(data.languages || [], oc)}
+</div>
+<div id="lang-add-row" style="display:none; margin-top:8px;">
+<div style="display:flex; gap:6px; align-items:center;">
+<input id="inp-lang-new" class="filter-input" type="text" placeholder="T.ex. Isländska"
+style="flex:1; font-size:12px; padding:5px 10px; height:28px;"
+onkeydown="if(event.key==='Enter'){ event.preventDefault(); window._addLangPill&&window._addLangPill(); }">
+<button onclick="window._addLangPill&&window._addLangPill()"
+style="height:28px; padding:0 10px; font-size:12px; background:rgba(0,113,227,0.15); border:1px solid rgba(0,113,227,0.35); color:#0071e3; border-radius:6px; cursor:pointer;">+ Lägg till</button>
+</div>
+</div>
+<button id="add-lang-btn" style="display:none; margin-top:8px; background:transparent; border:1px dashed rgba(255,255,255,0.2); color:rgba(255,255,255,0.4); border-radius:6px; padding:3px 10px; font-size:11px; cursor:pointer;"
+onclick="document.getElementById('lang-add-row').style.display='flex'; this.style.display='none'; document.getElementById('inp-lang-new').focus();">+ Lägg till språk</button>
+</div>
+</div>
+</div>
+
 <div class="glass-panel" id="box-prices" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid ${oc}44;">
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
 <h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase;">Tjänster & Priser</h4>
+<div style="display:flex; gap:5px; flex-wrap:wrap;">
+${['Bil','MC','AM','Släp','Lastbil'].map(s => (data.services_offered||[]).includes(s) ? `
+<span style="font-size:10px; padding:2px 8px; border-radius:20px; border:1px solid ${oc}55; color:${oc}; opacity:0.8;">${s}</span>` : '').join('')}
+</div>
+</div>
 <button class="admin-lock-btn" onclick="unlockOfficeSection('box-prices', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
 </div>
 <div class="price-list" style="display: grid; gap: 8px;" id="price-list-grid">
@@ -314,8 +402,8 @@ ${UI_ICONS.NOTES}
 
 // Lysa upp notes-ikonen om kontoret har anteckningar, och ärendekorten i listan
 if (typeof refreshNotesGlow === 'function') {
-  refreshNotesGlow('office_' + tag);
-  tickets.forEach(t => { if (t.conversation_id) refreshNotesGlow(t.conversation_id); });
+refreshNotesGlow('office_' + tag);
+tickets.forEach(t => { if (t.conversation_id) refreshNotesGlow(t.conversation_id); });
 }
 
 // 4. Koppla Editeringsfunktioner
@@ -428,7 +516,7 @@ card.style.setProperty('--atp-color', hex);
 });
 
 // Section-panelernas borders (glass-panel med id)
-['box-contact', 'box-prices', 'box-booking', 'box-desc', 'box-tickets'].forEach(id => {
+['box-contact', 'box-info', 'box-prices', 'box-booking', 'box-desc', 'box-tickets'].forEach(id => {
 const panel = document.getElementById(id);
 if (panel) panel.style.borderColor = hex + '44';
 });
@@ -484,6 +572,23 @@ currentData.contact.address = document.getElementById('inp-address').value;
 currentData.description = document.getElementById('inp-desc').value;
 const colorInput = document.getElementById('inp-office-color');
 if (colorInput) currentData.office_color = colorInput.value;
+
+// Öppettider — läs från .hours-row (funkar för både befintliga och nya rader)
+const hoursGrid = document.getElementById('opening-hours-grid');
+if (hoursGrid) {
+currentData.opening_hours = Array.from(hoursGrid.querySelectorAll('.hours-row')).map(row => ({
+days: row.querySelector('.hours-days')?.value || '',
+hours: row.querySelector('.hours-time')?.value || ''
+})).filter(h => h.days || h.hours);
+}
+
+// Språk — läs aktiva pills
+const langPills = document.querySelectorAll('#lang-pill-group .lang-pill');
+if (langPills.length) {
+currentData.languages = Array.from(langPills)
+.filter(p => p.getAttribute('data-active') === 'true')
+.map(p => p.getAttribute('data-lang'));
+}
 
 // Bokningslänkar
 const bookingKeys = { car: 'CAR', mc: 'MC', am: 'AM' };

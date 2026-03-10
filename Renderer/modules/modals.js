@@ -406,7 +406,8 @@ const nameEl = document.getElementById('current-user-name');
 if (nameEl) {
 const displayName = currentUser.display_name || currentUser.username || 'Agent';
 const statusHtml = statusText ? '<span class="user-status-text" style="display:block; font-size:10px; color:' + color + '; opacity:0.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;">💬 ' + statusText + '</span>' : '';
-nameEl.innerHTML = '<span style="display:block; font-weight:600; color:white;">' + (displayName.charAt(0).toUpperCase() + displayName.slice(1)) + '</span>' + statusHtml;
+const safeName = displayName.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+nameEl.innerHTML = '<span style="display:block; font-weight:600; color:white;">' + (safeName.charAt(0).toUpperCase() + safeName.slice(1)) + '</span>' + statusHtml;
 }
 
 // 4. Spara-knappen

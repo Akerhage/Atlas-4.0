@@ -117,7 +117,7 @@ if (filenameAttr) saveBasfaktaFile(filenameAttr);
 // deleteBasfaktaSection → flyttade till modules/admin/admin-tools.js
 
 // =============================================================================
-// NY FUNKTION: addNewBasfaktaSection — lägger till ny sektionskort längst ner
+// addNewBasfaktaSection — lägger till ny sektionskort längst ner
 // =============================================================================
 function addNewBasfaktaSection() {
 const container = document.getElementById('kb-sections-container');

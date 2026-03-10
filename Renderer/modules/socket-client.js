@@ -351,15 +351,38 @@ showToast('🗑️ Ärendet togs bort av en kollega');
 });
 
 window.socketAPI.on('team:ticket_taken', (data) => {
-const { conversationId, takenBy } = data;
+const { conversationId, takenBy, previousOwner } = data;
 const wasOpen = ['inbox-detail', 'my-ticket-detail'].some(id => {
 const el = document.getElementById(id);
 return el && el.getAttribute('data-current-id') === conversationId;
 });
 checkAndResetDetail('my-ticket-detail', conversationId);
 renderMyTickets?.();
-if (wasOpen) {
+
+// Visa toast för gamla ägaren (om ärendet var tilldelat någon)
+if (previousOwner && previousOwner === (typeof currentUser !== 'undefined' ? currentUser.username : null)) {
+const takenByDisplay = typeof usersCache !== 'undefined' 
+? (usersCache.find(u => u.username === takenBy)?.display_name || takenBy)
+: takenBy;
+showToast(`⚠️ ${takenByDisplay} tog över ärendet via snabbsvar`);
+} else if (wasOpen) {
 showToast(`⚠️ ${takenBy} tog över detta ärende`);
+}
+});
+
+// ==========================================================
+// LYSSNA PÅ EGET ÄRENDETAGANDE (SVARAREN GETS TOAST)
+// ==========================================================
+window.socketAPI.on('team:ticket_claimed_self', (data) => {
+const { conversationId, claimedBy, previousOwner } = data;
+if (claimedBy === (typeof currentUser !== 'undefined' ? currentUser.username : null)) {
+const previousOwnerDisplay = typeof usersCache !== 'undefined' && previousOwner
+? (usersCache.find(u => u.username === previousOwner)?.display_name || previousOwner)
+: (previousOwner ? previousOwner : null);
+const toastMsg = previousOwnerDisplay 
+? `✅ Du tog över ärendet från ${previousOwnerDisplay}`
+: `✅ Du tog över ärendet`;
+showToast(toastMsg);
 }
 });
 

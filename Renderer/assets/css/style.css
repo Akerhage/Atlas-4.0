@@ -1,9 +1,9 @@
 /* ============================================
-   style.css — Atlas UI Stylesheet
-   Innehåller: CSS-variabler, layout, navigation, knappar, modaler,
-               chattvy, ärendekort, mallar, admin-vy, om-vyn, animationer
-   SENAST STÄDAD: 2026-02-27
-   ============================================ */
+style.css — Atlas UI Stylesheet
+Innehåller: CSS-variabler, layout, navigation, knappar, modaler,
+chattvy, ärendekort, mallar, admin-vy, om-vyn, animationer
+SENAST STÄDAD: 2026-02-27
+============================================ */
 
 /* *** === CSS VARIABLER & TEMAN === *** */
 
@@ -154,30 +154,30 @@ margin-bottom: var(--spacing-md);
 }
 
 .sidebar-logo {
-    /* Vi gör loggan större (från 90px till 180px) */
-    width: 180px; 
-    height: auto;
-    margin-bottom: var(--spacing-md);
-    
-    /* VIKTIGT: Vi nollställer rutan */
-    background: transparent !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important; /* Tar bort fyrkantiga skuggan */
-    
-    /* Skugga som följer ATLAS-bokstäverna istället för rutan */
-    filter: drop-shadow(0px 5px 8px rgba(0, 0, 0, 0.5));
-    transition: transform 0.3s ease, filter 0.3s ease;
-    cursor: pointer;
+/* Vi gör loggan större (från 90px till 180px) */
+width: 180px; 
+height: auto;
+margin-bottom: var(--spacing-md);
+
+/* VIKTIGT: Vi nollställer rutan */
+background: transparent !important;
+border: none !important;
+border-radius: 0 !important;
+box-shadow: none !important; /* Tar bort fyrkantiga skuggan */
+
+/* Skugga som följer ATLAS-bokstäverna istället för rutan */
+filter: drop-shadow(0px 5px 8px rgba(0, 0, 0, 0.5));
+transition: transform 0.3s ease, filter 0.3s ease;
+cursor: pointer;
 }
 
 .sidebar-logo:hover {
-    /* Loggan växer lite snyggt */
-    transform: scale(1.05); 
-    
-    /* HOVER-GLOW: Nu lyser det runt bokstäverna istället för rutan! */
-    /* Vi lägger till ett blått/vitt sken som matchar Atlas-stilen */
-    filter: drop-shadow(0px 0px 15px rgba(0, 113, 227, 0.6)) drop-shadow(0px 0px 5px rgba(255, 255, 255, 0.2));
+/* Loggan växer lite snyggt */
+transform: scale(1.05); 
+
+/* HOVER-GLOW: Nu lyser det runt bokstäverna istället för rutan! */
+/* Vi lägger till ett blått/vitt sken som matchar Atlas-stilen */
+filter: drop-shadow(0px 0px 15px rgba(0, 113, 227, 0.6)) drop-shadow(0px 0px 5px rgba(255, 255, 255, 0.2));
 }
 
 #app-name-display { display: none; }
@@ -749,7 +749,7 @@ margin-bottom: var(--spacing-lg);
 display: flex;
 align-items: flex-start;
 gap: 8px;
-padding: 7px 10px;
+padding: 6px 8px;
 background-color: rgba(58, 58, 60, 0.4);
 border-radius: var(--border-radius-md);
 border-left: 4px solid var(--accent-primary);
@@ -1726,12 +1726,12 @@ white-space: pre-wrap !important;
 
 /* ÄNDRING RAD 1661: Visa endast linjen om vi INTE är i placeholder-läge */
 .template-editor-container[data-owner]:not(:has(#inbox-placeholder:not([style*="display: none"]))):not(:has(#my-detail-placeholder:not([style*="display: none"])))::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 4px;
-    background: var(--agent-color, #0071e3);
-    z-index: 10;
+content: "";
+position: absolute;
+top: 0; left: 0; right: 0;
+height: 4px;
+background: var(--agent-color, #0071e3);
+z-index: 10;
 }
 
 /* #my-ticket-chat-form och #my-ticket-chat-input hanteras längre upp i FOOTER-sektionen */
@@ -1756,11 +1756,10 @@ padding: 40px;
 
 /* Minimal fix för kanten vid placeholders */
 #inbox-placeholder,
-#my-detail-placeholder,
-#editor-placeholder {  /* <--- LÄGG TILL DENNA RAD HÄR */
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
+#my-detail-placeholder {
+outline: none !important;
+border: none !important;
+box-shadow: none !important;
 }
 
 #view-admin .hero-placeholder {
@@ -2318,7 +2317,8 @@ OBS: Ingen !important på display — JS kontrollerar show/hide via inline style
 color: var(--text-secondary);
 font-style: italic;
 text-align: center;
-background: transparent !important; 
+outline: none !important;
+background: transparent !important;
 border: none !important;
 box-shadow: none !important;
 margin: 0 !important;
@@ -2403,6 +2403,8 @@ border-radius: 8px !important;
 background: rgba(255, 255, 255, 0.05) !important;
 transition: all 0.2s ease !important;
 flex-shrink: 0 !important;
+border: 1.5px solid #10b981 !important;
+color: #10b981 !important;
 }
 /* display utan !important: tillåter JS att dölja knappen med element.style.display = 'none' */
 #delete-template-btn {
@@ -2424,12 +2426,6 @@ border-color: #ff4444 !important;
 color: white !important;
 transform: translateY(-2px) !important;
 box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4) !important;
-}
-
-/* SPARA (Grön) */
-#save-template-btn {
-border: 1.5px solid #10b981 !important; 
-color: #10b981 !important;
 }
 
 #save-template-btn:hover {
@@ -3316,20 +3312,20 @@ opacity: 1 !important;
 }
 
 /* =============================================================================
-   TEAM VIEW: INTERNAL CHATS (KLASS-BASERAD FIX)
-   ============================================================================= */
+TEAM VIEW: INTERNAL CHATS (KLASS-BASERAD FIX)
+============================================================================= */
 
 /* Kortet i listan (Garaget/Inkorg/Mina Ärenden) */
 .team-ticket-card.internal-ticket {
-    border-left: 4px solid #f1c40f !important;
-    background: rgba(241, 196, 15, 0.08) !important;
+border-left: 4px solid #f1c40f !important;
+background: rgba(241, 196, 15, 0.08) !important;
 }
 
 /* Taggen (texten) inuti kortet */
 .internal-ticket .ticket-tag {
-    color: #f1c40f !important;
-    background: rgba(241, 196, 15, 0.15) !important;
-    border: 1px solid rgba(241, 196, 15, 0.3) !important;
+color: #f1c40f !important;
+background: rgba(241, 196, 15, 0.15) !important;
+border: 1px solid rgba(241, 196, 15, 0.3) !important;
 }
 
 /* Ikon-färg och glöd vid hover — ärver från parent color */
@@ -3825,10 +3821,6 @@ margin-left: 5px;
 line-height: 1.6;
 }
 
-/* Guide-step: kompakt luft */
-.guide-step {
-padding: 6px 8px;
-}
 
 /* =========================================================
 Hem-vy: Skärpefix för bakgrundsrendering
@@ -3871,49 +3863,49 @@ outline: none !important;
 }
 
 /* =============================================================================
-   MAILMALLAR FROST-TEMA
-   ============================================================================= */
+MAILMALLAR FROST-TEMA
+============================================================================= */
 
 /* 1. Ramen: Synkar mörkret med nya globala variabeln */
 #view-templates .template-editor-container {
-    background: var(--bg-frosty-content) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
-    display: flex !important;
-    flex-direction: column !important;
+background: var(--bg-frosty-content) !important;
+backdrop-filter: blur(15px) !important;
+-webkit-backdrop-filter: blur(15px) !important;
+border: none !important;
+box-shadow: none !important;
+outline: none !important;
+display: flex !important;
+flex-direction: column !important;
 }
 
 /* 2. Placeholdern: Matchar övriga vyers mörka glaston */
 #view-templates #editor-placeholder {
-    background: rgba(0, 0, 0, 0.2) !important;
-    opacity: 1 !important;
-    border: none !important;
-    box-shadow: none !important;
+background: rgba(0, 0, 0, 0.2) !important;
+opacity: 1 !important;
+border: none !important;
+box-shadow: none !important;
 }
 
 /* 3. Quill-editorn: Gör texten knivskarp mot alla bakgrunder */
 #view-templates .ql-container {
-    background: transparent !important;
-    border: none !important;
+background: transparent !important;
+border: none !important;
 }
 
 #view-templates .ql-editor {
-    color: #ffffff !important;
-    font-size: 15px !important;
-    line-height: 1.6 !important;
-    /* Skuggan gör att texten "lyfter" från bakgrunden */
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
-    /* Subtilt mörkt lager precis bakom texten för max kontrast */
-    background: rgba(0, 0, 0, 0.15) !important; 
+color: #ffffff !important;
+font-size: 15px !important;
+line-height: 1.6 !important;
+/* Skuggan gör att texten "lyfter" från bakgrunden */
+text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+/* Subtilt mörkt lager precis bakom texten för max kontrast */
+background: rgba(0, 0, 0, 0.15) !important; 
 }
 
 /* 4. Footer: Diskret avslutning */
 #view-templates .detail-footer-toolbar {
-    background: rgba(0, 0, 0, 0.3) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
+background: rgba(0, 0, 0, 0.3) !important;
+border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 /* =============================================================================
@@ -3926,16 +3918,16 @@ box-sizing: border-box !important;
 }
 
 /* =============================================================================
-   Döljer agent-linjer i detaljvyn
-   ============================================================================= */
+Döljer agent-linjer i detaljvyn
+============================================================================= */
 
 /* 1. Huvudcontainern i de drabbade vyerna */
 #view-inbox .template-editor-container,
 #view-my-tickets .template-editor-container {
-    border: none !important;
-    border-bottom: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+border: none !important;
+border-bottom: none !important;
+box-shadow: none !important;
+outline: none !important;
 }
 
 /* 2. Dödar "spök-elementen" (::after/::before) som JS ofta använder för färglinjer */
@@ -3945,11 +3937,11 @@ box-sizing: border-box !important;
 #view-my-tickets .template-editor-container::before,
 #view-templates .template-editor-container::after,
 #view-templates .template-editor-container::before {
-    display: none !important;
-    content: none !important;
-    height: 0 !important;
-    width: 0 !important;
-    border: none !important;
+display: none !important;
+content: none !important;
+height: 0 !important;
+width: 0 !important;
+border: none !important;
 }
 
 /* 3. Säkerställer att själva placeholdern inuti är ren */
@@ -4044,7 +4036,7 @@ Bakgrundsbild — scroll-attachment för korrekt skalning i Electron
 Teman sätter background-attachment: fixed vilket kan ge zoom-effekt i Electron
 ============================================================================= */
 body {
-  background-attachment: scroll !important;
+background-attachment: scroll !important;
 }
 
 /* =============================================================================
@@ -4052,90 +4044,90 @@ KB global save button — diskettikon utan bakgrundsruta
 Inaktiv tills ändringar görs, grön glow när dirty
 ============================================================================= */
 .kb-save-icon-btn {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 6px !important;
-  color: rgba(255, 255, 255, 0.18) !important;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease !important;
-  border-radius: 6px !important;
+background: transparent !important;
+border: none !important;
+box-shadow: none !important;
+padding: 6px !important;
+color: rgba(255, 255, 255, 0.18) !important;
+cursor: pointer;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+transition: all 0.3s ease !important;
+border-radius: 6px !important;
 }
 .kb-save-icon-btn:hover {
-  color: rgba(255, 255, 255, 0.45) !important;
-  background: transparent !important;
+color: rgba(255, 255, 255, 0.45) !important;
+background: transparent !important;
 }
 .kb-save-icon-btn.dirty {
-  color: #4cd964 !important;
-  filter: drop-shadow(0 0 5px #4cd964);
-  animation: pulse-kb-save 2.5s ease-in-out infinite;
+color: #4cd964 !important;
+filter: drop-shadow(0 0 5px #4cd964);
+animation: pulse-kb-save 2.5s ease-in-out infinite;
 }
 .kb-save-icon-btn.dirty:hover {
-  filter: drop-shadow(0 0 10px #4cd964) !important;
-  animation: none !important;
+filter: drop-shadow(0 0 10px #4cd964) !important;
+animation: none !important;
 }
 @keyframes pulse-kb-save {
-  0%, 100% { filter: drop-shadow(0 0 3px #4cd964); opacity: 0.85; }
-  50% { filter: drop-shadow(0 0 8px #4cd964); opacity: 1; }
+0%, 100% { filter: drop-shadow(0 0 3px #4cd964); opacity: 0.85; }
+50% { filter: drop-shadow(0 0 8px #4cd964); opacity: 1; }
 }
 
 /* ================================================
-   READER MODAL (Kunder + Admin)
-   Fast storlek, sticky header, scroll bara i meddelanden
-   ================================================ */
+READER MODAL (Kunder + Admin)
+Fast storlek, sticky header, scroll bara i meddelanden
+================================================ */
 
 /* ============================================================
-   ÄRENDEREADER-MODALER: Adaptiv höjd, fast header-position
-   Overlay förankras uppifrån så att header-raden alltid sitter
-   på samma Y-koordinat oavsett hur lång konversationen är.
-   ============================================================ */
+ÄRENDEREADER-MODALER: Adaptiv höjd, fast header-position
+Overlay förankras uppifrån så att header-raden alltid sitter
+på samma Y-koordinat oavsett hur lång konversationen är.
+============================================================ */
 #customer-reader-modal,
 #atlas-reader-modal {
-  align-items: flex-start !important;   /* Förankra uppifrån */
-  padding-top: 11vh !important;         /* Fast avstånd från toppen */
+align-items: flex-start !important;   /* Förankra uppifrån */
+padding-top: 11vh !important;         /* Fast avstånd från toppen */
 }
 
 #customer-reader-modal .glass-modal-box,
 #atlas-reader-modal .glass-modal-box {
-  width: 680px !important;
-  max-width: 92vw !important;
-  height: auto !important;              /* Anpassas till innehåll */
-  min-height: 220px !important;         /* Aldrig hoptryckt */
-  max-height: 56vh !important;          /* Aldrig för stor */
-  overflow: hidden !important;
-  padding: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
+width: 680px !important;
+max-width: 92vw !important;
+height: auto !important;              /* Anpassas till innehåll */
+min-height: 220px !important;         /* Aldrig hoptryckt */
+max-height: 56vh !important;          /* Aldrig för stor */
+overflow: hidden !important;
+padding: 0 !important;
+display: flex !important;
+flex-direction: column !important;
 }
 
 #customer-reader-modal .glass-modal-header {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 10 !important;
-  background: rgba(30,30,30,0.95) !important;
-  backdrop-filter: blur(12px) !important;
-  padding: 16px 20px !important;
+position: sticky !important;
+top: 0 !important;
+z-index: 10 !important;
+background: rgba(30,30,30,0.95) !important;
+backdrop-filter: blur(12px) !important;
+padding: 16px 20px !important;
 }
 
 #customer-reader-modal .glass-modal-body {
-  overflow-y: auto !important;
-  max-height: calc(100% - 68px) !important;   /* Header = 68px */
-  padding: 16px 20px !important;
+overflow-y: auto !important;
+max-height: calc(100% - 68px) !important;   /* Header = 68px */
+padding: 16px 20px !important;
 }
 
 /* Bredare header så det inte känns hoptryckt */
 #customer-reader-modal .glass-modal-header > div:first-child {
-  gap: 16px !important;
+gap: 16px !important;
 }
 
 /* Datum syns tydligt i varje ärende (redan i din kod) */
 .ticket-meta {
-  font-size: 11px !important;
-  color: #aaa !important;
-  margin: 4px 0 12px !important;
+font-size: 11px !important;
+color: #aaa !important;
+margin: 4px 0 12px !important;
 }
 
 /* =============================================================================
@@ -4143,10 +4135,10 @@ Scrollbar-glow: nedbantad mot temaöverdrift
 Teman sätter box-shadow upp till 25px på scrollbar-thumbs — ta bort
 ============================================================================= */
 ::-webkit-scrollbar-thumb {
-  box-shadow: none !important;
+box-shadow: none !important;
 }
 ::-webkit-scrollbar-thumb:hover {
-  box-shadow: none !important;
+box-shadow: none !important;
 }
 
 /* =============================================================================
@@ -4155,15 +4147,15 @@ Teman applicerar gradient + box-shadow på .header-button i default-läge vilket
 skapar ett för kraftigt glow-utseende. Begränsa till subtilt utseende här.
 ============================================================================= */
 .header-button {
-  background: rgba(255, 255, 255, 0.06) !important;
-  box-shadow: none !important;
-  color: var(--text-secondary) !important;
+background: rgba(255, 255, 255, 0.06) !important;
+box-shadow: none !important;
+color: var(--text-secondary) !important;
 }
 .header-button:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-  box-shadow: none !important;
-  color: var(--text-primary) !important;
-  transform: none !important;
+background: rgba(255, 255, 255, 0.12) !important;
+box-shadow: none !important;
+color: var(--text-primary) !important;
+transform: none !important;
 }
 
 /* === ADMIN SCROLL-FIX: detail-container inuti admin får scrolla vertikalt === */

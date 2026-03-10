@@ -599,6 +599,52 @@ display:flex; flex-direction:column; gap:10px; min-height:0;">
 ${bubblesHtml}
 </div>
 
+${t.is_archived !== 1 ? `
+<!-- SVARSRUTA (aktiva ärenden) -->
+<div style="padding:10px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.18); flex-shrink:0;">
+<div style="display:flex; gap:8px; align-items:flex-end;">
+<textarea id="cust-reader-quick-reply"
+placeholder="Snabbsvar till kunden... (Ctrl+Enter för att skicka)"
+style="flex:1; height:58px; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:var(--text-primary); resize:none; font-family:inherit; font-size:13px; line-height:1.5; outline:none; transition:border-color 0.2s;"
+onfocus="this.style.borderColor='${tStyles.main}66'"
+onblur="this.style.borderColor='rgba(255,255,255,0.12)'"></textarea>
+<button id="cust-reader-send-btn" class="btn-glass-icon"
+style="width:38px; height:38px; flex-shrink:0; color:${tStyles.main}; border-color:${tStyles.border}; background:${tStyles.main}1a;"
+title="Skicka svar och ta ärendet (Ctrl+Enter)">
+${UI_ICONS.SEND}
+</button>
+</div>
+</div>
+
+<!-- ACTION FOOTER (aktiva ärenden) -->
+<div style="padding:9px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.3); display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+<div style="display:flex; gap:6px;">
+<button class="btn-glass-icon" id="cust-reader-archive-btn"
+title="Arkivera ärende"
+style="color:var(--text-secondary);">
+${UI_ICONS.ARCHIVE}
+</button>
+<button class="btn-glass-icon" id="cust-reader-delete-btn"
+title="Ta bort permanent"
+style="color:#ff453a;">
+${UI_ICONS.TRASH}
+</button>
+</div>
+<div style="display:flex; gap:6px;">
+<button id="cust-reader-ai-btn" class="btn-glass-icon"
+style="color:${tStyles.main}; border-color:${tStyles.border}; background:rgba(255,255,255,0.07);"
+title="AI Förslag">
+${UI_ICONS.AI}
+</button>
+<button class="btn-glass-icon" id="cust-reader-claim-btn"
+title="Plocka upp ärendet"
+style="color:${tStyles.main}; border-color:${tStyles.border}; background:${tStyles.main}1a;">
+${UI_ICONS.CLAIM}
+</button>
+</div>
+</div>
+` : ''}
+
 </div>
 `;
 
@@ -617,6 +663,98 @@ const prevBtn = modal.querySelector('#cust-reader-prev');
 const nextBtn = modal.querySelector('#cust-reader-next');
 if (prevBtn && hasPrev) prevBtn.onclick = () => { _currentTicketIdx--; _renderCustomerReaderModal(); };
 if (nextBtn && hasNext) nextBtn.onclick = () => { _currentTicketIdx++; _renderCustomerReaderModal(); };
+
+// Svarsruta-logik (aktiva ärenden)
+if (t.is_archived !== 1) {
+const convId = t.conversation_id;
+const custSendBtn  = modal.querySelector('#cust-reader-send-btn');
+const custReplyTA  = modal.querySelector('#cust-reader-quick-reply');
+
+if (custSendBtn && custReplyTA) {
+custReplyTA.addEventListener('input', () => {
+if (window.socketAPI) window.socketAPI.emit('team:agent_typing', { sessionId: convId });
+});
+
+const doSend = async () => {
+const msg = custReplyTA.value.trim();
+if (!msg) return;
+custSendBtn.disabled = true;
+custSendBtn.style.opacity = '0.45';
+try {
+if (window.socketAPI) window.socketAPI.emit('team:agent_reply', { conversationId: convId, message: msg });
+await window.claimTicket(convId);
+_closeCustomerReader();
+showToast('✅ Meddelande skickat — ärendet tillhör nu dig!');
+} catch (err) {
+console.error('[cust-reader-send] Fel:', err);
+custSendBtn.disabled = false;
+custSendBtn.style.opacity = '';
+}
+};
+custSendBtn.onclick = doSend;
+custReplyTA.onkeydown = (e) => { if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); doSend(); } };
+}
+
+// AI-förslag
+const custAiBtn = modal.querySelector('#cust-reader-ai-btn');
+if (custAiBtn) {
+custAiBtn.onclick = () => {
+const ta = modal.querySelector('#cust-reader-quick-reply');
+if (!ta) return;
+const lastUser = [...(t.answer || [])].reverse().find(m => m.role === 'user');
+const originalMsg = lastUser?.content || t.question || '';
+if (!originalMsg) { showToast('Ingen kundtext att basera förslag på.'); return; }
+ta.value = '🤖 Tänker... (Hämtar AI-förslag)';
+ta.disabled = true;
+window.socketAPI.emit('team:email_action', { conversationId: convId, action: 'draft', content: originalMsg });
+};
+}
+
+// Plocka upp ärendet
+const custClaimBtn = modal.querySelector('#cust-reader-claim-btn');
+if (custClaimBtn) {
+custClaimBtn.onclick = async () => {
+try {
+await window.claimTicket(convId);
+_closeCustomerReader();
+showToast('✅ Ärendet är nu ditt!');
+} catch (err) {
+console.error('[cust-reader-claim] Fel:', err);
+showToast('❌ Kunde inte ta ärendet.');
+}
+};
+}
+
+// Arkivera
+const custArchiveBtn = modal.querySelector('#cust-reader-archive-btn');
+if (custArchiveBtn) {
+custArchiveBtn.onclick = async () => {
+try {
+await fetch(`${SERVER_URL}/api/inbox/archive`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ conversationId: convId }) });
+showToast('✅ Ärendet arkiverat!');
+_currentTickets[idx] = { ..._currentTickets[idx], is_archived: 1 };
+_renderCustomerReaderModal();
+_renderTicketListBody();
+} catch (err) { console.error('[cust-reader-archive] Fel:', err); showToast('❌ Kunde inte arkivera.'); }
+};
+}
+
+// Radera permanent
+const custDeleteBtn = modal.querySelector('#cust-reader-delete-btn');
+if (custDeleteBtn) {
+custDeleteBtn.onclick = async () => {
+if (!(await atlasConfirm('Ta bort', 'Är du säker? Detta raderar ärendet permanent.'))) return;
+try {
+await fetch(`${SERVER_URL}/api/inbox/delete`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ conversationId: convId }) });
+showToast('✅ Ärendet raderat');
+_currentTickets.splice(idx, 1);
+if (_currentTickets.length === 0) { _closeCustomerReader(); }
+else { _currentTicketIdx = Math.min(idx, _currentTickets.length - 1); _renderCustomerReaderModal(); }
+_renderTicketListBody();
+} catch (err) { console.error('[cust-reader-delete] Fel:', err); showToast('❌ Kunde inte radera.'); }
+};
+}
+}
 
 // ESC stänger
 const escHandler = (e) => {

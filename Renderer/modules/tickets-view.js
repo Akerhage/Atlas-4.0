@@ -105,7 +105,7 @@ const myOfficeTags = (window.currentUser.routing_tag || '')
 tickets = tickets.filter(t => {
 if (t.owner && t.owner.toLowerCase() === myName) return true;
 if (t.sender && t.sender.toLowerCase() === myName) return true;
-if (t.routing_tag && myOfficeTags.includes(t.routing_tag.toLowerCase())) return true;
+if (t.routing_tag && myOfficeTags.includes(t.routing_tag.toLowerCase()) && !t.owner) return true;
 return false;
 });
 }
@@ -238,6 +238,7 @@ ${vehicleHtml}
 <button class="notes-trigger-btn" data-id="${t.conversation_id}" title="Interna anteckningar" style="color:${styles.main}" onclick="event.stopPropagation(); openNotesModal('${t.conversation_id}')">
 ${UI_ICONS.NOTES}
 </button>
+${!isInternal ? `<button class="notes-trigger-btn" data-id="${t.conversation_id}" title="Vidarebefordra till kollega" style="color:${styles.main}" onclick="event.stopPropagation(); showAssignModal({conversation_id: '${t.conversation_id}'})"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>` : ''}
 </div>
 </div>
 <div class="ticket-preview">${myPreviewText}</div>
@@ -454,6 +455,11 @@ const msgs = ticket.messages || [];
 const totalChars = msgs.reduce((acc, m) => acc + (m.content || m.text || '').length, 0);
 const isLongEnough = msgs.length >= 5 || totalChars >= 400;
 
+// 📝 Hämta displayName för ägarens placeholder-text
+const ownerDisplayName = (ticket.owner && ticket.owner !== currentUser.username)
+? (typeof usersCache !== 'undefined' && usersCache.find(u => u.username === ticket.owner)?.display_name) || ticket.owner
+: null;
+
 const contentBox = document.createElement('div');
 contentBox.className = 'detail-container';
 contentBox.innerHTML = `
@@ -471,7 +477,7 @@ ${bodyContent}
 </div>
 <div class="detail-footer-area">
 <form id="my-ticket-chat-form">
-<textarea id="my-ticket-chat-input" placeholder="${ticket.is_archived ? 'Ärendet är arkiverat' : 'Skriv ett meddelande...'}" ${ticket.is_archived ? 'disabled' : ''}></textarea>
+<textarea id="my-ticket-chat-input" placeholder="${ticket.is_archived ? 'Ärendet är arkiverat' : ownerDisplayName ? `Svar tar över från ${ownerDisplayName}... (Ctrl+Enter)` : 'Skriv ett meddelande...'}" ${ticket.is_archived ? 'disabled' : ''}></textarea>
 <button type="submit" id="${isMail ? 'btn-send-mail-action' : 'btn-reply-action'}" class="send-button-ticket">
 ${UI_ICONS.SEND}
 </button>
@@ -637,10 +643,10 @@ if (!inp) return;
 // Mail: första meddelandet. Chatt: sista kund-meddelandet.
 let originalMsg = '';
 if (isMail) {
-  originalMsg = ticket.messages?.[0]?.content || ticket.last_message || '';
+originalMsg = ticket.messages?.[0]?.content || ticket.last_message || '';
 } else {
-  const lastUser = [...(ticket.messages || [])].reverse().find(m => m.role === 'user');
-  originalMsg = lastUser?.content || ticket.last_message || '';
+const lastUser = [...(ticket.messages || [])].reverse().find(m => m.role === 'user');
+originalMsg = lastUser?.content || ticket.last_message || '';
 }
 if (!originalMsg) { showToast('Ingen kundtext att basera förslag på.'); return; }
 inp.value = '🤖 Tänker så det knakar... (Hämtar AI-svar)';
@@ -656,16 +662,16 @@ content: originalMsg
 // 3b. AI Sammanfattning
 const btnSum = document.getElementById('btn-summarize');
 if (btnSum) {
-  btnSum.onclick = () => {
-    btnSum.disabled = true;
-    const panel = document.getElementById('ticket-summary-panel');
-    const txt = document.getElementById('ticket-summary-text');
-    if (panel && txt) { panel.style.display = 'block'; txt.textContent = '🤖 Sammanfattar...'; }
-    window.socketAPI.emit('team:summarize_ticket', {
-      conversationId: ticket.conversation_id,
-      messages: ticket.messages || []
-    });
-  };
+btnSum.onclick = () => {
+btnSum.disabled = true;
+const panel = document.getElementById('ticket-summary-panel');
+const txt = document.getElementById('ticket-summary-text');
+if (panel && txt) { panel.style.display = 'block'; txt.textContent = '🤖 Sammanfattar...'; }
+window.socketAPI.emit('team:summarize_ticket', {
+conversationId: ticket.conversation_id,
+messages: ticket.messages || []
+});
+};
 }
 
 // 4. Arkivera (Direkt utan bekräftelsepopup — toast visas istället)

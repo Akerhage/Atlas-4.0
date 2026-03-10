@@ -265,7 +265,7 @@ ${UI_ICONS.NOTES}
 <div class="ticket-footer-bar">
 <div class="ticket-time">${fullDateStr}</div>
 <div class="ticket-tag" style="background: ${isInternal ? styles.main + '22' : 'rgba(255,255,255,0.05)'}; color: ${styles.main}; border: 1px solid ${styles.main}44;">
-${(item.routing_tag || item.office) ? resolveLabel(item.routing_tag || item.office) : (item.city ? item.city.toUpperCase() : (item.session_type === 'customer' ? 'WEBB' : '—'))}
+${(item.routing_tag || item.office) ? resolveLabel(item.routing_tag || item.office) : (item.city ? item.city.toUpperCase() : (item.session_type === 'customer' ? 'CHATT' : (item.owner ? item.owner.toUpperCase() : '—')))}
 </div>
 </div>
 `;
@@ -318,14 +318,14 @@ messages = JSON.parse(item.answer);
 // ❌ ÄNDRA INTE till themeStyles här — kontrasten mellan personerna är avsiktlig. Se regel 5 ovan.
 let senderStyles, ownerStyles, senderInitial, ownerInitial;
 if (isInternalItem) {
-  const senderName = item.sender || '';
-  const ownerName  = item.owner  || '';
-  senderStyles  = getAgentStyles(senderName);
-  ownerStyles   = getAgentStyles(ownerName);
-  const sDisp   = (typeof formatName === 'function' ? formatName(senderName) : senderName) || '?';
-  const oDisp   = (typeof formatName === 'function' ? formatName(ownerName)  : ownerName)  || '?';
-  senderInitial = sDisp.charAt(0).toUpperCase();
-  ownerInitial  = oDisp.charAt(0).toUpperCase();
+const senderName = item.sender || '';
+const ownerName  = item.owner  || '';
+senderStyles  = getAgentStyles(senderName);
+ownerStyles   = getAgentStyles(ownerName);
+const sDisp   = (typeof formatName === 'function' ? formatName(senderName) : senderName) || '?';
+const oDisp   = (typeof formatName === 'function' ? formatName(ownerName)  : ownerName)  || '?';
+senderInitial = sDisp.charAt(0).toUpperCase();
+ownerInitial  = oDisp.charAt(0).toUpperCase();
 }
 
 messages.forEach(m => {
@@ -333,44 +333,44 @@ const isUser = m.role === 'user';
 const clean = (m.content || m.text || '').replace(/^📧\s*(\((Mail|Svar)\):)?\s*/i, '');
 
 if (isInternalItem) {
-  // Interna ärenden: user-roll = avsändaren (vänster), övriga = mottagaren (höger)
-  if (isUser) {
-    historyHtml += `
+// Interna ärenden: user-roll = avsändaren (vänster), övriga = mottagaren (höger)
+if (isUser) {
+historyHtml += `
 <div class="msg-row user" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-start;">
 <div class="msg-avatar" style="background:${senderStyles.main}; color:black; font-weight:800; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; margin-right:12px; flex-shrink:0;">${senderInitial}</div>
 <div class="bubble" style="background:${senderStyles.bubbleBg} !important; border:1px solid ${senderStyles.border} !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
 ${formatAtlasMessage(clean)}
 </div>
 </div>`;
-  } else {
-    historyHtml += `
+} else {
+historyHtml += `
 <div class="msg-row atlas" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-end;">
 <div class="bubble" style="background:${ownerStyles.bubbleBg} !important; border:1px solid ${ownerStyles.border} !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
 ${formatAtlasMessage(clean)}
 </div>
 <div class="msg-avatar" style="background:${ownerStyles.main}; color:black; font-weight:800; margin-left:12px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0;">${ownerInitial}</div>
 </div>`;
-  }
+}
 } else {
-  // Vanliga ärenden: original-logik
-  const avatarInitial = isUser ? (item.contact_name ? item.contact_name.charAt(0).toUpperCase() : 'K') : '🤖';
-  if (isUser) {
-    historyHtml += `
+// Vanliga ärenden: original-logik
+const avatarInitial = isUser ? (item.contact_name ? item.contact_name.charAt(0).toUpperCase() : 'K') : '🤖';
+if (isUser) {
+historyHtml += `
 <div class="msg-row user" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-start;">
 <div class="msg-avatar" style="background:${themeStyles.main}; color:white; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; margin-right:12px; flex-shrink:0;">${avatarInitial}</div>
 <div class="bubble" style="background:${themeStyles.bubbleBg} !important; border:1px solid ${themeStyles.border} !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
 ${formatAtlasMessage(clean)}
 </div>
 </div>`;
-  } else {
-    historyHtml += `
+} else {
+historyHtml += `
 <div class="msg-row atlas" style="display:flex; width:100%; margin-bottom:15px; justify-content:flex-end;">
 <div class="bubble" style="background:var(--bg-dark-tertiary) !important; border:1px solid rgba(255,255,255,0.1) !important; color:var(--text-primary) !important; padding:15px; border-radius:12px; line-height:1.5;">
 ${formatAtlasMessage(clean)}
 </div>
 <div class="msg-avatar" style="background:#3a3a3c; margin-left:12px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0; font-size:18px;">🤖</div>
 </div>`;
-  }
+}
 }
 });
 

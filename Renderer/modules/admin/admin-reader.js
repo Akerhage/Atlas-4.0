@@ -72,7 +72,12 @@ const readerSubtitle = resolveLabel(t.routing_tag || t.owner);
 const readerDate = t.updated_at ? new Date(t.updated_at * 1000).toLocaleDateString('sv-SE') : (t.timestamp ? new Date(t.timestamp).toLocaleDateString('sv-SE') : '—');
 const readerExtra = (t.vehicle || t.vehicle_type) ? ' • ' + (t.vehicle || t.vehicle_type) : (t.contact_phone || t.phone ? ' • ' + (t.contact_phone || t.phone) : '');
 
-// 3. OSCAR BERG-FIX: Förbered meddelandehistoriken
+// 3. Förbered ägardisplaytext för placeholder
+const ownerDisplayName = t.owner && t.owner !== currentUser.username
+? (typeof formatName === 'function' ? formatName(t.owner) : t.owner)
+: null;
+
+// 4. Förbered meddelandehistoriken
 let messageHistoryHtml = '';
 const messages = t.messages || [];
 
@@ -127,22 +132,6 @@ title="Interna anteckningar"
 style="color:${rStyles.main}; border-color:${rStyles.border};">
 ${UI_ICONS.NOTES}
 </button>
-<button id="reader-ai-btn" class="btn-glass-icon"
-style="color:${rStyles.main}; border-color:${rStyles.border}; background:rgba(255,255,255,0.07);"
-title="AI Förslag">
-${UI_ICONS.AI}
-</button>
-<div style="width:1px; height:16px; background:rgba(255,255,255,0.1); margin:0 3px;"></div>
-<button class="btn-glass-icon" onclick="assignTicketFromReader('${t.conversation_id}')"
-title="Tilldela ärende till agent"
-style="color:var(--text-secondary);">
-${UI_ICONS.ASSIGN}
-</button>
-<button class="btn-glass-icon" onclick="claimTicketFromReader('${t.conversation_id}')"
-title="Plocka upp ärendet"
-style="color:${rStyles.main}; border-color:${rStyles.border}; background:${rStyles.main}1a;">
-${UI_ICONS.CLAIM}
-</button>
 <div style="width:1px; height:16px; background:rgba(255,255,255,0.1); margin:0 3px;"></div>
 <button class="btn-glass-icon" id="reader-prev"
 ${currentTicketIdx === 0 ? 'disabled' : ''}
@@ -168,7 +157,7 @@ ${messageHistoryHtml}
 <div style="padding:10px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.18); flex-shrink:0;">
 <div style="display:flex; gap:8px; align-items:flex-end;">
 <textarea id="reader-quick-reply"
-placeholder="Snabbsvar till kunden... (Ctrl+Enter för att skicka)"
+placeholder="${ownerDisplayName ? `Svar tar över från ${ownerDisplayName} (Ctrl+Enter)` : 'Snabbsvar till kunden... (Ctrl+Enter för att skicka)'}"
 style="flex:1; height:58px; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:var(--text-primary); resize:none; font-family:inherit; font-size:13px; line-height:1.5; outline:none; transition:border-color 0.2s;"
 onfocus="this.style.borderColor='${rStyles.main}66'"
 onblur="this.style.borderColor='rgba(255,255,255,0.12)'"></textarea>
@@ -180,7 +169,8 @@ ${UI_ICONS.SEND}
 </div>
 </div>
 
-<div style="padding:9px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.3); display:flex; justify-content:flex-end; align-items:center; gap:8px; flex-shrink:0;">
+<div style="padding:9px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.3); display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+<div style="display:flex; gap:6px;">
 <button class="btn-glass-icon" id="reader-archive-btn"
 title="Arkivera ärende"
 style="color:var(--text-secondary);">
@@ -191,6 +181,24 @@ title="Ta bort permanent"
 style="color:#ff453a;">
 ${UI_ICONS.TRASH}
 </button>
+</div>
+<div style="display:flex; gap:6px;">
+<button id="reader-ai-btn" class="btn-glass-icon"
+style="color:${rStyles.main}; border-color:${rStyles.border}; background:rgba(255,255,255,0.07);"
+title="AI Förslag">
+${UI_ICONS.AI}
+</button>
+<button class="btn-glass-icon" onclick="assignTicketFromReader('${t.conversation_id}')"
+title="Tilldela ärende till agent"
+style="color:var(--text-secondary);">
+${UI_ICONS.ASSIGN}
+</button>
+<button class="btn-glass-icon" onclick="claimTicketFromReader('${t.conversation_id}')"
+title="Plocka upp ärendet"
+style="color:${rStyles.main}; border-color:${rStyles.border}; background:${rStyles.main}1a;">
+${UI_ICONS.CLAIM}
+</button>
+</div>
 </div>
 
 </div>`; // Slut på modal.innerHTML
@@ -316,7 +324,7 @@ const newIdx = currentTicketIdx + dir;
 if (newIdx >= 0 && newIdx < currentTicketList.length) {
 currentTicketIdx = newIdx;
 renderReaderContent();
-// 🔥 Uppdatera notes-glow för det nya ärendet
+// Uppdatera notes-glow för det nya ärendet
 const t = currentTicketList[currentTicketIdx];
 if (t?.conversation_id && typeof refreshNotesGlow === 'function') {
 refreshNotesGlow(t.conversation_id);

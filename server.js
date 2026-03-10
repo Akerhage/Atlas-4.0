@@ -1089,17 +1089,17 @@ console.log(`💬 [AGENT REPLY] ${conversationId}: ${message}`);
 
 const agentName = socket.user?.username || 'Support';
 
-// 🔒 AUTO-CLAIM: Om ärendet saknar ägare när agenten svarar via socket,
-// sätt agenten som ägare automatiskt — samma som snabbsvarsflödet gör explicit.
-// Förhindrar att svar skickas utan att ärendet kopplas till någon agent.
+// 🔒 AUTO-CLAIM: Den som svarar tar alltid ärendet — oavsett vem som hade det innan.
+// Samma logik för chatt och mail. Skapa konsekvent beteende i hela systemet.
 const replyState = await getV2State(conversationId);
-if (replyState && !replyState.owner) {
+const previousOwner = replyState?.owner || null;
 await claimTicket(conversationId, agentName);
-console.log(`🔗 [AGENT REPLY] Auto-claim: ${conversationId} → ${agentName}`);
+console.log(`🔗 [AGENT REPLY] Claim: ${conversationId} → ${agentName}${previousOwner ? ` (från ${previousOwner})` : ''}`);
 if (typeof io !== 'undefined') {
 io.emit('team:update', { type: 'ticket_claimed', sessionId: conversationId, owner: agentName });
-io.emit('team:ticket_taken', { conversationId, takenBy: agentName });
-}
+io.emit('team:ticket_taken', { conversationId, takenBy: agentName, previousOwner: previousOwner });
+// 👤 Notifiera svararen att de tog över ärendet
+io.emit('team:ticket_claimed_self', { conversationId, claimedBy: agentName, previousOwner: previousOwner });
 }
 
 const stored = await getContextRow(conversationId);
@@ -1213,7 +1213,11 @@ headers: {
 // -- E. SKICKA FÖRST --
 const sentInfo = await mailTransporter.sendMail(mailOptions);
 
-// -- F. SPARA I DB ENDAST OM SÄNDNING LYCKADES --
+// -- F. HÄMTA TIDIGARE ÄGARE INNAN VI UPPDATERAR --
+const mailPreState = await getV2State(conversationId);
+const mailPreviousOwner = mailPreState?.owner || null;
+
+// -- G. SPARA I DB ENDAST OM SÄNDNING LYCKADES --
 await new Promise((resolve, reject) => {
 db.run(
 `INSERT INTO chat_v2_state (conversation_id, session_type, human_mode, owner, updated_at)
@@ -1242,10 +1246,14 @@ context_data: contextData,
 updated_at: now
 });
 
-// -- G. Notifiera UI (Global Sync) --
+// -- H. Notifiera UI (Global Sync) --
 if (typeof io !== 'undefined') {
 io.emit('team:customer_reply', { conversationId, message: `📧 ${html || message}`, sender: agentName, timestamp: Date.now(), isEmail: true });
 io.emit('team:update', { type: 'new_message', sessionId: conversationId });
+// Emita ticket_taken för att notifiera gamla ägaren och svararen
+io.emit('team:ticket_taken', { conversationId, takenBy: agentName, previousOwner: mailPreviousOwner, isEmail: true });
+// 👤 Notifiera svararen att de tog över ärendet via mail
+io.emit('team:ticket_claimed_self', { conversationId, claimedBy: agentName, previousOwner: mailPreviousOwner });
 }
 
 } catch (err) {

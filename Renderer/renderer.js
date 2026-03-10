@@ -2,7 +2,6 @@
 // renderer.js
 // VAD DEN GÖR: All UI-logik för Atlas — chatt, inkorg, ärendehantering, mallar, arkiv, profil och inloggning.
 // ANVÄNDS AV: index.html (Electron renderer process)
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 const ATLAS_VERSION = '4.0'; // Centralt versionsnummer — uppdatera ENDAST här
 // AVATAR_ICONS, UI_ICONS, ADMIN_UI_ICONS → flyttade till modules/ui-constants.js
@@ -11,7 +10,7 @@ const ATLAS_VERSION = '4.0'; // Centralt versionsnummer — uppdatera ENDAST hä
 // 🟢 ATLAS CORE REPAIR (Global Scope - Rad 50)
 // =============================================================================
 window.updateInboxVisibility = function() {
-// currentUser är redan definierad som global let på rad 120 i din fil
+// currentUser är redan definierad som global let på rad 120 i denna fil
 if (!currentUser) return; 
 
 const inboxTab = document.querySelector('li[data-view="inbox"]');
@@ -48,7 +47,7 @@ document.documentElement.style.setProperty('--accent-primary', savedUser.agent_c
 })();
 
 // =============================================================================
-//=========ÄNRA AVATAR BUBBLANS FÄRGER OCH BILD=================================
+//=========ÄNDRA AVATAR BUBBLANS FÄRGER OCH BILD================================
 // =============================================================================
 function getAvatarBubbleHTML(user, size = "32px") {
 if (!user) return `<div class="user-avatar" style="width:${size}; height:${size}; background:#333; border-radius:50%;"></div>`;
@@ -99,8 +98,6 @@ console.log(`✅ Laddat ${officeData.length} kontor från SQL.`);
 } catch (err) { console.error("Kunde inte förladda kontor:", err); }
 }
 
-console.log('📋 officeData:', JSON.stringify(officeData.map(o => ({ tag: o.routing_tag, area: o.area, city: o.city }))));
-
 
 // Hämtar alla användare från servern och lagrar dem i usersCache för agentfärger och namnuppslag
 async function preloadUsers() {
@@ -122,12 +119,6 @@ function isSupportAgent() {
 return currentUser && currentUser.role === 'admin';
 }
 
-// 🛑 DEBUG (Uppdaterad för att visa både namn och roll)
-if (currentUser) {
-console.log("LOGGAD IN SOM:", currentUser.username);
-console.log("ROLL:", currentUser.role);
-console.log("HAR SUPPORT-BEHÖRIGHET?", isSupportAgent()); 
-}
 
 // =============================================================================
 // 🔒 SECURITY INTERCEPTOR (Måste ligga först i filen)
@@ -197,7 +188,7 @@ const loginModalHTML = `
 // Smart definition av fetchHeaders - Hämtar alltid senaste token från 'atlas_token'
 Object.defineProperty(window, 'fetchHeaders', {
 get() {
-const token = localStorage.getItem('atlas_token'); // Här är nyckeln vi såg i din logg
+const token = localStorage.getItem('atlas_token');
 
 // Valfritt: Varning i konsolen om token saknas när man försöker hämta data
 if (!token) console.warn("⚠️ FetchHeaders anropades utan att 'atlas_token' finns i minnet.");
@@ -205,7 +196,7 @@ if (!token) console.warn("⚠️ FetchHeaders anropades utan att 'atlas_token' f
 return {
 'Content-Type': 'application/json',
 'Authorization': token ? `Bearer ${token}` : '',
-'ngrok-skip-browser-warning': 'true' // Bra att ha kvar om du kör via ngrok ibland
+'ngrok-skip-browser-warning': 'true' // Bra att ha om ngrok används
 };
 },
 configurable: true

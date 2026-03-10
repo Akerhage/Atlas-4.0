@@ -13,7 +13,7 @@
 //   openNotesModal, loadNotes                      — notes-system.js
 // ============================================
 
-// --- RENDER LISTA: AGENTER (FIXAD) ---
+// --- RENDER LISTA: AGENTER ---
 async function renderAdminUserList() {
 const listContainer = document.getElementById('admin-main-list');
 listContainer.innerHTML = '<div class="spinner-small"></div>';
@@ -53,7 +53,7 @@ listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:#f
 }
 
 // =============================================================================
-// ADMIN - openAdminUserDetail (FULLSTÄNDIG- NOTES INTEGRERAD)
+// ADMIN - openAdminUserDetail
 // =============================================================================
 async function openAdminUserDetail(username, element) {
 if (window._adminFormDirty) {

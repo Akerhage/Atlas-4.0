@@ -164,7 +164,6 @@ const cardList = document.getElementById('gaps-card-list');
 if (cardList) {
 cardList.addEventListener('click', async (e) => {
 
-// Kopiera JSON-knapp
 const copyBtn = e.target.closest('.gap-copy-btn');
 if (copyBtn) {
 const pre = copyBtn.closest('.gap-suggestion-panel')?.querySelector('pre');
@@ -176,7 +175,6 @@ setTimeout(() => { copyBtn.textContent = '📋 Kopiera JSON'; }, 2000);
 return;
 }
 
-// AI-analys-knapp
 const btn = e.target.closest('.gap-ai-btn');
 if (!btn) return;
 

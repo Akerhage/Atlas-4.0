@@ -320,7 +320,7 @@ if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = ''; }
 }
 }
 // =============================================================================
-// RAG — POÄNGSÄTTNING (Ny sektion)
+// RAG — POÄNGSÄTTNING
 // =============================================================================
 function renderRagScoresSection(scores, detailBox) {
 const DEFAULTS = {
@@ -468,7 +468,7 @@ await saveRagField(id, field);
 }
 
 // =============================================================================
-// BOKNINGSLÄNKAR (Ny sektion — speglar RAG-poängsättningens mönster)
+// BOKNINGSLÄNKAR
 // =============================================================================
 function renderBookingLinksSection(links, detailBox) {
 

@@ -86,7 +86,7 @@ responseText = JSON.stringify(result.response_payload);
 }
 
 // 4. Lägg till ATLAS svar i historiken
-contextData.messages.push({ role: 'atlas', content: responseText, timestamp: Date.now() });;
+contextData.messages.push({ role: 'atlas', content: responseText, timestamp: Date.now() });
 
 assertValidContext(result.new_context, 'ragSync');
 contextData = mergeContext(contextData, result.new_context);

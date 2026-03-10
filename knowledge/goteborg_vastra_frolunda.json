@@ -1,6 +1,6 @@
 {
   "id": "my_driving_academy_goteborg_vastra_frolunda",
-  "name": "My Driving Academy - Göteborg - Västra Frölunda",
+  "name": "My Driving Academy - Göteborg Västra Frölunda",
   "brand": "My Driving Academy",
   "city": "Göteborg",
   "area": "Västra Frölunda",
@@ -20,7 +20,8 @@
     "priser",
     "språk",
     "undervisning",
-    "utbildning"
+    "utbildning",
+    "my"
   ],
   "contact": {
     "phone": "031456763",
@@ -55,7 +56,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -68,7 +70,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -81,7 +84,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -95,7 +99,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -109,7 +114,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -122,7 +128,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -135,7 +142,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -148,7 +156,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -161,7 +170,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -174,7 +184,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -187,7 +198,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -200,7 +212,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     },
     {
@@ -215,7 +228,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "västra frölunda"
+        "västra frölunda",
+        "my"
       ]
     }
   ],

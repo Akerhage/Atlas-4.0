@@ -19,10 +19,7 @@
 // ============================================
 
 // =============================================================================
-// ADMIN: WINDOW FUNKTIONER & HJÄLPLOGIK
-// =============================================================================
-// =============================================================================
-// OpenNewAgentForm (inline i detaljvyn) 25/2
+// openNewAgentForm — SKAPA / REDIGERA AGENT
 // =============================================================================
 window.openNewAgentForm = async function(editUser = null) {
 window._adminFormDirty = false;
@@ -292,7 +289,6 @@ if (password.length < 6) { showToast('Lösenordet måste vara minst 6 tecken.');
 if (password !== password2) { showToast('Lösenorden matchar inte.'); return; }
 }
 
-// Bestäm endpoint och payload
 const url = isEdit ? `${SERVER_URL}/api/admin/update-user-profile` : `${SERVER_URL}/api/admin/create-user`;
 const payload = { 
 username, 
@@ -326,9 +322,6 @@ cached.role = role;
 cached.agent_color = agentColor;
 cached.avatar_id = avatarId;
 cached.routing_tag = routingTag;
-} else if (!isEdit) {
-// Om det är en helt ny agent kan vi behöva hämta hela listan på nytt
-// eller pusha det nya objektet (renderAdminUserList gör oftast detta åt oss)
 }
 
 showToast(isEdit ? `✅ Profilen för @${username} är uppdaterad!` : `✅ Agenten @${username} skapad!`);
@@ -353,7 +346,7 @@ showToast('Anslutningsfel vid sparning.');
 };
 
 // ======================================================
-// FIX 1c — openNewOfficeForm (inline i detaljvyn)
+// openNewOfficeForm — SKAPA NYTT KONTOR
 // ======================================================
 window.openNewOfficeForm = async function() {
 window._adminFormDirty = false;

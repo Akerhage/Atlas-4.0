@@ -15,7 +15,7 @@
 // ============================================
 
 // =============================================================================
-// NY FUNKTION: deleteBasfaktaSection — tar bort en sektion från DOM och sparar
+// deleteBasfaktaSection — tar bort en sektion från DOM och sparar
 // =============================================================================
 function deleteBasfaktaSection(idx) {
 const card = document.getElementById(`kb-section-${idx}`);
@@ -48,7 +48,7 @@ if (filenameAttr) saveBasfaktaFile(filenameAttr);
 }
 
 window.resetUserPassword = (id, name) => {
-// DEL 4B: Dedikerad tvåfälts-modal — inget hårdkodat lösenord
+// Tvåfälts-modal för lösenordsåterställning
 let modal = document.getElementById('atlas-reset-pw-modal');
 if (!modal) {
 modal = document.createElement('div');

@@ -209,8 +209,6 @@ router.post('/customers/summarize', authenticateToken, async (req, res) => {
   });
 });
 
-module.exports = router;
-
 // -------------------------------------------------------------------------
 // KUNDANTECKNINGAR
 // -------------------------------------------------------------------------
@@ -275,3 +273,5 @@ res.json({ ok: true });
 });
 });
 });
+
+module.exports = router;

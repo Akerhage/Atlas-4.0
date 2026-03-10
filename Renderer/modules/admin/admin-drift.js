@@ -79,7 +79,6 @@ headers: { ...fetchHeaders, 'Content-Type': 'application/json' },
 body: JSON.stringify({ field, value })
 });
 if (!res.ok) throw new Error('Save failed');
-console.log(`[Drift] ${field} = ${value}`);
 } catch (e) {
 alert('Kunde inte spara inställning: ' + e.message);
 }

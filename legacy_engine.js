@@ -2,7 +2,6 @@
 // legacy_engine.js
 // VAD DEN GÖR: Stateless RAG-motor. Laddar kunskapsbas, kör NLU/intent, bygger kontext och anropar OpenAI.
 // ANVÄNDS AV: server.js (via runLegacyFlow + loadKnowledgeBase)
-// SENAST STÄDAD: 2026-02-27
 // ============================================
 // ARKITEKTUR: Inject State → Execute Logic → Extract State → Return till V3 Server
 
@@ -207,7 +206,6 @@ chunkMap = new Map(allChunks.map(c => [c.id, c]));
 const LOW_CONFIDENCE_THRESHOLD = 0.25;
 const LOW_CONFIDENCE_SLICE = 8;
 const MAX_CHUNKS = 18;
-const DEBUG_MODE = true;
 
 // =============================================================================
 // SECTION 3.1: CITY & VEHICLE ALIASES (NLU Mapping)
@@ -252,12 +250,16 @@ const CITY_ALIASES = {
 'dingle': 'Göteborg',
 'kungalv': 'Göteborg',
 'kungälv': 'Göteborg',
+'aby': 'Göteborg',
+'åby': 'Göteborg',
 
 // --- Malmö (inkl. Bulltofta, Limhamn, Södervärn, Triangeln, Värnhem, Västra Hamnen) ---
 'malmo': 'Malmö',
 'malmö': 'Malmö',
 'bulltofta': 'Malmö',
 'limhamn': 'Malmö',
+'jagersro': 'Malmö',
+'jägersro': 'Malmö',
 'sodervarn': 'Malmö',
 'sodervärn': 'Malmö',
 'södervarn': 'Malmö',
@@ -871,8 +873,6 @@ return 'För att hjälpa dig på bästa sätt — kan du berätta lite mer? Vilk
 // SECTION 6: KNOWLEDGE BASE INITIALIZATION (Runs Once)
 // ====================================================================
 const loadKnowledgeBase = () => {
-console.log('Laddar kunskapsdatabas...\n');
-
 let files = [];
 try {
 files = fs.readdirSync(KNOWLEDGE_PATH);
@@ -904,8 +904,7 @@ let fileType = '';
 // =================================================================
 if (file === 'basfakta_nollutrymme.json') {
 if (data.sections && Array.isArray(data.sections)) {
-criticalAnswers = data.sections; 
-console.log(`✅ Laddade ${criticalAnswers.length} kritiska svar från nollutrymme`);
+criticalAnswers = data.sections;
 }
 }
 
@@ -1022,10 +1021,6 @@ fileChunksCreated++;
 }
 });
 
-// ---------------------------------------------------------
-// 🔥 OPTIMERAD KOD: Inkludera Språk, Beskrivning & Egna Nyckelord
-// ---------------------------------------------------------
-
 const languages = Array.isArray(data.languages) ? data.languages.join(", ") : "Svenska";
 const languageKeywords = Array.isArray(data.languages) ? data.languages.map(l => l.toLowerCase()) : [];
 
@@ -1054,7 +1049,6 @@ city: data.city,
 area: data.area || null,
 office: officeName,
 booking_links: bookingLinks,
-// 🔥 SLÅ IHOP ALLA NYCKELORD (Filens egna + Språk + Standard)
 keywords: [
 ...existingKeywords, 
 'kontakt', 'öppettider', 'adress', 'telefon', 'språk', 'undervisning', 
@@ -1128,18 +1122,6 @@ if (miniSearch) {
 try { miniSearch.removeAll(); } catch (e) {}
 }
 
-// Specifik diagnostik för olika chunk-typer
-const cityChunks = allChunks.filter(c => c.type === 'price' || c.type === 'kontor_info');
-console.log(`   🏙️  Stads-chunks (pris + kontor): ${cityChunks.length}`);
-
-const basfaktaChunks = allChunks.filter(c => c.type === 'basfakta');
-console.log(`   📚 Basfakta-chunks: ${basfaktaChunks.length}`);
-
-// Nollutrymme-specifik kontroll
-const nollChunks = allChunks.filter(c => c.source && c.source.includes('nollutrymme'));
-console.log(`   🛡️  Nollutrymme chunks: ${nollChunks.length}`);
-console.log(`   🎯 Kritiska svar (nollutrymme): ${criticalAnswers.length}`);
-
 miniSearch = new MiniSearch({
 fields: ['title', 'text', 'city', 'area', 'office', 'keywords', 'vehicle'],
 storeFields: ['title', 'text', 'city', 'area', 'office', 'vehicle', 'type', 'price', 'id', 'booking_url', 'booking_links'],
@@ -1165,12 +1147,9 @@ rebuildChunkMap();
 try {
 // Vi skickar med de faktiska områdena som vi registrerade under laddningen (knownAreas)
 intentEngine = new IntentEngine(knownCities, CITY_ALIASES, VEHICLE_MAP, knownAreas);
-console.log('[IntentEngine] ✅ Motor initierad (Legacy).');
 } catch (e) {
 console.error('[FATAL] Kunde inte initiera IntentEngine:', e.message);
 }
-
-console.log('\n✅ Kunskapsbas fullständigt laddad!\n');
 };
 
 // ====================================================================
@@ -1181,7 +1160,6 @@ const filePath = path.join(UTILS_PATH, 'booking-links.json');
 try {
 if (fs.existsSync(filePath)) {
 bookingLinks = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-console.log(`✅ [BookingLinks] Laddade ${Object.keys(bookingLinks).length} bokningslänkar från utils/booking-links.json`);
 } else {
 console.warn('[BookingLinks] utils/booking-links.json saknas — faller tillbaka på hårdkodade defaults.');
 bookingLinks = {};
@@ -1212,11 +1190,7 @@ injectSessionState(sessionId, contextFromDB);
 // 3. Säkra att sessionen finns i minnet
 if (!sessions.has(sessionId)) {createEmptySession(sessionId);}
 
-// --- 🔥 SÄKER FIX: TVINGANDE UPPDATERING FRÅN FRONTEND ---
-// Påverkar ENDAST om användaren klickat på en knapp (payload har locked_context).
-// Rör INTE vanlig sessionshistorik vid fritext.
 if (payload.locked_context) {
-console.log("🔒 [FORCE CONTEXT] Frontend tvingar kontext:", payload.locked_context);
 const session = sessions.get(sessionId);
 
 // Vi uppdaterar minnes-sessionen direkt så att sökningen nedan använder rätt fordon
@@ -1282,7 +1256,6 @@ session = sessions.get(sessionId);
 // === SNABB-VAKT FÖR NOLLUTRYMME (Återställer snabbhet & stoppar timeouts) ===
 const queryLowerClean = query.toLowerCase().trim().replace(/[?!.]/g, '');
 
-// ✅ NY CHECK: Hoppa över nollutrymme om vi har detekterat affärsord
 const hasBusinessKeywords = /pris|kostar|boka|betala|am|mc|bil|körkort|lektion|faktura|avgift/.test(queryLowerClean);
 
 if (!hasBusinessKeywords) {
@@ -1292,8 +1265,6 @@ entry.keywords.some(kw => queryLowerClean === kw.toLowerCase())
 );
 
 if (emergencyMatch) {
-console.error("🚨 EARLY RETURN TRIGGERED: emergencyMatch / nollutrymme");
-console.log(`🛡️ Snabbmatch Nollutrymme: ${emergencyMatch.id}`);
 return res.json({
 answer: emergencyMatch.answer,
 sessionId: sessionId,
@@ -1302,10 +1273,8 @@ locked_context: session.locked_context || { city: null, area: null, vehicle: nul
 }
 }
 
-console.log(`[NOLLUTRYMME] Hoppade över snabbmatch (affärsord detekterat: ${hasBusinessKeywords})`);
-
 // ====================================================================
-// STEP 3: INTENT & CONTEXT RESOLUTION (FIXAD FÖR SCENARIO 5 & 6)
+// STEP 3: INTENT & CONTEXT RESOLUTION
 // ====================================================================
 const lockedContext = session.locked_context || {};
 const contextPayload = lockedContext;
@@ -1322,7 +1291,6 @@ if (!nluResult.slots.city) {
 for (const [alias, realCity] of Object.entries(CITY_ALIASES)) {
 if (new RegExp(`\\b${alias}\\b`, 'i').test(sanitizedQuery)) {
 nluResult.slots.city = realCity;
-console.log(`[RESCUE] 🔧 Tvingade fram stad: ${realCity}`);
 break;
 }
 }
@@ -1334,7 +1302,6 @@ for (const [realVehicle, aliases] of Object.entries(VEHICLE_MAP)) {
 const match = aliases.some(word => new RegExp(`\\b${word}\\b`, 'i').test(sanitizedQuery));
 if (match) {
 nluResult.slots.vehicle = realVehicle;
-console.log(`[RESCUE] 🔧 Tvingade fram fordon: ${realVehicle}`);
 break;
 }
 }
@@ -1342,7 +1309,6 @@ break;
 
 // 5. MANUELL ÖVERKÖRNING: INTENT & SLOTS
 if (nluResult.intent === 'unknown') {
-// FIX: "betalningsalternativ" ska inte trigga pris-lookup direkt
 const isPriceWord = /pris|kostar|kostnad|avgift/i.test(sanitizedQuery) || 
 (/\bbetala\b/i.test(sanitizedQuery) && !sanitizedQuery.includes('alternativ'));
 
@@ -1366,7 +1332,7 @@ else if (q.includes('mc') || q.includes('motorcykel')) nluResult.slots.service =
 }
 
 // ====================================================================
-// STEP 3: RESOLUTION (FIXAD & SÄKRAD)
+// STEP 3: RESOLUTION
 // ====================================================================
 const detectedCity = nluResult.slots.city;
 const detectedArea = nluResult.slots.area;
@@ -1376,10 +1342,8 @@ const lockedCity = detectedCity || lockedContext.city;
 const detectedVehicleType = nluResult.slots.vehicle || lockedContext.vehicle;
 const wasFirstMessage = isFirstMessage;
 
-// 🔥 FIX: Definiera isLegalQuestion (Förhindrar ReferenceError)
 const isLegalQuestion = /regler|giltighet|giltig|krav|ålder|villkor|policy|gäller|faktura/i.test(sanitizedQuery);
 
-// ✅ KONSEKVENT SESSIONSUPPDATERING (Original)
 if (detectedVehicleType) {
 session.locked_context.vehicle = detectedVehicleType;
 }
@@ -1445,7 +1409,6 @@ mode = forcedMode;
 else if (containsRagKeyword) {
 // HÖGSTA PRIORITET: Om affärsord finns -> ALLTID RAG
 mode = 'knowledge';
-console.log(`[MODE] RAG-ord detekterat i "${queryCheck}", tvingar knowledge-mode`);
 }
 else if (nluResult.intent === 'weather') {
 mode = 'chat';
@@ -1460,23 +1423,12 @@ mode = 'knowledge';
 // Kontaktinfo ska ALLTID vara knowledge (Säkerhetsspärr)
 if (nluResult.intent === 'contact_info') mode = 'knowledge';
 
-console.log(`[MODE SWITCH] Valde läge: ${mode} (Intent: ${nluResult.intent})`);
-
 // STEP 5: SEARCH & RETRIEVAL (Här börjar nästa sektion i din fil)
 
 let retrievedContext = "";
 let topResults = [];
 
 try {
-
-// 🔥 CHECKPOINT 1: FÖRE RAG-SÖKNING
-console.log("=".repeat(80));
-console.log("🔥 CHECKPOINT 1: FÖRE RAG-SÖKNING");
-console.log("Query:", query);
-console.log("detectedVehicleType:", detectedVehicleType);
-console.log("detectedCity:", detectedCity);
-console.log("session.locked_context.vehicle:", session.locked_context.vehicle);
-console.log("=".repeat(80));
 
 let searchQuery = query;
 
@@ -1603,13 +1555,6 @@ let mustAddChunks = [];
 // Skapa motor för att tvinga in kritiska filer baserat på sökord/intent
 const forceAddEngine = new ForceAddEngine(allChunks);
 
-console.log("🔍 [DEBUG] Anropar forceAddEngine.execute med:", {
-queryLower,
-intent: nluResult.intent,
-vehicle: detectedVehicleType,
-city: lockedCity
-});
-
 // SÄKERHET FÖR SCENARIO 5: 
 // Vi sparar original-intentet, men ändrar det till 'legal_query' under sökningen 
 // om det är en fråga om regler/giltighet.
@@ -1676,7 +1621,6 @@ mustAddChunks.push(...withBooking);
 mustAddChunks.push(...withoutBooking.slice(0, 3));
 }
 
-// 🔧 FIX: Om area nämns – prioritera kontorsinfo oavsett fordon
 if (detectedArea) {
 mustAddChunks = mustAddChunks.map(c => {
 if (
@@ -1686,7 +1630,7 @@ c.area.toLowerCase() === detectedArea.toLowerCase()
 ) {
 return {
 ...c,
-score: Math.max(c.score || 0, 25000) // slår fordons-prio men ej forceAdd
+score: Math.max(c.score || 0, 25000)
 };
 }
 return c;
@@ -1728,7 +1672,7 @@ const policyKeywords = [
 
 const isPolicyQuery = policyKeywords.some(kw => query.toLowerCase().includes(kw));
 
-let hasSniperMatch = false; // 🔥 NY FLAGGA
+let hasSniperMatch = false;
 
 // Huvudloopen för poängsättning - FULLSTÄNDIG OCH INTEGRERAD
 mustAddChunks.forEach(chunk => {
@@ -1901,13 +1845,6 @@ topResults = Array.from(topResultsMap.values()).sort((a, b) => (b.score || 0) - 
 // Spara 30 chunks för att inte tappa stadsinfo innan City Guard körs
 topResults = topResults.slice(0, 30).filter(r => r.score > 0);
 
-// 🔥 CHECKPOINT 2: EFTER FILTRERING
-console.log("=".repeat(80));
-console.log("🔥 CHECKPOINT 2: EFTER FILTRERING");
-console.log("topResults.length:", topResults.length);
-console.log("Första resultatet:", topResults[0] ? topResults[0].title : "INGEN");
-console.log("=".repeat(80));
-
 // Konfidenstjänst: Returnera klarifieringsfråga om resultaten är för svaga
 if (!forceHighConfidence) {
 const hasBasfakta = topResults.some(r => isBasfaktaType(r));
@@ -1937,9 +1874,6 @@ if (chunkCity === '') return true;
 // Fel stad rensas alltid bort
 if (chunkCity !== targetCity) return false;
 
-// 🔥 DIN LOGIK: Om användaren har angett ett område (t.ex. Dingle)
-// och vi tittar på en fil som har ett area-fält (ett kontor), 
-// så raderar vi allt som inte matchar exakt.
 if (targetArea && chunkArea && chunkArea !== targetArea) {
 return false;
 }
@@ -1964,12 +1898,8 @@ const isForceAdded = (chunk.score || 0) >= 4000;
 return noVehicle || matchesVehicle || isGeneral || isForceAdded;
 });
 } else {
-console.log("🔓 [OFFICE BYPASS] Kontakt/Utbudsfråga - Släpper igenom kontorsfil och boostar poäng.");
-
 // Boosta kontor_info så den vinner över priser och paket i kontext-fönstret
 filteredResults = topResults.map(chunk => {
-// 🔥 FIX: Om vi har en Sniper-match, dämpa kontors-boosten (999k)
-// så att Sniper-infon (5M) ligger kvar absolut överst.
 if (chunk.type === 'kontor_info' || chunk.type === 'office_info') {
 return { ...chunk, score: hasSniperMatch ? 50000 : 999999 }; 
 }
@@ -1997,8 +1927,6 @@ if (!hasSniperMatch && !isSeasonQuery && (nluResult.intent === 'price_lookup' ||
 
 const serviceToLookup = nluResult.slots.service || query;
 
-console.log(`[PriceResolver] Försöker lösa pris for "${serviceToLookup}" i ${lockedCity || 'okänd stad'}`);
-
 const priceResult = priceResolver.resolvePrice({
 city: lockedCity,
 serviceTerm: serviceToLookup, 
@@ -2007,8 +1935,6 @@ globalFallback: null
 });
 
 if (priceResult.found && Number(priceResult.price) > 0) {
-console.log(`[PriceResolver] ✅ Hittade pris: ${priceResult.price} SEK (${priceResult.source})`);
-
 const bestMatchName = priceResult.matches[0]?.service_name || serviceToLookup;
 const priceText = `PRISUPPGIFT: Priset för ${bestMatchName} i ${lockedCity || 'våra städer'} är exakt ${priceResult.price} SEK.`;
 
@@ -2020,8 +1946,6 @@ score: 999999,
 type: 'price',
 price: priceResult.price
 });
-} else {
-console.log(`[PriceResolver] ❌ Ignorerade ogiltigt pris: ${priceResult.price} (Hittad: ${priceResult.found})`);
 }
 }
 
@@ -2049,7 +1973,6 @@ if (Number(c.price) <= 0) return false;
 if (c.text) {
 const zeroPattern = /(?:\s|\*\*|:)0\s*(?:kr|sek|:-)|(?:kostar|pris).{0,15}\b0\b/i;
 if (zeroPattern.test(c.text)) {
-console.log(`[KILL SWITCH] 🗑️ Raderade nolla i text (Regex): ${c.title}`);
 return false;
 }
 }
@@ -2087,22 +2010,6 @@ retrievedContext = contextParts.join('\n\n');
 let ragResult;
 let finalAnswer;
 
-// 🔥 BRUTALT DEBUG - LOGGA ALLT INNAN OPENAI
-console.log("=".repeat(80));
-console.log("🔥 DEBUG CHECKPOINT - FÖRE OPENAI");
-console.log("=".repeat(80));
-console.log("Query:", query);
-console.log("Mode:", mode);
-console.log("detectedCity:", detectedCity);
-console.log("detectedArea:", detectedArea);
-console.log("detectedVehicleType:", detectedVehicleType);
-console.log("session.locked_context:", JSON.stringify(session.locked_context));
-console.log("nluResult.slots.vehicle:", nluResult.slots.vehicle);
-console.log("Första 200 tecken av context:", retrievedContext.substring(0, 200));
-console.log("=".repeat(80));
-
-console.log("DEBUG: Skickar till OpenAI...");
-
 } catch (searchError) {
 console.error("❌ [SEARCH ERROR]", searchError.message);
 console.error("❌ Stack:", searchError.stack);
@@ -2116,15 +2023,6 @@ error: searchError.message
 
 try {
 ragResult = await generate_rag_answer(query, retrievedContext, lockedCity, detectedArea, isFirstMessage, mode);
-console.log("DEBUG: OpenAI svarade!");
-
-// 🔥 LOGGA SVARET
-console.log("=".repeat(80));
-console.log("🔥 OPENAI RETURNERADE:");
-console.log("=".repeat(80));
-console.log("ragResult.type:", ragResult.type);
-console.log("Första 200 tecken av svar:", ragResult.answer?.substring(0, 200));
-console.log("=".repeat(80));
 
 } catch (e) {
 console.error("!!! OPENAI ERROR:", e.message);
@@ -2323,32 +2221,19 @@ session.linksSentByVehicle[vehicleKey] = true;
 // STEP 8: FINALIZATION & CLEANUP
 appendToSession(sessionId, 'assistant', finalAnswer);
 
-// --- UPPDATERA SESSIONEN I MINNET FÖRST - Vi måste spara det vi räknat ut till sessionen, så att getSessionState()
-// i res-objektet får med sig den senaste datan.
 if (session) {
-session.locked_context = { 
+session.locked_context = {
 city: lockedContext.city || detectedCity || null,
 area: lockedContext.area || detectedArea || null,
 vehicle: lockedContext.vehicle || detectedVehicleType || null
 };
-
-// Spara även flaggor - De uppdateras redan löpande i koden ovan, men bra att veta
-if (session.linksSentByVehicle) {
-}
 }
 
-console.log(`[DEBUG] Slutgiltigt antal chunks: ${topResults.length}`);
-if (topResults.length === 0) {
-console.log(`[DEBUG] VARNING: Resultatet blev tomt! forceHighConfidence: ${forceHighConfidence}, lockedCity: ${lockedCity}`);
-}
-
-// 2. Skicka sedan svaret men behåll ALL din existerande logik för context
 res.json({
 sessionId: sessionId,
-answer: finalAnswer, 
-// ✅ FIX: Inkluderar nu ID så att debug-script kan identifiera chunks
-context: uniqueTopResults.map(r => ({ 
-id: r.id, // 👈 VIKTIGT FÖR DEBUG-SCRIPTET
+answer: finalAnswer,
+context: uniqueTopResults.map(r => ({
+id: r.id,
 title: r.title, 
 text: (r.text || "").slice(0, 200), 
 city: r.city, 
@@ -2375,7 +2260,6 @@ answer: 'Jag förstår inte riktigt vad du menar nu? Kan du omformulera din frå
 sessionId: sessionId
 });
 } finally {
-// ✅ 26/12 RADERA INTE SESSIONEN - State returneras via getSessionState()
 }
 });
 }

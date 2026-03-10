@@ -516,15 +516,20 @@ res.status(500).json({ error: "Failed to claim ticket" });
 // ENDPOINT: /team/assign - Tilldela ärende till specifik agent
 // -------------------------------------------------------------------------
 router.post('/team/assign', authenticateToken, async (req, res) => {
-// 🔒 F2.2: Vanliga agenter får inte tilldela ärenden — kräver support eller admin
-if (req.user.role === 'agent') {
-return res.status(403).json({ error: "Endast admin kan tilldela ärenden." });
-}
 try {
 const { conversationId, targetAgent } = req.body;
 
 if (!conversationId || !targetAgent) {
 return res.status(400).json({ error: "Missing ID or Target" });
+}
+
+// 🔒 F2.2: Admin/support tilldelar fritt.
+// Agenter får bara vidarebefordra ärenden de själva äger.
+if (req.user.role === 'agent') {
+const ticketState = await getV2State(conversationId);
+if (!ticketState || ticketState.owner !== req.user.username) {
+return res.status(403).json({ error: "Du kan bara vidarebefordra dina egna ärenden." });
+}
 }
 
 console.log(`👤 [ASSIGN] ${req.user.username} tilldelar ${conversationId} till ${targetAgent}`);

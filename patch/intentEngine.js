@@ -68,12 +68,16 @@ extractCity(queryLower, currentContextCity) {
 const q = (queryLower || "").toLowerCase();
 
 for (const [alias, city] of Object.entries(this.cityAliases)) {
-if (q.includes(alias.toLowerCase())) return city;
+const aliasNorm = alias.toLowerCase();
+// Använd word boundary för att undvika att "lund" matchar inuti "frölunda"
+const re = new RegExp(`(?:^|[\\s,.-])${escapeRegex(aliasNorm)}(?:$|[\\s,.-])`, 'i');
+if (re.test(q)) return city;
 }
 
 for (const city of this.knownCities) {
 const c = city.toLowerCase();
-if (q.includes(c)) return city;
+const re = new RegExp(`(?:^|[\\s,.-])${escapeRegex(c)}(?:$|[\\s,.-])`, 'i');
+if (re.test(q)) return city;
 }
 
 return currentContextCity || null;

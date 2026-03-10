@@ -55,7 +55,7 @@
 // ⚠️  ╚══════════════════════════════════════════════════════════════╝
 
 // =============================================================================
-// NY FUNKTION: Lås upp specifik sektion i Kontorsvyn
+// LÅS UPP SPECIFIK SEKTION I KONTORSVYN
 // =============================================================================
 window.unlockOfficeSection = function(sectionId, tag, btnElement) {
 const box = document.getElementById(sectionId);
@@ -76,6 +76,82 @@ if (addBtn) addBtn.style.display = 'block';
 box.querySelectorAll('.price-delete-btn').forEach(btn => btn.style.display = 'flex');
 }
 
+// Om det är info-sektionen: aktivera öppettider-kontroller och språk-pills
+if (sectionId === 'box-info') {
+// Visa × på befintliga öppettider-rader
+box.querySelectorAll('.hours-remove-btn').forEach(btn => btn.style.display = 'flex');
+// Visa + Lägg till rad-knappen
+const addHoursBtn = document.getElementById('add-hours-btn');
+if (addHoursBtn) addHoursBtn.style.display = 'block';
+// Aktivera språk-pills: klickbara + visa × på extra pills
+box.querySelectorAll('.lang-pill').forEach(pill => pill.style.cursor = 'pointer');
+box.querySelectorAll('.lang-pill[data-extra="true"] .lang-remove-x').forEach(x => x.style.display = 'inline');
+// Visa + Lägg till språk-knappen
+const addLangBtn = document.getElementById('add-lang-btn');
+if (addLangBtn) addLangBtn.style.display = 'block';
+
+// _toggleLangPill: togglar aktiv/inaktiv stil på en pill
+window._toggleLangPill = function(pill) {
+const active = pill.getAttribute('data-active') === 'true';
+// Om extra pill och man klickar × — ta bort pillen helt
+if (!active === false && pill.getAttribute('data-extra') === 'true') {
+// klick på × i en aktiv extra pill = ta bort
+}
+const nowActive = !active;
+pill.setAttribute('data-active', nowActive);
+// Läs kontorets accentfärg från header-gradienten (sparad på detail-header)
+const oc = document.getElementById('inp-office-color')?.value || '#0071e3';
+pill.style.border = `1px solid ${nowActive ? oc : 'rgba(255,255,255,0.12)'}`;
+pill.style.color = nowActive ? oc : 'rgba(255,255,255,0.3)';
+pill.style.background = nowActive ? oc + '18' : 'transparent';
+pill.style.fontWeight = nowActive ? '600' : '400';
+window._adminFormDirty = true;
+};
+
+// × på extra pills tar bort pillen helt
+box.querySelectorAll('.lang-pill[data-extra="true"] .lang-remove-x').forEach(x => {
+x.onclick = function(e) {
+e.stopPropagation();
+this.closest('.lang-pill').remove();
+window._adminFormDirty = true;
+};
+});
+
+// _addLangPill: lägger till ny pill från textfältet
+window._addLangPill = function() {
+const inp = document.getElementById('inp-lang-new');
+if (!inp) return;
+const val = inp.value.trim();
+if (!val) return;
+const normalized = val.toLowerCase();
+// Kolla dublett
+const existing = document.querySelector(`#lang-pill-group .lang-pill[data-lang="${normalized}"]`);
+if (existing) { inp.value = ''; return; }
+const oc = document.getElementById('inp-office-color')?.value || '#0071e3';
+const group = document.getElementById('lang-pill-group');
+const addBtn = document.getElementById('add-lang-btn');
+const newPill = document.createElement('span');
+newPill.className = 'lang-pill';
+newPill.setAttribute('data-lang', normalized);
+newPill.setAttribute('data-extra', 'true');
+newPill.setAttribute('data-active', 'true');
+newPill.style.cssText = `display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:3px 10px; border-radius:20px; cursor:pointer; transition:all 0.15s; border:1px solid ${oc}; color:${oc}; background:${oc}18; font-weight:600;`;
+newPill.innerHTML = `${val.charAt(0).toUpperCase()+val.slice(1)}<span class="lang-remove-x" style="display:inline; font-size:13px; line-height:1; margin-left:2px; opacity:0.6; cursor:pointer;">×</span>`;
+newPill.onclick = function() { window._toggleLangPill && window._toggleLangPill(this); };
+newPill.querySelector('.lang-remove-x').onclick = function(e) {
+e.stopPropagation();
+newPill.remove();
+window._adminFormDirty = true;
+};
+// Infoga i group — addBtn är ett syskon till group, inte ett barn, så använd appendChild
+group.appendChild(newPill);
+inp.value = '';
+document.getElementById('lang-add-row').style.display = 'none';
+if (addBtn) addBtn.style.display = 'block';
+window._adminFormDirty = true;
+};
+}
+
 // Ändra knappen till "Spara" och gör den aktiv
 btnElement.innerHTML = '💾 Spara';
 btnElement.classList.add('unlocked');
@@ -88,7 +164,7 @@ btnElement.innerHTML = '⏳ Sparar...'; // Visuell laddnings-feedback
 };
 
 // =============================================================================
-// ADMIN — TILLÄGG B: LÄGG TILL TJÄNST PÅ KONTOR (Uppdaterad)
+// LÄGG TILL TJÄNST PÅ KONTOR
 // =============================================================================
 async function openAddServicePanel() {
 const panel = document.getElementById('add-service-panel');
@@ -217,12 +293,11 @@ headerTop.style.borderBottomColor = color;
 headerTop.style.background = `linear-gradient(90deg, ${color}22, transparent)`;
 }
 
-// 2. Uppdatera Avatar-ringen OCH ikonen inuti (Det du störde dig på!)
+// 2. Uppdatera Avatar-ringen och ikonen inuti
 const avatar = detailBox.querySelector('.msg-avatar');
 if (avatar) {
 avatar.style.borderColor = color;
-// Här letar vi upp div:en inuti bubblan. 
-// Eftersom din getAvatarBubbleHTML har "color: ${color}" på inner-diven, uppdaterar vi den här:
+// Letar upp div:en inuti bubblan för att synka ikonfärgen
 const innerIconContainer = avatar.querySelector('.avatar-inner-icon') || avatar.querySelector('.user-avatar div');
 if (innerIconContainer) {
 innerIconContainer.style.color = color;
@@ -251,7 +326,7 @@ const nameTitle = detailBox.querySelector('.detail-subject');
 if (nameTitle) nameTitle.style.setProperty('color', color, 'important');
 }
 
-// KIRURGISK FIX: Synka med sidofältet om det är JAG (currentUser) som ändras
+// Synka sidofältet om det är inloggad agents egna färg
 if (currentUser && username === currentUser.username) {
 // Uppdatera CSS-variabeln som styr HEM-vyn, knappar och all accentfärg globalt
 document.documentElement.style.setProperty('--accent-primary', color);
@@ -264,8 +339,7 @@ if (sideAvatarRing) sideAvatarRing.style.setProperty('border-color', color, 'imp
 if (sideIconContainer) sideIconContainer.style.setProperty('background-color', color, 'important');
 }
 
-// KIRURGISK TILLÄGG: Live-uppdatering av kundvyn (customers-view.js)
-// Körs bara om det är den inloggade agentens egna färg som ändras
+// Live-uppdatering av kundvyn om det är inloggad agents egna färg
 if (currentUser && username === currentUser.username) {
 // 1. Kundkortslistan — vänsterbård och --agent-color på varje kort
 document.querySelectorAll('#customer-list .team-ticket-card').forEach(card => {
@@ -299,7 +373,7 @@ if (notesBtn) notesBtn.style.color = color;
 }
 }
 
-// --- DIN ORIGINAL-LOGIK (RÖR EJ) ---
+// --- ORIGINAL-LOGIK (RÖR EJ) ---
 const cached = usersCache.find(u => u.username === username);
 if (cached) cached.agent_color = color;
 

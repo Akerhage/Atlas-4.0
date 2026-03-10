@@ -1,7 +1,9 @@
-// =============================================================================
-// ATLAS MAIN-CLIENT v.4.0 - DEFINITIV VERSION
-// Klient-only Electron — ansluter mot extern server via SERVER_URL
-// =============================================================================
+// ============================================
+// main-client.js
+// VAD DEN GÖR: Klient-only Electron-app. Skapar loader- och huvudfönster,
+//              hanterar IPC-bryggor och ansluter mot extern server via SERVER_URL.
+// ANVÄNDS AV: Electron (entry point för klientbygget via electron-builder-client.json)
+// ============================================
 
 const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, session, nativeImage } = require('electron');
 const path = require('path');
@@ -102,7 +104,7 @@ function createMainWindow() {
         }
     });
 
-    // CSP Header Override - Tillåter WebSockets (WSS) till din Ngrok-tunnel
+    // CSP Header Override — tillåter WebSockets via Ngrok-tunnel
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
         callback({
             responseHeaders: {
