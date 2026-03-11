@@ -460,6 +460,72 @@ async function runDebug() {
   const contextStr = contextParts.join('\n\n');
   console.log(contextStr.substring(0,2000) + (contextStr.length>2000 ? '\n  [...trunkerad...]' : ''));
 
+  // ── 7.5. LOKAL TILLGÄNGLIGHETS-CHECK ───────────────────────
+  hdr('STEG 7.5 — LOKAL TILLGÄNGLIGHET', C.cyan);
+  let localAvailabilityNote = '';
+
+  if (detectedArea && lockedCity && nluResult.intent !== 'contact_info') {
+    const cityLower = lockedCity.toLowerCase();
+    const areaLower = detectedArea.toLowerCase();
+    const areaWords = new Set(areaLower.split(/\s+/));
+    const cityWords = new Set(cityLower.split(/\s+/));
+    const commonStop = new Set(['kunde','boken','vilken','frågar','börjar','startar','körkort','kör','att','och','eller','men','för','inte','till','från','med','vid','hos','kan','vill','vara']);
+    const queryWords = sanitized
+      .replace(/[?!.,]/g, '')
+      .split(/\s+/)
+      .filter(w => w.length >= 6 && !areaWords.has(w) && !cityWords.has(w) && !commonStop.has(w));
+
+    info(`Query-ord för tjänstmatchning: ${JSON.stringify(queryWords)}`);
+
+    if (queryWords.length > 0) {
+      const hasLocalServiceChunk = allChunks.some(c =>
+        c.city?.toLowerCase() === cityLower &&
+        c.area?.toLowerCase() === areaLower &&
+        (c.type === 'price' || c.type === 'basfakta') &&
+        queryWords.some(w =>
+          (c.service_name || '').toLowerCase().includes(w) ||
+          (c.title || '').toLowerCase().includes(w) ||
+          (c.text || '').toLowerCase().includes(w)
+        )
+      );
+
+      if (hasLocalServiceChunk) {
+        ok(`Lokal tjänst hittad för "${detectedArea}" — ingen systemnotering behövs`);
+      } else {
+        const alternatives = [...new Set(
+          allChunks
+            .filter(c =>
+              c.city?.toLowerCase() === cityLower &&
+              c.area && c.area.toLowerCase() !== areaLower &&
+              c.type === 'price' &&
+              queryWords.some(w =>
+                (c.service_name || '').toLowerCase().includes(w) ||
+                (c.title || '').toLowerCase().includes(w)
+              )
+            )
+            .map(c => c.area)
+        )].slice(0, 4);
+
+        if (alternatives.length > 0) {
+          localAvailabilityNote = `\n\n[SYSTEMNOTERING — LOKAL TILLGÄNGLIGHET: Tjänsten kunden frågar om erbjuds INTE vid kontoret i ${detectedArea}. Matchande tjänst finns däremot vid följande kontor i ${lockedCity}: ${alternatives.join(', ')}. Du MÅSTE svara tydligt att tjänsten INTE erbjuds i ${detectedArea}, och sedan nämna dessa alternativa kontor som kunden kan vända sig till.]`;
+          warn(`Ingen lokal tjänst i "${detectedArea}". Alternativ i ${lockedCity}: ${alternatives.join(', ')}`);
+        } else {
+          localAvailabilityNote = `\n\n[SYSTEMNOTERING — LOKAL TILLGÄNGLIGHET: Tjänsten kunden frågar om verkar inte erbjudas vid kontoret i ${detectedArea}, och inga andra matchande kontor i ${lockedCity} hittades. Svara ärligt att du inte kan bekräfta att tjänsten erbjuds här och hänvisa kunden till hemsidan eller att kontakta supporten för hjälp.]`;
+          warn(`Ingen lokal tjänst i "${detectedArea}" och inga alternativ hittades`);
+        }
+      }
+    } else {
+      info('För få distinkta query-ord — hoppar över lokal tillgänglighets-check');
+    }
+  } else {
+    info('Inget detekterat område — hoppar över lokal tillgänglighets-check');
+  }
+
+  if (localAvailabilityNote) {
+    console.log(`\n${C.yellow}  SYSTEMNOTERING som injiceras:${C.reset}`);
+    console.log(`${C.dim}${localAvailabilityNote}${C.reset}`);
+  }
+
   // ── 8. AI-SVAR ─────────────────────────────────────────────
   hdr('STEG 8 — OPENAI-ANROP', C.cyan);
 
@@ -474,7 +540,7 @@ async function runDebug() {
 
   const systemPrompt = `Du är Atlas — en hjälpsam kundtjänstassistent för en svensk trafikskola.
 Svara ENDAST utifrån kontexten nedan. Svara alltid på svenska.
-Använd **fetstil** för priser och viktiga fakta.`;
+Använd **fetstil** för priser och viktiga fakta.${localAvailabilityNote}`;
 
   const userContent = `Fråga: ${userQuery}\n\nKONTEXT:\n${contextStr}`;
 
