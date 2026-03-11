@@ -40,6 +40,7 @@ const imapSimple = require('imap-simple');
 const { simpleParser } = require('mailparser');
 const PDFDocument = require('pdfkit');
 const { Readable } = require('stream');
+const rateLimit = require('express-rate-limit');
 const { 
 db, getUserByUsername, 
 createUser, 
@@ -155,7 +156,9 @@ console.log(`✅ [Settings] IMAP:${imapEnabled} Inbound:${imapInbound} Backup:${
 // === MAIL CONFIGURATION (NODEMAILER) ===
 // `let` istället för `const` så att transporter kan återskapas vid hot-reload av e-postuppgifter
 let mailTransporter = nodemailer.createTransport({
-service: 'gmail',
+host: 'smtp-relay.brevo.com',
+port: 587,
+secure: false,
 auth: {
 user: process.env.EMAIL_USER,
 pass: process.env.EMAIL_PASS
@@ -166,7 +169,9 @@ pass: process.env.EMAIL_PASS
 function recreateMailTransporter() {
 try {
 mailTransporter = nodemailer.createTransport({
-service: 'gmail',
+host: 'smtp-relay.brevo.com',
+port: 587,
+secure: false,
 auth: {
 user: process.env.EMAIL_USER,
 pass: process.env.EMAIL_PASS
@@ -547,6 +552,34 @@ app.use(cors({
 origin: '*',
 methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
 allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning']
+}));
+
+// =============================================================================
+// 🛡️ RATE LIMITING — Skydda dyra och känsliga endpoints mot missbruk
+// =============================================================================
+// Kundchatt AI (anropar OpenAI) — max 30 meddelanden/minut per IP
+app.use('/api/customer/message', rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'För många meddelanden. Vänta en stund och försök igen.' }
+}));
+// Formulärärenden — max 5 per 15 min per IP (stoppar skräppost)
+app.use('/api/customer/message-form', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'För många inskickade formulär. Försök igen om en stund.' }
+}));
+// Filuppladdning — max 20 per timme per IP
+app.use('/api/upload', rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'För många uppladdningar. Försök igen om en stund.' }
 }));
 
 // Request Logger Middleware
@@ -1198,7 +1231,8 @@ const referencesHeader = allMessages
 
 // -- D. Konfigurera Mail --
 const mailOptions = {
-from: `"My Driving Academy Support" <${process.env.EMAIL_USER}>`,
+from: `"My Driving Academy Support" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+replyTo: process.env.IMAP_USER || process.env.EMAIL_USER,
 to: customerEmail,
 subject: cleanSubject,
 text: message,
@@ -1382,7 +1416,8 @@ VALUES (?, 'message', 1, ?, ?, ?, ?, 'agent')`,
 
 // -- D. Skicka mail --
 const mailOptions = {
-from: `"My Driving Academy Support" <${process.env.EMAIL_USER}>`,
+from: `"My Driving Academy Support" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+replyTo: process.env.IMAP_USER || process.env.EMAIL_USER,
 to: customerEmail,
 subject: finalSubject,
 text: message,
@@ -1602,8 +1637,8 @@ isScanning = true;
 // ✅ KORREKT STRUKTUR FÖR IMAP-SIMPLE (MED ALLA MÅSVINGAR)
 const imapConfig = {
 imap: {
-user: process.env.EMAIL_USER,
-password: process.env.EMAIL_PASS,
+user: process.env.IMAP_USER || process.env.EMAIL_USER,
+password: process.env.IMAP_PASS || process.env.EMAIL_PASS,
 host: 'imap.gmail.com',
 port: 993,
 tls: true,
@@ -1788,14 +1823,27 @@ mailContent = parsed.html.replace(/<[^>]*>?/gm, '');
 console.error(`⚠️ Parser-fel: ${parseErr.message}`);
 }
 
-// Rensa bort gamla citat (Allt under "Den ... skrev:" eller "On ... wrote:")
-let cleanMessage = mailContent
-.split(/On .* wrote:/i)[0]
-.split(/Den .* skrev:/i)[0]
-.split(/-----Original Message-----/i)[0]
-.split(/Från: /i)[0]
-.split(/_{10,}/)[0]   // Outlook-separator (________________________________)
-.trim();
+// Rensa bort gamla citat — rad-för-rad, stanna vid citatmarkör
+const quoteStopPatterns = [
+  /^On .+ wrote:?$/i,
+  /^Den .+ skrev:?$/i,
+  /^-----Original Message-----/i,
+  /^Från:/i,
+  /^From:/i,
+  /^_{10,}/,
+];
+const cleanLines = [];
+for (const line of mailContent.split('\n')) {
+  const trimmed = line.trim();
+  if (trimmed.startsWith('>')) break;
+  if (quoteStopPatterns.some(p => p.test(trimmed))) break;
+  // Ta bort Brevo/Sendinblue spårningslänkar
+  const cleaned = trimmed
+    .replace(/\[https?:\/\/[^\]]+(?:brevo|sendinblue|sendibt)[^\]]*\]/gi, '')
+    .replace(/https?:\/\/\S+(?:brevo|sendinblue|sendibt)\S*/gi, '');
+  cleanLines.push(cleaned);
+}
+let cleanMessage = cleanLines.join('\n').trim();
 
 // FIX: Om städningen raderade allt (Outlook-bugg), använd originaltexten
 if (cleanMessage.length < 2 && mailContent.length > 5) {
@@ -2083,10 +2131,27 @@ try {
 const dir = backupPath;
 if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 const ts  = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
-const src = getWritablePath('atlas.db');
 const dst = path.join(dir, `atlas_${ts}.db`);
-fs.copyFileSync(src, dst);
-console.log(`✅ [Backup] atlas.db → ${dst}`);
+
+// VACUUM INTO skapar en konsistent kopia inkl. WAL-checkpoint (säkrare än copyFileSync)
+db.run(`VACUUM INTO '${dst}'`, (err) => {
+  if (err) { console.error('❌ [Backup] Fel:', err.message); return; }
+  console.log(`✅ [Backup] atlas.db → ${dst}`);
+
+  // Behåll max 14 senaste backuper (7 dagar × 2/dag), radera äldre
+  try {
+    const files = fs.readdirSync(dir)
+      .filter(f => f.startsWith('atlas_') && f.endsWith('.db'))
+      .map(f => ({ name: f, time: fs.statSync(path.join(dir, f)).mtimeMs }))
+      .sort((a, b) => b.time - a.time);
+    files.slice(14).forEach(f => {
+      fs.unlinkSync(path.join(dir, f.name));
+      console.log(`🗑️ [Backup] Raderade gammal backup: ${f.name}`);
+    });
+  } catch (cleanErr) {
+    console.error('⚠️ [Backup] Rensning misslyckades:', cleanErr.message);
+  }
+});
 } catch (e) {
 console.error('❌ [Backup] Fel:', e.message);
 }

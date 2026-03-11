@@ -147,11 +147,14 @@ res.json({ success: true });
 // POST /api/auth/seed - Create Initial User (Development Only)
 // -------------------------------------------------------------------------
 router.post('/auth/seed', async (req, res) => {
-// 🔒 F1.2: Blockerad i produktion — använd admin-panelen för att skapa användare
-if (process.env.NODE_ENV === 'production') {
-return res.status(403).json({ error: "Not allowed in production" });
-}
+// 🔒 Blockeras automatiskt om det redan finns användare — fungerar bara vid tom databas (första installation)
 try {
+const count = await new Promise((resolve, reject) =>
+  db.get("SELECT COUNT(*) as c FROM users", [], (err, row) => err ? reject(err) : resolve(row?.c ?? 1))
+);
+if (count > 0) {
+  return res.status(403).json({ error: "Setup already complete" });
+}
 const { username, password } = req.body;
 const hash = await bcrypt.hash(password, 10);
 await createUser(username, hash);

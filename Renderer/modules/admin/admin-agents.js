@@ -452,7 +452,7 @@ ticketListEl.innerHTML = tickets.length ? tickets.map((t, idx) => `
 style="border-left: 3px solid ${styles.main} !important; --atp-color: ${styles.main} !important;">
 <div style="flex:1; min-width:0;">
 <div class="atp-sender">${t.contact_name || t.sender || 'Okänd kund'}</div>
-<div class="atp-subject">${t.subject || 'Inget ämne'}</div>
+<div class="atp-subject">${t.preview || t.last_message || t.question || t.subject || 'Inget ämne'}</div>
 </div>
 <button class="atp-note-btn"
 onclick="event.stopPropagation(); openNotesModal('${t.conversation_id || t.id}')"

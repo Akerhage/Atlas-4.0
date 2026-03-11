@@ -218,6 +218,7 @@ const CITY_ALIASES = {
 'djursholm': 'Stockholm',
 'enskededalen': 'Stockholm',
 'kungsholmen': 'Stockholm',
+'lindhagsplan': 'Stockholm',
 'osteraker': 'Stockholm',
 'osteråker': 'Stockholm',
 'österaker': 'Stockholm',
@@ -243,6 +244,8 @@ const CITY_ALIASES = {
 'stora holm': 'Göteborg',
 'storaholm': 'Göteborg',
 'ullevi': 'Göteborg',
+'frölunda': 'Göteborg',
+'frolunda': 'Göteborg',
 'vastra frolunda': 'Göteborg',
 'västra frölunda': 'Göteborg',
 'hovas': 'Göteborg',
@@ -258,8 +261,9 @@ const CITY_ALIASES = {
 'malmö': 'Malmö',
 'bulltofta': 'Malmö',
 'limhamn': 'Malmö',
-'jagersro': 'Malmö',
 'jägersro': 'Malmö',
+'jagersro': 'Malmö',
+'hamnen': 'Malmö',
 'sodervarn': 'Malmö',
 'sodervärn': 'Malmö',
 'södervarn': 'Malmö',
@@ -594,6 +598,7 @@ Du MÅSTE följa dessa regler slaviskt, även om kontexten verkar vag:
 - ANVÄND ENDAST information från KONTEXTEN. Skapa aldrig ny fakta.
 - ÄNDRA aldrig pris, tider, telefonnummer, eller andra fakta från kontexten.
 - Säg aldrig bokningslänkar — servern lägger in dessa automatiskt.
+- **LOKALT UTBUD (KRITISKT):** Bekräfta ALDRIG att en specifik kurs, tjänst eller utbildning erbjuds på ett specifikt kontor eller ort, om det inte finns ett chunk i kontexten som explicit och direkt bekräftar detta för just det kontoret/orten. Generell kursinformation, nationella priser eller basfakta om en kurs bekräftar INTE att kursen erbjuds lokalt. Om lokal bekräftelse saknas: tillämpa FALLBACK-regeln nedan.
 
 // === KANONFRASER (Använd exakt när ämnet tas upp) ===
 - Testlektion: "Testlektion (även kallad provlektion eller prova-på) är ett nivåtest för bil-elever och kan endast bokas en gång per elev."
