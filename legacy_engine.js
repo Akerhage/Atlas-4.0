@@ -551,7 +551,7 @@ const globalAvailableTools = [
 // ====================================================================
 
 // === SYSTEM PROMPT FUNCTION AND RAG ANSWER GENERATOR
-async function generate_rag_answer(userQuestion, retrievedContext, detectedCity, detectedArea, isFirstMessage = false, mode = 'knowledge') {
+async function generate_rag_answer(userQuestion, retrievedContext, detectedCity, detectedArea, isFirstMessage = false, mode = 'knowledge', localAvailabilityNote = '') {
 
 // === HÄLSNINGS-LOGIK
 let timeGreeting = "";
@@ -722,6 +722,11 @@ Svara på frågan baserat på den bifogade kontexten men nämn att vi finns på 
 }
 }
 }
+}
+
+// Injicera lokal tillgänglighetsnotering om sådan finns
+if (localAvailabilityNote) {
+systemPrompt += localAvailabilityNote;
 }
 
 // === TRIGGERS
@@ -2012,6 +2017,62 @@ contextTokens += estimatedTokens;
 }
 retrievedContext = contextParts.join('\n\n');
 
+// === SMART LOKAL TILLGÄNGLIGHETS-KONTROLL
+// Om kunden frågar om en specifik tjänst på ett specifikt område: kolla om det faktiskt finns
+// lokal data för det kontoret. Om inte → hitta alternativa kontor i samma stad som har tjänsten.
+let localAvailabilityNote = '';
+if (detectedArea && (lockedCity || detectedCity) && nluResult && nluResult.intent !== 'contact_info') {
+const cityLower = (lockedCity || detectedCity).toLowerCase();
+const areaLower = detectedArea.toLowerCase();
+const areaWords = new Set(areaLower.split(/\s+/));
+const cityWords = new Set(cityLower.split(/\s+/));
+
+// Extrakt meningsbärande serviceord från frågan (6+ tecken, ej ortsnamn)
+const commonStop = new Set(['kunde', 'boken', 'vilken', 'frågar', 'börjar', 'startar', 'körkort', 'kör', 'att', 'och', 'eller', 'men', 'för', 'inte', 'till', 'från', 'med', 'vid', 'hos', 'kan', 'vill', 'vara']);
+const queryWords = query.toLowerCase()
+.replace(/[?!.,]/g, '')
+.split(/\s+/)
+.filter(w => w.length >= 6 && !areaWords.has(w) && !cityWords.has(w) && !commonStop.has(w));
+
+if (queryWords.length > 0) {
+// Kolla om det finns lokal prischunk för detta kontor + tjänst
+const hasLocalServiceChunk = allChunks.some(c =>
+c.city?.toLowerCase() === cityLower &&
+c.area?.toLowerCase() === areaLower &&
+(c.type === 'price' || c.type === 'basfakta') &&
+queryWords.some(w =>
+(c.service_name || '').toLowerCase().includes(w) ||
+(c.title || '').toLowerCase().includes(w) ||
+(c.text || '').toLowerCase().includes(w)
+)
+);
+
+if (!hasLocalServiceChunk) {
+// Hitta alternativa kontor i samma stad med matchande tjänst
+const alternatives = [...new Set(
+allChunks
+.filter(c =>
+c.city?.toLowerCase() === cityLower &&
+c.area && c.area.toLowerCase() !== areaLower &&
+c.type === 'price' &&
+queryWords.some(w =>
+(c.service_name || '').toLowerCase().includes(w) ||
+(c.title || '').toLowerCase().includes(w)
+)
+)
+.map(c => c.area)
+)].slice(0, 4);
+
+const cityName = lockedCity || detectedCity;
+if (alternatives.length > 0) {
+localAvailabilityNote = `\n\n[SYSTEMNOTERING — LOKAL TILLGÄNGLIGHET: Tjänsten kunden frågar om erbjuds INTE vid kontoret i ${detectedArea}. Matchande tjänst finns däremot vid följande kontor i ${cityName}: ${alternatives.join(', ')}. Du MÅSTE svara tydligt att tjänsten INTE erbjuds i ${detectedArea}, och sedan nämna dessa alternativa kontor som kunden kan vända sig till.]`;
+} else {
+localAvailabilityNote = `\n\n[SYSTEMNOTERING — LOKAL TILLGÄNGLIGHET: Tjänsten kunden frågar om verkar inte erbjudas vid kontoret i ${detectedArea}, och inga andra matchande kontor i ${cityName} hittades. Svara ärligt att du inte kan bekräfta att tjänsten erbjuds här och hänvisa kunden till hemsidan eller att kontakta supporten för hjälp.]`;
+}
+}
+}
+}
+
 let ragResult;
 let finalAnswer;
 
@@ -2027,7 +2088,7 @@ error: searchError.message
 }
 
 try {
-ragResult = await generate_rag_answer(query, retrievedContext, lockedCity, detectedArea, isFirstMessage, mode);
+ragResult = await generate_rag_answer(query, retrievedContext, lockedCity, detectedArea, isFirstMessage, mode, localAvailabilityNote);
 
 } catch (e) {
 console.error("!!! OPENAI ERROR:", e.message);
