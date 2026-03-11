@@ -2064,7 +2064,7 @@ queryWords.some(w =>
 (c.title || '').toLowerCase().includes(w) ||
 (c.text || '').toLowerCase().includes(w)
 ) ||
-(detectedVehicle && c.vehicle === detectedVehicle)
+(detectedVehicleType && c.vehicle === detectedVehicleType)
 )
 );
 
@@ -2082,7 +2082,7 @@ queryWords.some(w =>
 (c.service_name || '').toLowerCase().includes(w) ||
 (c.title || '').toLowerCase().includes(w)
 ) ||
-(detectedVehicle && c.vehicle === detectedVehicle)
+(detectedVehicleType && c.vehicle === detectedVehicleType)
 )
 )
 .map(c => c.area)
