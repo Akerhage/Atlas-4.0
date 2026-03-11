@@ -109,7 +109,7 @@ const VEHICLE_MAP = {
   'AM':     ['am','moped','moppe'],
   'BIL':    ['bil','personbil','b-körkort'],
   'MC':     ['mc','motorcykel','a1','a2','a-körkort'],
-  'INTRO':  ['introduktionskurs','handledarkurs','handledare']
+  'INTRO':  ['introduktionskurs','handledarkurs','handledare','introkurs','handledar']
 };
 
 const UNIFIED_SYNONYMS = {

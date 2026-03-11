@@ -326,7 +326,7 @@ const VEHICLE_MAP = {
 'AM': ['am', 'moped', 'mopedutbildning', 'moppe', 'klass 1'],
 'BIL': ['bil', 'personbil', 'b-körkort', 'b körkort', 'körlektion bil', 'körlektion personbil'],
 'MC': ['mc', 'motorcykel', 'a1', 'a2', 'a-körkort', '125cc', '125 cc', 'lätt motorcykel', 'tung motorcykel'],
-'INTRO': ['introduktionskurs', 'handledarkurs', 'handledare']
+'INTRO': ['introduktionskurs', 'handledarkurs', 'handledare', 'introkurs', 'handledar']
 };
 
 const UNIFIED_SYNONYMS = {
