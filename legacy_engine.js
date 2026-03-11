@@ -1116,12 +1116,12 @@ allChunks = [...tempChunks];
 // Hjälpfunktion för att extrahera fordonstyp
 function extractVehicle(text) {
 const lower = (text || "").toLowerCase();
+if (/(^|\b)(introduktion|handledarkurs|handledare|handledarutbildning)\b/.test(lower)) return "INTRO";
 if (/(^|\b)(am|moped|moppe)\b/.test(lower)) return "AM";
 if (/(^|\b)(b96|be|släp)\b/.test(lower)) return "SLÄP";
-if (/(^|\b)(bil|personbil)\b/.test(lower)) return "BIL";
 if (/(^|\b)(mc|a1|a2|motorcykel|motorcyklar)\b/.test(lower)) return "MC";
 if (/(^|\b)(lastbil|c1|c|ce|ykb)\b/.test(lower)) return "LASTBIL";
-if (/(^|\b)(introduktion|handledarkurs|handledare|handledarutbildning)\b/.test(lower)) return "INTRO";
+if (/(^|\b)(bil|personbil)\b/.test(lower)) return "BIL";
 return null;
 }
 

@@ -140,12 +140,12 @@ const files = fs.readdirSync(KNOWLEDGE_PATH);
 // Extrahera fordonstyp från tjänstnamn
 function extractVehicleFromService(text) {
   const lower = (text||'').toLowerCase();
+  if (/introduktion|handledare/.test(lower)) return 'INTRO';
   if (/\bam\b|\bmoped\b/.test(lower))   return 'AM';
   if (/\bmc\b|\ba1\b|\ba2\b/.test(lower)) return 'MC';
-  if (/\bbil\b|\bpersonbil\b/.test(lower)) return 'BIL';
   if (/\blastbil\b|\b(c1?e?)\b/.test(lower)) return 'LASTBIL';
   if (/\bsläp\b|\bb96\b/.test(lower))   return 'SLÄP';
-  if (/introduktion|handledare/.test(lower)) return 'INTRO';
+  if (/\bbil\b|\bpersonbil\b/.test(lower)) return 'BIL';
   return null;
 }
 
