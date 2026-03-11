@@ -13,8 +13,8 @@
 <title>Atlas</title>
 <!-- Atlas UI: CSS-variabler, layout, knappar, modaler -->
 <link rel="stylesheet" href="./assets/css/style.css">
-<!-- Mobilanpassning — laddas ENBART på skärmar ≤ 768px (påverkar ej Electron/desktop) -->
-<link rel="stylesheet" media="screen and (max-width: 768px)" href="./assets/css/mobile.css">
+<!-- Mobilanpassning — laddas ENBART på skärmar ≤ 480px (påverkar ej Electron/desktop) -->
+<link rel="stylesheet" media="screen and (max-width: 480px)" href="./assets/css/mobile.css">
 <!-- Quill Rich Text Editor: stilar -->
 <link href="./assets/css/quill.snow.css" rel="stylesheet">
 <!-- Kontorsfärgstema (byts dynamiskt av renderer.js) -->
@@ -591,7 +591,7 @@ Admin
 <!-- Mobil-toggle: stänger/öppnar sidomenyn. Inline script körs direkt, påverkar ej desktop. -->
 <script>
 (function () {
-  if (window.innerWidth > 768) return;
+  if (window.innerWidth > 480) return;
   var btn     = document.getElementById('mobile-hamburger');
   var overlay = document.getElementById('mobile-overlay');
   var sidebar = document.querySelector('.sidebar');
