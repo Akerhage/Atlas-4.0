@@ -482,10 +482,13 @@ async function runDebug() {
         c.city?.toLowerCase() === cityLower &&
         c.area?.toLowerCase() === areaLower &&
         (c.type === 'price' || c.type === 'basfakta') &&
-        queryWords.some(w =>
-          (c.service_name || '').toLowerCase().includes(w) ||
-          (c.title || '').toLowerCase().includes(w) ||
-          (c.text || '').toLowerCase().includes(w)
+        (
+          queryWords.some(w =>
+            (c.service_name || '').toLowerCase().includes(w) ||
+            (c.title || '').toLowerCase().includes(w) ||
+            (c.text || '').toLowerCase().includes(w)
+          ) ||
+          (detectedVehicle && c.vehicle === detectedVehicle)
         )
       );
 
@@ -498,9 +501,12 @@ async function runDebug() {
               c.city?.toLowerCase() === cityLower &&
               c.area && c.area.toLowerCase() !== areaLower &&
               c.type === 'price' &&
-              queryWords.some(w =>
-                (c.service_name || '').toLowerCase().includes(w) ||
-                (c.title || '').toLowerCase().includes(w)
+              (
+                queryWords.some(w =>
+                  (c.service_name || '').toLowerCase().includes(w) ||
+                  (c.title || '').toLowerCase().includes(w)
+                ) ||
+                (detectedVehicle && c.vehicle === detectedVehicle)
               )
             )
             .map(c => c.area)
