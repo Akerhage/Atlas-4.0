@@ -1453,6 +1453,9 @@ if (nluResult.intent === 'contact_info') mode = 'knowledge';
 
 let retrievedContext = "";
 let topResults = [];
+let localAvailabilityNote = '';
+let ragResult;
+let finalAnswer;
 
 try {
 
@@ -2036,7 +2039,6 @@ retrievedContext = contextParts.join('\n\n');
 // === SMART LOKAL TILLGÄNGLIGHETS-KONTROLL
 // Om kunden frågar om en specifik tjänst på ett specifikt område: kolla om det faktiskt finns
 // lokal data för det kontoret. Om inte → hitta alternativa kontor i samma stad som har tjänsten.
-let localAvailabilityNote = '';
 if (detectedArea && (lockedCity || detectedCity) && nluResult && nluResult.intent !== 'contact_info') {
 const cityLower = (lockedCity || detectedCity).toLowerCase();
 const areaLower = detectedArea.toLowerCase();
@@ -2088,9 +2090,6 @@ localAvailabilityNote = `\n\n[SYSTEMNOTERING — LOKAL TILLGÄNGLIGHET: Tjänste
 }
 }
 }
-
-let ragResult;
-let finalAnswer;
 
 } catch (searchError) {
 console.error("❌ [SEARCH ERROR]", searchError.message);
