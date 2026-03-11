@@ -1341,6 +1341,22 @@ else if (q.includes('am') || q.includes('moped')) nluResult.slots.service = 'AM'
 else if (q.includes('mc') || q.includes('motorcykel')) nluResult.slots.service = 'MC';
 }
 
+// === FALLBACK: Förkortade ortsnamn för flervords-areas (ex. "frölunda" → "västra frölunda")
+// IntentEngine matchar bara exakt "västra frölunda" — detta fångar kortformer
+if (!nluResult.slots.area && nluResult.slots.city) {
+const qLow = sanitizedQuery.toLowerCase();
+const cityLow = nluResult.slots.city.toLowerCase();
+for (const [areaName, areaCity] of Object.entries(knownAreas)) {
+if (areaCity.toLowerCase() !== cityLow) continue;
+if (!areaName.includes(' ')) continue; // Enordiga areas hanteras redan av IntentEngine
+const distinctWords = areaName.split(/\s+/).filter(w => w.length >= 6);
+if (distinctWords.some(w => qLow.includes(w))) {
+nluResult.slots.area = areaName;
+break;
+}
+}
+}
+
 // ====================================================================
 // STEP 3: RESOLUTION
 // ====================================================================
