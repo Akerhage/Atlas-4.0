@@ -341,7 +341,8 @@ const alterColumns = [
 "ALTER TABLE chat_v2_state ADD COLUMN phone TEXT",
 "ALTER TABLE chat_v2_state ADD COLUMN name TEXT",
 "ALTER TABLE chat_v2_state ADD COLUMN source TEXT",
-"ALTER TABLE chat_v2_state ADD COLUMN is_archived INTEGER DEFAULT 0"
+  "ALTER TABLE chat_v2_state ADD COLUMN is_archived INTEGER DEFAULT 0",
+  "ALTER TABLE users ADD COLUMN allowed_views TEXT DEFAULT NULL"
 ];
 
 alterColumns.forEach(sql => {
@@ -696,7 +697,7 @@ function getUserByUsername(username) {
 return new Promise((resolve, reject) => {
 // Vi lägger till de nya kolumnerna i SELECT-frågan
 db.get(
-"SELECT id, username, password_hash, role, agent_color, avatar_id, status_text, routing_tag, display_name FROM users WHERE username = ?",
+"SELECT id, username, password_hash, role, agent_color, avatar_id, status_text, routing_tag, display_name, allowed_views FROM users WHERE username = ?",
 [username.toLowerCase()], // Tvingar sökningen till små bokstäver
 (err, row) => {
 if (err) reject(err);

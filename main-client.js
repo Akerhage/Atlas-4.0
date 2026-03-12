@@ -5,7 +5,7 @@
 // ANVÄNDS AV: Electron (entry point för klientbygget via electron-builder-client.json)
 // ============================================
 
-const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, session, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, session, nativeImage, Tray, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const dotenv = require('dotenv');
@@ -14,6 +14,8 @@ const os = require('os');
 // GLOBAL STATE
 let mainWindow = null;
 let loaderWindow = null;
+let tray = null;
+let forceQuit = false;
 let config = {};
 
 // Single Instance Lock
@@ -93,14 +95,20 @@ function createMainWindow() {
     const indexPath = getRendererPath('index.html');
 
     mainWindow = new BrowserWindow({
-        width: 1400, height: 1000, show: false,
+        width: 1600, height: 950,
+        minWidth: 1280, minHeight: 760,
+        center: true,
+        show: false,
         icon: getRendererPath('assets/icons/app/icon.ico'),
         autoHideMenuBar: true,
+        titleBarStyle: 'hidden',
+        titleBarOverlay: { color: '#0a0f1a', symbolColor: '#00d4b4', height: 36 },
         webPreferences: { 
             preload: path.join(__dirname, 'preload.js'), 
             contextIsolation: true, 
             nodeIntegration: false,
-            sandbox: false
+            sandbox: false,
+            backgroundThrottling: false
         }
     });
 
@@ -127,11 +135,20 @@ function createMainWindow() {
         if (loaderWindow) { loaderWindow.close(); loaderWindow = null; }
         mainWindow.show();
         mainWindow.focus();
+        // Lås zoom — förhindrar att Ctrl+scroll förstör layouten
+        mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
+    });
+
+    // Stäng till tray istället för att avsluta helt
+    mainWindow.on('close', (e) => {
+        if (!forceQuit) {
+            e.preventDefault();
+            mainWindow.hide();
+        }
     });
 
     mainWindow.on('closed', () => {
         mainWindow = null;
-        app.quit(); 
     });
 }
 
@@ -141,6 +158,23 @@ function createMainWindow() {
 
 app.whenReady().then(async () => {
     createLoaderWindow();
+
+    // Tray-ikon — använder samma ikon som fönstret
+    const iconPath = getRendererPath('assets/icons/app/icon.ico');
+    tray = new Tray(nativeImage.createFromPath(iconPath));
+    tray.setToolTip('Atlas');
+    const trayMenu = Menu.buildFromTemplate([
+        { label: 'Öppna Atlas', click: () => { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } } },
+        { type: 'separator' },
+        { label: 'Avsluta Atlas', click: () => { forceQuit = true; app.quit(); } }
+    ]);
+    tray.setContextMenu(trayMenu);
+    tray.on('click', () => {
+        if (mainWindow) {
+            if (mainWindow.isVisible()) { mainWindow.focus(); }
+            else { mainWindow.show(); mainWindow.focus(); }
+        }
+    });
 
     // Triggar server-ready efter 1.5 sekunder för att simulera nätverkscheck
     setTimeout(() => {
@@ -156,7 +190,7 @@ app.whenReady().then(async () => {
 });
 
 app.on('will-quit', () => globalShortcut.unregisterAll());
-app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+app.on('window-all-closed', () => { /* Appen lever kvar i tray — inget här */ });
 
 // =============================================================================
 // IPC HANDLERS

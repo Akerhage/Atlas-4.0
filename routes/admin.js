@@ -426,6 +426,36 @@ res.status(500).json({ error: "Internt serverfel" });
 }
 });
 
+// =====================================================================
+// 🔐 ADMIN — VY-BEHÖRIGHETER (RBAC)
+// PUT /api/admin/user-views/:username
+// Body: { allowed_views: ["inbox","my-tickets"] } eller null för att ta bort begränsning
+// =====================================================================
+router.put('/api/admin/user-views/:username', authenticateToken, (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+
+  const { username } = req.params;
+  const { allowed_views } = req.body;
+
+  // null = inga begränsningar (visa allt), array = begränsa till listade vyer
+  const value = Array.isArray(allowed_views) ? JSON.stringify(allowed_views) : null;
+
+  db.run("UPDATE users SET allowed_views = ? WHERE username = ?", [value, username], (err) => {
+    if (err) {
+      console.error('[VIEWS] Kunde inte spara vy-behörigheter:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    console.log(`✅ [VIEWS] Uppdaterade allowed_views för @${username}: ${value}`);
+
+    // 🔥 LIVE-UPPDATERING: Meddela agentens klient direkt
+    if (typeof io !== 'undefined') {
+      io.emit('agent:views_updated', { username, allowed_views: value });
+    }
+
+    res.json({ success: true, allowed_views: value });
+  });
+});
+
 // Hämta ärenden för ett specifikt kontor (Används i Admin -> Kontor)
 // Alla autentiserade agenter kan läsa — bara skrivoperationer kräver admin/support
 router.get('/api/admin/office-tickets/:tag', authenticateToken, async (req, res) => {

@@ -152,10 +152,14 @@ detailBox.innerHTML = `
 <div class="msg-avatar" style="width:60px; height:60px; border: 3px solid ${styles.main}; font-size:24px;">
 ${getAvatarBubbleHTML(u, "100%")}
 </div>
-<div>
-<h2 class="detail-subject">${displayTitle}</h2>
-<div class="header-pills-row">${pillsHTML}</div>
+<div style="display:flex; flex-direction:column; align-items:flex-start; gap:4px;">
+<h2 class="detail-subject" style="font-size:20px; font-weight:800; margin:0;">${displayTitle}</h2>
+<div class="header-pills-row" style="justify-content:flex-start;">${pillsHTML}</div>
 </div>
+</div>
+
+<div style="flex:1; display:flex; justify-content:center; align-items:center;">
+${tickets.length > 0 ? `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;" onclick="openTicketReader(0,'${username}')" title="Öppna ärendebläddaren"><span style="background:rgba(255,255,255,0.05);border:1px solid ${styles.main}55;border-radius:20px;padding:4px 14px;font-size:10px;color:${styles.main};white-space:nowrap;display:inline-flex;align-items:center;gap:5px;">🔥 ${tickets.length} Aktiva ärenden</span><div style="font-size:9px;opacity:0.65;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">${window._agentOwnerTickets?.length > 0 ? `<span style="color:${styles.main}99;">${window._agentOwnerTickets.length} tilldelade</span>` : ''}${window._agentRoutingTickets?.length > 0 ? `<span>+${window._agentRoutingTickets.length} via kontor</span>` : ''}</div></div>` : `<span style="font-size:10px; opacity:0.25;">Inga aktiva ärenden</span>`}
 </div>
 
 <div class="detail-footer-toolbar" style="background:transparent; border:none; padding:0; gap:10px;">
@@ -173,44 +177,122 @@ ${actionsHTML}
 
 <div class="detail-body" style="padding:25px; display:flex; flex-direction:column; gap:20px; overflow-y:auto; flex:1; min-height:0;">
 
-<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-<div class="admin-stat-card"
-${tickets.length > 0 ? `onclick="(function(){window._savedTicketList=currentTicketList;currentTicketList=tickets;openTicketReader(0,'${username}');})()" title="Öppna ärendebläddaren — alla aktiva ärenden för ${u.display_name || u.username}"` : ''}
-style="${tickets.length > 0 ? 'cursor:pointer;' : ''}"
-onmouseover="${tickets.length > 0 ? `this.style.borderColor='${styles.main}66'; this.style.background='${styles.main}08'` : ''}"
-onmouseout="${tickets.length > 0 ? `this.style.borderColor=''; this.style.background=''` : ''}">
-<div style="font-size:38px; font-weight:800; color:${styles.main}; line-height:1;">${tickets.length || 0}</div>
-<div style="font-size:11px; opacity:0.5; text-transform:uppercase; margin-top:6px; display:flex; align-items:center; justify-content:center; gap:5px;">
-AKTIVA ÄRENDEN
-${tickets.length > 0 ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${styles.main}" stroke-width="2" opacity="0.6"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>` : ''}
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+
+<div style="display:flex; flex-direction:column; gap:6px;">
+<h4 style="margin:0; font-size:10px; opacity:0.5; text-transform:uppercase;">Kontorsbehörighet</h4>
+<div class="glass-panel" style="padding:15px; border-radius:12px; border:1px solid var(--border-color); background:rgba(255,255,255,0.02); flex:1; display:flex; flex-direction:column;">
+<div style="display:flex; flex-direction:column; gap:4px; overflow-y:auto; max-height:160px;">
+${(() => {
+const byCity = {};
+offices.forEach(o => { if (!byCity[o.city]) byCity[o.city] = []; byCity[o.city].push(o); });
+const entries = Object.entries(byCity).sort((a,b) => {
+  const am = a[1].length > 1, bm = b[1].length > 1;
+  if (am && !bm) return -1; if (!am && bm) return 1;
+  return a[0].localeCompare(b[0], 'sv');
+});
+const cbHide = 'position:absolute;opacity:0;pointer-events:none;width:0;height:0;';
+const pillStyle = (bg,bd,cl,ro) => `display:inline-flex;align-items:center;justify-content:center;font-size:10px;padding:4px 8px;border-radius:20px;white-space:nowrap;margin:2px 0;${ro?'cursor:default;':'cursor:pointer;'}background:${bg};border:1px solid ${bd};color:${cl};`;
+const groups = entries.filter(([,cos]) => cos.length > 1);
+const singles = entries.filter(([,cos]) => cos.length === 1);
+let html = '';
+
+// Rad 1: gruppchhips alltid överst — flex OK här, buttons blockifieras inte
+if (groups.length) {
+  html += '<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start;">';
+  groups.forEach(([city, cos]) => {
+    const ac = cos.filter(o => u.routing_tag && u.routing_tag.includes(o.routing_tag)).length;
+    const gid = 'cg_' + city.toLowerCase().replace(/[^a-z0-9]/g,'');
+    const bid = gid+'_btn', cid = gid+'_ch', kid = gid+'_ct';
+    const bg = ac > 0 ? 'rgba(100,60,200,0.25)' : 'rgba(255,255,255,0.04)';
+    const bd = ac > 0 ? 'rgba(150,100,255,0.5)' : 'rgba(255,255,255,0.06)';
+    const cl = ac > 0 ? '#b09fff' : 'inherit';
+    const oc = readOnly ? '' : `onclick="(function(){const g=document.getElementById('${gid}');const ch=document.getElementById('${cid}');const open=g.style.display!=='none'&&g.style.display!=='';if(open){g.style.display='none';ch.style.transform='';}else{g.style.display='block';ch.style.transform='rotate(90deg)';}})();"`;
+    html += `<button id="${bid}" type="button" ${oc} style="${pillStyle(bg,bd,cl,readOnly)}outline:none;"><span id="${cid}" style="font-size:7px;display:inline-block;transition:transform 0.15s;opacity:0.5;">▶</span>${adminEscapeHtml(city)}<span id="${kid}" style="opacity:0.5;font-size:9px;">&nbsp;(${ac}/${cos.length})</span></button>`;
+  });
+  html += '</div>';
+}
+
+// Sub-paneler per grupp — display:block så labels är äkta inline-flex
+groups.forEach(([city, cos]) => {
+  const gid = 'cg_' + city.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const bid = gid+'_btn', kid = gid+'_ct';
+  const subUpdate = `(function(){const g=document.getElementById('${gid}');const ct=document.getElementById('${kid}');const btn=document.getElementById('${bid}');if(!ct||!g||!btn)return;const n=g.querySelectorAll('input:checked').length;ct.textContent=' ('+n+'/${cos.length})';const s=n>0;btn.style.background=s?'rgba(100,60,200,0.25)':'rgba(255,255,255,0.04)';btn.style.borderColor=s?'rgba(150,100,255,0.5)':'rgba(255,255,255,0.06)';btn.style.color=s?'#b09fff':'inherit';})()`;
+  const pills = cos.map(o => {
+    const ia = u.routing_tag && u.routing_tag.includes(o.routing_tag);
+    const pbg = ia ? 'rgba(100,60,200,0.25)' : 'rgba(255,255,255,0.04)';
+    const pbd = ia ? 'rgba(150,100,255,0.5)' : 'rgba(255,255,255,0.06)';
+    const pcl = ia ? '#b09fff' : 'inherit';
+    return `<label style="${pillStyle(pbg,pbd,pcl,readOnly)}margin-right:4px;"><input type="checkbox" style="${cbHide}" data-rt="${o.routing_tag}" ${ia?'checked':''} ${readOnly?'disabled':`onchange="updateAgentOfficeRole('${u.username}','${o.routing_tag}',this.checked,this,'${adminEscapeHtml(u.display_name||u.username)}');${subUpdate};"`}>${adminEscapeHtml(o.area||o.city)}</label>`;
+  }).join('');
+  html += `<div id="${gid}" style="display:none;padding:3px 0 1px 8px;border-left:1px solid rgba(100,60,200,0.25);">${pills}</div>`;
+});
+
+// Rad 2: enkontor-städer — display:block så labels är äkta inline-flex
+if (singles.length) {
+  html += '<div style="display:block;padding-top:2px;">';
+  singles.forEach(([,cos]) => {
+    const o = cos[0];
+    const ia = u.routing_tag && u.routing_tag.includes(o.routing_tag);
+    const dn = o.city + (o.area ? ' / ' + o.area : '');
+    const bg = ia ? 'rgba(100,60,200,0.25)' : 'rgba(255,255,255,0.04)';
+    const bd = ia ? 'rgba(150,100,255,0.5)' : 'rgba(255,255,255,0.06)';
+    const cl = ia ? '#b09fff' : 'inherit';
+    html += `<label style="${pillStyle(bg,bd,cl,readOnly)}margin-right:4px;"><input type="checkbox" style="${cbHide}" ${ia?'checked':''} ${readOnly?'disabled':`onchange="updateAgentOfficeRole('${u.username}','${o.routing_tag}',this.checked,this,'${adminEscapeHtml(u.display_name||u.username)}')"}`}>${adminEscapeHtml(dn)}</label>`;
+  });
+  html += '</div>';
+}
+return html;
+})()}
 </div>
-<div style="font-size:10px; opacity:0.4; margin-top:5px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-${window._agentOwnerTickets?.length > 0 ? `<span style="color:${styles.main}99;">${window._agentOwnerTickets.length} tilldelade</span>` : ''}
-${window._agentRoutingTickets?.length > 0 ? `<span style="opacity:0.6;">+${window._agentRoutingTickets.length} via kontor</span>` : ''}
 </div>
-${(() => { const internalCount = tickets.filter(t => t.session_type === 'internal').length; return internalCount > 0 ? `<div style="font-size:10px; opacity:0.35; margin-top:4px;">+ ${internalCount} interna</div>` : ''; })()}
 </div>
 
-<div class="glass-panel" style="padding:15px; border-radius:12px; border:1px solid var(--border-color); background:rgba(255,255,255,0.02);">
-<h4 style="margin:0 0 12px 0; font-size:10px; opacity:0.5; text-transform:uppercase;">Kontorsbehörighet</h4>
-<div style="display:flex; flex-wrap:wrap; gap:6px; overflow-y:auto; max-height:100px;">
-${offices.map(o => {
-const isAssigned = u.routing_tag && u.routing_tag.includes(o.routing_tag);
-const displayName = o.city + (o.area ? ' / ' + o.area : '');
-const bg = isAssigned ? 'rgba(100,60,200,0.25)' : 'rgba(255,255,255,0.04)';
-const border = isAssigned ? 'rgba(150,100,255,0.5)' : 'rgba(255,255,255,0.06)';
-const color = isAssigned ? '#b09fff' : 'inherit';
-return `
-<label style="display:flex; align-items:center; gap:6px; font-size:11px;
-padding:5px 10px; border-radius:6px; ${readOnly ? 'cursor:default;' : 'cursor:pointer;'}
-background:${bg}; border:1px solid ${border}; color:${color};">
-<input type="checkbox" ${isAssigned ? 'checked' : ''}
-${readOnly ? 'disabled' : `onchange="updateAgentOfficeRole('${u.username}', '${o.routing_tag}', this.checked, this)"`}>
-${adminEscapeHtml(displayName)}
-</label>`;
-}).join('')}
+<div style="display:flex; flex-direction:column; gap:6px;">
+<h4 style="margin:0; font-size:10px; opacity:0.5; text-transform:uppercase;">Vybehörighet</h4>
+<div class="glass-panel" style="padding:15px; border-radius:12px; border:1px solid rgba(255,160,50,0.2); background:rgba(255,140,0,0.03); flex:1; display:flex; flex-direction:column;">
+<div style="display:block;">
+${
+u.role === 'admin'
+  ? `<span style="font-size:10px;opacity:0.45;font-style:italic;">&#128274; Admin har alltid full åtkomst till alla vyer och kan inte begränsas.</span>`
+  : (() => {
+const _parsed = u.allowed_views ? JSON.parse(u.allowed_views) : null;
+const navViews = [
+  { view: 'my-tickets', label: 'Mina ärenden' },
+  ...(u.role === 'admin' ? [{ view: 'inbox', label: 'Inkorgen' }] : []),
+  { view: 'archive',    label: 'Garaget' },
+  { view: 'customers',  label: 'Kunder' },
+  { view: 'templates',  label: 'Mailmallar' },
+  { view: 'about',      label: 'Om' }
+];
+const adminTabs = [
+  { view: 'admin-users',   label: 'Agenter' },
+  { view: 'admin-offices', label: 'Kontor' },
+  { view: 'admin-config',  label: 'Systemkonfig' }
+];
+const renderPill = (opt, isAdminTab) => {
+  let isAllowed;
+  if (isAdminTab) {
+    const hasAnyAdminKey = _parsed && ['admin-users','admin-offices','admin-config'].some(k => _parsed.includes(k));
+    isAllowed = !_parsed || !hasAnyAdminKey || _parsed.includes(opt.view);
+  } else {
+    isAllowed = _parsed === null || _parsed.includes(opt.view);
+  }
+  const bg     = isAllowed ? 'rgba(200,120,30,0.25)' : 'rgba(255,255,255,0.04)';
+  const border = isAllowed ? 'rgba(255,160,50,0.5)'  : 'rgba(255,255,255,0.06)';
+  const color  = isAllowed ? '#ffaa44'               : 'inherit';
+  return `<label style="display:inline-flex;align-items:center;justify-content:center;font-size:10px;padding:4px 8px;border-radius:20px;white-space:nowrap;margin:0 4px 4px 0;${readOnly?'cursor:default;':'cursor:pointer;'}background:${bg};border:1px solid ${border};color:${color};"><input type="checkbox" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;" data-view-key="${opt.view}" ${isAllowed ? 'checked' : ''} ${readOnly ? 'disabled' : `onchange="(function(cb){const l=cb.closest('label');const on=cb.checked;l.style.background=on?'rgba(200,120,30,0.25)':'rgba(255,255,255,0.04)';l.style.borderColor=on?'rgba(255,160,50,0.5)':'rgba(255,255,255,0.06)';l.style.color=on?'#ffaa44':'inherit';saveUserViews('${u.username}','${opt.view}',cb.checked,'${adminEscapeHtml(u.display_name||u.username)}');})(this)"`}>${opt.label}</label>`;
+};
+return `<div style="font-size:8px;opacity:0.3;margin:0 0 3px 0;text-transform:uppercase;letter-spacing:0.06em;width:100%;">Sidomenyn vyer</div>` +
+  navViews.map(o => renderPill(o, false)).join('') +
+  `<div style="font-size:8px;opacity:0.3;margin:4px 0 3px 0;text-transform:uppercase;letter-spacing:0.06em;width:100%;">Admin-flikar</div>` +
+  adminTabs.map(o => renderPill(o, true)).join('');
+})()
+}
 </div>
 </div>
+</div>
+
 </div>
 
 <div style="flex:1; display:flex; flex-direction:column; min-height:0;">

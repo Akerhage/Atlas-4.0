@@ -386,14 +386,17 @@ renderInbox?.();
 // =============================================================================
 // UI: UPPDATERA ROLLER PÅ AGENTER
 // =============================================================================
-window.updateAgentOfficeRole = async (username, tag, isChecked, checkboxEl) => {
+window.updateAgentOfficeRole = async (username, tag, isChecked, checkboxEl, agentName) => {
 const res = await fetch(`${SERVER_URL}/api/admin/update-agent-offices`, {
 method: 'POST',
 headers: fetchHeaders,
 body: JSON.stringify({ username, tag, isChecked })
 });
 if (res.ok) {
-showToast("Kontor uppdaterat");
+const officeName = checkboxEl?.closest('label')?.textContent.trim() || tag;
+showToast(isChecked
+  ? `${officeName} <span style="color:#4ade80;font-weight:600;">tillagt</span> på agenten ${agentName || username}`
+  : `${officeName} <span style="color:#f87171;font-weight:600;">borttaget</span> från agenten ${agentName || username}`);
 
 // Visuell uppdatering direkt på checkboxen utan väntan
 if (checkboxEl) {
@@ -496,4 +499,37 @@ if(document.getElementById('inp-desc')) data.description = document.getElementBy
 const resPut = await fetch(`${SERVER_URL}/api/knowledge/${tag}`, { method: 'PUT', headers: fetchHeaders, body: JSON.stringify(data) });
 if (resPut.ok) showToast("✅ Kontorsdata sparad!");
 } catch (err) { alert("Kunde inte spara: " + err.message); }
+}
+
+// =============================================================================
+// SPARA VY-BEHÖRIGHETER FÖR AGENT
+// Läser data-view-key-checkboxarna i Vy-behörigheter-panelen och sparar via API.
+// =============================================================================
+async function saveUserViews(username, viewKey, isNowVisible, agentName) {
+const checkboxes = document.querySelectorAll('[data-view-key]');
+const checked = Array.from(checkboxes)
+  .filter(cb => cb.checked)
+  .map(cb => cb.getAttribute('data-view-key'));
+
+// Alla vyer ikryssade = inga begränsningar (null = visa allt)
+const ALL_VIEWS = ['my-tickets', 'inbox', 'archive', 'customers', 'templates', 'about', 'admin-users', 'admin-offices', 'admin-config'];
+const allChecked = ALL_VIEWS.every(v => checked.includes(v));
+const payload = allChecked ? null : checked;
+
+try {
+  const res = await fetch(`${SERVER_URL}/api/admin/user-views/${encodeURIComponent(username)}`, {
+    method: 'PUT',
+    headers: fetchHeaders,
+    body: JSON.stringify({ allowed_views: payload })
+  });
+  if (!res.ok) throw new Error(`Serverfel: ${res.status}`);
+  const VIEW_LABELS = {'my-tickets':'Mina ärendenvyn','inbox':'Inkorgen','archive':'Garaget','customers':'Kundvyn','templates':'Mailmallarvyn','about':'Om-sidan','admin-users':'Admin: Agenter','admin-offices':'Admin: Kontor','admin-config':'Admin: Systemkonfiguration'};
+  const vname = VIEW_LABELS[viewKey] || viewKey || 'Vy';
+  showToast(isNowVisible
+    ? `${vname} är nu <span style="color:#4ade80;font-weight:600;">synlig</span> för agenten ${agentName || username}`
+    : `${vname} är nu <span style="color:#f87171;font-weight:600;">dold</span> för agenten ${agentName || username}`);
+} catch (e) {
+  console.error('[VIEWS] Kunde inte spara vy-behörigheter:', e);
+  showToast('❌ Kunde inte spara vy-behörigheter');
+}
 }

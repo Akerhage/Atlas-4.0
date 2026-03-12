@@ -585,6 +585,32 @@ console.log(`✅ [LIVE] Egen routing_tag uppdaterad till: ${newTags}`);
 
 // Rendera om Mina Ärenden så rätt ärenden visas direkt
 renderMyTickets?.();
+updateInboxBadge?.();
+});
+
+// LIVE VY-SYNK: Uppdaterar allowed_views direkt när admin ändrar vy-behörigheter
+window.socketAPI.on('agent:views_updated', ({ username, allowed_views }) => {
+console.log(`👁️ [LIVE] Vy-behörigheter uppdaterade: ${username}`);
+
+// Gäller bara den inloggade agenten
+if (currentUser?.username !== username) return;
+
+// Synka state och localStorage
+currentUser.allowed_views = allowed_views;
+localStorage.setItem('atlas_user', JSON.stringify(currentUser));
+console.log(`✅ [LIVE] Egna allowed_views uppdaterade till: ${allowed_views || 'alla'}`);
+
+// Uppdatera sidebaren direkt
+if (typeof updateInboxVisibility === 'function') updateInboxVisibility();
+
+// Om agenten befinner sig på en vy som nu är dold → skicka hem
+const activeItem = document.querySelector('.menu-item.active');
+const currentView = activeItem?.dataset.view;
+const allowed = allowed_views ? JSON.parse(allowed_views) : null;
+if (allowed && currentView && !allowed.includes(currentView) && currentView !== 'chat' && currentView !== 'admin') {
+console.warn(`⚠️ [LIVE] Aktuell vy "${currentView}" är inte längre tillåten — omdirigerar till Hem`);
+if (typeof switchView === 'function') switchView('chat');
+}
 });
 
 } // <-- Stänger setupSocketListeners-funktionen

@@ -6,7 +6,7 @@
 // ANVÄNDS AV: Electron runtime
 // ============================================
 
-const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, session, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, session, nativeImage, Tray, Menu } = require('electron');
 const path = require('path');
 const { spawn, exec } = require('child_process');
 const fs = require('fs');
@@ -26,6 +26,8 @@ console.error("CRITICAL: Kunde inte ladda db.js", e);
 // Server Readiness State
 let serverVersion = 'Väntar...';
 let serverReady = false;
+let tray = null;
+let forceQuit = false;
 
 // Single Instance Lock & Server Detection
 const isServerProcess = process.argv.includes(path.join(__dirname, 'server.js'));
@@ -153,14 +155,20 @@ let indexPath = getRendererPath('index.html');
 if (!fs.existsSync(indexPath)) indexPath = getLocalPath('index.html');
 
 mainWindow = new BrowserWindow({
-width: 1400, height: 1000, show: false,
+width: 1600, height: 950,
+minWidth: 1280, minHeight: 760,
+center: true,
+show: false,
 icon: getRendererPath('assets/icons/app/icon.ico'),
 autoHideMenuBar: true,
+titleBarStyle: 'hidden',
+titleBarOverlay: { color: '#0a0f1a', symbolColor: '#00d4b4', height: 36 },
 webPreferences: { 
 preload: path.join(__dirname, 'preload.js'), 
 contextIsolation: true, 
 nodeIntegration: false,
-sandbox: false
+sandbox: false,
+backgroundThrottling: false
 }
 });
 
@@ -187,12 +195,21 @@ loaderWindow = null;
 }
 mainWindow.show();
 mainWindow.focus();
+// Lås zoom — förhindrar att Ctrl+scroll förstör layouten
+mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
+});
+
+// Stäng till tray istället för att avsluta helt
+mainWindow.on('close', (e) => {
+if (!forceQuit) {
+e.preventDefault();
+mainWindow.hide();
+}
 });
 
 // Stängnings-hanterare som krävs för din .bat-fil
 mainWindow.on('closed', () => {
 mainWindow = null;
-app.quit(); 
 });
 }
 
@@ -203,6 +220,23 @@ app.whenReady().then(async () => {
 if (isServerProcess) return;
 
 createLoaderWindow();
+
+// Tray-ikon
+const iconPath = getRendererPath('assets/icons/app/icon.ico');
+tray = new Tray(nativeImage.createFromPath(iconPath));
+tray.setToolTip('Atlas');
+const trayMenu = Menu.buildFromTemplate([
+    { label: 'Öppna Atlas', click: () => { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } } },
+    { type: 'separator' },
+    { label: 'Avsluta Atlas', click: () => { forceQuit = true; app.quit(); } }
+]);
+tray.setContextMenu(trayMenu);
+tray.on('click', () => {
+    if (mainWindow) {
+        if (mainWindow.isVisible()) { mainWindow.focus(); }
+        else { mainWindow.show(); mainWindow.focus(); }
+    }
+});
 await killPort3001(); // Denna kör taskkill /F /IM ngrok.exe /T
 
 // Starta ngrok-tunnel mot port 3001
@@ -328,7 +362,7 @@ app.on('will-quit', terminateServerProcess);
 
 app.on('window-all-closed', () => {
 terminateServerProcess();
-if (process.platform !== 'darwin') app.quit();
+// Appen lever kvar i tray — avslutar inte automatiskt
 });
 
 process.on('exit', terminateServerProcess);

@@ -82,7 +82,8 @@ agent_color: user.agent_color,
 display_name: user.display_name,
 avatar_id: user.avatar_id,
 status_text: user.status_text,
-routing_tag: user.routing_tag
+routing_tag: user.routing_tag,
+allowed_views: user.allowed_views ?? null
 }
 });
 } catch (err) {

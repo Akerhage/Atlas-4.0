@@ -153,30 +153,33 @@ border: hexToRgba(hex, 0.3)
 
 // Visa toast-notifiering
 function showToast(message, duration = 3000) {
+let container = document.getElementById('atlas-toast-container');
+if (!container) {
+  container = document.createElement('div');
+  container.id = 'atlas-toast-container';
+  container.style.cssText = 'position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column-reverse;gap:6px;z-index:10000;pointer-events:none;';
+  document.body.appendChild(container);
+}
 const toast = document.createElement('div');
 toast.className = 'toast-notification';
-toast.textContent = message;
+toast.innerHTML = message;
 toast.style.cssText = `
-position: fixed;
-bottom: 20px;
-right: 20px;
 background: rgba(20, 20, 30, 0.95);
 color: #fff;
 padding: 12px 20px;
 border-radius: 8px;
 border: 1px solid rgba(255, 255, 255, 0.2);
 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-z-index: 10000;
 animation: slideIn 0.3s ease;
 font-size: 14px;
 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+pointer-events: auto;
+white-space: nowrap;
 `;
-
-document.body.appendChild(toast);
-
+container.appendChild(toast);
 setTimeout(() => {
-toast.style.animation = 'slideOut 0.3s ease';
-setTimeout(() => toast.remove(), 300);
+  toast.style.animation = 'slideOut 0.3s ease';
+  setTimeout(() => toast.remove(), 300);
 }, duration);
 }
 

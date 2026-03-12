@@ -11,18 +11,71 @@ const ATLAS_VERSION = '4.0'; // Centralt versionsnummer — uppdatera ENDAST hä
 // =============================================================================
 window.updateInboxVisibility = function() {
 // currentUser är redan definierad som global let på rad 120 i denna fil
-if (!currentUser) return; 
-
-const inboxTab = document.querySelector('li[data-view="inbox"]');
-const adminTab = document.getElementById('menu-admin');
+if (!currentUser) return;
 
 const isSupport = currentUser.role === 'admin';
 
-// Måste använda setProperty med 'important' — CSS .menu-item{display:flex!important} vinner annars
-if (inboxTab) inboxTab.style.setProperty('display', isSupport ? 'flex' : 'none', 'important');
-if (adminTab) adminTab.style.setProperty('display', 'flex', 'important');
+// Admins har alltid full åtkomst — hoppa över alla vy-restriktioner
+if (isSupport) {
+  document.querySelectorAll('.sidebar-menu .menu-item').forEach(item => {
+    if (item.dataset.view) item.style.setProperty('display', 'flex', 'important');
+  });
+  document.querySelectorAll('#view-admin .header-tab').forEach(t => t.style.display = '');
+  return;
+}
 
-console.log("📍 [UI] updateInboxVisibility kördes för:", currentUser.role);
+// allowed_views: null = inga begränsningar (visa allt), JSON-array = begränsa till listade vyer
+const allowed = currentUser.allowed_views
+  ? JSON.parse(currentUser.allowed_views)
+  : null;
+
+// Iterera alla meny-items och tillämpa vy-behörigheter
+const menuItems = document.querySelectorAll('.sidebar-menu .menu-item');
+menuItems.forEach(item => {
+  const view = item.dataset.view;
+  if (!view) return;
+
+  // Hem kan aldrig döljas
+  if (view === 'chat') {
+    item.style.setProperty('display', 'flex', 'important');
+    return;
+  }
+
+  // Admin-vyn styrs enbart av role — aldrig av allowed_views
+  if (view === 'admin') {
+    item.style.setProperty('display', isSupport ? 'flex' : 'none', 'important');
+    return;
+  }
+
+  // Inkorgen visas bara för admins (befintlig logik bevarad) OCH om vy är tillåten
+  if (view === 'inbox') {
+    if (!isSupport) { item.style.setProperty('display', 'none', 'important'); return; }
+  }
+
+  // allowed_views-kontroll: om null = visa allt, annars kräv att vyn finns i arrayen
+  if (allowed && !allowed.includes(view)) {
+    item.style.setProperty('display', 'none', 'important');
+  } else {
+    item.style.setProperty('display', 'flex', 'important');
+  }
+});
+
+// Admin-flik behörigheter: bara aktiva om admin-nycklar är explicit konfigurerade
+const adminTabKeys = ['admin-users', 'admin-offices', 'admin-config'];
+const hasAnyAdminTabConfig = allowed && adminTabKeys.some(k => allowed.includes(k));
+if (hasAnyAdminTabConfig) {
+  ['users', 'offices', 'config'].forEach(tab => {
+    const tabBtn = document.querySelector(`#view-admin .header-tab[onclick*="'${tab}'"]`);
+    if (!tabBtn) return;
+    const key = `admin-${tab}`;
+    tabBtn.style.display = allowed.includes(key) ? '' : 'none';
+  });
+} else {
+  // Inga admin-tab-restriktioner konfigurerade — visa alla flikar
+  document.querySelectorAll('#view-admin .header-tab').forEach(t => t.style.display = '');
+}
+
+console.log("📍 [UI] updateInboxVisibility kördes för:", currentUser.role, "| allowed_views:", currentUser.allowed_views || 'alla');
 };
 
 // claimTicket, claimTicketFromReader, assignTicketFromReader,
