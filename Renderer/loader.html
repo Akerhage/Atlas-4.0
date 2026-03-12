@@ -1,31 +1,48 @@
-<!-- ============================================
-     loader.html — Atlas Splash / Loader
-     Laddar: loader.js, loader.css
-     Visas medan server.js startar upp.
-     SENAST STÄDAD: 2026-02-27
-     ============================================ -->
 <!DOCTYPE html>
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <!-- Loader-animering: trafikljus, typsnitt -->
   <link rel="stylesheet" href="loader.css" />
-  <title>Atlas Loader</title>
+  <title>Atlas</title>
 </head>
 <body>
-  <div class="loader-container">
-    <h1 class="logo">ATLAS</h1>
+  <div class="card">
 
-    <div class="traffic-light">
-      <div class="light red" id="light-red"></div>
-      <div class="light yellow" id="light-yellow"></div>
-      <div class="light green" id="light-green"></div>
+    <!-- Bakgrundsglöd -->
+    <div class="bg-glow"></div>
+
+    <!-- Logotyp med roterande ring -->
+    <div class="logo-wrap">
+      <div class="ring-pulse"></div>
+      <div class="ring-pulse delay"></div>
+      <div class="ring-spin"></div>
+      <div class="logo-circle">
+        <img src="./assets/images/logo.png" alt="Atlas" class="logo-img"
+             onerror="this.style.display='none'; document.querySelector('.logo-fallback').style.display='flex';" />
+        <span class="logo-fallback">ATLAS</span>
+      </div>
     </div>
 
-    <p class="text" id="loader-text">Startar...</p>
-  </div>
+    <!-- Namn + tagline -->
+    <p class="app-name">ATLAS</p>
+    <p class="tagline">Support &amp; Ärendehantering</p>
 
-  <!-- Loader-logik: lyssnar på server-status via IPC, skickar loader:done -->
+    <!-- Progress -->
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <!-- Status -->
+    <p class="status-text" id="loader-text">Startar...</p>
+
+    <!-- Trafikljós-nick: 3 små prickar -->
+    <div class="dot-row">
+      <div class="dot red"    id="light-red"></div>
+      <div class="dot yellow" id="light-yellow"></div>
+      <div class="dot green"  id="light-green"></div>
+    </div>
+
+  </div>
   <script src="loader.js"></script>
 </body>
 </html>

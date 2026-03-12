@@ -1,8 +1,212 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
 body {
-  margin: 0;
-  padding: 0;
   background: transparent;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Segoe UI', -apple-system, sans-serif;
+}
+
+/* ── Card ──────────────────────────────────────── */
+.card {
+  width: 268px;
+  height: 460px;
+  background: linear-gradient(160deg, #0d1422 0%, #080c14 55%, #0a0e1a 100%);
+  border-radius: 30px;
+  border: 1px solid rgba(0, 212, 180, 0.12);
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  position: relative;
+  overflow: hidden;
+  animation: cardIn 0.55s cubic-bezier(0.34, 1.52, 0.64, 1) both;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: scale(0.82) translateY(16px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+
+/* ── Background glow blob ───────────────────────── */
+.bg-glow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(0, 212, 180, 0.07) 0%, transparent 68%);
+  pointer-events: none;
+}
+
+/* ── Logo area ──────────────────────────────────── */
+.logo-wrap {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+/* Pulsing rings */
+.ring-pulse {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 212, 180, 0.25);
+  animation: ringPulse 2.8s ease-in-out infinite;
+}
+.ring-pulse.delay {
+  inset: -26px;
+  border-color: rgba(0, 212, 180, 0.10);
+  animation-delay: 0.7s;
+}
+@keyframes ringPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.03); }
+}
+
+/* Spinning arc */
+.ring-spin {
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  border-top-color: #00d4b4;
+  border-right-color: rgba(0, 212, 180, 0.2);
+  animation: spin 1.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Inner circle */
+.logo-circle {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #101826, #070b11);
+  border: 1.5px solid rgba(0, 212, 180, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.logo-img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(0, 212, 180, 0.5));
+  animation: logoPulse 3s ease-in-out infinite;
+}
+@keyframes logoPulse {
+  0%, 100% { filter: drop-shadow(0 0 8px  rgba(0, 212, 180, 0.45)); }
+  50%       { filter: drop-shadow(0 0 18px rgba(0, 212, 180, 0.75)); }
+}
+
+.logo-fallback {
+  display: none;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  color: #fff;
+  text-shadow: 0 0 16px rgba(0, 212, 180, 0.7);
+}
+
+/* ── Text ───────────────────────────────────────── */
+.app-name {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: #ffffff;
+  text-shadow: 0 0 24px rgba(0, 212, 180, 0.35);
+  margin-bottom: 4px;
+}
+
+.tagline {
+  font-size: 9.5px;
+  letter-spacing: 2.5px;
+  color: rgba(0, 212, 180, 0.55);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+/* ── Progress bar ───────────────────────────────── */
+.progress-track {
+  width: 168px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00b89d, #00d4b4, #00ffdd);
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(0, 212, 180, 0.9);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 32px; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%   { opacity: 0; transform: translateX(-20px); }
+  50%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(10px); }
+}
+
+/* ── Status text ────────────────────────────────── */
+.status-text {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.4px;
+  height: 15px;
+  margin-bottom: 24px;
+  transition: opacity 0.3s;
+}
+
+/* ── Traffic light nod — 3 tiny dots ────────────── */
+.dot-row {
+  display: flex;
+  gap: 9px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  transition: background 0.35s ease, box-shadow 0.35s ease;
+}
+
+.dot.active.red    { background: #ff3b30; box-shadow: 0 0 8px rgba(255, 59, 48,  0.8); }
+.dot.active.yellow { background: #ffd60a; box-shadow: 0 0 8px rgba(255, 214, 10, 0.8); }
+.dot.active.green  { background: #30d158; box-shadow: 0 0 8px rgba(48,  209, 88, 0.8); }
+
   align-items: center;
   justify-content: center;
   height: 100vh;

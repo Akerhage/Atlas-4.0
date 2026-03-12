@@ -1,84 +1,61 @@
 //===========================================================
-//========= LOADER.JS v.3.0.0 ======//
+//========= LOADER.JS v.4.0.0 ======//
 //===========================================================
 document.addEventListener("DOMContentLoaded", () => {
-const red = document.getElementById("light-red");
-const yellow = document.getElementById("light-yellow");
-const green = document.getElementById("light-green");
-const text = document.getElementById("loader-text");
+  const dRed    = document.getElementById("light-red");
+  const dYellow = document.getElementById("light-yellow");
+  const dGreen  = document.getElementById("light-green");
+  const text    = document.getElementById("loader-text");
+  const fill    = document.getElementById("progress-fill");
 
-console.log("🔵 Loader.js: DOMContentLoaded event triggered");
-console.log("✓ DOM element references loaded:", { red, yellow, green, text });
+  let animationFinished = false;
+  let serverIsReady     = false;
 
-let animationFinished = false;
-let serverIsReady = false;
+  const setProgress = (pct) => { if (fill) fill.style.width = pct + '%'; };
+  const setStatus   = (msg) => { if (text) text.textContent = msg; };
 
-const tryFinish = () => {
-console.log(`🔍 tryFinish() called: animationFinished=${animationFinished}, serverIsReady=${serverIsReady}`);
-if (animationFinished && serverIsReady) {
-console.log("🟢 ALL SYSTEMS GO! Closing loader in 800ms...");
-text.textContent = "NU KÖR VI!";
-setTimeout(() => {
-if (window.electronAPI && window.electronAPI.loaderDone) {
-console.log("📤 Sending loader:done signal to main process");
-window.electronAPI.loaderDone();
-} else {
-console.log("❌ ERROR: window.electronAPI.loaderDone not available");
-}
-}, 800);
-} else {
-console.log(`⏳ Waiting for: animation=(${animationFinished}) + server=(${serverIsReady})`);
-}
-};
+  const tryFinish = () => {
+    if (animationFinished && serverIsReady) {
+      setStatus("Redo.");
+      setProgress(100);
+      setTimeout(() => {
+        if (window.electronAPI?.loaderDone) window.electronAPI.loaderDone();
+      }, 550);
+    }
+  };
 
-// ESC-tangent för MANUELL stängning (debug)
-document.addEventListener('keydown', (e) => {
-if (e.key === 'Escape') {
-console.log("🛑 ESC pressed - manually closing loader (DEBUG MODE)");
-if (window.electronAPI && window.electronAPI.loaderDone) {
-window.electronAPI.loaderDone();
-} else {
-console.log("❌ Cannot close: window.electronAPI.loaderDone not available");
-}
-}
-});
+  // ESC — manuell stängning (debug)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && window.electronAPI?.loaderDone) window.electronAPI.loaderDone();
+  });
 
-if (window.electronAPI && window.electronAPI.onServerStatus) {
-console.log("✓ Server status listener registered");
-window.electronAPI.onServerStatus((status) => {
-console.log(`📡 Server status received: ${status}`);
-if (status === true) {
-serverIsReady = true;
-tryFinish();
-}
-});
-} else {
-console.log("❌ ERROR: window.electronAPI.onServerStatus not available");
-}
+  // Server-signal via IPC
+  if (window.electronAPI?.onServerStatus) {
+    window.electronAPI.onServerStatus((status) => {
+      if (status === true) { serverIsReady = true; tryFinish(); }
+    });
+  }
 
-// --- ANIMATIONS-SEKVENS (Långsammare) ---
-// Rött direkt
-setTimeout(() => {
-console.log("🔴 RED: Søker efter satelliter...");
-red.classList.add("active");
-text.textContent = "Söker efter satelliter...";
-}, 500);
+  // ── Animationssekvens ──────────────────────────────────
+  setTimeout(() => {
+    dRed.classList.add("active");
+    setStatus("Söker efter satelliter...");
+    setProgress(22);
+  }, 350);
 
-// Växla till Orange efter 2 sekunder (tidigare 1.3s)
-setTimeout(() => {
-console.log("🟠 YELLOW: Värmer upp motorn...");
-red.classList.remove("active");
-yellow.classList.add("active");
-text.textContent = "Värmer upp motorn...";
-}, 2500);
+  setTimeout(() => {
+    dRed.classList.remove("active");
+    dYellow.classList.add("active");
+    setStatus("Värmer upp systemet...");
+    setProgress(55);
+  }, 1900);
 
-// Växla till "Väntar på tunnel" efter ytterligare 2.5 sekunder
-setTimeout(() => {
-console.log("🟢 GREEN: Öppnar säker tunnel... Waiting for server signal");
-yellow.classList.remove("active");
-green.classList.add("active");
-text.textContent = "Öppnar säker tunnel..."; 
-animationFinished = true;
-tryFinish(); // Kolla om server redan är redo
-}, 5000);
+  setTimeout(() => {
+    dYellow.classList.remove("active");
+    dGreen.classList.add("active");
+    setStatus("Ansluter till server...");
+    setProgress(82);
+    animationFinished = true;
+    tryFinish();
+  }, 3600);
 });
