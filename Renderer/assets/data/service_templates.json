@@ -33,6 +33,19 @@
 ]
 },
 {
+"service_name": "Prova-på-uppkörning BIL",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"prova-på",
+"provkörning",
+"uppkörning",
+"bil",
+"pris",
+"kostnad"
+]
+},
+{
 "service_name": "Privat teorilektion BIL",
 "price": 0,
 "currency": "SEK",
@@ -138,6 +151,19 @@
 "pris",
 "kostnad",
 "paket"
+]
+},
+{
+"service_name": "Intensivvecka MC",
+"price": 0,
+"currency": "SEK",
+"keywords": [
+"intensivvecka",
+"mc",
+"motorcykel",
+"intensiv",
+"pris",
+"kostnad"
 ]
 },
 {

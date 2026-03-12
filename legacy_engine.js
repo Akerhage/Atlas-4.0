@@ -606,6 +606,8 @@ Du MÅSTE följa dessa regler slaviskt, även om kontexten verkar vag:
 - Riskutbildning: "Risk 1 är cirka 3,5 timmar och Risk 2 är 4–5 timmar och kan göras i vilken ordning som helst."
 - Handledare: "Handledaren måste vara minst 24 år, haft körkort i minst 5 av de senaste 10 åren och både elev och handledare behöver gå introduktionskurs."
 - Automat: "Automat ger villkor 78."
+- Paket-jämförelse BIL: LEKTIONSPAKET = ren rabatt på körlektioner, inga kurser ingår (Minipaket=5 lek, Mellanpaket=10 lek, Baspaket=15 lek). TOTALPAKET = komplett startpaket (5/10/15 lek + Risk 1 + Risk 2 + Mitt Körkort-appen). Presentera ALLTID lektionspaketen i rätt storleksordning: Minipaket → Mellanpaket → Baspaket. Baspaket är det STÖRSTA lektionspaketet, Minipaket är det MINSTA.
+- Paket-jämförelse MC: LEKTIONSPAKET = ren rabatt på körlektioner, inga kurser ingår (5-lektionspaket eller 10-lektionspaket). TOTALPAKET = komplett startpaket (5 eller 10 lek + Risk 1 + Risk 2 + teorimaterial + lån av MC till prov + uppvärmning). MC har INGA lektionspaket med 15 lektioner — max är 10.
 
 // === FALLBACK (INTELLIGENT) ===
 - Om information saknas i kontexten: GISSA ALDRIG priser, tider, tillgänglighet eller annat du inte vet.
@@ -838,28 +840,54 @@ return { type: "answer", answer: finalAnswer, messages, model: "gpt-4o-mini" };
 // Anropas när konfidenstjänsten bedömer att kontexten är för svag.
 // Analyserar frågan + NLU-slots och ber kunden om rätt info.
 // ====================================================================
-async function generateSmartClarification(query, nluResult, detectedCity, detectedVehicle) {
+async function generateSmartClarification(query, nluResult, detectedCity, detectedVehicle, lockedCtx = {}) {
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Bygg lista på vad som saknas baserat på vad NLU hittade
-const missing = [];
-if (!detectedCity) missing.push('stad eller kontor');
-if (!detectedVehicle) missing.push('fordonstyp (bil, MC, moped/AM, lastbil)');
+const intentLabel = {
+  price_lookup: 'pris eller kostnad',
+  booking: 'bokning eller lediga tider',
+  risk_info: 'riskutbildning',
+  handledare_course: 'handledarutbildning',
+  tillstand_info: 'körkortstillstånd',
+  contact_info: 'kontaktuppgifter',
+  service_inquiry: 'tjänst eller utbildning',
+}[nluResult?.intent] || 'körkortsfråga';
 
-const missingText = missing.length > 0 ? missing.join(' och ') : 'mer specifik information';
+const vehicleLabel = detectedVehicle
+  ? `kundens fordonstyp verkar vara ${detectedVehicle}`
+  : 'fordonstyp oklart (bil, MC, moped/AM eller lastbil)';
 
-const systemPrompt = `Du är Atlas — en varm, hjälpsam kundtjänstassistent för en svensk trafikskola.
-Kunden har ställt en fråga som är för vag för att du ska kunna ge ett korrekt svar.
-Din uppgift: Skriv ett kort, naturligt svar (1–2 meningar) på svenska som:
-1. Visar att du förstår vad kunden frågar om (nämn gärna ämnet)
-2. Ber om den specifika information du saknar för att kunna hjälpa
-Gissa ALDRIG priser, tider eller annan fakta. Var vänlig och konkret.`;
+const cityHint = detectedCity
+  ? `Kunden verkar befinna sig i närheten av ${detectedCity}.`
+  : 'Stad är helt okänd.';
+
+const prevHistory = lockedCtx.city
+  ? `Kunden har tidigare i sessionen pratat om: ${[lockedCtx.city, lockedCtx.vehicle].filter(Boolean).join(', ')}.`
+  : '';
+
+const exampleCities = 'Malmö, Göteborg, Stockholm, Lund, Helsingborg, Uppsala, Linköping, Umeå, Gävle eller Varberg';
+
+const systemPrompt = `Du är Atlas — en varm, rådgivande kundtjänstassistent för en svensk trafikskola.
+En kund har ställt en fråga som är lite för vag för att du ska kunna ge ett korrekt svar.
+
+Din uppgift är att skriva ett svar (2–3 meningar, svenska) som:
+1. SPEGLAR kundens ämne — visa att du uppfattat vad de undrar.
+   Exempel: "Jag ser att du undrar om priset för körlektion!"
+2. GUIDAR med en konkret fråga om det som saknas (stad och/eller fordon).
+   Exempel: "För att jag ska kunna titta i rätt prislista, behöver jag bara veta vilken stad och vilket körkort det gäller?"
+3. GER SNABBEXEMPEL på vanliga städer eller alternativ om stad saknas.
+   Exempel: "Vi finns bland annat i Malmö, Göteborg, Stockholm, Lund och Helsingborg — kanske ett av dem stämmer?"
+
+Var varm, konkret och hjälpsam. Gissa ALDRIG priser eller info du inte fått.
+Avsluta INTE med "Hör av dig om du har frågor" — bjud i stället in kunden att svara direkt i chatten.`;
 
 const userPrompt = `Kundens fråga: "${query}"
-Identifierat ämne: ${nluResult?.intent || 'okänt'}
-Hittade nyckelord: stad=${detectedCity || 'saknas'}, fordon=${detectedVehicle || 'saknas'}
-Det saknas: ${missingText}
-Skriv en kort, smart motfråga som hjälper kunden precisera sin fråga.`;
+Ämne: ${intentLabel}
+${vehicleLabel}
+${cityHint}
+${prevHistory}
+Exempel på våra städer: ${exampleCities}
+Skriv en varm, smart klarifieringsfråga som speglar ämnet och ber om rätt preciseringar.`;
 
 try {
 const completion = await openai.chat.completions.create({
@@ -1358,6 +1386,38 @@ break;
 }
 
 // ====================================================================
+// REFERENS-DETEKTION: Identifiera när kunden syftar på tidigare föreslagna alternativ
+// (ex. "kontaktuppgifter dit", "de andra kontoren", "dem" efter att Atlas listat alternativ)
+// ====================================================================
+let _alternativesContextNote = '';
+{
+const _hasSuggestedAlts = Array.isArray(session.locked_context?.suggested_alternatives) &&
+  session.locked_context.suggested_alternatives.length > 0;
+const _refersToAlternatives = _hasSuggestedAlts &&
+  /\b(de\s+andra|de\s+övriga|alternativ(?:en|et)?|dit\b|dem\b|de\s+kontoren)\b/i.test(sanitizedQuery);
+
+if (_refersToAlternatives) {
+  const _alts = session.locked_context.suggested_alternatives;
+  const _forArea = session.locked_context.suggestions_for_area || nluResult.slots.area || '';
+  const _altCity = lockedContext.city || nluResult.slots.city || '';
+
+  // Rensa stale area-arv så att RAG-filtret inte låser sig på det gamla kontoret
+  nluResult.slots.area = null;
+
+  if (/\bdit\b/i.test(sanitizedQuery) && _alts.length > 1) {
+    // "dit" är tvetydigt med flera alternativ → be kunden precisera
+    _alternativesContextNote = `\n\n[SYSTEMNOTERING — FLYTANDE KONTEXT: Kunden frågar troligen om ett av de alternativa kontor som Atlas nyss rekommenderade som alternativ till ${_forArea}: ${_alts.join(', ')}. Svara varmt och fråga vilket kontor kunden menar, och lista dem som en punktlista.]`;
+  } else if (_alts.length === 1) {
+    // Exakt ett alternativ → lås det direkt
+    nluResult.slots.area = _alts[0];
+  } else {
+    // "de andra", "de övriga" → svara om alla alternativ, ignorera det låsta kontoret
+    _alternativesContextNote = `\n\n[SYSTEMNOTERING — FLYTANDE KONTEXT: Kunden frågar specifikt om de alternativa kontor som Atlas nyss listade i ${_altCity}: ${_alts.join(', ')}. Svara med relevant information om dessa kontor baserat på kontexten. Inkludera INTE upprepad information om ${_forArea} i detta svar.]`;
+  }
+}
+}
+
+// ====================================================================
 // STEP 3: RESOLUTION
 // ====================================================================
 const detectedCity = nluResult.slots.city;
@@ -1448,6 +1508,22 @@ mode = 'knowledge';
 
 // Kontaktinfo ska ALLTID vara knowledge (Säkerhetsspärr)
 if (nluResult.intent === 'contact_info') mode = 'knowledge';
+
+// === PROAKTIV KLARIFIERING: Prisfråga utan känd stad ===
+// Triggas INNAN RAG-sökningen startar — ger kunden en varm fråga istället för ett vagt svar.
+if (
+  nluResult.intent === 'price_lookup' &&
+  !lockedCity &&
+  !detectedCity
+) {
+  const clarification = await generateSmartClarification(query, nluResult, null, detectedVehicleType, session.locked_context);
+  return res.json({
+    answer: clarification,
+    context: [],
+    sessionId,
+    debug: { triggered_by: 'price_without_city', intent: nluResult.intent }
+  });
+}
 
 // STEP 5: SEARCH & RETRIEVAL (Här börjar nästa sektion i din fil)
 
@@ -1883,7 +1959,7 @@ const threshold = isContactQuery ? 0.05 : LOW_CONFIDENCE_THRESHOLD;
 
 if (!hasBasfakta && bestScore < threshold && nluResult.intent !== 'contact_info') {
 // AI analyserar frågan och ber om rätt info istället för hårdkodad sträng
-const clarification = await generateSmartClarification(query, nluResult, lockedCity || detectedCity, detectedVehicleType);
+const clarification = await generateSmartClarification(query, nluResult, lockedCity || detectedCity, detectedVehicleType, session.locked_context);
 return res.json({ answer: clarification, context: [], debug: { low_confidence: true, best_score: bestScore } });
 }
 } 
@@ -2091,6 +2167,9 @@ queryWords.some(w =>
 const cityName = lockedCity || detectedCity;
 if (alternatives.length > 0) {
 localAvailabilityNote = `\n\n[SYSTEMNOTERING — LOKAL TILLGÄNGLIGHET: Tjänsten kunden frågar om erbjuds INTE vid kontoret i ${detectedArea}. Matchande tjänst finns däremot vid följande kontor i ${cityName}: ${alternatives.join(', ')}. Du MÅSTE svara tydligt att tjänsten INTE erbjuds i ${detectedArea}, och sedan nämna dessa alternativa kontor som kunden kan vända sig till.]`;
+// Spara alternativa kontor i sessionen för referens i efterföljande frågor
+session.locked_context.suggested_alternatives = alternatives;
+session.locked_context.suggestions_for_area = detectedArea;
 } else {
 localAvailabilityNote = `\n\n[SYSTEMNOTERING — LOKAL TILLGÄNGLIGHET: Tjänsten kunden frågar om verkar inte erbjudas vid kontoret i ${detectedArea}, och inga andra matchande kontor i ${cityName} hittades. Svara ärligt att du inte kan bekräfta att tjänsten erbjuds här och hänvisa kunden till hemsidan eller att kontakta supporten för hjälp.]`;
 }
@@ -2110,7 +2189,13 @@ error: searchError.message
 }
 
 try {
-ragResult = await generate_rag_answer(query, retrievedContext, lockedCity, detectedArea, isFirstMessage, mode, localAvailabilityNote);
+// Sammanfoga evt. alternativ-kontext-notering med lokal tillgänglighetsnotering
+if (_alternativesContextNote) {
+  localAvailabilityNote = (_alternativesContextNote + (localAvailabilityNote || '')).trim();
+  // Rensa detectedArea-argumentet till generate_rag_answer när vi svarat om alternativ
+}
+const _effectiveArea = _alternativesContextNote ? null : detectedArea;
+ragResult = await generate_rag_answer(query, retrievedContext, lockedCity, _effectiveArea, isFirstMessage, mode, localAvailabilityNote);
 
 } catch (e) {
 console.error("!!! OPENAI ERROR:", e.message);

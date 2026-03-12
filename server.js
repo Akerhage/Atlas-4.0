@@ -464,7 +464,13 @@ let responseText = typeof result.response_payload === 'string'
 : result.response_payload?.answer || "";
 
 // Transportstyrelsen-fallback: kör om RAG inte hittade svar på regelrelaterad fråga
-if (aiEnabled && responseText.includes("hittar ingen information")) {
+const _tsMissPatterns1 = [
+  'hittar ingen information',
+  'har tyvärr inte den informationen',
+  'saknar den informationen'
+];
+const _tsSeemsLikeMiss1 = _tsMissPatterns1.some(p => responseText.toLowerCase().includes(p));
+if (aiEnabled && _tsSeemsLikeMiss1) {
 const sessionTypeForLog = v2State?.session_type || 'unknown';
 let tsSucceeded = 0;
 let tsUrlUsed = null;
@@ -1033,7 +1039,13 @@ let responseText = (typeof result.response_payload === 'string')
 : (result.response_payload?.answer || "Inget svar tillgängligt");
 
 // Transportstyrelsen-fallback: kör om RAG inte hittade svar på regelrelaterad fråga
-if (aiEnabled && responseText.includes("hittar ingen information")) {
+const _tsMissPatterns2 = [
+  'hittar ingen information',
+  'har tyvärr inte den informationen',
+  'saknar den informationen'
+];
+const _tsSeemsLikeMiss2 = _tsMissPatterns2.some(p => responseText.toLowerCase().includes(p));
+if (aiEnabled && _tsSeemsLikeMiss2) {
 const sessionTypeForLog = v2State?.session_type || 'unknown';
 let tsSucceeded = 0;
 let tsUrlUsed = null;

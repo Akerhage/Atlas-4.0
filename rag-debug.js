@@ -1,7 +1,7 @@
 // ============================================================
 // rag-debug.js — Atlas RAG Debug Script
 // PLACERA I: C:\Atlas\rag-debug.js
-// KÖR MED:   node rag-debug.js "din fråga här"
+// KÖR MED:   cd /apps/atlas node rag-debug.js "din fråga här"
 // ============================================================
 
 const fs      = require('fs');

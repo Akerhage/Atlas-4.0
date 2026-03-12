@@ -205,7 +205,7 @@ REGLER (OBLIGATORISKA, GÄLLER UTAN UNDANTAG):
 3. Lägg ALDRIG till information som inte finns i texten.
 4. Ändra ALDRIG fakta, siffror, tider eller krav från texten.
 5. Svara alltid på svenska. Använd **fetstil** för viktiga fakta (priser, åldrar, krav).
-6. Avsluta alltid varje svar med en ny rad: "Källa: Transportstyrelsen.se"
+6. Avsluta alltid svaret med (på ny rad): "📋 Källa: Transportstyrelsen.se — vill du veta mer eller boka, kan du fortsätta fråga mig!"
 
 BIFOGAD TEXT FRÅN TRANSPORTSTYRELSEN:
 ${pageContent}`.trim();
@@ -229,7 +229,10 @@ ${pageContent}`.trim();
     }
 
     console.log('[TS-Fallback] Svar returnerat från Transportstyrelsen-fallback.');
-    return answer;
+    const bridgePrefix =
+      'Jag hittade inte svaret på just den frågan i mina interna dokument, ' +
+      'men gick ett extra steg och kollade Transportstyrelsen åt dig:\n\n';
+    return bridgePrefix + answer;
 
   } catch (err) {
     console.warn('[TS-Fallback] OpenAI-fel:', err.message);

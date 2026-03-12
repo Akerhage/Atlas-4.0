@@ -1,6 +1,6 @@
 {
   "id": "my_driving_academy_goteborg_ullevi",
-  "name": "My Driving Academy - Göteborg – Ullevi",
+  "name": "My Driving Academy - Göteborg Ullevi",
   "brand": "My Driving Academy",
   "city": "Göteborg",
   "area": "Ullevi",
@@ -20,7 +20,8 @@
     "priser",
     "språk",
     "undervisning",
-    "utbildning"
+    "utbildning",
+    "my"
   ],
   "contact": {
     "phone": "0313362665",
@@ -50,7 +51,7 @@
   "prices": [
     {
       "service_name": "AM Mopedutbildning",
-      "price": 10999,
+      "price": 9499,
       "currency": "SEK",
       "keywords": [
         "Moped",
@@ -58,7 +59,10 @@
         "pris",
         "kostnad",
         "Göteborg",
-        "Ullevi"
+        "Ullevi",
+        "göteborg",
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -71,7 +75,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -84,7 +89,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -97,7 +103,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -111,7 +118,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -125,7 +133,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -138,7 +147,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -151,7 +161,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -164,7 +175,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -177,7 +189,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -190,7 +203,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -203,7 +217,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -216,7 +231,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -230,7 +246,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -245,7 +262,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -259,7 +277,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -272,7 +291,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -285,7 +305,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -298,7 +319,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -312,7 +334,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -326,7 +349,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -339,7 +363,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -352,7 +377,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     },
     {
@@ -365,7 +391,8 @@
         "pris",
         "kostnad",
         "göteborg",
-        "ullevi"
+        "ullevi",
+        "my"
       ]
     }
   ],

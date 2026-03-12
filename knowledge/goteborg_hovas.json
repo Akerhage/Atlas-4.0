@@ -40,6 +40,7 @@
     }
   ],
   "services_offered": [
+    "AM",
     "Bil",
     "MC",
     "AM"
@@ -51,7 +52,7 @@
   "prices": [
     {
       "service_name": "AM Mopedutbildning",
-      "price": 10999,
+      "price": 9499,
       "currency": "SEK",
       "keywords": [
         "Moped",

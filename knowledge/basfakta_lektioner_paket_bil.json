@@ -107,6 +107,24 @@
         "återfallselev",
         "återtagning"
       ]
+    },
+    {
+      "title": "Paketjämförelse: Lektionspaket vs Totalpaket (Bil)",
+      "answer": "Vi har två typer av paket för bilkörkortet:\n\n**Lektionspaket** — Ren rabatt på körlektioner. Inga kurser ingår:\n- Minipaket: 5 körlektioner\n- Mellanpaket: 10 körlektioner\n- Baspaket: 15 körlektioner\n\n**Totalpaket** — Komplett startpaket (lektioner + kurser):\n- Totalpaket 5: 5 körlektioner + Risk 1 + Risk 2 + Mitt Körkort-appen\n- Totalpaket 10: 10 körlektioner + Risk 1 + Risk 2 + Mitt Körkort-appen\n- Totalpaket 15: 15 körlektioner + Risk 1 + Risk 2 + Mitt Körkort-appen\n\nSkillnaden: Totalpaketen inkluderar de obligatoriska riskutbildningarna (Risk 1 & Risk 2) och teorin i appen — vilket gör dem mer prisvärda om du inte redan har gjort dessa. Priserna varierar beroende på stad.",
+      "keywords": [
+        "skillnad",
+        "skillnaden",
+        "jämförelse",
+        "minipaket",
+        "mellanpaket",
+        "baspaket",
+        "totalpaket",
+        "lektionspaket",
+        "vad är skillnaden",
+        "paket bil",
+        "paket jämförelse"
+      ],
+      "boost": 300000
     }
   ],
   "type": "basfakta",

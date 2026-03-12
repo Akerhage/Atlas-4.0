@@ -2,6 +2,8 @@
 $SERVER = "root@204.168.129.104"
 $REMOTE = "/apps/atlas/"
 
+Write-Host "🚀 Deployar filer till servern..." -ForegroundColor Cyan
+
 # Huvudfiler
 scp C:\Atlas\server.js ${SERVER}:${REMOTE}
 scp C:\Atlas\db.js ${SERVER}:${REMOTE}
@@ -22,8 +24,11 @@ scp -r C:\Atlas\kundchatt\* ${SERVER}:${REMOTE}kundchatt/
 # Vill du ändå pusha knowledge manuellt (t.ex. efter lokal fix):
 #   scp -r C:\Atlas\knowledge\* root@204.168.129.104:/apps/atlas/knowledge/
 
-# Starta om
-ssh $SERVER "pm2 restart atlas"
+Write-Host "🔄 Startar om Atlas-processen (PM2)..." -ForegroundColor Yellow
+# OBS: knowledge/ deployas INTE — dessa filer ägs av servern (redigeras via admin-UI)
+# Vill du ändå pusha knowledge manuellt (t.ex. efter lokal fix):
+# scp -r C:\Atlas\knowledge\* root@204.168.129.104:/apps/atlas/knowledge/
+# Startar om specifikt processen "atlas" som definierats i ecosystem.config.js
+ssh ${SERVER} "pm2 restart atlas"
 
-Write-Host "✅ Deploy klar!" -ForegroundColor Green
-Read-Host "Tryck Enter för att stänga"
+Write-Host "✅ Allt klart! Servern kör nu den nya koden." -ForegroundColor Green
