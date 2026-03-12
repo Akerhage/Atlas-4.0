@@ -857,6 +857,17 @@ restartRequired = false; // Ingen omstart behövs för detta
 
 console.log(`[SYSCONFIG] ${field} = ${val} | Filer: ${changedFiles.join(', ')}`);
 res.json({ success: true, changedFiles, restartRequired });
+
+// Om ändringen kräver omstart — trigga pm2 restart automatiskt efter 800ms
+if (restartRequired) {
+setTimeout(() => {
+const { exec } = require('child_process');
+exec('pm2 restart atlas', (err) => {
+if (err) console.error('[SYSCONFIG] pm2 restart misslyckades:', err.message);
+else console.log('[SYSCONFIG] Server omstartad automatiskt via pm2');
+});
+}, 800);
+}
 } catch (err) {
 console.error('[SYSCONFIG POST]', err);
 res.status(500).json({ error: 'Kunde inte spara konfiguration.' });

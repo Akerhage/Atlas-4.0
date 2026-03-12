@@ -104,15 +104,17 @@ function createMainWindow() {
         }
     });
 
-    // CSP Header Override — tillåter WebSockets via Ngrok-tunnel
+    // CSP Header Override — tillåter anslutning mot VPS (atlas-support.se) och lokal dev
+    const serverOrigin = (config.SERVER_URL || 'https://atlas-support.se').replace(/\/$/, '');
+    const serverWss = serverOrigin.replace(/^https/, 'wss').replace(/^http/, 'ws');
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
         callback({
             responseHeaders: {
                 ...details.responseHeaders,
                 'Content-Security-Policy': [
                     "default-src 'self' 'unsafe-inline' data:; " +
-                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.ngrok-free.dev https://cdn.socket.io; " +
-                    "connect-src 'self' https://*.ngrok-free.dev wss://*.ngrok-free.dev ws://localhost:* http://localhost:*; " +
+                    `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${serverOrigin} https://*.ngrok-free.dev https://cdn.socket.io; ` +
+                    `connect-src 'self' ${serverOrigin} ${serverWss} https://*.ngrok-free.dev wss://*.ngrok-free.dev ws://localhost:* http://localhost:*; ` +
                     "img-src 'self' data: http: https:;"
                 ]
             }

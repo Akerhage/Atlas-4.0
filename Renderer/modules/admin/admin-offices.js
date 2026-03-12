@@ -104,6 +104,18 @@ return '<span class="lang-pill"'
 // ===================================================
 // ADMIN - RENDER OFFICE LIST
 // ===================================================
+// Bekräftelsedialog vid radering av prisrad
+async function adminDeletePriceRow(btn) {
+const row = btn.closest('.price-row');
+const serviceName = row?.querySelector('[data-service-name]')?.getAttribute('data-service-name')
+  || row?.querySelector('span[style]')?.textContent?.trim()
+  || 'denna tjänst';
+const ok = await atlasConfirm('Ta bort tjänst', `Vill du ta bort "${serviceName}" från prislistan?`);
+if (!ok) return;
+row.remove();
+window._adminFormDirty = true;
+}
+
 async function renderAdminOfficeList() {
 const listContainer = document.getElementById('admin-main-list');
 listContainer.innerHTML = '<div class="spinner-small"></div>';
@@ -313,7 +325,7 @@ ${data.prices ? data.prices.map((p, idx) => `
 style="display:none; width:22px; height:22px; border-radius:50%; background:rgba(255,69,58,0.15);
 border:1px solid rgba(255,69,58,0.3); color:#ff453a; cursor:pointer; font-size:14px;
 align-items:center; justify-content:center; padding:0; line-height:1; flex-shrink:0;"
-onclick="this.closest('.price-row').remove(); window._adminFormDirty=true;">×</button>
+onclick="adminDeletePriceRow(this)">×</button>
 </div>
 </div>
 `).join('') : '<div class="template-item-empty">Inga priser inlagda.</div>'}
@@ -636,6 +648,15 @@ return null;
 currentData.services_offered = [...new Set(remainingPrices.map(p => v2s[dv(p.service_name)]).filter(Boolean))];
 })();
 
+// Kolla om bokningslänkar kommer nollställas (tjänst borttagen)
+const removedLinkNames = [];
+if (currentData.booking_links) {
+const so = currentData.services_offered;
+if (currentData.booking_links.CAR && !so.includes('Bil')) removedLinkNames.push('Bil');
+if (currentData.booking_links.MC  && !so.includes('MC'))  removedLinkNames.push('MC');
+if (currentData.booking_links.AM  && !so.includes('AM'))  removedLinkNames.push('AM');
+}
+
 const saveRes = await fetch(`${SERVER_URL}/api/knowledge/${tag}`, {
 method: 'PUT',
 headers: fetchHeaders,
@@ -645,6 +666,9 @@ body: JSON.stringify(currentData)
 if (saveRes.ok) {
 window._adminFormDirty = false; // Markerar formuläret som sparat
 showToast("✅ Kontorsdata sparad!");
+if (removedLinkNames.length > 0) {
+setTimeout(() => showToast(`⚠️ Bokningslänk för ${removedLinkNames.join(', ')} borttagen automatiskt.`), 800);
+}
 await preloadOffices();
 renderMyTickets?.();
 renderInbox?.();

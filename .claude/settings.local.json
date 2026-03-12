@@ -18,7 +18,12 @@
       "Bash(curl:*)",
       "Bash(sort:*)",
       "Bash(pm2 list:*)",
-      "Bash(\"C:/Atlas/AUDIT.md\":*)"
+      "Bash(\"C:/Atlas/AUDIT.md\":*)",
+      "Bash(ssh:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(\"C:/Atlas/tests/check_so.js\":*)"
     ]
   }
 }

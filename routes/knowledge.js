@@ -129,16 +129,19 @@ if (updates.services_offered) data.services_offered = updates.services_offered;
 if (updates.prices && Array.isArray(updates.prices)) {
 data.prices = updates.prices;
 
-// Dedup-synk av services_offered: baserat på keywords hos kvarvarande priser
-const activeServices = new Set();
-data.prices.forEach(p => {
-const kw = p.keywords || [];
-if (kw.some(k => k === 'bil')) activeServices.add('Bil');
-if (kw.some(k => k === 'mc' || k === 'motorcykel')) activeServices.add('MC');
-if (kw.some(k => k === 'am' || k === 'moped')) activeServices.add('AM');
-});
-// Bevara bara de tjänster som faktiskt har kvarvarande priser
-data.services_offered = (data.services_offered || []).filter(s => activeServices.has(s));
+// Härleder services_offered från tjänste-NAMN (ej keywords) — robust mot skiftläge
+function detectServiceFromName(name) {
+  const l = (name || '').toLowerCase();
+  if (/introduktion|handledare/.test(l)) return 'Bil'; // INTRO räknas som Bil
+  if (/\bam\b|\bmoped\b/.test(l)) return 'AM';
+  if (/\bmc\b|\ba1\b|\ba2\b|\bmotorcykel/.test(l)) return 'MC';
+  if (/\blastbil\b|\bc1\b|\bce\b|\bykb\b/.test(l)) return 'Lastbil';
+  if (/\bsläp\b|\bb96\b|\bbe\b/.test(l)) return 'Släp';
+  if (/\bbil\b|\bpersonbil\b/.test(l)) return 'Bil';
+  return null;
+}
+const activeServices = new Set(data.prices.map(p => detectServiceFromName(p.service_name)).filter(Boolean));
+data.services_offered = [...activeServices];
 
 // Städa booking_links för borttagna tjänster
 if (data.booking_links) {

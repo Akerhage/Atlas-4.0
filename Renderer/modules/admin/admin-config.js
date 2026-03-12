@@ -215,7 +215,7 @@ detailBox.innerHTML = `
 <div class="detail-container">
 <div class="detail-body" style="padding:25px;">
 ${rows}
-<div id="sysconfig-restart-notice" style="display:none;" class="admin-restart-notice">⚠️ Kräver omstart av servern för att träda i kraft</div>
+<div id="sysconfig-restart-notice" style="display:none;" class="admin-restart-notice">🔄 Servern startar om automatiskt inom några sekunder...</div>
 <div id="sysconfig-changed-files" style="margin-top:12px;"></div>
 </div>
 </div>
