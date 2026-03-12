@@ -620,6 +620,22 @@ remainingPrices.push({ ...currentData.prices[idx], price: parseInt(inp.value) ||
 });
 currentData.prices = remainingPrices;
 
+// Auto-derivera services_offered från prisraderna
+(function() {
+const v2s = { BIL:'Bil', INTRO:'Bil', MC:'MC', AM:'AM', LASTBIL:'Lastbil', SLÄP:'Släp' };
+function dv(name) {
+const l = (name||'').toLowerCase();
+if (/introduktion|handledare/.test(l)) return 'INTRO';
+if (/\bam\b|\bmoped\b/.test(l)) return 'AM';
+if (/\bmc\b|\ba1\b|\ba2\b|\bmotorcykel/.test(l)) return 'MC';
+if (/\blastbil\b|\bc1\b|\bce\b|\bykb\b/.test(l)) return 'LASTBIL';
+if (/\bsläp\b|\bb96\b|\bbe\b/.test(l)) return 'SLÄP';
+if (/\bbil\b|\bpersonbil\b/.test(l)) return 'BIL';
+return null;
+}
+currentData.services_offered = [...new Set(remainingPrices.map(p => v2s[dv(p.service_name)]).filter(Boolean))];
+})();
+
 const saveRes = await fetch(`${SERVER_URL}/api/knowledge/${tag}`, {
 method: 'PUT',
 headers: fetchHeaders,
