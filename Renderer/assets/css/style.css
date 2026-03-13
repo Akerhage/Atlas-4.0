@@ -1183,9 +1183,64 @@ border: 1px solid rgba(255,255,255,0.1);
 }
 
 .help-footer { 
-font-size: 11px; opacity: 0.5; color: #ffffff !important;
-border-top: 1px solid rgba(255,255,255,0.1); 
-padding-top: 12px; margin-top: 15px; text-align: center;
+font-size: 11px; color: rgba(255,255,255,0.4) !important;
+border-top: 1px solid rgba(255,255,255,0.08); 
+padding-top: 14px; margin-top: 18px;
+display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+
+/* Help modal bredare än standard glass-modal-box */
+.atlas-help-overlay .help-modal-box {
+width: 700px !important;
+}
+
+/* =============================================
+HJÄLP-TRIGGER (placeholder-knapp)
+============================================= */
+.help-trigger {
+display: inline-flex;
+align-items: center;
+gap: 7px;
+margin-top: 22px;
+padding: 7px 18px;
+border-radius: 20px;
+border: 1px solid rgba(255,255,255,0.22);
+background: rgba(255,255,255,0.05);
+color: rgba(255,255,255,0.55);
+font-size: 12px;
+font-family: inherit;
+cursor: pointer;
+transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.help-trigger:hover {
+border-color: var(--accent-primary);
+color: var(--accent-primary);
+background: rgba(0, 113, 227, 0.09);
+}
+
+/* =============================================
+MANUAL-NEDLADDNINGSKNAPP (help footer)
+============================================= */
+.help-download-btn {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+padding: 5px 12px;
+border-radius: 12px;
+border: 1px solid rgba(255,255,255,0.1);
+background: rgba(255,255,255,0.04);
+color: rgba(255,255,255,0.5);
+font-size: 11px;
+font-family: inherit;
+cursor: pointer;
+white-space: nowrap;
+transition: all 0.2s ease;
+flex-shrink: 0;
+}
+.help-download-btn:hover {
+border-color: var(--accent-primary);
+color: var(--accent-primary);
+background: rgba(0, 113, 227, 0.07);
 }
 
 /* =============================================================================
@@ -2516,6 +2571,43 @@ font-size: 16px;
 border-bottom: 1px solid rgba(255,255,255,0.1);
 padding-bottom: 12px;
 margin-bottom: 18px;
+}
+
+/* =============================================
+   HJÄLP-MODAL STYLAD VYRUBRRIK
+   (matchar showCustomersInfoModal-stilen)
+============================================= */
+.help-view-header {
+display: flex;
+align-items: center;
+gap: 14px;
+margin: -32px -32px 20px;
+padding: 20px 24px 18px;
+border-bottom: 1px solid rgba(255,255,255,0.07);
+background: linear-gradient(90deg, rgba(255,255,255,0.035), transparent);
+border-radius: 14px 14px 0 0;
+}
+.help-view-icon-circle {
+width: 38px;
+height: 38px;
+border-radius: 50%;
+background: rgba(255,255,255,0.07);
+border: 1px solid rgba(255,255,255,0.14);
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+color: var(--accent-primary);
+}
+.help-view-title {
+font-size: 15px;
+font-weight: 700;
+color: var(--accent-primary);
+}
+.help-view-subtitle {
+font-size: 11px;
+color: rgba(255,255,255,0.38);
+margin-top: 2px;
 }
 .help-content ul { padding-left: 0; list-style: none; margin: 0; }
 .help-content li { margin-bottom: 14px; font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.85) !important; }

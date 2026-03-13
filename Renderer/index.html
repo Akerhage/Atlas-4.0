@@ -271,6 +271,10 @@ Mina Ärenden
 <svg class="hero-fg-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
 <h2 class="hero-title">Mina Ärenden</h2>
 <p class="hero-subtitle">Fortsätt konversationen genom att välja en av dina aktiva chattar.</p>
+<button class="help-trigger" onclick="toggleHelp()">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+Visa hjälpguide
+</button>
 </div>
 </div>
 <div id="my-ticket-detail" style="display: none; flex-direction: column; height: 100%;">
@@ -318,6 +322,10 @@ Inkorgen
 <svg class="hero-fg-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
 <h2 class="hero-title">Inkorgen</h2>
 <p class="hero-subtitle">Välj ett ärende från listan för att hantera det.</p>
+<button class="help-trigger" onclick="toggleHelp()">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+Visa hjälpguide
+</button>
 </div>
 </div>
 <div id="inbox-detail" style="display: none; flex-direction: column; height: 100%;"></div>
@@ -373,6 +381,10 @@ Garaget
 <svg class="hero-fg-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
 <h2 class="hero-title">Garaget</h2>
 <p class="hero-subtitle">Välj ett inkommande ärende för att påbörja hanteringen.</p>
+<button class="help-trigger" onclick="toggleHelp()">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+Visa hjälpguide
+</button>
 </div>
 </div>
 <div id="archive-detail" style="display: none; flex-direction: column; height: 100%;"></div>
@@ -409,6 +421,10 @@ Kunder
 <svg class="hero-fg-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
 <h2 class="hero-title">KUNDER</h2>
 <p class="hero-subtitle">Sök på namn, email eller telefon</p>
+<button class="help-trigger" onclick="showCustomersInfoModal()">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+Visa hjälpguide
+</button>
 <input type="text" id="customer-search-main" placeholder="Skriv minst 3 tecken..." autocomplete="off"
   style="margin-top:16px; width:280px; padding:10px 16px; border-radius:12px;
          background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
@@ -479,6 +495,10 @@ Admin
 <h2 class="hero-title">Admin Dashboard</h2>
 <p class="hero-subtitle">Välj en agent eller ett kontor för att hantera inställningar.</p>
 <p style="margin-top:14px; font-size:11px; color:#ff453a; opacity:0.75; max-width:280px; line-height:1.5; text-align:center;">Varning: Ändringar i systeminställningar tillämpas omedelbart och kan påverka driften.</p>
+<button class="help-trigger" onclick="showAdminInfoModal()">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+Visa hjälpguide
+</button>
 </div>
 </div>
 <div id="admin-detail-content" style="display: none; flex-direction: column; height: 100%;"></div>
@@ -489,8 +509,15 @@ Admin
 
 <div id="atlas-help-overlay" class="atlas-help-overlay">
 <div class="help-modal-box glass-effect">
+<button id="help-close-btn" onclick="document.getElementById('atlas-help-overlay').style.display='none'" title="Stäng">✕</button>
 <div id="help-content-area" class="help-content"></div>
-<div class="help-footer">Atlas Support Guide v4.0</div>
+<div class="help-footer">
+<span>Atlas Support Guide v4.0</span>
+<button class="help-download-btn" onclick="openAtlasManual()">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+Ladda ner manual
+</button>
+</div>
 </div>
 </div>
 
