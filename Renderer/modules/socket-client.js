@@ -172,6 +172,12 @@ if (
 playNotificationSound();
 }
 
+// Toast + notis (riktat till mig) när kund triggar live-chatt
+if (evt.type === 'human_mode_triggered') {
+showToast('👤 En kund vill chatta live!', 5000, 'warning');
+if (window.NotifSystem) window.NotifSystem.addNotif('👤 En kund vill chatta live!');
+}
+
 clearTimeout(_teamUpdateDebounce);
 _teamUpdateDebounce = setTimeout(() => {
 renderInbox();
@@ -195,6 +201,8 @@ window.socketAPI.on('team:customer_message', (data) => {
 console.log("📩 Nytt kundmeddelande via API:", data);
 updateInboxBadge();
 if (State.soundEnabled) playNotificationSound();
+showToast('💬 Nytt kundmeddelande', 4000, 'info');
+if (window.NotifSystem) window.NotifSystem.addNotif('💬 Nytt kundmeddelande via kundchatten');
 
 if (DOM.views.inbox.style.display === 'flex') renderInbox();
 });
@@ -204,6 +212,13 @@ window.socketAPI.on('team:new_ticket', (data) => {
 console.log("🆕 Nytt ärende i kön:", data);
 updateInboxBadge();
 if (State.soundEnabled) playNotificationSound();
+// Om ärendet är riktat till mig → Notiser, annars Historik
+const _newTicketIsForMe = data.owner && typeof currentUser !== 'undefined' && data.owner === currentUser?.username;
+showToast('📩 Nytt ärende inkommit', 4000, 'info');
+if (window.NotifSystem) {
+if (_newTicketIsForMe) window.NotifSystem.addNotif('📩 Nytt ärende tilldelat till dig');
+else                   window.NotifSystem.addHistory('📩', 'Nytt ärende inkommit');
+}
 
 if (DOM.views.inbox.style.display === 'flex') renderInbox();
 });
@@ -223,7 +238,31 @@ const myDetail    = document.getElementById('my-ticket-detail');
 const inboxDetail = document.getElementById('inbox-detail');
 const isMyTicketOpen = myDetail?.getAttribute('data-current-id') === conversationId;
 const isInboxOpen    = inboxDetail?.getAttribute('data-current-id') === conversationId;
-if (!isMyTicketOpen && !isInboxOpen) return; // Ingen av vyerna visar detta ärende
+if (!isMyTicketOpen && !isInboxOpen) {
+if (sender === 'user' || (data.isEmail && sender === 'user')) {
+const isMyTicket = !!document.querySelector(`#my-tickets-list .team-ticket-card[data-id="${conversationId}"]`);
+if (isMyTicket) {
+// Mitt ärende: riktat till mig → Notiser med namn + meddelandeförhandsvisning
+const _label   = window.NotifSystem ? window.NotifSystem.getTicketLabel(conversationId) : `#${String(conversationId).slice(-6)}`;
+const _snippet = (message || '').replace(/📧\s*(\((?:Mail|Svar)\):)?\s*/i, '').trim().substring(0, 45);
+showToast(`💬 Nytt svar — ${_label}`, 4500, 'info');
+if (window.NotifSystem) window.NotifSystem.addNotif(`💬 ${_label}: "${_snippet}${_snippet.length >= 45 ? '…' : ''}"`);
+} else {
+// Inte mitt ärende → Historik
+if (window.NotifSystem) {
+const _label2 = window.NotifSystem.getTicketLabel(conversationId);
+window.NotifSystem.addHistory('💬', `Kundsvar i ärende ${_label2}`);
+}
+}
+} else if (sender && sender.toLowerCase() !== 'system') {
+// Agenthändelse (kollega svarade) → Historik
+if (window.NotifSystem) {
+const _label3 = window.NotifSystem.getTicketLabel(conversationId);
+window.NotifSystem.addHistory('💬', `${sender} svarade i ärende ${_label3}`);
+}
+}
+return;
+} // Ingen av vyerna visar detta ärende
 
 // Välj rätt chattcontainer baserat på vilken vy som är aktiv
 let chatContainer = null;
@@ -346,8 +385,9 @@ checkAndResetDetail('my-ticket-detail', conversationId);
 
 // Visa toast endast om agenten faktiskt hade ärendet öppet
 if (wasOpen) {
-showToast('🗑️ Ärendet togs bort av en kollega');
+showToast('🗑️ Ärendet togs bort av en kollega', 4000, 'warning');
 }
+if (window.NotifSystem) window.NotifSystem.addHistory('🗑️', 'Ärende avslutades/raderades');
 });
 
 window.socketAPI.on('team:ticket_taken', (data) => {
@@ -359,14 +399,18 @@ return el && el.getAttribute('data-current-id') === conversationId;
 checkAndResetDetail('my-ticket-detail', conversationId);
 renderMyTickets?.();
 
+const ticketLabel = window.NotifSystem ? window.NotifSystem.getTicketLabel(conversationId) : `#${String(conversationId).slice(-6)}`;
+
 // Visa toast för gamla ägaren (om ärendet var tilldelat någon)
 if (previousOwner && previousOwner === (typeof currentUser !== 'undefined' ? currentUser.username : null)) {
-const takenByDisplay = typeof usersCache !== 'undefined' 
+const takenByDisplay = typeof usersCache !== 'undefined'
 ? (usersCache.find(u => u.username === takenBy)?.display_name || takenBy)
 : takenBy;
-showToast(`⚠️ ${takenByDisplay} tog över ärendet via snabbsvar`);
+showToast(`⚠️ ${takenByDisplay} tog över ärendet (${ticketLabel}) via snabbsvar`, 4000, 'warning');
+if (window.NotifSystem) window.NotifSystem.addHistory('⚠️', `${takenByDisplay} tog över ärendet ${ticketLabel}`);
 } else if (wasOpen) {
-showToast(`⚠️ ${takenBy} tog över detta ärende`);
+showToast(`⚠️ ${takenBy} tog över ärendet ${ticketLabel}`, 4000, 'warning');
+if (window.NotifSystem) window.NotifSystem.addHistory('⚠️', `${takenBy} tog över ärendet ${ticketLabel}`);
 }
 });
 
@@ -379,10 +423,12 @@ if (claimedBy === (typeof currentUser !== 'undefined' ? currentUser.username : n
 const previousOwnerDisplay = typeof usersCache !== 'undefined' && previousOwner
 ? (usersCache.find(u => u.username === previousOwner)?.display_name || previousOwner)
 : (previousOwner ? previousOwner : null);
-const toastMsg = previousOwnerDisplay 
-? `✅ Du tog över ärendet från ${previousOwnerDisplay}`
-: `✅ Du tog över ärendet`;
-showToast(toastMsg);
+const ticketLabel = window.NotifSystem ? window.NotifSystem.getTicketLabel(conversationId) : `#${String(conversationId).slice(-6)}`;
+const toastMsg = previousOwnerDisplay
+? `✅ Du tog över ärendet ${ticketLabel} från ${previousOwnerDisplay}`
+: `✅ Du tog ärendet ${ticketLabel}`;
+showToast(toastMsg, 3500, 'success');
+if (window.NotifSystem) window.NotifSystem.addHistory('✅', toastMsg.replace('✅ ', ''));
 }
 });
 
@@ -525,6 +571,8 @@ modal.onclick = (e) => { if (e.target === modal) _closeBroadcast(); };
 const _bcEsc = (e) => { if (e.key === 'Escape') { _closeBroadcast(); document.removeEventListener('keydown', _bcEsc); } };
 document.addEventListener('keydown', _bcEsc);
 if (typeof playNotificationSound === 'function') playNotificationSound();
+// Broadcast är riktat till alla → Notiser (viktig info)
+if (window.NotifSystem) window.NotifSystem.addNotif(`📢 Systemmeddelande: ${String(data.message || '').substring(0, 70)}`);
 });
 
 window.socketAPI.on('ticket:summary', (data) => {

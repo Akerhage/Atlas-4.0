@@ -78,8 +78,20 @@ const liveChatCount = (inboxData.live_chats || []).length;
 const mailCount     = (inboxData.mail || []).length;
 const claimedCount  = (inboxData.claimed || []).length;
 
-// Mina ärenden: visas i separat badge, räknas INTE in i inkorgen
-const myCount = myTickets.length;
+// Mina ärenden: applicera SAMMA klientfilter som renderMyTickets
+// (utesluter kontorsärenden som är plockade av en annan agent)
+const myCount = (() => {
+  if (!window.currentUser?.username) return myTickets.length;
+  const myName = window.currentUser.username.toLowerCase();
+  const myOfficeTags = (window.currentUser.routing_tag || '')
+    .split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+  return myTickets.filter(t => {
+    if (t.owner && t.owner.toLowerCase() === myName) return true;
+    if (t.sender && t.sender.toLowerCase() === myName) return true;
+    if (t.routing_tag && myOfficeTags.includes(t.routing_tag.toLowerCase()) && !t.owner) return true;
+    return false;
+  }).length;
+})();
 
 const totalInbox = liveChatCount + mailCount + claimedCount;
 const totalCount = totalInbox; // Inkorgens badge visar bara inkorgen
@@ -898,6 +910,14 @@ body: JSON.stringify({ conversationId: ticket.conversation_id })
 }
 const toastMsg = action === 'takeover' ? '✅ Du har tagit över ärendet!' : '✅ Ärendet är nu ditt!';
 showToast(toastMsg);
+// Lägg till i notif-systemet
+if (window.NotifSystem) {
+  const customerName = esc(resolveTicketTitle(ticket));
+  const notifMsg = action === 'takeover' 
+    ? `Du tog över ärendet från ${customerName}`
+    : `Du tog ärendet från ${customerName}`;
+  window.NotifSystem.addNotif(notifMsg);
+}
 renderInbox();
 updateInboxBadge();
 } catch (err) {
@@ -920,7 +940,10 @@ inboxArchive.onclick = async () => {
 clearDetailView();
 try {
 await fetch(`${SERVER_URL}/api/inbox/archive`, { method: 'POST', headers: fetchHeaders, body: JSON.stringify({ conversationId: ticket.conversation_id }) });
-showToast('✅ Ärendet arkiverat!');
+const customerName = esc(resolveTicketTitle(ticket));
+const ticketRef = `#${String(ticket.conversation_id).slice(-6)}`;
+showToast(`✅ Ärendet från ${customerName} ${ticketRef} arkiverat!`);
+if (window.NotifSystem) window.NotifSystem.addNotif(`Ärendet från ${customerName} ${ticketRef} arkiverat`);
 renderInbox();
 } catch (err) {
 console.error("Fel vid arkivering:", err);
@@ -941,7 +964,10 @@ if (window.electronAPI && ticket.id) {
 await window.electronAPI.deleteQA(ticket.id).catch(e => console.log("Lokal städning ej nödvändig"));
 }
 
-showToast("✅ Ärendet raderat");
+const customerName = esc(resolveTicketTitle(ticket));
+const ticketRef = `#${String(ticket.conversation_id).slice(-6)}`;
+showToast(`✅ Ärendet från ${customerName} ${ticketRef} raderat`);
+if (window.NotifSystem) window.NotifSystem.addHistory('🗑️', `Ärendet från ${customerName} ${ticketRef} raderades`);
 
 const listContainer = document.getElementById('inbox-list');
 if (listContainer) {

@@ -17,6 +17,7 @@ let loaderWindow = null;
 let tray = null;
 let forceQuit = false;
 let config = {};
+let trayNotifShown = false; // Visas max en gång per app-session
 
 // Single Instance Lock
 const gotTheLock = app.requestSingleInstanceLock();
@@ -144,6 +145,17 @@ function createMainWindow() {
         if (!forceQuit) {
             e.preventDefault();
             mainWindow.hide();
+            // Visa balloon-notis första gången fönstret döljs till tray
+            if (!trayNotifShown && tray) {
+                trayNotifShown = true;
+                try {
+                    tray.displayBalloon({
+                        title: 'Atlas körs i bakgrunden',
+                        content: 'Avsluta Atlas helt via högerklick på ikonen i aktivitetsfältet.',
+                        noSound: true
+                    });
+                } catch (err) { /* displayBalloon stöds ej på alla plattformar */ }
+            }
         }
     });
 
@@ -176,12 +188,16 @@ app.whenReady().then(async () => {
         }
     });
 
-    // Triggar server-ready efter 1.5 sekunder för att simulera nätverkscheck
-    setTimeout(() => {
-        if (loaderWindow && !loaderWindow.isDestroyed()) {
-            loaderWindow.webContents.send('server-status', true);
-        }
-    }, 1500);
+    // Skicka server-ready FÖRST när loader-sidan är fullt laddad (race-condition-säkert).
+    // did-finish-load garanterar att DOMContentLoaded i loader.js redan har kört
+    // och att ipcRenderer-lyssnaren är registrerad — oavsett hur lång datorns uppstartstid är.
+    loaderWindow.webContents.once('did-finish-load', () => {
+        setTimeout(() => {
+            if (loaderWindow && !loaderWindow.isDestroyed()) {
+                loaderWindow.webContents.send('server-status', true);
+            }
+        }, 200); // 200ms buffert för DOMContentLoaded att hinna registrera lyssnaren
+    });
 
     // Globala genvägar
     globalShortcut.register('Control+P', () => {
@@ -209,10 +225,51 @@ ipcMain.handle('get-app-info', async () => {
     };
 });
 
-// Bryggor för att förhindra krascher i Renderer
-ipcMain.handle('load-templates', async () => []);
-ipcMain.handle('save-templates', async () => ({ success: true }));
-ipcMain.handle('delete-template', async () => ({ success: true }));
+// Hjälpfunktion: bygg headers med CLIENT_API_KEY
+function clientApiHeaders() {
+    return { 'Content-Type': 'application/json', 'x-api-key': config.CLIENT_API_KEY || '' };
+}
+
+// Hjälpfunktion: bygg server-bas-URL utan avslutande snedstreck
+function serverBase() {
+    return (config.SERVER_URL || 'https://atlas-support.se').replace(/\/$/, '');
+}
+
+// Hämta mallar från VPS-servern
+ipcMain.handle('load-templates', async () => {
+    try {
+        const res = await fetch(`${serverBase()}/api/templates`, { headers: clientApiHeaders() });
+        if (!res.ok) { console.error('[Templates] Load HTTP', res.status); return []; }
+        return await res.json();
+    } catch (e) { console.error('[Templates] Load error:', e.message); return []; }
+});
+
+// Spara/uppdatera mall på VPS-servern
+ipcMain.handle('save-templates', async (_, templates) => {
+    try {
+        for (const t of templates) {
+            const res = await fetch(`${serverBase()}/api/templates/save`, {
+                method: 'POST',
+                headers: clientApiHeaders(),
+                body: JSON.stringify(t)
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        }
+        return { success: true };
+    } catch (e) { console.error('[Templates] Save error:', e.message); return { success: false, error: e.message }; }
+});
+
+// Radera mall på VPS-servern
+ipcMain.handle('delete-template', async (_, templateId) => {
+    try {
+        const res = await fetch(`${serverBase()}/api/templates/delete/${templateId}`, {
+            method: 'DELETE',
+            headers: clientApiHeaders()
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return { success: true };
+    } catch (e) { console.error('[Templates] Delete error:', e.message); return { success: false, error: e.message }; }
+});
 ipcMain.handle('save-qa', async () => ({ success: true }));
 ipcMain.handle('load-qa-history', async () => []);
 ipcMain.handle('delete-qa', async () => ({ success: true }));

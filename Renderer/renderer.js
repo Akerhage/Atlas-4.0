@@ -1841,6 +1841,8 @@ setTimeout(masterSystemAudit, 2000);
 setTimeout(auditDOM, 1000);
 // Försök köra synlighet direkt (ifall sessionen redan är laddad)
 updateInboxVisibility();
+// Initierar notifikationsklockan (bell + badge + panel)
+if (typeof NotifSystem !== 'undefined') NotifSystem.init();
 console.log("🚀 ATLAS READY OCH SYSTEMET ÄR LIVE.");
 }
 

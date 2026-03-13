@@ -73,6 +73,8 @@
 <script src="modules/admin/admin-agents.js" defer></script>
 <!-- Customers-view: renderCustomerList, openCustomerDetail -->
 <script src="modules/customers-view.js" defer></script>
+<!-- Notif-system: bell, badge, notis-panel (laddas FÖRE renderer.js) -->
+<script src="modules/notif-system.js" defer></script>
 <!-- Atlas UI-logik: all rendering, socket-hantering, IPC -->
 <script src="./renderer.js" defer></script>
 </head>
@@ -605,6 +607,23 @@ Admin
   overlay.addEventListener('click', closeMenu);
 }());
 </script>
+
+<!-- ============================================================
+     Notifikationspanel — visas/döljs av NotifSystem.togglePanel()
+     ============================================================ -->
+<div id="notif-panel" style="display:none" role="dialog" aria-label="Notiser">
+  <div class="notif-panel-header">
+    <div class="notif-tabs">
+      <button class="notif-tab active" data-tab="notiser"
+        onclick="NotifSystem.switchTab('notiser')">Notiser</button>
+      <button class="notif-tab" data-tab="historik"
+        onclick="NotifSystem.switchTab('historik')">Historik</button>
+    </div>
+    <button class="notif-clear-btn" onclick="NotifSystem.clearAll()" title="Rensa allt">Rensa</button>
+  </div>
+  <div id="notif-tab-notiser"  class="notif-tab-content"></div>
+  <div id="notif-tab-historik" class="notif-tab-content" style="display:none"></div>
+</div>
 
 </body>
 </html>

@@ -158,7 +158,7 @@ ${getAvatarBubbleHTML(u, "100%")}
 </div>
 </div>
 
-<div style="flex:1; display:flex; justify-content:center; align-items:center;">
+<div id="agent-ticket-counter-cell" style="flex:1; display:flex; justify-content:center; align-items:center;">
 ${tickets.length > 0 ? `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;" onclick="openTicketReader(0,'${username}')" title="Öppna ärendebläddaren"><span style="background:rgba(255,255,255,0.05);border:1px solid ${styles.main}55;border-radius:20px;padding:4px 14px;font-size:10px;color:${styles.main};white-space:nowrap;display:inline-flex;align-items:center;gap:5px;">🔥 ${tickets.length} Aktiva ärenden</span><div style="font-size:9px;opacity:0.65;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">${window._agentOwnerTickets?.length > 0 ? `<span style="color:${styles.main}99;">${window._agentOwnerTickets.length} tilldelade</span>` : ''}${window._agentRoutingTickets?.length > 0 ? `<span>+${window._agentRoutingTickets.length} via kontor</span>` : ''}</div></div>` : `<span style="font-size:10px; opacity:0.25;">Inga aktiva ärenden</span>`}
 </div>
 

@@ -114,7 +114,7 @@
 },
 {
 "title": "Vad är skillnaden på Totalpaket och Lektionspaket (MC)?",
-"answer": "Vi har två typer av paket för MC-körkortet:\n\n**Lektionspaket** — Ren rabatt på körlektioner. Inga kurser ingår:\n- 5-lektionspaket: 5 körlektioner\n- 10-lektionspaket: 10 körlektioner\n\n**Totalpaket** — Komplett startpaket (lektioner + kurser):\n- Totalpaket 5 MC: 5 körlektioner + Risk 1 + Risk 2 + digitalt teorimaterial + lån av MC till prov + uppvärmning\n- Totalpaket 10 MC: 10 körlektioner + Risk 1 + Risk 2 + digitalt teorimaterial + lån av MC till prov + uppvärmning\n\nSkillnaden: Totalpaketen inkluderar de obligatoriska riskutbildningarna och teorin — mer prisvärt om du inte redan gjort dessa. Priserna varierar beroende på stad.",
+"answer": "Skillnaden är innehållet: Totalpaket är en helhetslösning med lektioner, riskkurser, teori, lån av MC till prov och uppvärmning. Lektionspaket innehåller BARA körlektioner (rabatterade).",
 "keywords": [
 "bara körlektioner",
 "jämförelse",
@@ -122,15 +122,12 @@
 "mc",
 "motorcykel",
 "skillnad",
-"skillnaden",
 "totalpaket",
 "vad ska jag välja",
 "10 lektioner",
 "5 lektioner",
-"antal",
-"paket mc"
-],
-"boost": 300000
+"antal"
+]
 },
 {
 "title": "Var startar körlektionerna (Bana eller Trafik)?",

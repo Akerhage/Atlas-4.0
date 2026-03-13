@@ -268,7 +268,10 @@ headers: fetchHeaders,
 body: JSON.stringify({ conversationId: t.conversation_id })
 });
 if (!archRes.ok) throw new Error('Arkivering nekad');
-showToast('✅ Ärendet arkiverat!');
+const customerName = resolveTicketTitle(t);
+const ticketRef = `#${String(t.conversation_id).slice(-6)}`;
+showToast(`✅ Ärendet från ${customerName} ${ticketRef} arkiverat!`);
+if (window.NotifSystem) window.NotifSystem.addNotif(`Ärendet från ${customerName} ${ticketRef} arkiverat`);
 checkAndResetDetail('my-ticket-detail', t.conversation_id);
 renderMyTickets();
 } catch(err) {
@@ -703,7 +706,10 @@ const idToDelete = ticket.id || ticket.conversation_id;
 if(idToDelete) await window.electronAPI.deleteQA(idToDelete).catch(e => console.log("Lokal städning ej nödvändig"));
 }
 
-showToast("✅ Ärendet raderat");
+const customerName = resolveTicketTitle(ticket);
+const ticketRef = `#${String(ticket.conversation_id).slice(-6)}`;
+showToast(`✅ Ärendet från ${customerName} ${ticketRef} raderat`);
+if (window.NotifSystem) window.NotifSystem.addHistory('🗑️', `Ärendet från ${customerName} ${ticketRef} raderades`);
 
 // 4. Ta bort från UI utan att göra full refresh
 const listContainer = document.getElementById('my-tickets-list');
@@ -747,7 +753,9 @@ body: JSON.stringify({ conversationId })
 if (!res.ok) throw new Error('Kunde inte arkivera ärendet');
 
 // ✅ Servern bekräftade — nu är det säkert att rensa UI
-showToast('✅ Ärendet arkiverat!');
+const ticketLabel = window.NotifSystem ? window.NotifSystem.getTicketLabel(conversationId) : `#${String(conversationId).slice(-6)}`;
+showToast(`✅ Ärendet ${ticketLabel} arkiverat!`);
+if (window.NotifSystem) window.NotifSystem.addNotif(`Ärendet ${ticketLabel} arkiverat`);
 checkAndResetDetail('inbox-detail', conversationId);
 checkAndResetDetail('my-ticket-detail', conversationId);
 checkAndResetDetail('archive-detail', conversationId);

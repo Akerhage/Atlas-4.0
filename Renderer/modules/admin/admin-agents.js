@@ -428,26 +428,19 @@ const detailBox = document.getElementById('admin-detail-content');
 if (!detailBox) return;
 
 // Uppdatera räknaren (AKTIVA ÄRENDEN — total)
-const statCard = detailBox.querySelector('.admin-stat-card');
-if (statCard) {
-const numEl = statCard.querySelector('div[style*="font-size:38px"]');
-if (numEl) numEl.textContent = tickets.length || 0;
-
-// Uppdatera uppdelningsraden (tilldelade / via kontor)
-const breakdownEl = statCard.querySelector('div[style*="display:flex; gap:8px"]');
-if (breakdownEl) {
+// Skriver om hela cellens innerHTML direkt via det ID som sätts i admin-users.js
 const styles = getAgentStyles(username);
-const ownedCount = window._agentOwnerTickets?.length || 0;
-const routingCount = window._agentRoutingTickets?.length || 0;
-breakdownEl.innerHTML = `
-${ownedCount > 0 ? `<span style="color:${styles.main}99;">${ownedCount} tilldelade</span>` : ''}
-${routingCount > 0 ? `<span style="opacity:0.6;">+${routingCount} via kontor</span>` : ''}
-`;
-}
+const counterCell = document.getElementById('agent-ticket-counter-cell');
+if (counterCell) {
+  const ownedCount = window._agentOwnerTickets?.length || 0;
+  const routingCount = window._agentRoutingTickets?.length || 0;
+  if (tickets.length > 0) {
+    counterCell.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;" onclick="openTicketReader(0,'${username}')" title="Öppna ärendebläddaren"><span style="background:rgba(255,255,255,0.05);border:1px solid ${styles.main}55;border-radius:20px;padding:4px 14px;font-size:10px;color:${styles.main};white-space:nowrap;display:inline-flex;align-items:center;gap:5px;">🔥 ${tickets.length} Aktiva ärenden</span><div style="font-size:9px;opacity:0.65;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">${ownedCount > 0 ? `<span style="color:${styles.main}99;">${ownedCount} tilldelade</span>` : ''}${routingCount > 0 ? `<span>+${routingCount} via kontor</span>` : ''}</div></div>`;
+  } else {
+    counterCell.innerHTML = `<span style="font-size:10px; opacity:0.25;">Inga aktiva ärenden</span>`;
+  }
 }
 
-// Uppdatera ärendelistan (Pågående ärenden för agent)
-const styles = getAgentStyles(username);
 const ticketListEl = detailBox.querySelector('.scroll-list');
 if (ticketListEl) {
 ticketListEl.innerHTML = tickets.length ? tickets.map((t, idx) => `
