@@ -1,0 +1,62 @@
+{
+  "AM": {
+    "type": "info",
+    "text": "Boka din AM-kurs via vår hemsida här",
+    "linkText": "här",
+    "url": "https://mydrivingacademy.com/two-wheels/ta-am-korkort/"
+  },
+  "MC": {
+    "type": "info",
+    "text": "För mer MC-information, kolla vår hemsida",
+    "linkText": "hemsida",
+    "url": "https://mydrivingacademy.com/two-wheels/home/"
+  },
+  "CAR": {
+    "type": "info",
+    "text": "För mer information om bilkörkort, kolla vår hemsida",
+    "linkText": "hemsida",
+    "url": "https://mydrivingacademy.com/kom-igang/"
+  },
+  "INTRO": {
+    "type": "book",
+    "text": "Boka Handledarkurs/Introduktionskurs här",
+    "linkText": "här",
+    "url": "https://mydrivingacademy.com/handledarutbildning/"
+  },
+  "RISK1": {
+    "type": "book",
+    "text": "Boka Riskettan (Risk 1) här",
+    "linkText": "här",
+    "url": "https://mydrivingacademy.com/riskettan/"
+  },
+  "RISK2": {
+    "type": "book",
+    "text": "Boka Risktvåan/Halkbana (Risk 2) här",
+    "linkText": "här",
+    "url": "https://mydrivingacademy.com/halkbana/"
+  },
+  "TEORI": {
+    "type": "book",
+    "text": "Plugga körkortsteori i appen Mitt Körkort här",
+    "linkText": "här",
+    "url": "https://mydrivingacademy.com/app/"
+  },
+  "B96/BE": {
+    "type": "book",
+    "text": "Boka Släpvagnsutbildning (B96/BE) här",
+    "linkText": "här",
+    "url": "https://mydrivingacademy.com/slapvagn/"
+  },
+  "TUNG": {
+    "type": "book",
+    "text": "Boka utbildning för Tung Trafik (C/CE) här",
+    "linkText": "här",
+    "url": "https://mydrivingacademy.com/tungtrafik/"
+  },
+  "POLICY": {
+    "type": "info",
+    "text": "Läs våra köpvillkor och policy här",
+    "linkText": "här",
+    "url": "https://mydrivingacademy.com/privacy-policy/"
+  }
+}

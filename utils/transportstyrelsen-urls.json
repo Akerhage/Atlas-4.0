@@ -1,0 +1,16 @@
+{
+  "TILLSTAND":      "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/korkortstillstand/",
+  "ATERKALLELSE":   "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/forlorat-korkort/aterkallat-korkort/",
+  "RISK":           "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/riskutbildning/riskutbildning-bil/",
+  "HANDLEDARE":     "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/handledarskap-och-ovningskorning/introduktionsutbildning/",
+  "BE_B96":         "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/valj-behorighet/personbil-och-latt-lastbil/",
+  "YKB":            "https://www.transportstyrelsen.se/sv/vagtrafik/yrkestrafik/ykb/",
+  "CE":             "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/valj-behorighet/tung-lastbil/c-tung-lastbil/",
+  "MC_A":           "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/valj-behorighet/motorcykel/",
+  "AM_MOPED":       "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/valj-behorighet/am-korkort-for-moped-klass-i/",
+  "B":              "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/valj-behorighet/personbil-och-latt-lastbil/b-personbil-och-latt-lastbil/",
+  "HALSA":          "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/medicinska-krav/",
+  "FORNYA":         "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/har-korkort/fornya-korkortet/",
+  "INTERNATIONELLT":"https://www.transportstyrelsen.se/sv/vagtrafik/korkort/har-korkort/utlandska-korkort/",
+  "ALDER":          "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/"
+}

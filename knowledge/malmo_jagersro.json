@@ -1,0 +1,401 @@
+{
+  "id": "martenssons_trafikskola_malmo_jagersro",
+  "name": "Mårtenssons Trafikskola – Malmö Jägersro (Tung Trafik)",
+  "brand": "Mårtenssons Trafikskola",
+  "city": "Malmö",
+  "area": "Jägersro",
+  "description": "Mårtenssons Trafikskolas kontor för tung trafik i Malmö, beläget på Jägersrovägen 213. Här erbjuder vi utbildning för lastbil (C, C1, CE), buss (D) och YKB (Yrkeskompetensbevis). Kontakta oss för offert och individuell planering.",
+  "keywords": [
+    "mårtenssons",
+    "trafikskola",
+    "malmö",
+    "jägersro",
+    "tung trafik",
+    "lastbil",
+    "c körkort",
+    "ce körkort",
+    "c1 körkort",
+    "d körkort",
+    "buss",
+    "ykb",
+    "yrkeskompetensbevis",
+    "telefon",
+    "mail",
+    "adress",
+    "kontakt",
+    "öppettider",
+    "priser",
+    "utbildning"
+  ],
+  "contact": {
+    "phone": "010-188 83 26",
+    "email": "tungtrafik@trafikskolan.com",
+    "address": "Jägersrovägen 213, Malmö"
+  },
+  "opening_hours": [
+    {
+      "days": "Mån – Tors (kontor)",
+      "hours": "08:00 – 16:00"
+    },
+    {
+      "days": "Fredag (kontor)",
+      "hours": "08:00 – 14:00"
+    },
+    {
+      "days": "Mån – Tors (tung trafik)",
+      "hours": "08:00 – 12:00"
+    }
+  ],
+  "services_offered": [
+    "Lastbil"
+  ],
+  "languages": [
+    "svenska"
+  ],
+  "lastbil_info": {
+    "note": "Tung trafik bokas via specialiserad support, inte direkt online.",
+    "phone": "010-188 83 26",
+    "email": "tungtrafik@trafikskolan.com"
+  },
+  "prices": [
+    {
+      "service_name": "C Totalpaket 5",
+      "price": 13495,
+      "currency": "SEK",
+      "includes": "5 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "c körkort",
+        "c totalpaket 5",
+        "lastbil",
+        "tung lastbil",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "C Totalpaket 10",
+      "price": 21495,
+      "currency": "SEK",
+      "includes": "10 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "c körkort",
+        "c totalpaket 10",
+        "lastbil",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "C Totalpaket 15",
+      "price": 28650,
+      "currency": "SEK",
+      "includes": "15 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "c körkort",
+        "c totalpaket 15",
+        "lastbil",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "C Paket + YKB 140H",
+      "price": 37495,
+      "currency": "SEK",
+      "includes": "5 lektioner á 80 min, C teoriportalen, lån av ekipage & uppvärmning, YKB 140H, 10 YKB-lektioner á 60 min",
+      "keywords": [
+        "c ykb paket",
+        "lastbil ykb",
+        "c körkort ykb",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "C Körlektion (1 st)",
+      "price": 1950,
+      "currency": "SEK",
+      "keywords": [
+        "c körlektion",
+        "lastbil lektion",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "C Lektionspaket 5",
+      "price": 9350,
+      "currency": "SEK",
+      "keywords": [
+        "c lektionspaket 5",
+        "lastbil",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "C Lektionspaket 10",
+      "price": 18100,
+      "currency": "SEK",
+      "keywords": [
+        "c lektionspaket 10",
+        "lastbil",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "C Uppvärmning & ekipage vid prov",
+      "price": 2650,
+      "currency": "SEK",
+      "keywords": [
+        "uppvärmning",
+        "ekipage",
+        "c körkort",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "CE Totalpaket 5",
+      "price": 14495,
+      "currency": "SEK",
+      "includes": "5 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "ce körkort",
+        "ce totalpaket 5",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "CE Totalpaket 10",
+      "price": 22995,
+      "currency": "SEK",
+      "includes": "10 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "ce körkort",
+        "ce totalpaket 10",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "CE Totalpaket 15",
+      "price": 31495,
+      "currency": "SEK",
+      "includes": "15 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "ce körkort",
+        "ce totalpaket 15",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "CE Lektionspaket 5",
+      "price": 10750,
+      "currency": "SEK",
+      "keywords": [
+        "ce lektionspaket 5",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "CE Lektionspaket 10",
+      "price": 19995,
+      "currency": "SEK",
+      "keywords": [
+        "ce lektionspaket 10",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "CE Lektionspaket 15",
+      "price": 29995,
+      "currency": "SEK",
+      "keywords": [
+        "ce lektionspaket 15",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "CE Uppvärmning & ekipage vid prov",
+      "price": 2850,
+      "currency": "SEK",
+      "keywords": [
+        "uppvärmning",
+        "ekipage",
+        "ce körkort",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "C1 Paket (3 lektioner)",
+      "price": 6995,
+      "currency": "SEK",
+      "includes": "3 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "c1 körkort",
+        "c1 paket",
+        "medeltung lastbil",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "C1 Körlektion (1 st)",
+      "price": 1340,
+      "currency": "SEK",
+      "keywords": [
+        "c1 körlektion",
+        "medeltung lastbil",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "C1 Uppvärmning & ekipage vid prov",
+      "price": 1990,
+      "currency": "SEK",
+      "keywords": [
+        "uppvärmning",
+        "ekipage",
+        "c1 körkort",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "D Totalpaket 5 (Buss)",
+      "price": 13495,
+      "currency": "SEK",
+      "includes": "5 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "d körkort",
+        "buss",
+        "busskörkort",
+        "d totalpaket",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "D Körlektion (1 st, Buss)",
+      "price": 1950,
+      "currency": "SEK",
+      "keywords": [
+        "d körlektion",
+        "buss",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "D Lektionspaket 5 (Buss)",
+      "price": 10300,
+      "currency": "SEK",
+      "keywords": [
+        "d lektionspaket 5",
+        "buss",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "D Lektionspaket 10 (Buss)",
+      "price": 19995,
+      "currency": "SEK",
+      "keywords": [
+        "d lektionspaket 10",
+        "buss",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "D Lektionspaket 15 (Buss)",
+      "price": 29995,
+      "currency": "SEK",
+      "keywords": [
+        "d lektionspaket 15",
+        "buss",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    },
+    {
+      "service_name": "D Uppvärmning & ekipage vid prov (Buss)",
+      "price": 2650,
+      "currency": "SEK",
+      "keywords": [
+        "uppvärmning",
+        "ekipage",
+        "d körkort",
+        "buss",
+        "pris",
+        "kostnad",
+        "malmö",
+        "jägersro"
+      ]
+    }
+  ],
+  "type": "kontor_info",
+  "office_color": "#1f558b"
+}

@@ -1,0 +1,634 @@
+// ============================================
+// modules/admin/admin-offices.js
+// VAD DEN GÖR: Admin — kontorslista och
+//              kontorsdetaljer
+// ANVÄNDS AV: renderer.js
+// ============================================
+// Beroenden (löses vid anropstid):
+//   SERVER_URL, fetchHeaders, currentUser,         — renderer.js globals
+//   officeData, usersCache, window._adminFormDirty — renderer.js globals
+//   ADMIN_UI_ICONS, UI_ICONS                       — ui-constants.js
+//   getAgentStyles, resolveLabel, showToast        — styling-utils.js
+//   atlasConfirm                                   — renderer.js
+//   openNotesModal, loadNotes                      — notes-system.js
+//   window.unlockOfficeSection                     — renderer.js (definieras ej här)
+//   window.saveOfficeSection                       — definieras inuti openAdminOfficeDetail
+// ============================================
+
+// ⚠️  ╔══════════════════════════════════════════════════════════════╗
+// ⚠️  ║     KRITISK VARNING — KONTORSFÄRG OCH LIVE-UPPDATERING      ║
+// ⚠️  ║     LÄS DETTA INNAN DU ÄNDRAR NÅGOT I DENNA FIL             ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║                                                              ║
+// ⚠️  ║  FÄRGFLÖDET FÖR KONTOR — steg för steg:                    ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  1. office_color läses från /api/knowledge/:tag             ║
+// ⚠️  ║     (JSON-kunskapsfilen) → sparas i officeData[]            ║
+// ⚠️  ║  2. Renderas som `oc` på VARJE element i kontorlistan       ║
+// ⚠️  ║     och detaljvyn (header, pills, borders, avatarer,        ║
+// ⚠️  ║     section-titlar, ärendekort).                            ║
+// ⚠️  ║  3. Färgpickern (inp-office-color-inline) kallar            ║
+// ⚠️  ║     _updateOfficeLiveColor() oninput (vid varje drag).      ║
+// ⚠️  ║  4. Auto-spara sker med 700ms debounce via                  ║
+// ⚠️  ║     POST /api/admin/update-office-color.                    ║
+// ⚠️  ║  5. Efter spara: preloadOffices() → officeData[] synkas     ║
+// ⚠️  ║     → renderMyTickets() + renderInbox() + renderArchive()   ║
+// ⚠️  ║     triggas så att ny färg syns i alla aktiva vyer.         ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  CSS-VARIABLER (ÄNDRA INTE NAMNEN):                        ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  --agent-color  sätts på .admin-mini-card (kontorslistan)   ║
+// ⚠️  ║  --atp-color    sätts på .admin-ticket-preview (korten)     ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  Dessa CSS-variabler används av stylesheet:n för hover-     ║
+// ⚠️  ║  effekter och borders. Byt inte namn.                       ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  _updateOfficeLiveColor() — KOMPLETT ELEMENTLISTA           ║
+// ⚠️  ║  (ÄNDRA INTE UTAN ATT TESTA VARJE ELEMENT VISUELLT):       ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║   #office-detail-header     gradient + border               ║
+// ⚠️  ║   #office-avatar-circle     bakgrundsfärg                   ║
+// ⚠️  ║   .office-pill-accent       KONTOR-pillens border+text      ║
+// ⚠️  ║   #office-id-pill           ID-pillens border+text (66%)    ║
+// ⚠️  ║   .notes-trigger-btn        anteckningsikonens textfärg     ║
+// ⚠️  ║   .admin-mini-card.active   --agent-color + bubble          ║
+// ⚠️  ║   .admin-ticket-preview     --atp-color                     ║
+// ⚠️  ║   glass-panel borders       box-contact/prices/booking/     ║
+// ⚠️  ║                             box-desc/box-tickets            ║
+// ⚠️  ║   .glass-panel h4           section-titlar                  ║
+// ⚠️  ║   .detail-subject           kontorsnamnet (h2, !important)  ║
+// ⚠️  ║                                                              ║
+// ⚠️  ║  Om ett element tas bort slutar det att uppdateras live —   ║
+// ⚠️  ║  ingen krasch, men visuellt fel som är svårt att spåra.     ║
+// ⚠️  ║                                                              ║
+// ⚠️  ╠══════════════════════════════════════════════════════════════╣
+// ⚠️  ║  saveOfficeSection() — SPARAR ALLTID HELA JSON-OBJEKTET:   ║
+// ⚠️  ║  GET → patcha fält → PUT. Prisradernas keywords läses från  ║
+// ⚠️  ║  data-keywords i DOM — ändra inte det utan att förstå       ║
+// ⚠️  ║  RAG-indexeringen i server.js.                              ║
+// ⚠️  ╚══════════════════════════════════════════════════════════════╝
+
+// ===================================================
+// LANG PILL HELPER — anropas från template literal
+// Måste vara en namngiven funktion (ej IIFE) för att
+// undvika syntax-konflikter med nästlade backticks.
+// ===================================================
+window._buildLangPills = function(languages, oc) {
+const fixed = ['svenska', 'engelska', 'arabiska'];
+const fromFile = languages.map(function(x) { return x.toLowerCase(); });
+const extra = fromFile.filter(function(l) { return !fixed.includes(l); });
+const all = fixed.concat(extra);
+return all.map(function(l) {
+const active = fromFile.includes(l);
+const isExtra = !fixed.includes(l);
+const borderCol = active ? oc : 'rgba(255,255,255,0.12)';
+const textCol   = active ? oc : 'rgba(255,255,255,0.3)';
+const bgCol     = active ? oc + '18' : 'transparent';
+const fw        = active ? '600' : '400';
+const cap       = l.charAt(0).toUpperCase() + l.slice(1);
+return '<span class="lang-pill"'
++ ' data-lang="' + l + '"'
++ ' data-extra="' + isExtra + '"'
++ ' data-active="' + active + '"'
++ ' onclick="window._toggleLangPill&&window._toggleLangPill(this)"'
++ ' style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:20px;cursor:not-allowed;transition:all 0.15s;'
++ 'border:1px solid ' + borderCol + ';color:' + textCol + ';background:' + bgCol + ';font-weight:' + fw + ';">'
++ cap
++ '<span class="lang-remove-x" style="display:none;font-size:13px;line-height:1;margin-left:2px;opacity:0.6;">&#215;</span>'
++ '</span>';
+}).join('');
+};
+
+// ===================================================
+// ADMIN - RENDER OFFICE LIST
+// ===================================================
+// Bekräftelsedialog vid radering av prisrad
+async function adminDeletePriceRow(btn) {
+const row = btn.closest('.price-row');
+const serviceName = row?.querySelector('[data-service-name]')?.getAttribute('data-service-name')
+  || row?.querySelector('span[style]')?.textContent?.trim()
+  || 'denna tjänst';
+const ok = await atlasConfirm('Ta bort tjänst', `Vill du ta bort "${serviceName}" från prislistan?`);
+if (!ok) return;
+row.remove();
+window._adminFormDirty = true;
+}
+
+async function renderAdminOfficeList() {
+const listContainer = document.getElementById('admin-main-list');
+listContainer.innerHTML = '<div class="spinner-small"></div>';
+
+try {
+const res = await fetch(`${SERVER_URL}/api/public/offices`, { headers: fetchHeaders });
+const offices = await res.json();
+
+// Sortera: A-Ö
+offices.sort((a, b) => a.city.localeCompare(b.city, 'sv'));
+
+listContainer.innerHTML = offices.map(o => {
+const subtext = o.area ? o.area : '';
+const initial = (o.city || 'K').charAt(0).toUpperCase();
+const oc = o.office_color || '#0071e3';
+
+return `
+<div class="admin-mini-card" onclick="openAdminOfficeDetail('${o.routing_tag}', this)" style="--agent-color: ${oc}" data-routing-tag="${o.routing_tag}">
+<div class="office-card-bubble" style="background:${oc}18; border-color:${oc}; color:${oc};">
+${initial}
+</div>
+<div style="min-width:0; flex:1; overflow:hidden;">
+<div class="office-card-sub" style="color:${oc};">${o.city}</div>
+<div style="font-size:10px; opacity:0.6; color:var(--text-secondary); min-height:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${subtext}</div>
+</div>
+</div>`;
+}).join('');
+} catch (e) {
+console.error("Office List Error:", e);
+listContainer.innerHTML = '<p class="error-text">Kunde inte ladda kontor.</p>';
+}
+}
+
+// =============================================================================
+// ADMIN - openAdminOfficeDetail (FULLSTÄNDIG - ALL LOGIK INKLUDERAD)
+// =============================================================================
+async function openAdminOfficeDetail(tag, element) {
+if (!tag) return;
+if (window._adminFormDirty) {
+const ok = await atlasConfirm('Osparade ändringar', 'Du har ändringar som inte sparats. Navigera bort?');
+if (!ok) return;
+window._adminFormDirty = false;
+}
+
+// 1. UI Feedback i listan
+if (element) {
+document.querySelectorAll('.admin-mini-card').forEach(c => c.classList.remove('active'));
+element.classList.add('active');
+}
+
+const detailBox = document.getElementById('admin-detail-content');
+const placeholder = document.getElementById('admin-placeholder');
+if (!detailBox || !placeholder) return;
+
+placeholder.style.display = 'none';
+detailBox.style.display = 'flex';
+detailBox.innerHTML = '<div class="spinner-small"></div>';
+detailBox.setAttribute('data-current-id', tag); 
+
+try {
+// 2. Hämta all data parallellt
+const [res, ticketsRes, usersRes] = await Promise.all([
+fetch(`${SERVER_URL}/api/knowledge/${tag}`, { headers: fetchHeaders }),
+fetch(`${SERVER_URL}/api/admin/office-tickets/${tag}`, { headers: fetchHeaders }),
+fetch(`${SERVER_URL}/api/admin/users`, { headers: fetchHeaders })
+]);
+
+if (!res.ok) throw new Error(`Kunde inte hitta kontorsdata för ${tag}`);
+
+const data = await res.json();
+const oc = data.office_color || '#0071e3';
+const tickets = await ticketsRes.json();
+const connectedAgents = (usersRes.ok ? await usersRes.json() : [])
+.filter(u => u.routing_tag?.split(',').map(s => s.trim()).includes(tag));
+currentTicketList = tickets; // Sparas för Reader-modalen
+const readOnly = !isSupportAgent(); // Agent ser i läsläge
+
+// 3. Rendera Master-Header och Body
+detailBox.innerHTML = `
+<div class="detail-container" id="box-office-master">
+
+<div class="detail-header-top" id="office-detail-header" style="border-top: 3px solid ${oc}; border-radius: 12px 12px 0 0; border-bottom: none; background: linear-gradient(90deg, color-mix(in srgb, ${oc} 12%, rgba(255,255,255,0.02)), transparent), rgba(0,0,0,0.15); padding: 14px 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);">
+<div style="display:flex; align-items:center; gap:20px;">
+<div class="profile-avatar" id="office-avatar-circle" style="width: 54px; height: 54px; background: ${oc}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; font-weight: 800; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+${data.city ? data.city.substring(0,1) : 'K'}
+</div>
+<div>
+<div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+<h2 class="detail-subject" style="margin:0;">${data.city} ${data.area ? '- ' + data.area : ''}</h2>
+<button class="footer-icon-btn"
+onclick="window.openOfficeAgentsBroadcastModal('${tag}', '${(data.city + (data.area ? ' - ' + data.area : '')).replace(/'/g, "\\'")}')"
+style="color:#ffc400; border-color:rgba(255,196,0,0.3); padding:2px 6px;"
+title="Skicka notis-meddelande till det här kontorets agenter">
+${UI_ICONS.BROADCAST}
+</button>
+</div>
+<div class="header-pills-row" style="display:flex; align-items:center; gap:8px;">
+<div class="pill office-pill-accent" style="border-color:${oc}; color:${oc}; font-weight: 800;">KONTOR</div>
+
+<div id="office-id-pill" class="pill" style="border-color:${oc}66; color:${oc}; opacity: 0.8; font-family: monospace;">ID: ${tag}</div>
+
+${readOnly ? '' : `<input type="color" id="inp-office-color-inline" value="${data.office_color || '#0071e3'}"
+oninput="window._updateOfficeLiveColor(this.value)"
+style="width:24px; height:24px; cursor:pointer; background:none; border:none; border-radius:4px; flex-shrink:0;"
+title="Profilfärg">`}
+
+<button class="notes-trigger-btn footer-icon-btn"
+data-id="office_${tag}"
+onclick="openNotesModal('office_${tag}')"
+style="color:${oc}; background:none; border:none; padding:4px; margin:0; font-size:18px;"
+title="Interna anteckningar om kontoret">
+${UI_ICONS.NOTES}
+</button>
+</div>
+</div>
+
+<button id="office-detail-delete-btn" class="btn-glass-icon" onclick="deleteOffice('${tag}')" title="Radera kontor permanent"
+style="color:#ff453a; border:none; background:transparent; display:none;">
+${UI_ICONS.TRASH}
+</button>
+</div>
+</div>
+<div class="detail-body" id="office-detail-body" style="display: flex; flex-direction: column; gap: 20px; padding:25px; overflow-y:auto; flex:1; min-height:0;">
+
+<!-- TOPP-RAD: Ärenden och Agenter (fokus på realtidsstatus) -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="glass-panel" id="box-tickets" style="padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid ${oc}44; display: flex; flex-direction: column; height: 220px; overflow:hidden;">
+        <h4 style="margin: 0 0 15px 0; color: ${oc}; font-size:11px; text-transform:uppercase; display:flex; align-items:center;">Aktiva Ärenden (${tickets.length})<span class="sh-tip" data-tip="Kontorets öppna ärenden — chattar och mail som ännu inte arkiverats. Uppdateras i realtid när agenter hanterar ärenden.">i</span></h4>
+        <div class="scroll-list" style="flex:1; overflow-y:auto;">
+            ${tickets.length ? tickets.map((t, idx) => `
+            <div class="admin-ticket-preview" onclick="openTicketReader(${idx}, '${tag}')"
+                style="border-left: 3px solid ${oc} !important; --atp-color: ${oc} !important; margin-bottom: 8px;">
+                <div style="flex:1; min-width:0;">
+                    <div class="atp-sender">${t.name || t.contact_name || 'Okänd kund'}</div>
+                    <div class="atp-subject">${t.preview || t.last_message || t.question || t.subject || 'Inget ämne'}</div>
+                </div>
+            </div>
+            `).join('') : '<div class="template-item-empty" style="text-align:center;">Kön är tom ✅</div>'}
+        </div>
+    </div>
+
+    <div class="glass-panel" id="box-agents" style="padding:20px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid ${oc}44; display: flex; flex-direction: column; min-height: auto; max-height: fit-content;">
+        <h4 style="margin:0 0 12px 0; color:${oc}; font-size:11px; text-transform:uppercase; display:flex; align-items:center;">Kopplade Agenter<span class="sh-tip" data-tip="Agenter kopplade till detta kontor via sin kontorsbehörighet. För att ändra kopplingar, gå till Agenter-fliken och redigera agentens kontorsbehörighet.">i</span></h4>
+        <div class="scroll-list" style="flex:1; overflow-y:auto; min-height: 0;">
+            ${connectedAgents.length ? connectedAgents.map(u => `
+            <div style="display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                ${getAvatarBubbleHTML(u, '28px')}
+                <span style="font-size:13px; flex:1;">${u.display_name || u.username}</span>
+                ${u.is_online ? '<span style="width:7px;height:7px;border-radius:50%;background:#4cd964;box-shadow:0 0 4px #4cd964;flex-shrink:0;"></span>' : ''}
+            </div>`).join('')
+            : '<div style="opacity:0.4;font-size:12px;padding-top:6px;">Inga agenter kopplade</div>'}
+        </div>
+    </div>
+</div>
+
+<!-- DETALJ-SEKTION: Kontakter, Info, Priser etc (2-kolonn layout under) -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+
+    <!-- VÄNSTER: Kontakt & Info -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="glass-panel" id="box-contact" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid ${oc}44; display: flex; flex-direction: column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase; display:flex; align-items:center;">Kontaktuppgifter<span class="sh-tip" data-tip="Kontorets telefon, e-post och adress. Klicka Lås upp för att redigera. Används av AI:n när kunder frågar om hur de når kontoret.">i</span></h4>
+                <button class="admin-lock-btn" onclick="unlockOfficeSection('box-contact', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
+            </div>
+            <div style="display: grid; gap: 12px;">
+                <input type="text" id="inp-phone" class="filter-input" value="${data.contact?.phone || ''}" disabled placeholder="Telefon">
+                <input type="text" id="inp-email" class="filter-input" value="${data.contact?.email || ''}" disabled placeholder="E-post">
+                <input type="text" id="inp-address" class="filter-input" value="${data.contact?.address || ''}" disabled placeholder="Adress">
+            </div>
+        </div>
+
+        <div class="glass-panel" id="box-info" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid ${oc}44; display: flex; flex-direction: column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase; display:flex; align-items:center;">Kontorsinformation<span class="sh-tip" data-tip="Öppettider och tillgängliga språk för kontoret. Klicka Lås upp för att redigera. AI:n hänvisar till dessa tider om kunder frågar när kontoret har öppet.">i</span></h4>
+                <button class="admin-lock-btn" onclick="unlockOfficeSection('box-info', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
+            </div>
+            <div style="display:grid; gap:16px;">
+                <div>
+                    <div style="font-size:10px; opacity:0.5; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Öppettider</div>
+                    <div style="display:grid; gap:8px;" id="opening-hours-grid">
+                        ${(data.opening_hours || [{days:'Mån – Tors',hours:'08:30 – 17:00'},{days:'Fredag',hours:'08:00 – 14:00'}]).map((h,i) => `
+                        <div class="hours-row" style="display:flex; gap:8px; align-items:center;">
+                            <input type="text" id="inp-hours-days-${i}" class="filter-input hours-days" value="${h.days}" disabled placeholder="T.ex. Mån – Tors" style="flex:1;">
+                            <input type="text" id="inp-hours-time-${i}" class="filter-input hours-time" value="${h.hours}" disabled placeholder="T.ex. 08:30 – 17:00" style="flex:1;">
+                        </div>`).join('')}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:10px; opacity:0.5; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Språk</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;" id="lang-pill-group">
+                        ${window._buildLangPills(data.languages || [], oc)}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel" id="box-booking" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid ${oc}44; display: flex; flex-direction: column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase; display:flex; align-items:center;">Bokningslänkar<span class="sh-tip" data-tip="Direktlänkar till bokningssidan för B-körkort, MC och AM. Klicka Lås upp för att uppdatera. AI:n skickar dessa länkar till kunder som vill boka tid.">i</span></h4>
+                <button class="admin-lock-btn" onclick="unlockOfficeSection('box-booking', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
+            </div>
+            <div style="display:grid; gap:10px;">
+                ${[['CAR','Bil'], ['MC','MC'], ['AM','AM']].map(([key, label]) => `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:10px; opacity:0.5; text-transform:uppercase; width:30px; flex-shrink:0;">${label}</span>
+                    <input id="inp-booking-${key.toLowerCase()}" class="filter-input" type="url" disabled
+                        placeholder="https://..."
+                        value="${(data.booking_links && data.booking_links[key]) || ''}"
+                        style="flex:1; font-size:11px;">
+                </div>`).join('')}
+            </div>
+        </div>
+
+        <div class="glass-panel" id="box-desc" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid ${oc}44; display: flex; flex-direction: column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase; display:flex; align-items:center;">AI Kunskap (Beskrivning)<span class="sh-tip" data-tip="Fri text om kontoret som matas direkt in i AI:ns kunskapsbas. Uppdatera vid förändringar i utbud, profil eller miljö — texten påverkar vad AI:n svarar om just detta kontor.">i</span></h4>
+                <button class="admin-lock-btn" onclick="unlockOfficeSection('box-desc', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
+            </div>
+            <textarea id="inp-desc" class="filter-input" style="width: 100%; height: 100px; resize: none;" disabled>${data.description || ''}</textarea>
+        </div>
+    </div>
+
+    <!-- HÖGER: Priser -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="glass-panel" id="box-prices" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid ${oc}44; display: flex; flex-direction: column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h4 style="margin: 0; color: ${oc}; font-size:11px; text-transform:uppercase; display:flex; align-items:center;">Tjänster & Priser<span class="sh-tip" data-tip="Kontorets kursutbud och priser. Klicka Lås upp för att redigera. VIKTIGT: uppdatera alltid när priser ändras — AI:n hämtar prissvar direkt från denna data.">i</span></h4>
+                <button class="admin-lock-btn" onclick="unlockOfficeSection('box-prices', '${tag}', this)" style="display:${readOnly ? 'none' : 'block'};">🔒 Lås upp</button>
+            </div>
+            <div class="price-list" style="display: grid; gap: 8px;" id="price-list-grid">
+                ${data.prices ? data.prices.map((p, idx) => `
+                <div class="price-row" data-service-idx="${idx}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; min-width: 0;">
+                    <span style="font-size: 13px; flex: 0 1 auto; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" data-service-name="${p.service_name}" title="${p.service_name}">${p.service_name}</span>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-shrink:0; margin-left: 8px;">
+                        <input type="number" class="price-inp" data-idx="${idx}" value="${p.price}" disabled style="width: 80px; text-align: right;">
+                        <span style="font-size: 11px; opacity: 0.6;">SEK</span>
+                    </div>
+                </div>`).join('') : '<div class="template-item-empty">Inga priser inlagda.</div>'}
+            </div>
+        </div>
+    </div>
+</div>
+</div>`;
+
+// Lysa upp notes-ikonen om kontoret har anteckningar, och ärendekorten i listan
+if (typeof refreshNotesGlow === 'function') {
+refreshNotesGlow('office_' + tag);
+tickets.forEach(t => { if (t.conversation_id) refreshNotesGlow(t.conversation_id); });
+}
+
+// 4. Koppla Editeringsfunktioner
+window.toggleEditMode = (boxId) => {
+const box = document.getElementById(boxId);
+box.querySelectorAll('input, textarea').forEach(el => {
+if (el.id === 'inp-office-color-inline') return; // färgväljare är alltid aktiv
+el.disabled = false;
+el.style.borderColor = 'var(--accent-primary)';
+el.style.background = 'rgba(255,255,255,0.08)';
+});
+// Visa raderingsknapparna på prisrader
+box.querySelectorAll('.price-delete-btn').forEach(btn => btn.style.display = 'flex');
+
+const saveActions = box.querySelector('.save-actions');
+if (saveActions) {
+saveActions.style.setProperty('display', 'none', 'important');
+// Starta inaktiva — aktiveras först vid faktisk ändring
+const saveBtns = saveActions.querySelectorAll('button');
+saveBtns.forEach(btn => {
+btn.style.opacity = '0.35';
+btn.style.pointerEvents = 'none';
+btn.style.cursor = 'not-allowed';
+btn.style.color = '';
+btn.style.borderColor = '';
+});
+const activateSave = () => {
+saveBtns.forEach(btn => {
+btn.style.opacity = '1';
+btn.style.pointerEvents = 'auto';
+btn.style.cursor = 'pointer';
+if (btn.getAttribute('data-action') === 'cancel') {
+btn.style.color = '#ff453a';
+btn.style.borderColor = 'rgba(255,69,58,0.4)';
+} else if (btn.getAttribute('data-action') === 'save') {
+btn.style.color = '#4cd964';
+btn.style.borderColor = 'rgba(76,217,100,0.4)';
+}
+});
+// Lyssna bara en gång
+box.querySelectorAll('input, textarea').forEach(el => {
+el.removeEventListener('input', activateSave);
+el.removeEventListener('change', activateSave);
+});
+};
+box.querySelectorAll('input, textarea').forEach(el => {
+el.addEventListener('input', activateSave);
+el.addEventListener('change', activateSave);
+});
+}
+
+const addServiceBtn = document.getElementById('add-service-btn');
+if (addServiceBtn) addServiceBtn.style.display = 'block';
+};
+
+window.cancelEdit = (boxId) => {
+openAdminOfficeDetail(tag); // Ladda om vyn
+};
+
+// ⚠️ LOCK — _updateOfficeLiveColor(hex): Live DOM-synk vid färgbyte.
+// Uppdaterar varje element med kontorets färg synkront (ingen fetch).
+// Se elementlistan i filhuvudet ovan — listan är komplett och avsiktlig.
+// ❌ ÄNDRA INTE: debounce-timer (700ms) — kortare ger för många API-anrop.
+// ❌ ÄNDRA INTE: preloadOffices() + renderMyTickets() + renderInbox() +
+//    renderArchive() efter spara — utan dem syns inte ny färg i korten.
+// ❌ TA INTE BORT element ur listan — tyst visuellt fel, ingen krasch.
+window._updateOfficeLiveColor = (hex) => {
+// Synka inline-pickern
+const inlineColorInput = document.getElementById('inp-office-color-inline');
+if (inlineColorInput) inlineColorInput.value = hex;
+
+// Header — gradient och border
+const header = document.getElementById('office-detail-header');
+if (header) {
+header.style.borderTopColor = hex;
+header.style.background = `linear-gradient(90deg, color-mix(in srgb, ${hex} 12%, rgba(255,255,255,0.02)), transparent), rgba(0,0,0,0.15)`;
+}
+
+// Avatar-bubbla i headern
+const avatar = document.getElementById('office-avatar-circle');
+if (avatar) avatar.style.background = hex;
+
+// KONTOR-pill
+const pill = document.querySelector('.office-pill-accent');
+if (pill) { pill.style.borderColor = hex; pill.style.color = hex; }
+
+// ID-pill
+const idPill = document.getElementById('office-id-pill');
+if (idPill) { idPill.style.borderColor = hex + '66'; idPill.style.color = hex; }
+
+// Notes-knapp i headern (finns nu i .header-pills-row, inte i .detail-footer-toolbar)
+const notesBtn = document.querySelector('.header-pills-row .notes-trigger-btn');
+if (notesBtn) notesBtn.style.color = hex;
+
+// Aktivt kort i listan
+const activeCard = document.querySelector('#admin-main-list .admin-mini-card.active');
+if (activeCard) {
+activeCard.style.setProperty('--agent-color', hex);
+const bubble = activeCard.querySelector('.office-card-bubble');
+if (bubble) { bubble.style.background = hex + '18'; bubble.style.borderColor = hex; bubble.style.color = hex; }
+const sub = activeCard.querySelector('.office-card-sub');
+if (sub) sub.style.color = hex;
+}
+
+// Ärendekortens vänsterlinje i kontorsdetaljvyn
+document.querySelectorAll('#admin-detail-content .admin-ticket-preview').forEach(card => {
+card.style.setProperty('--atp-color', hex);
+card.style.setProperty('border-left', `3px solid ${hex}`, 'important');
+});
+
+// Section-panelernas borders (glass-panel med id)
+['box-contact', 'box-info', 'box-prices', 'box-booking', 'box-desc', 'box-tickets'].forEach(id => {
+const panel = document.getElementById(id);
+if (panel) panel.style.borderColor = hex + '44';
+});
+
+// Section-titlar (h4 med kontorets färg)
+document.querySelectorAll('#admin-detail-content .glass-panel h4').forEach(h4 => {
+h4.style.color = hex;
+});
+
+// Rubrikens titel (setProperty med 'important' krävs för att slå CSS-specificiteten)
+const detailTitle = document.querySelector('#admin-detail-content .detail-subject');
+if (detailTitle) detailTitle.style.setProperty('color', hex, 'important');
+
+// Auto-spara med debounce — snabb endpoint, ingen AI-validering
+clearTimeout(window._colorSaveTimer);
+window._colorSaveTimer = setTimeout(async () => {
+try {
+const saveRes = await fetch(`${SERVER_URL}/api/admin/update-office-color`, {
+method: 'POST',
+headers: fetchHeaders,
+body: JSON.stringify({ routing_tag: tag, color: hex })
+});
+if (saveRes.ok) {
+await preloadOffices();      // Uppdatera officeData-cache
+renderMyTickets?.();         // Ärendekort i Mina Ärenden
+renderInbox?.();             // Ärendekort i Inkorg
+renderArchive?.(true);       // Ärendekort i Arkiv (filtrerar befintlig data, ingen ny fetch)
+showToast('🎨 Kontorsfärg sparad');
+}
+
+} catch (e) {
+logError('[admin]', e, 'Ett fel uppstod. Försök igen.');
+}
+}, 700);
+};
+
+
+// ⚠️ LOCK — saveOfficeSection(tag): Sparar HELA JSON-objektet (GET → patcha → PUT).
+// ❌ ÄNDRA INTE: data-keywords-inläsningen på prisrader — keywords krävs
+//    för att RAG-sökning ska fungera efter en prisändring. Utan keywords
+//    tappar AI:n förmågan att matcha frågor mot rätt tjänst.
+// ❌ ÄNDRA INTE: data-idx vs data-new-service-logiken — befintliga rader
+//    bevarar keywords från filen, nya rader läser från data-keywords i DOM.
+window.saveOfficeSection = async (tag) => {
+try {
+const res = await fetch(`${SERVER_URL}/api/knowledge/${tag}`, { headers: fetchHeaders });
+const currentData = await res.json();
+
+// Hämta värden från formulären
+currentData.contact.phone = document.getElementById('inp-phone').value;
+currentData.contact.email = document.getElementById('inp-email').value;
+currentData.contact.address = document.getElementById('inp-address').value;
+currentData.description = document.getElementById('inp-desc').value;
+const colorInput = document.getElementById('inp-office-color-inline');
+if (colorInput) currentData.office_color = colorInput.value;
+
+// Öppettider — läs från .hours-row (funkar för både befintliga och nya rader)
+const hoursGrid = document.getElementById('opening-hours-grid');
+if (hoursGrid) {
+currentData.opening_hours = Array.from(hoursGrid.querySelectorAll('.hours-row')).map(row => ({
+days: row.querySelector('.hours-days')?.value || '',
+hours: row.querySelector('.hours-time')?.value || ''
+})).filter(h => h.days || h.hours);
+}
+
+// Språk — läs aktiva pills
+const langPills = document.querySelectorAll('#lang-pill-group .lang-pill');
+if (langPills.length) {
+currentData.languages = Array.from(langPills)
+.filter(p => p.getAttribute('data-active') === 'true')
+.map(p => p.getAttribute('data-lang'));
+}
+
+// Bokningslänkar
+const bookingKeys = { car: 'CAR', mc: 'MC', am: 'AM' };
+if (!currentData.booking_links) currentData.booking_links = {};
+Object.entries(bookingKeys).forEach(([inputKey, dataKey]) => {
+const el = document.getElementById(`inp-booking-${inputKey}`);
+if (el) currentData.booking_links[dataKey] = el.value.trim() || null;
+});
+
+// Priser — bygg komplett array från kvarvarande DOM-rader (raderade är borta)
+const remainingPrices = [];
+document.querySelectorAll('#price-list-grid .price-row').forEach(row => {
+const inp = row.querySelector('.price-inp');
+if (!inp) return;
+const newService = inp.getAttribute('data-new-service');
+const idx = inp.getAttribute('data-idx');
+
+if (newService) {
+// NY TJÄNST: Läs in de inbakade keywordsen från HTML-raden
+let kw = [];
+try {
+kw = JSON.parse(row.getAttribute('data-keywords') || '[]');
+} catch(e) {}
+remainingPrices.push({ service_name: newService, price: parseInt(inp.value) || 0, currency: "SEK", keywords: kw });
+} else if (idx !== null && currentData.prices[idx]) {
+// EXISTERANDE TJÄNST: bevara keywords från filen, uppdatera bara pris
+remainingPrices.push({ ...currentData.prices[idx], price: parseInt(inp.value) || 0 });
+}
+});
+currentData.prices = remainingPrices;
+
+// Auto-derivera services_offered från prisraderna
+(function() {
+const v2s = { BIL:'Bil', INTRO:'Bil', MC:'MC', AM:'AM', LASTBIL:'Lastbil', SLÄP:'Släp' };
+function dv(name) {
+const l = (name||'').toLowerCase();
+if (/introduktion|handledare/.test(l)) return 'INTRO';
+if (/\bam\b|\bmoped\b/.test(l)) return 'AM';
+if (/\bmc\b|\ba1\b|\ba2\b|\bmotorcykel/.test(l)) return 'MC';
+if (/\blastbil\b|\bc1\b|\bce\b|\bykb\b/.test(l)) return 'LASTBIL';
+if (/\bsläp\b|\bb96\b|\bbe\b/.test(l)) return 'SLÄP';
+if (/\bbil\b|\bpersonbil\b/.test(l)) return 'BIL';
+return null;
+}
+currentData.services_offered = [...new Set(remainingPrices.map(p => v2s[dv(p.service_name)]).filter(Boolean))];
+})();
+
+// Kolla om bokningslänkar kommer nollställas (tjänst borttagen)
+const removedLinkNames = [];
+if (currentData.booking_links) {
+const so = currentData.services_offered;
+if (currentData.booking_links.CAR && !so.includes('Bil')) removedLinkNames.push('Bil');
+if (currentData.booking_links.MC  && !so.includes('MC'))  removedLinkNames.push('MC');
+if (currentData.booking_links.AM  && !so.includes('AM'))  removedLinkNames.push('AM');
+}
+
+const saveRes = await fetch(`${SERVER_URL}/api/knowledge/${tag}`, {
+method: 'PUT',
+headers: fetchHeaders,
+body: JSON.stringify(currentData)
+});
+
+if (saveRes.ok) {
+window._adminFormDirty = false; // Markerar formuläret som sparat
+showToast("✅ Kontorsdata sparad!");
+if (removedLinkNames.length > 0) {
+setTimeout(() => showToast(`⚠️ Bokningslänk för ${removedLinkNames.join(', ')} borttagen automatiskt.`), 800);
+}
+await preloadOffices();
+renderMyTickets?.();
+renderInbox?.();
+openAdminOfficeDetail(tag, null); // Laddar om och låser vyn automatiskt
+}
+} catch (e) {
+logError('[admin]', e, 'Ett fel uppstod vid sparning.');
+}
+};
+
+} catch (e) {
+console.error("Admin Office Detail Error:", e);
+detailBox.innerHTML = '<div class="template-item-empty">Kunde inte ladda kontorsdata.</div>';
+}
+}

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Driving Academy — Din trafikskola</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #1a56db;
+      --blue-dark: #1340a8;
+      --blue-light:#eff6ff;
+      --text:      #1e293b;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --white:     #ffffff;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.6;
+    }
+
+    /* ── Navbar ───────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--blue);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-logo-icon svg { width: 22px; height: 22px; }
+    .nav-logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .nav-logo-text span { color: var(--blue); }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--blue); }
+
+    .nav-cta {
+      background: var(--blue);
+      color: var(--white) !important;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 600 !important;
+      font-size: 14px !important;
+      transition: background 0.15s !important;
+    }
+    .nav-cta:hover { background: var(--blue-dark) !important; color: var(--white) !important; }
+
+    /* ── Hero ─────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #1a56db 0%, #1340a8 60%, #0f2d7a 100%);
+      color: var(--white);
+      padding: 90px 32px 100px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 800;
+      line-height: 1.15;
+      max-width: 700px;
+      margin: 0 auto 20px;
+    }
+    .hero p {
+      font-size: 18px;
+      opacity: 0.85;
+      max-width: 520px;
+      margin: 0 auto 36px;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--white);
+      color: var(--blue);
+      padding: 13px 28px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.12);
+      color: var(--white);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 13px 28px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+
+    /* ── USP-strip ────────────────────────────────── */
+    .usp-strip {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      background: var(--blue-light);
+      border-bottom: 1px solid #bfdbfe;
+      flex-wrap: wrap;
+    }
+    .usp-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--blue-dark);
+      border-right: 1px solid #bfdbfe;
+    }
+    .usp-item:last-child { border-right: none; }
+    .usp-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ── Körkort-kategorier ───────────────────────── */
+    .section { padding: 72px 32px; max-width: 1100px; margin: 0 auto; }
+    .section-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: 16px;
+      margin-bottom: 40px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 20px;
+      background: var(--white);
+      transition: box-shadow 0.18s, transform 0.18s;
+      cursor: default;
+    }
+    .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.09); transform: translateY(-2px); }
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--blue-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      font-size: 22px;
+    }
+    .card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .card p  { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .card-price {
+      margin-top: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    /* ── Kontorer-strip ───────────────────────────── */
+    .offices-bg {
+      background: #f8fafc;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .offices-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .office-pill {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    /* ── CTA-banner ───────────────────────────────── */
+    .cta-banner {
+      background: linear-gradient(135deg, #1a56db, #1340a8);
+      color: var(--white);
+      border-radius: 20px;
+      padding: 52px 40px;
+      text-align: center;
+      margin: 0 32px 72px;
+    }
+    .cta-banner h2 { font-size: 28px; font-weight: 800; margin-bottom: 10px; }
+    .cta-banner p  { opacity: 0.85; font-size: 16px; margin-bottom: 28px; }
+    .cta-banner .btn-primary { display: inline-block; }
+
+    /* ── Footer ───────────────────────────────────── */
+    footer {
+      background: #0f172a;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 28px 32px;
+      font-size: 13px;
+    }
+    footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      nav { padding: 0 16px; }
+      .nav-links { display: none; }
+      .hero { padding: 60px 20px 70px; }
+      .section { padding: 52px 20px; }
+      .cta-banner { margin: 0 16px 52px; padding: 36px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4l3 3"/>
+        </svg>
+      </div>
+      <span class="nav-logo-text">My Driving <span>Academy</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#">Körkort</a></li>
+      <li><a href="#">Priser</a></li>
+      <li><a href="#">Kontor</a></li>
+      <li><a href="#">Om oss</a></li>
+      <li><a href="#" class="nav-cta">Boka lektion</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">🏆 Sveriges snabbast växande trafikskola</div>
+    <h1>Ta körkort med rätt stöd — hela vägen</h1>
+    <p>Vi hjälper dig från teoriprov till uppkörning. Flexibla tider, erfarna handledare och 30+ kontor i hela Sverige.</p>
+    <div class="hero-buttons">
+      <a href="#" class="btn-primary">Boka gratis konsultation</a>
+      <a href="#" class="btn-secondary">Se våra priser →</a>
+    </div>
+  </section>
+
+  <!-- USP-strip -->
+  <div class="usp-strip">
+    <div class="usp-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Godkänd av Transportstyrelsen
+    </div>
+    <div class="usp-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      30+ kontor i Sverige
+    </div>
+    <div class="usp-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Flexibla tider — även helger
+    </div>
+    <div class="usp-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      24/7 AI-support — fråga direkt
+    </div>
+  </div>
+
+  <!-- Körkortskategorier -->
+  <div class="section">
+    <div class="section-title">Välj din körkortskategori</div>
+    <div class="section-sub">Vi erbjuder utbildning för alla kategorier — hitta rätt paket för dig.</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🚗</div>
+        <h3>B — Personbil</h3>
+        <p>Vår mest populära utbildning. Teori, riskutbildning och körträning.</p>
+        <div class="card-price">Från 8 900 kr</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏍️</div>
+        <h3>A — Motorcykel</h3>
+        <p>A, A1 och A2 — välj rätt kategori för din ålder och erfarenhet.</p>
+        <div class="card-price">Från 6 500 kr</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🚛</div>
+        <h3>C / CE — Lastbil</h3>
+        <p>Yrkesförarutbildning för lastbil med och utan släp.</p>
+        <div class="card-price">Från 22 000 kr</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛵</div>
+        <h3>AM — Moped</h3>
+        <p>Klass I och II. Snabb utbildning med teori och praktik.</p>
+        <div class="card-price">Från 3 200 kr</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kontor -->
+  <div class="offices-bg">
+    <div class="section" style="padding-top:48px;padding-bottom:48px;">
+      <div class="section-title" style="font-size:20px;">Vi finns nära dig</div>
+      <div class="section-sub" style="margin-bottom:20px;">Kontor i hela Sverige — från Malmö till Umeå.</div>
+      <div class="offices-grid">
+        <span class="office-pill">Malmö City</span>
+        <span class="office-pill">Malmö Triangeln</span>
+        <span class="office-pill">Göteborg Ullevi</span>
+        <span class="office-pill">Göteborg Högsbo</span>
+        <span class="office-pill">Stockholm Södermalm</span>
+        <span class="office-pill">Stockholm Solna</span>
+        <span class="office-pill">Helsingborg City</span>
+        <span class="office-pill">Lund Katedral</span>
+        <span class="office-pill">Uppsala</span>
+        <span class="office-pill">Västerås</span>
+        <span class="office-pill">Linköping</span>
+        <span class="office-pill">Umeå</span>
+        <span class="office-pill">+ 20 kontor till</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA-banner -->
+  <div class="section" style="padding-bottom:0;">
+    <div class="cta-banner">
+      <h2>Redo att börja din körkortsresa?</h2>
+      <p>Boka en gratis konsultation eller chatta med oss direkt — vi svarar 24/7.</p>
+      <a href="#" class="btn-primary">Kom igång idag</a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 My Driving Academy AB · <a href="#">Integritetspolicy</a> · <a href="#">Kontakt</a></p>
+    <p style="margin-top:6px;font-size:11px;opacity:0.5;">⚠️ Detta är en demosida för Atlas Support Widget — inte en riktig hemsida.</p>
+  </footer>
+
+  <!-- ✅ Atlas Support Widget -->
+  <script
+    src="https://atlas-support.se/widget.js"
+    data-color="#1a56db"
+    data-label="Fråga Atlas">
+  </script>
+
+</body>
+</html>

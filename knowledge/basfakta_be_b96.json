@@ -1,0 +1,59 @@
+{
+"section_title": "BASFAKTA - Lektioner och Paket (BE, B96, Släp)",
+"source_info": "Information om alla lektioner, kurser och paket för släp (B96/BE).",
+"sections": [
+{
+"title": "Hur tar man B96-körkort (Utökad B)?",
+"answer": "För B96 (utökad B) bokar du vårt paket via supporten (chatten). Processen är: 1. Vi bokar in en dubbellektion (80 min) ca 1-2 veckor innan ditt prov. 2. Lektionen startar på skolan där vi tränar körning samt till- och frånkoppling av släp. 3. Viktigt: Du måste ta ett nytt foto hos Trafikverket innan provet. 4. På provdagen värmer vi upp tillsammans utifrån dina behov och du lånar vår bil och släp till körprovet. Inget teoriprov krävs.",
+"keywords": [
+"160 min", "80 min", "b96", "b96-paket", "behöver inte teoriprov",
+"foto", "fotografering", "frånkoppling", "husvagn", "hästtransport",
+"inget teoriprov", "körprov", "process", "släp", "tillkoppling",
+"uppvärmning", "utan teoriprov", "utökad b", "ta b96", "hur tar man b96"
+]
+},
+{
+"title": "Hur tar man BE-körkort (Tungt släp)?",
+"answer": "För BE (tungt släp) är ordningen viktig: 1. Skaffa körkortstillstånd. 2. Boka BE-paketet via supporten. 3. Vi beställer 'BE-boken' (du får ett SMS du MÅSTE godkänna) och aktiverar appen 'Mitt Körkort'. 4. Du bokar och klarar teoriprovet hos Trafikverket INNAN vi bokar dina körlektioner. Kom 30 min innan provet för fotografering. 5. Körlektioner (80 min) fokuserar på manövrering och koppling. 6. Körprovet görs med vår bil och släp (total tid ca 4 timmar inkl uppvärmning).",
+"keywords": [
+"4 timmar", "be", "be-boken", "foto", "fotografering", "giltigt",
+"husvagn", "hästtransport", "krav", "kunskapsprov", "körkortstillstånd",
+"körlektioner", "körprov", "mitt körkort", "process", "sms",
+"ta be-kort", "teori innan körning", "teoriprov", "tungt släp", "upplägg",
+"hur tar man be körkort", "ta be körkort", "vad är be körkort"
+]
+},
+{
+"title": "Vad är skillnaden mellan B96 och BE?",
+"answer": "Skillnaden handlar om vikt och proverkrav. B96 (Utökad B) låter dig köra bil + släp med en totalvikt på max 4 250 kg. Inget teoriprov krävs men du måste fotograferas hos Trafikverket. BE (Tungt släp) har ingen övre viktgräns på släpet (upp till 3 500 kg), men kräver körkortstillstånd, studier med BE-boken och godkänt teoriprov innan körning börjar.",
+"keywords": [
+"3500 kg", "4250 kg", "b96", "be", "be-boken", "skillnad",
+"teori", "teoriprov", "totalvikt", "vad är skillnaden",
+"viktgräns", "b96 eller be", "skillnad b96 be"
+]
+},
+{
+"title": "Var erbjuder ni släputbildning (BE/B96)?",
+"answer": "Vi erbjuder BE- och B96-utbildning i Göteborg, Västerås och Stockholm. Kontakta supporten via chatten eller ring 010-20 70 775 (MDA) för att boka.",
+"keywords": [
+"be var", "b96 var", "släp var", "göteborg släp", "västerås släp",
+"stockholm släp", "var erbjuder ni be", "var kan jag ta be",
+"be utbildning orter", "b96 utbildning orter"
+]
+},
+{
+"title": "Kontakt och bokning för BE/B96",
+"answer": "BE- och B96-paket bokas via supporten — chatta med oss på hemsidan eller ring 010-20 70 775 (My Driving Academy). Vi hjälper dig hela vägen!",
+"keywords": [
+"boka be", "boka b96", "kontakt be", "kontakt b96",
+"010-20 70 775", "supporten be", "be bokning", "b96 bokning",
+"be körkort kontakt", "boka släp"
+]
+}
+],
+"type": "basfakta",
+"id": "basfakta_be_b96",
+"city": "",
+"area": "",
+"vehicle": "SLÄP"
+}

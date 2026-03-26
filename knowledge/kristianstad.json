@@ -1,0 +1,658 @@
+{
+  "id": "martenssons_trafikskola_kristianstad",
+  "name": "Mårtenssons Trafikskola – Kristianstad",
+  "brand": "Mårtenssons Trafikskola",
+  "city": "Kristianstad",
+  "description": "Välkommen till Mårtenssons Trafikskola i Kristianstad! Hos Mårtenssons Trafikskola i Kristianstad får du en körkortsutbildning anpassad efter dina behov.",
+  "keywords": [
+    "mårtenssons",
+    "trafikskola",
+    "kristianstad",
+    "telefon",
+    "mail",
+    "adress",
+    "kontakt",
+    "öppettider",
+    "priser",
+    "språk",
+    "undervisning",
+    "utbildning"
+  ],
+  "contact": {
+    "phone": "044 – 140 99 20",
+    "email": "kristianstad@trafikskolan.com",
+    "address": "Kanalgatan 22, 291 34 Kristianstad"
+  },
+  "opening_hours": [
+    {
+      "days": "Mån – Tors",
+      "hours": "08:30– 17:00"
+    },
+    {
+      "days": "Fredag",
+      "hours": "08:00 - 14:00"
+    }
+  ],
+  "services_offered": [
+    "AM",
+    "Bil",
+    "MC",
+    "Släp",
+    "Lastbil"
+  ],
+  "languages": [
+    "svenska",
+    "grekiska",
+    "engelska"
+  ],
+  "prices": [
+    {
+      "service_name": "AM Mopedutbildning",
+      "price": 10999,
+      "currency": "SEK",
+      "keywords": [
+        "Moped",
+        "AM",
+        "pris",
+        "kostnad",
+        "Kristianstad"
+      ]
+    },
+    {
+      "service_name": "Körlektion Bil",
+      "price": 1199,
+      "currency": "SEK",
+      "keywords": [
+        "körlektion",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Privat teorilektion BIL",
+      "price": 999,
+      "currency": "SEK",
+      "keywords": [
+        "privat",
+        "teori",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Körbedömning för sökande till Trafiklärarutbildningen BIL",
+      "price": 1400,
+      "currency": "SEK",
+      "keywords": [
+        "körbedömning",
+        "trafiklärarutbildning",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Totalpaket 5 BIL",
+      "price": 10299,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 5",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Totalpaket 10 BIL",
+      "price": 15399,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 10",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Totalpaket 15 BIL",
+      "price": 20499,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 15",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Minipaket BIL",
+      "price": 5699,
+      "currency": "SEK",
+      "keywords": [
+        "minipaket",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Mellanpaket BIL",
+      "price": 11099,
+      "currency": "SEK",
+      "keywords": [
+        "mellanpaket",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Baspaket BIL",
+      "price": 16499,
+      "currency": "SEK",
+      "keywords": [
+        "baspaket",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Intensivutbildning (2 veckor) BIL",
+      "price": 19999,
+      "currency": "SEK",
+      "keywords": [
+        "intensivkurs",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Introduktionskurs/Handledarkurs BIL",
+      "price": 349,
+      "currency": "SEK",
+      "keywords": [
+        "introduktionskurs",
+        "handledarkurs",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Risk 1 BIL",
+      "price": 799,
+      "currency": "SEK",
+      "keywords": [
+        "risk 1",
+        "riskettan",
+        "bil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Totalpaket 5 MC",
+      "price": 13999,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 5",
+        "mc",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Totalpaket 10 MC",
+      "price": 19999,
+      "currency": "SEK",
+      "keywords": [
+        "totalpaket 10",
+        "mc",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Körlektion MC",
+      "price": 1349,
+      "currency": "SEK",
+      "keywords": [
+        "körlektion",
+        "mc",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Lektionspaket 5 MC",
+      "price": 6499,
+      "currency": "SEK",
+      "keywords": [
+        "lektionspaket 5",
+        "mc",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Lektionspaket 10 MC",
+      "price": 12799,
+      "currency": "SEK",
+      "keywords": [
+        "lektionspaket 10",
+        "mc",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "Risk 1 MC",
+      "price": 799,
+      "currency": "SEK",
+      "keywords": [
+        "risk 1",
+        "riskettan",
+        "mc",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "BE Paket",
+      "price": 5999,
+      "currency": "SEK",
+      "keywords": [
+        "be",
+        "släp",
+        "paket",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "B96 Paket",
+      "price": 4199,
+      "currency": "SEK",
+      "keywords": [
+        "b96",
+        "släp",
+        "paket",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "C Körlektion (1 st)",
+      "price": 1950,
+      "currency": "SEK",
+      "keywords": [
+        "c körlektion",
+        "lastbil lektion",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "C Totalpaket 5",
+      "price": 13495,
+      "currency": "SEK",
+      "includes": "5 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "c körkort",
+        "c totalpaket 5",
+        "lastbil",
+        "tung lastbil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "C Totalpaket 10",
+      "price": 21495,
+      "currency": "SEK",
+      "includes": "10 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "c körkort",
+        "c totalpaket 10",
+        "lastbil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "C Totalpaket 15",
+      "price": 29495,
+      "currency": "SEK",
+      "includes": "15 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "c körkort",
+        "c totalpaket 15",
+        "lastbil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "C Lektionspaket 5",
+      "price": 9350,
+      "currency": "SEK",
+      "keywords": [
+        "c lektionspaket 5",
+        "lastbil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "C Lektionspaket 10",
+      "price": 18100,
+      "currency": "SEK",
+      "keywords": [
+        "c lektionspaket 10",
+        "lastbil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "C Lektionspaket 15",
+      "price": 26850,
+      "currency": "SEK",
+      "keywords": [
+        "c lektionspaket 15",
+        "lastbil",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "CE Körlektion (1 st)",
+      "price": 2150,
+      "currency": "SEK",
+      "keywords": [
+        "ce körlektion",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "CE Totalpaket 5",
+      "price": 14495,
+      "currency": "SEK",
+      "includes": "5 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "ce körkort",
+        "ce totalpaket 5",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "CE Totalpaket 10",
+      "price": 22995,
+      "currency": "SEK",
+      "includes": "10 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "ce körkort",
+        "ce totalpaket 10",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "CE Totalpaket 15",
+      "price": 31495,
+      "currency": "SEK",
+      "includes": "15 lektioner á 80 min, teoriportalen, uppvärmning & lån av ekipage",
+      "keywords": [
+        "ce körkort",
+        "ce totalpaket 15",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "CE Lektionspaket 5",
+      "price": 10300,
+      "currency": "SEK",
+      "keywords": [
+        "ce lektionspaket 5",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "CE Lektionspaket 10",
+      "price": 19995,
+      "currency": "SEK",
+      "keywords": [
+        "ce lektionspaket 10",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "CE Lektionspaket 15",
+      "price": 29995,
+      "currency": "SEK",
+      "keywords": [
+        "ce lektionspaket 15",
+        "lastbil med släp",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "YKB Fortbildning del 1 (Godstransport)",
+      "price": 1495,
+      "currency": "SEK",
+      "keywords": [
+        "ykb",
+        "fortbildning",
+        "ykb del 1",
+        "gods",
+        "godstransport",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "YKB Fortbildning del 2 (Godstransport)",
+      "price": 1495,
+      "currency": "SEK",
+      "keywords": [
+        "ykb",
+        "fortbildning",
+        "ykb del 2",
+        "gods",
+        "godstransport",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "YKB Fortbildning del 3 (Godstransport)",
+      "price": 1495,
+      "currency": "SEK",
+      "keywords": [
+        "ykb",
+        "fortbildning",
+        "ykb del 3",
+        "gods",
+        "godstransport",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "YKB Fortbildning del 4 (Godstransport)",
+      "price": 1495,
+      "currency": "SEK",
+      "keywords": [
+        "ykb",
+        "fortbildning",
+        "ykb del 4",
+        "gods",
+        "godstransport",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "YKB Fortbildning del 5 (Godstransport)",
+      "price": 1495,
+      "currency": "SEK",
+      "keywords": [
+        "ykb",
+        "fortbildning",
+        "ykb del 5",
+        "gods",
+        "godstransport",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "YKB Fortbildning del 1 (Persontransport)",
+      "price": 1495,
+      "currency": "SEK",
+      "keywords": [
+        "ykb",
+        "fortbildning",
+        "ykb del 1",
+        "person",
+        "persontransport",
+        "buss",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "YKB Fortbildning del 2 (Persontransport)",
+      "price": 1495,
+      "currency": "SEK",
+      "keywords": [
+        "ykb",
+        "fortbildning",
+        "ykb del 2",
+        "person",
+        "persontransport",
+        "buss",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "YKB Fortbildning del 3 (Persontransport)",
+      "price": 1495,
+      "currency": "SEK",
+      "keywords": [
+        "ykb",
+        "fortbildning",
+        "ykb del 3",
+        "person",
+        "persontransport",
+        "buss",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "YKB Fortbildning del 4 (Persontransport)",
+      "price": 1495,
+      "currency": "SEK",
+      "keywords": [
+        "ykb",
+        "fortbildning",
+        "ykb del 4",
+        "person",
+        "persontransport",
+        "buss",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    },
+    {
+      "service_name": "YKB Fortbildning del 5 (Persontransport)",
+      "price": 1495,
+      "currency": "SEK",
+      "keywords": [
+        "ykb",
+        "fortbildning",
+        "ykb del 5",
+        "person",
+        "persontransport",
+        "buss",
+        "pris",
+        "kostnad",
+        "kristianstad"
+      ]
+    }
+  ],
+  "lastbil_info": {
+    "note": "Tung trafik bokas via specialiserad support, inte direkt online.",
+    "phone": "010-344 49 50",
+    "email": "tungtrafik@trafikskolan.com"
+  },
+  "booking_links": {
+    "CAR": "https://booking.mydrivingacademy.com/widget?vehicleType=car&productType=Bundle&regionId=200024&locationId=200019",
+    "MC": "https://booking.mydrivingacademy.com/widget?vehicleType=mc&productType=Bundle&regionId=200024&locationId=200019",
+    "AM": "https://booking.mydrivingacademy.com/widget?vehicleType=moped&productType=Bundle&regionId=200024&locationId=200019&serviceId=452"
+  },
+  "type": "kontor_info",
+  "area": "",
+  "office_color": "#4c9e86"
+}
