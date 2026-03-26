@@ -87,8 +87,6 @@ body { background: var(--bg-image) center/cover no-repeat fixed; color: #ffffff 
 .menu-item:hover {
     background: rgba(16, 185, 129, 0.05);
     color: var(--accent-primary);
-    transform: translateX(4px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .menu-item.active {
@@ -120,7 +118,6 @@ body { background: var(--bg-image) center/cover no-repeat fixed; color: #ffffff 
 .shortcut-item:hover {
     background: rgba(16, 185, 129, 0.08);
     border-color: var(--accent-primary);
-    transform: translateX(5px);
 }
 .shortcut-item kbd {
     background: #000;

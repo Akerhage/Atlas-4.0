@@ -318,7 +318,12 @@ Visa hjälpguide
 </svg>
 Inkorgen
 </h2>
-<div class="header-actions">
+<div class="header-tabs">
+<button class="header-tab active" id="inbox-tab-btn-chats" onclick="switchInboxTab('chats')">Live-Chattar <span id="inbox-tab-badge-chats" class="tab-badge" style="display:none;">0</span></button>
+<button class="header-tab" id="inbox-tab-btn-mail" onclick="switchInboxTab('mail')">E-post <span id="inbox-tab-badge-mail" class="tab-badge" style="display:none;">0</span></button>
+<button class="header-tab" id="inbox-tab-btn-claimed" onclick="switchInboxTab('claimed')">Plockade <span id="inbox-tab-badge-claimed" class="tab-badge" style="display:none;">0</span></button>
+</div>
+<div class="header-actions" style="margin-left:auto;">
 <span class="info-icon-trigger" onclick="toggleHelp()" title="Visa snabbguide">
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="info-icon-svg"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
 </span>
@@ -326,9 +331,6 @@ Inkorgen
 </header>
 <div class="templates-container">
 <div class="template-list-container">
-<div class="list-panel-header">
-<h3>Inkomna nya ärenden</h3>
-</div>
 <div style="padding:8px 0 4px 0;">
 <input type="text" id="inbox-search" class="filter-input" placeholder="Sök ärende, namn, stad..." autocomplete="off" style="width:100%; box-sizing:border-box;">
 </div>

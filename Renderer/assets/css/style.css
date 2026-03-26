@@ -387,7 +387,6 @@ transition: opacity 0.15s ease, background 0.15s ease !important;
 opacity: 1 !important;
 background: rgba(255, 255, 255, 0.05) !important;
 border-radius: 6px !important;
-transform: scale(1.1) !important;
 }
 
 /* =============================================================================
@@ -403,7 +402,7 @@ align-items: center;
 gap: 12px;
 transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
-.agent-card:hover { background: rgba(255, 255, 255, 0.08); transform: translateY(-2px); border-color: var(--accent-primary); }
+.agent-card:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--accent-primary); }
 
 .agent-card-avatar {
 width: 38px;
@@ -547,8 +546,6 @@ box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
 
 #home-chat-footer #send-button:hover {
 background: var(--accent-hover) !important;
-transform: scale(1.08) !important;
-box-shadow: 0 0 18px color-mix(in srgb, var(--accent-primary) 70%, transparent) !important;
 }
 
 #home-chat-footer #send-button svg {
@@ -646,12 +643,10 @@ box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35) !important;
 }
 
 .send-button-ticket:hover {
-transform: translateY(-1px) !important;
-box-shadow: 0 5px 16px rgba(0, 0, 0, 0.45) !important;
-opacity: 0.9 !important;
+opacity: 0.85 !important;
 }
 
-.send-button-ticket:active { transform: scale(0.95) !important; }
+.send-button-ticket:active { opacity: 0.7 !important; }
 .send-button-ticket svg { width: 20px !important; height: 20px !important; fill: currentColor !important; }
 
 /* === HEADER BUTTON (Standard) === */
@@ -772,7 +767,7 @@ border-left: 4px solid var(--accent-primary);
 transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.guide-step:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2); }
+.guide-step:hover { background: rgba(0, 113, 227, 0.06); }
 
 .step-number {
 display: flex;
@@ -989,8 +984,6 @@ box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
 
 .btn-modal-confirm:hover {
 background: var(--accent-hover) !important;
-transform: translateY(-1.5px) scale(1.02) !important;
-box-shadow: 0 0 12px rgba(0, 113, 227, 0.30) !important;
 }
 
 .btn-modal-cancel {
@@ -1145,8 +1138,6 @@ transition: all 0.2s ease !important;
 
 .notes-trigger-btn:hover svg {
 opacity: 1;
-transform: scale(1.1);
-filter: drop-shadow(0 0 4px currentColor);
 }
 
 /* 🔥 AKTIV STATUS: Glöd i kontorets färg när anteckningar finns */
@@ -1339,7 +1330,6 @@ justify-content: center !important;
 .action-icon-btn:hover {
 background: rgba(255, 255, 255, 0.15) !important;
 color: white !important;
-transform: scale(1.05);
 }
 
 .ql-container.ql-snow, .ql-editor {
@@ -1426,7 +1416,6 @@ border-color: rgba(255, 71, 87, 0.3) !important;
 background: rgba(255, 71, 87, 0.2) !important;
 border-color: #ff4757 !important;
 color: white !important;
-transform: scale(1.05);
 }
 
 /* VARIANTER (LILA) */
@@ -3440,6 +3429,24 @@ border-bottom-color: var(--accent-primary) !important;
 background: rgba(0, 113, 227, 0.05) !important;
 }
 
+/* Inline badge i header-flikar */
+.tab-badge {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+background: var(--status-danger);
+color: white;
+border-radius: 10px;
+min-width: 18px;
+height: 18px;
+font-size: 10px;
+font-weight: 700;
+padding: 0 4px;
+margin-left: 6px;
+vertical-align: middle;
+line-height: 1;
+}
+
 .pane-header {
 display: flex !important;
 align-items: center !important;
@@ -3543,8 +3550,6 @@ display: none !important;
 .team-ticket-card:hover,
 .archive-card:hover {
 background: rgba(255, 255, 255, 0.08) !important;
-transform: translateX(3px) !important;
-/* Subtil färg-glöd vid hover */
 border-color: color-mix(in srgb, var(--agent-color, #fff) 30%, transparent) !important;
 }
 

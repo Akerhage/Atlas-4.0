@@ -54,6 +54,31 @@
 // ⚠️  ╚══════════════════════════════════════════════════════════════╝
 
 // ============================================================================
+// INKORG FLIK-STATE
+// ============================================================================
+// Aktiv flik (chats | mail | claimed) — återställs till 'chats' vid navigering
+let currentInboxTab = 'chats';
+
+// Synkar aktiva flik-knappar i headern
+function _updateInboxTabBtns() {
+['chats', 'mail', 'claimed'].forEach(t => {
+const btn = document.getElementById('inbox-tab-btn-' + t);
+if (btn) btn.classList.toggle('active', t === currentInboxTab);
+});
+}
+
+// Byter aktiv flik — anropas från index.html onclick
+window.switchInboxTab = function(tab) {
+currentInboxTab = tab;
+_updateInboxTabBtns();
+// Rensa bulk-läge vid flikbyte
+if (typeof isBulkMode !== 'undefined' && isBulkMode && typeof exitBulkMode === 'function') {
+exitBulkMode();
+}
+renderInbox();
+};
+
+// ============================================================================
 // BADGE-HANTERING + WINDOWS TASKBAR ICON
 // ============================================================================
 async function updateInboxBadge() {
@@ -218,42 +243,45 @@ unassignedChats.sort(sortFn);
 unassignedMails.sort(sortFn);
 claimedByOthers.sort(sortFn);
 
+// Uppdatera badge-räknare i header-flikarna
+const _chatBadge = document.getElementById('inbox-tab-badge-chats');
+const _mailBadge = document.getElementById('inbox-tab-badge-mail');
+const _claimedBadge = document.getElementById('inbox-tab-badge-claimed');
+if (_chatBadge) { _chatBadge.textContent = unassignedChats.length; _chatBadge.style.display = unassignedChats.length > 0 ? 'inline-flex' : 'none'; }
+if (_mailBadge) { _mailBadge.textContent = unassignedMails.length; _mailBadge.style.display = unassignedMails.length > 0 ? 'inline-flex' : 'none'; }
+if (_claimedBadge) { _claimedBadge.textContent = claimedByOthers.length; _claimedBadge.style.display = claimedByOthers.length > 0 ? 'inline-flex' : 'none'; }
+
+// Synka aktiv flik-knapp
+_updateInboxTabBtns();
+
+// Välj rätt lista baserat på aktiv flik
+let _activeTickets;
+let _emptyMsg;
+if (currentInboxTab === 'chats') {
+_activeTickets = unassignedChats;
+_emptyMsg = 'Inga aktiva live-chattar just nu.';
+} else if (currentInboxTab === 'mail') {
+_activeTickets = unassignedMails;
+_emptyMsg = 'Inga inkomna mail-ärenden just nu.';
+} else {
+_activeTickets = claimedByOthers;
+_emptyMsg = 'Inga plockade eller routade ärenden just nu.';
+}
+
 container.innerHTML = '';
 
-// Renderfunktion för varje grupp
-const renderGroup = (title, tickets, icon, groupKey, badgeClass, badgeTooltip) => {
-const defaultExpanded = State.inboxExpanded[groupKey];
-const header = document.createElement('div');
-header.className = 'template-group-header'; 
-
-const countHtml = tickets.length > 0
-? `<span class="group-badge ${badgeClass}" title="${badgeTooltip}">${tickets.length}</span>` 
-: `<span class="group-count empty" title="${badgeTooltip}">0</span>`;
-
-header.innerHTML = `
-<div class="group-header-content">
-<span class="group-arrow ${defaultExpanded ? 'expanded' : ''}">▶</span>
-<span class="group-name">${icon} ${title}</span>
-</div>
-${countHtml}`;
-
-const content = document.createElement('div');
-content.className = `template-group-content ${defaultExpanded ? 'expanded' : ''}`;
-
-if (tickets.length === 0) {
-content.innerHTML = `<div style="padding:15px; text-align:center; opacity:0.5; font-style:italic; font-size:13px;">Inga ärenden i denna kö.</div>`;
+if (_activeTickets.length === 0) {
+container.innerHTML = `<div style="padding:30px; text-align:center; opacity:0.5; font-style:italic; font-size:13px;">${_emptyMsg}</div>`;
 } else {
-tickets.forEach(t => {
+_activeTickets.forEach(t => {
 const card = document.createElement('div');
 // ⚠️ LOCK — isInternal: Båda villkoren krävs. ÄNDRA INTE ordningen eller logiken. Se regel 1 ovan.
 const isInternal = (t.session_type === 'internal' || t.routing_tag === 'INTERNAL');
 // ⚠️ LOCK — styles: Gult för interna, getAgentStyles(routing_tag||owner) för övriga. Se reglerna 2-3 ovan.
 const styles = isInternal ? { main: '#f1c40f', bg: 'transparent', border: 'rgba(241,196,15,0.3)', bubbleBg: 'rgba(241,196,15,0.15)' } : getAgentStyles(t.routing_tag || t.owner);
 
-// Deklarera variablerna innan de används i HTML
 const timeStr = new Date(t.updated_at * 1000).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
 const dateStr = new Date(t.updated_at * 1000).toLocaleDateString('sv-SE');
-const actionIcon = UI_ICONS.CLAIM;
 let tagText = t.routing_tag ? resolveLabel(t.routing_tag) : (t.owner ? resolveLabel(t.owner) : (t.session_type === 'message' ? 'MAIL' : 'CHATT'));
 
 const isMail = t.session_type === 'message';
@@ -287,7 +315,6 @@ const previewText = isPrivateInbox
 const vIcon = getVehicleIcon(t.vehicle);
 const vehicleHtml = vIcon ? `<span style="color: ${styles.main}; display: flex; align-items: center; opacity: 0.9;" title="${t.vehicle}">${vIcon}</span>` : '';
 
-// Sökindex: bara synliga fält — undviker falska träffar från meddelandetext
 const searchIndex = [
 displayTitle, tagText, dateStr,
 t.sender || '', t.contact_email || '',
@@ -317,7 +344,7 @@ ${UI_ICONS.NOTES}
 ${UI_ICONS.CLAIM}
 </button>`;
 
-// Claim-knapp (inline onclick ersätts med querySelector-handler)
+// Claim-knapp handler
 const btn = card.querySelector('.claim-action');
 btn.onclick = async (e) => {
 e.stopPropagation();
@@ -327,7 +354,6 @@ headers: fetchHeaders,
 body: JSON.stringify({ conversationId: t.conversation_id, agentName: currentUser.username })
 });
 const result = res.ok ? await res.json() : null;
-// Ingen local toast vid takeover — socket team:ticket_claimed_self hanterar den
 if (!result?.previousOwner) showToast('✅ Ärendet är nu ditt!');
 renderInbox();
 };
@@ -351,7 +377,7 @@ toggleBulkCard(card, t.conversation_id);
 card.addEventListener('mouseup', () => {
 clearTimeout(_lpTimer);
 _lpTimer = null;
-if (_lpFired) { _lpFired = false; return; } // long press hanterade redan
+if (_lpFired) { _lpFired = false; return; }
 if (isBulkMode) {
 toggleBulkCard(card, t.conversation_id);
 } else {
@@ -365,7 +391,7 @@ clearTimeout(_lpTimer);
 _lpTimer = null;
 });
 
-content.appendChild(card);
+container.appendChild(card);
 
 // 🔥 Sätt notes-glow på kortet om anteckningar finns
 if (typeof refreshNotesGlow === 'function') {
@@ -373,21 +399,6 @@ refreshNotesGlow(t.conversation_id);
 }
 });
 }
-
-header.onclick = () => {
-const isExpanded = content.classList.toggle('expanded');
-header.querySelector('.group-arrow').classList.toggle('expanded');
-State.inboxExpanded[groupKey] = isExpanded; 
-};
-container.appendChild(header);
-container.appendChild(content);
-};
-
-renderGroup("Live-Chattar", unassignedChats, `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>`, "Live-Chattar", "live-badge", "Nya kundchattar till Centralsupporten"); 
-
-renderGroup("Inkomna MAIL", unassignedMails, `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>`, "Inkomna MAIL", "mail-badge", "Nya mail-ärenden till Centralsupporten");
-
-renderGroup("Plockade Ärenden", claimedByOthers, `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`, "Plockade Ärenden", "picked-badge", "Redan plockade/routade ärenden");
 
 // Uppdatera även den lilla röda pricken i menyn om det behövs
 updateInboxBadge();

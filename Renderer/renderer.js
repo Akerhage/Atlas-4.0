@@ -569,7 +569,7 @@ item.classList.toggle('active', item.dataset.view === viewId);
 
 // 4. Ladda data (Special-logik)
 if (viewId === 'inbox') {
-State.inboxExpanded = { "Live-Chattar": false, "Inkomna MAIL": false, "Plockade Ärenden": true };
+currentInboxTab = 'chats';
 const searchEl = document.getElementById('inbox-search');
 if (searchEl) searchEl.value = '';
 renderInbox();
