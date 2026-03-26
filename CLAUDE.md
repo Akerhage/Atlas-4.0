@@ -3,7 +3,7 @@
 ## ⚠️ INSTRUKTION FÖR AI
 Du har full tillgång till att köra script som kontrollerar allt i Atlas-mappen.
 
-Jag har lagt ner över 1500h på att skapa denna produkt utan att själv kunna kod. 
+Jag har lagt ner över 1800h på att skapa denna produkt utan att själv kunna kod. 
 Detta med dagar, veckor, månaders envetet slit och att prompta LLMs att skriva koden för att skapa en vision jag haft.
 Frustration, ångest, glädje osv har nu lett fram till den ABSOLUTA slutfasen nu.
 
@@ -15,8 +15,7 @@ Så kontrollera noga att mappningar, fält, id, variablar och parametrar är exa
 Kontrollera "hela vägen" i kedjan innan du tar beslut att skriva kod så att du inte missar viktig logik.
 Genom att fokusera nu fullt på detta så skall vi tillsammans nu sätta sista fixarna KORREKT utan gissningar.
 
-I mappen tests/other finns resultat från audit-script som jag uppdaterar ofta.
-Du kan alltid kontrollera dessa filer för att få överblick. 
+I mappen tests/other finns filträd, databasfacit-fil samt insamlad text från knowledge basfaktafiler. Kan vara bra att kika denna mapp. 
 
 Atlas är ett tredelat system enligt mig.
 
@@ -37,236 +36,19 @@ Viktigt att inte ID ändras på något sätt. Ärenden skall routas korrekt till
 
 Då jag inte kan kod själv är det därför viktigt att du agerar expert här och mina 1600h skall respekteras. Det är därför strikta krav att inte anta eller gissa något. Ta hellre god tid på dig och utför uppgiften korrekt med insamlad fakta från nödvändiga filer. Så löser vi detta tillsammans! 
 
-Ditt jobb är att kirurgiskt och säkert åtgärda felen vi hittar eller fixa detaljer i gränssnittet jag önskar.
+Ditt jobb är att kirurgiskt och säkert åtgärda felen vi hittar eller fixa detaljer i gränssnittet/koden jag önskar.
 
 Senaste uppdateringar är att jag 10/3 har fixat VPS via Hertzner och en domän via loopia. Atlas körs nu via atlas-support.se och kundchatten på atlas-support.se/kundchatt. Jag har aldrig tidigare arbetat med VPS och det är svårt för mig. Så om något skall göras mot VPS guida mig gärna lite extra där.
 
 Jag är nu (tror jag iaf enligt er LLM) redo för demo och har redan börjat be någon kollega testa och komma med feedback. Så ni är vi i fasen att stärka Atlas från denna demo-test-runda mer än att bygga mer saker i Atlas. Alla buggar, fel osv som hittas nu under demo-rundan skall vi kika på. 
 
-Var extremt noga, kontrollera innan åtgärd. Så löser vi att "banta ner" Renderers 8500 rader 
-på samma effektiva sätt som vi löste server.js. Du är grym! Tack för din hjälp! Nu kör vi!
-
 Kolla gärna Atlas_fle_tree för att se alla filer i Atlas-mappen. 
-Kontrollera ATLAS-SYSTEM-MANUAL.MD i tests/other för att skapa förståelse över ärendeflöden, ägarskapslogik etc.
 
-Atlas filträd
+Nästa mål är att fixa inkorgen så att den blir mer lik admin-vyn när det kommer till grupperna.
 
-Atlas/
-├── .claude
-│   └── settings.local.json
-├── .env
-├── .gitignore
-├── atlas.db
-├── atlas.db-shm
-├── atlas.db-wal
-├── CLAUDE.md
-├── config.json
-├── db.js
-├── ecosystem.config.js
-├── electron-builder-client.json
-├── exports
-│   ├── atlas_archive_2026_01.csv
-│   ├── atlas_archive_2026_02.csv
-│   └── test-fil-chatt.png
-├── knowledge
-│   ├── angelholm.json
-│   ├── basfakta_12_stegsguide_bil.json
-│   ├── basfakta_am_kort_och_kurser.json
-│   ├── basfakta_be_b96.json
-│   ├── basfakta_goteborg_banplatser.json
-│   ├── basfakta_introduktionskurs_handledarkurs_bil.json
-│   ├── basfakta_korkortsteori_mitt_korkort.json
-│   ├── basfakta_korkortstillstand.json
-│   ├── basfakta_lastbil_c_ce_c1_c1e.json
-│   ├── basfakta_lektioner_paket_bil.json
-│   ├── basfakta_lektioner_paket_mc.json
-│   ├── basfakta_mc_a_a1_a2.json
-│   ├── basfakta_mc_lektioner_utbildning.json
-│   ├── basfakta_nollutrymme.json
-│   ├── basfakta_om_foretaget.json
-│   ├── basfakta_personbil_b.json
-│   ├── basfakta_policy_kundavtal.json
-│   ├── basfakta_riskutbildning_bil_mc.json
-│   ├── basfakta_saknade_svar.json
-│   ├── eslov.json
-│   ├── gavle.json
-│   ├── goteborg_aby.json
-│   ├── goteborg_dingle.json
-│   ├── goteborg_hogsbo.json
-│   ├── goteborg_hovas.json
-│   ├── goteborg_kungalv.json
-│   ├── goteborg_molndal.json
-│   ├── goteborg_molnlycke.json
-│   ├── goteborg_storaholm.json
-│   ├── goteborg_ullevi.json
-│   ├── goteborg_vastra_frolunda.json
-│   ├── hassleholm.json
-│   ├── helsingborg_city.json
-│   ├── helsingborg_halsobacken.json
-│   ├── hollviken.json
-│   ├── kalmar.json
-│   ├── kristianstad.json
-│   ├── kungsbacka.json
-│   ├── landskrona.json
-│   ├── linkoping.json
-│   ├── lund_katedral.json
-│   ├── lund_sodertull.json
-│   ├── malmo_bulltofta.json
-│   ├── malmo_city.json
-│   ├── malmo_jagersro.json
-│   ├── malmo_limhamn.json
-│   ├── malmo_sodervarn.json
-│   ├── malmo_triangeln.json
-│   ├── malmo_varnhem.json
-│   ├── malmo_vastra_hamnen.json
-│   ├── stockholm_djursholm.json
-│   ├── stockholm_enskededalen.json
-│   ├── stockholm_kungsholmen.json
-│   ├── stockholm_osteraker.json
-│   ├── stockholm_ostermalm.json
-│   ├── stockholm_sodermalm.json
-│   ├── stockholm_solna.json
-│   ├── trelleborg.json
-│   ├── umea.json
-│   ├── uppsala.json
-│   ├── varberg.json
-│   ├── vasteras.json
-│   ├── vaxjo.json
-│   ├── vellinge.json
-│   └── ystad.json
-├── kundchatt
-│   ├── assets
-│   │   ├── atlas-logo-FzVeXVTO.png
-│   │   ├── index-CIGegrlU.css
-│   │   └── index-CoUdujRa.js
-│   ├── favicon.ico
-│   ├── index.html
-│   ├── placeholder.svg
-│   └── robots.txt
-├── legacy_engine.js
-├── main-client.js
-├── main.js
-├── middleware
-│   └── auth.js
-├── ngrok.exe
-├── package-lock.json
-├── package.json
-├── patch
-│   ├── forceAddEngine.js
-│   └── intentEngine.js
-├── preload-loader.js
-├── preload.js
-├── Renderer
-│   ├── assets
-│   │   ├── audio
-│   │   │   ├── pling-1.mp3
-│   │   │   ├── pling-2.mp3
-│   │   │   ├── pling-3.mp3
-│   │   │   ├── pling-4.mp3
-│   │   │   └── pling-5.mp3
-│   │   ├── css
-│   │   │   ├── mobile.css
-│   │   │   ├── quill.snow.css
-│   │   │   └── style.css
-│   │   ├── data
-│   │   │   ├── Atlas_Adminmanual.docx
-│   │   │   ├── Atlas_Användarmanual.docx
-│   │   │   └── service_templates.json
-│   │   ├── docs
-│   │   ├── icons
-│   │   │   ├── app
-│   │   │   │   └── icon.ico
-│   │   │   ├── menu-archive.svg
-│   │   │   ├── menu-home.svg
-│   │   │   ├── menu-inbox.svg
-│   │   │   ├── menu-logout.svg
-│   │   │   ├── menu-myown.svg
-│   │   │   ├── menu-settings.svg
-│   │   │   └── menu-templates.svg
-│   │   ├── images
-│   │   │   └── logo.png
-│   │   ├── js
-│   │   │   └── quill.js
-│   │   ├── README.txt
-│   │   └── themes
-│   │       ├── apple-dark
-│   │       │   ├── apple-dark-bg.jpg
-│   │       │   └── apple-dark.css
-│   │       ├── apple-road
-│   │       │   ├── apple-road-bg.jpg
-│   │       │   └── apple-road.css
-│   │       ├── atlas-navigator
-│   │       │   ├── atlas-navigator-bg.jpg
-│   │       │   └── atlas-navigator.css
-│   │       ├── atlas-nebula
-│   │       │   ├── atlas-nebula-bg1.jpg
-│   │       │   ├── atlas-nebula-bg2.jpg
-│   │       │   └── atlas-nebula.css
-│   │       ├── carbon-theme
-│   │       │   ├── carbon-theme-bg.jpg
-│   │       │   └── carbon-theme.css
-│   │       ├── onyx-ultradark
-│   │       │   ├── onyx-ultradark-bg.jpg
-│   │       │   └── onyx-ultradark.css
-│   │       ├── standard-theme
-│   │       │   ├── standard-theme-bg.jpg
-│   │       │   └── standard-theme.css
-│   │       └── sunset-horizon
-│   │           ├── sunset-horizon-bg.jpg
-│   │           └── sunset-horizon.css
-│   ├── index.html
-│   ├── loader.css
-│   ├── loader.html
-│   ├── loader.js
-│   ├── modules
-│   │   ├── admin
-│   │   │   ├── admin-agents.js
-│   │   │   ├── admin-audit.js
-│   │   │   ├── admin-config.js
-│   │   │   ├── admin-core.js
-│   │   │   ├── admin-drift.js
-│   │   │   ├── admin-forms.js
-│   │   │   ├── admin-gaps.js
-│   │   │   ├── admin-knowledge.js
-│   │   │   ├── admin-offices.js
-│   │   │   ├── admin-reader.js
-│   │   │   ├── admin-tools.js
-│   │   │   └── admin-users.js
-│   │   ├── archive-view.js
-│   │   ├── bulk-ops.js
-│   │   ├── chat-engine.js
-│   │   ├── customers-view.js
-│   │   ├── detail-ui.js
-│   │   ├── inbox-view.js
-│   │   ├── ipc-bridges.js
-│   │   ├── modals.js
-│   │   ├── notes-system.js
-│   │   ├── socket-client.js
-│   │   ├── styling-utils.js
-│   │   ├── templates-view.js
-│   │   ├── tickets-view.js
-│   │   └── ui-constants.js
-│   └── renderer.js
-├── routes
-│   ├── admin.js
-│   ├── archive.js
-│   ├── auth.js
-│   ├── customer.js
-│   ├── customers.js
-│   ├── knowledge.js
-│   ├── notes.js
-│   ├── team.js
-│   ├── templates.js
-│   └── webhook.js
-├── server.js
-├── sqlite3.exe
-├── starta_atlas.bat
-├── uploads
-└── utils
-    ├── booking-links.json
-    ├── contextLock.js
-    ├── priceResolver.js
-    └── transportstyrelsen-fallback.js
-	
-	
-	
+Dvs skapa tre stycken grupper i headern där istället precis så som adminvyn nu har agenter, kontor & utbildning samt systemkonfiguration.
+Skapa Nya Live-Chattar, Nya Mail-ärenden samt Redan plockade/Routade Ärenden i headern, ta bort de grupperna som ligger där ärenden skall visas.
+Notis-badge-räknaren för Inkorgen kan vara kvar exakt som den är nu i sidovyn men lös så att varje grupp i headern får en notis-bade som räknar live antal ärenden i respektive grupp. 
+När man klickar på Inkorgen i sidomenyn skall man alltid komma till första fliken som är Nya Live-chattar. 
+
+Jag önskar också att dra ner effekter som glow och annat i gränssnittet. Har efter att jag skapade atlas-minimal-temat insett att alla dessa animationer bara gör att gränssnittet känns segare och det känns också "mindre seriöst" för ett sådant här system. HEM-vyn kan vara lika snygg som den är där man snyggt ser de bakgrundsbilder som jag valt. Men försök att hitta ställen där vi kan ta bort glow på ex scrollbars, blinkande menyer och klick. Vissa subtila gloweffekter på valt ärendekort osv kan såklart vara kvar och bör vara kvar. 
