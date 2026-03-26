@@ -263,7 +263,11 @@ stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 </svg>
 Mina Ärenden
 </h2>
-<div class="header-actions">
+<div class="header-tabs">
+<button class="header-tab active" id="my-tickets-tab-btn-chats" onclick="switchMyTicketsTab('chats')">Live-Chattar <span id="my-tickets-tab-badge-chats" class="tab-badge" style="display:none;">0</span></button>
+<button class="header-tab" id="my-tickets-tab-btn-mail" onclick="switchMyTicketsTab('mail')">Mail <span id="my-tickets-tab-badge-mail" class="tab-badge" style="display:none;">0</span></button>
+</div>
+<div class="header-actions" style="margin-left:auto;">
 <button id="new-mail-btn-my-tickets" class="header-button icon-only-btn" title="Starta nytt ärende">
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
 </button>
@@ -275,7 +279,7 @@ Mina Ärenden
 <div class="templates-container">
 <div class="template-list-container">
 <div class="list-panel-header">
-<h3>Aktiva chattar och mail</h3>
+<h3 id="my-tickets-list-header-title">Live-Chattar</h3>
 </div>
 <div id="my-tickets-list"></div>
 </div>

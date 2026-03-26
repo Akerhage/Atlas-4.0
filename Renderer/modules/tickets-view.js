@@ -77,6 +77,29 @@
 // ============================================
 
 // ============================================================================
+// MINA ÄRENDEN: FLIKAR
+// ============================================================================
+let currentMyTicketsTab = 'chats';
+
+function _updateMyTicketsTabBtns() {
+  ['chats', 'mail'].forEach(t => {
+    const btn = document.getElementById('my-tickets-tab-btn-' + t);
+    if (btn) btn.classList.toggle('active', t === currentMyTicketsTab);
+  });
+  const titleEl = document.getElementById('my-tickets-list-header-title');
+  if (titleEl) {
+    const titles = { chats: 'Live-Chattar', mail: 'Mail' };
+    titleEl.textContent = titles[currentMyTicketsTab] || '';
+  }
+}
+
+window.switchMyTicketsTab = function(tab) {
+  currentMyTicketsTab = tab;
+  _updateMyTicketsTabBtns();
+  renderMyTickets();
+};
+
+// ============================================================================
 // MINA ÄRENDEN: LISTA
 // ============================================================================
 async function renderMyTickets() {
@@ -109,6 +132,22 @@ if (t.routing_tag && myOfficeTags.includes(t.routing_tag.toLowerCase()) && !t.ow
 return false;
 });
 }
+
+// Räkna per flik (av totala listan) och uppdatera badges
+const chatCount = tickets.filter(t => t.session_type !== 'message').length;
+const mailCount = tickets.filter(t => t.session_type === 'message').length;
+const chatBadge = document.getElementById('my-tickets-tab-badge-chats');
+const mailBadge = document.getElementById('my-tickets-tab-badge-mail');
+if (chatBadge) { chatBadge.textContent = chatCount; chatBadge.style.display = chatCount > 0 ? 'inline-flex' : 'none'; }
+if (mailBadge) { mailBadge.textContent = mailCount; mailBadge.style.display = mailCount > 0 ? 'inline-flex' : 'none'; }
+_updateMyTicketsTabBtns();
+
+// Filtrera per aktiv flik
+tickets = tickets.filter(t => {
+  if (currentMyTicketsTab === 'chats') return t.session_type !== 'message';
+  if (currentMyTicketsTab === 'mail') return t.session_type === 'message';
+  return true;
+});
 
 if (tickets.length > 0) {
 const existingPlaceholder = container.querySelector('.template-item-empty');

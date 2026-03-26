@@ -575,6 +575,7 @@ if (searchEl) searchEl.value = '';
 renderInbox();
 } 
 else if (viewId === 'my-tickets') {
+currentMyTicketsTab = 'chats';
 renderMyTickets();
 }
 else if (viewId === 'archive') {

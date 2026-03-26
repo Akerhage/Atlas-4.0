@@ -2387,10 +2387,26 @@ gap: 6px;
 flex-shrink: 0;
 }
 
-/* Mina Ärenden: 2px lägre än standard men inte lika mycket som övriga vyer */
+/* Mina Ärenden: 101px ger border i linje med sidebar-logga-kanten */
 #view-my-tickets .list-panel-header {
-min-height: 114px;
-margin-bottom: 15px; /* panel-label-total(129) - 114 */
+min-height: 101px;
+margin-bottom: 28px; /* panel-label-total(129) bibehålls: 101+28=129 */
+position: relative;
+border-bottom: none;
+box-shadow: 0 4px 24px -6px color-mix(in srgb, var(--accent-primary) 25%, transparent);
+}
+#view-my-tickets .list-panel-header::after {
+content: '';
+position: absolute;
+bottom: 0;
+left: 0;
+right: 115px; /* stannar tydligt innan SVG-ikonen (~27px buffert) */
+height: 1px;
+background: color-mix(in srgb, var(--accent-primary) 22%, var(--border-color));
+}
+#view-my-tickets .list-panel-header h3 {
+flex: 1;
+min-width: 0;
 }
 
 /* Garaget: filterfält ovanför; rubrikrutan startar precis vid filtrets nedkant.
@@ -2408,7 +2424,15 @@ padding-top: 10px !important;
 
 /* Per-vy SVG-vattenmärken + agentfärgat glöd (--accent-primary = agent_color från login).
 Lager: gradient → radial-glow (agentfärg bakom ikonen) → SVG-ikon (vit kontur) */
+/* Inkorgen: 101px ger border i linje med sidebar-logga-kanten (101+28=129)
+   margin-left explicit för att garantera att linjen når vänster kant */
 #view-inbox .list-panel-header {
+min-height: 101px;
+margin-bottom: 28px; /* panel-label-total(129) bibehålls: 101+28=129 */
+margin-left: calc(-1 * var(--spacing-lg));
+position: relative;
+border-bottom: none;
+box-shadow: 0 4px 24px -6px color-mix(in srgb, var(--accent-primary) 25%, transparent);
 background-image:
 linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.065) 100%),
 radial-gradient(circle at calc(100% - 52px) 50%, color-mix(in srgb, var(--accent-primary) 22%, transparent) 0%, transparent 60%),
@@ -2416,6 +2440,21 @@ url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2
 background-position: 0 0, 0 0, calc(100% - 16px) 50%;
 background-size: auto, auto, 72px 72px;
 background-repeat: repeat, no-repeat, no-repeat;
+}
+/* Inbox ::after skapar border som stannar tydligt innan SVG-ikonen */
+#view-inbox .list-panel-header::after {
+content: '';
+position: absolute;
+bottom: 0;
+left: 0;
+right: 115px; /* stannar tydligt innan SVG-ikonen (~27px buffert) */
+height: 1px;
+background: color-mix(in srgb, var(--accent-primary) 22%, var(--border-color));
+}
+/* Inbox h3: flex:1 gör att h3 kan växa men stannar vid flex-layoutens gräns */
+#view-inbox .list-panel-header h3 {
+flex: 1;
+min-width: 0;
 }
 #view-my-tickets .list-panel-header {
 background-image:
@@ -3408,41 +3447,47 @@ input[type="checkbox"]:checked { accent-color: var(--accent-primary) !important;
 display: flex !important;
 align-items: center !important;
 gap: 0 !important;
-border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+border-bottom: none !important;
 }
 
 .header-tab {
 padding: 15px 20px !important;
 background: transparent !important;
 border: none !important;
-border-bottom: 3px solid transparent !important;
-color: rgba(255, 255, 255, 0.6) !important;
+border-bottom: 2px solid transparent !important;
+color: rgba(255, 255, 255, 0.38) !important;
 cursor: pointer !important;
-transition: all 0.2s ease !important;
-font-weight: 600 !important;
-font-size: 14px !important;
+transition: color 0.2s ease, border-color 0.2s ease !important;
+font-weight: 500 !important;
+font-size: 13px !important;
+letter-spacing: 0.2px !important;
+}
+
+.header-tab:hover {
+color: rgba(255, 255, 255, 0.65) !important;
 }
 
 .header-tab.active {
 color: var(--accent-primary) !important;
 border-bottom-color: var(--accent-primary) !important;
-background: rgba(0, 113, 227, 0.05) !important;
+background: transparent !important;
+font-weight: 600 !important;
 }
 
-/* Inline badge i header-flikar */
+/* Inline badge i header-flikar — accent-tonad räknare */
 .tab-badge {
 display: inline-flex;
 align-items: center;
 justify-content: center;
-background: var(--status-danger);
-color: white;
-border-radius: 10px;
-min-width: 18px;
-height: 18px;
+background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
+color: color-mix(in srgb, var(--accent-primary) 75%, white);
+border-radius: 6px;
+min-width: 16px;
+height: 16px;
 font-size: 10px;
-font-weight: 700;
+font-weight: 500;
 padding: 0 4px;
-margin-left: 6px;
+margin-left: 5px;
 vertical-align: middle;
 line-height: 1;
 }

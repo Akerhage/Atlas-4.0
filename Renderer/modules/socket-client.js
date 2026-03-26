@@ -677,6 +677,13 @@ localStorage.setItem('atlas_user', JSON.stringify(currentUser));
 document.documentElement.style.setProperty('--accent-primary', color);
 // Uppdatera sidebar-avataren, namn och statustext direkt
 if (typeof updateProfileUI === 'function') updateProfileUI();
+// Synka profilmodalen om den är öppen (admin-ändring skall slå igenom live)
+const prefColor = document.getElementById('pref-color');
+if (prefColor) prefColor.value = color;
+const prefColorLine = document.getElementById('pref-color-line');
+if (prefColorLine) prefColorLine.style.setProperty('background-color', color, 'important');
+const prefColorHex = document.getElementById('pref-color-hex');
+if (prefColorHex) prefColorHex.innerText = color.toUpperCase();
 }
 _debouncedColorRender();
 });
