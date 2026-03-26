@@ -59,12 +59,17 @@
 // Aktiv flik (chats | mail | claimed) — återställs till 'chats' vid navigering
 let currentInboxTab = 'chats';
 
-// Synkar aktiva flik-knappar i headern
+// Synkar aktiva flik-knappar och panel-titel i headern
 function _updateInboxTabBtns() {
 ['chats', 'mail', 'claimed'].forEach(t => {
 const btn = document.getElementById('inbox-tab-btn-' + t);
 if (btn) btn.classList.toggle('active', t === currentInboxTab);
 });
+const titleEl = document.getElementById('inbox-list-header-title');
+if (titleEl) {
+const titles = { chats: 'Live-Chattar', mail: 'E-post', claimed: 'Plockade ärenden' };
+titleEl.textContent = titles[currentInboxTab] || '';
+}
 }
 
 // Byter aktiv flik — anropas från index.html onclick
