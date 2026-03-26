@@ -14,12 +14,12 @@ this.version = "1.9.6";
 // Scores med fallback till hårdkodade defaults
 this.scores = {
 a1_am:       scores.rag_score_a1_am       ?? 25000,
-		fix_saknade: scores.rag_score_fix_saknade  ?? 20000,
+fix_saknade: scores.rag_score_fix_saknade  ?? 20000,
 c8_kontakt:  scores.rag_score_c8_kontakt   ?? 25000,
 b1_policy:   scores.rag_score_b1_policy    ?? 50000,
 c7_teori:    scores.rag_score_c7_teori     ?? 55000
 };
-console.log(`[ForceAddEngine v${this.version}] Scores: ${JSON.stringify(this.scores)}`);
+// console.log(`[ForceAddEngine v${this.version}] Scores: ${JSON.stringify(this.scores)}`);
 }
 
 // === HJÄLPFUNKTIONER ===
@@ -40,7 +40,7 @@ return t === 'basfakta' || t === 'basfak' || t === 'basfacts' || t === 'basfacta
 addChunks(chunks, score, prepend = false) {
 
 // Säkerhetsfilter: Kasta bort pris-chunks som är 0 kr eller "0 SEK"
-    // Detta hindrar motorn från att tvinga in felaktiga priser via bakdörren.
+// Detta hindrar motorn från att tvinga in felaktiga priser via bakdörren.
 const validChunks = chunks.filter(c => {
 if (c.type === 'price') {
 const p = Number(c.price);
@@ -101,7 +101,7 @@ return 0;
 const chunks = this.findBasfaktaBySource('basfakta_am_kort_och_kurser.json');
 const score = this.scores.a1_am;
 const count = this.addChunks(chunks, score, false);
-console.log(`[A1-AM] Lade till ${count} chunks (score: ${score})`);
+// console.log(`[A1-AM] Lade till ${count} chunks (score: ${score})`);
 return count;
 }
 
@@ -119,7 +119,7 @@ c.service_name === targetServiceName // EXAKT matchning på tjänstens namn
 // Lägg till med absolut högsta prioritet (10000) och preppend: true
 const count = this.addChunks(matchingChunks, 10000, true);
 if (count > 0) {
-console.log(`[A4-LOCKED-PRICE] Lade till ${count} Körlektionspris för ${lockedCity} (score: 10000, FÖRST)`);
+// console.log(`[A4-LOCKED-PRICE] Lade till ${count} Körlektionspris för ${lockedCity} (score: 10000, FÖRST)`);
 }
 return count;
 }
@@ -181,7 +181,7 @@ const generalChunks = this.findBasfaktaBySource('basfakta_om_foretaget.json');
 // Intent-gate
 if (intent === 'policy' || intent === 'booking' || intent === 'price_lookup') {
 const count = this.addChunks(generalChunks, 8000, false);
-console.log(`[B2-FINANS] Score: 8000 (Intent Match)`);
+// console.log(`[B2-FINANS] Score: 8000 (Intent Match)`);
 return count;
 } else {
 // Låg prio fallback (3 000)
@@ -254,7 +254,7 @@ const risk1Chunks = allRiskChunks.filter(c =>
 const count = this.addChunks(risk1Chunks, 9000, true);
 if (count > 0) {
 this.forceHighConfidence = true;
-console.log(`[C1a-RISK1] Lade till ${count} specifika Risk 1-chunks FÖRST (score: 9000, HIGH CONF)`);
+// console.log(`[C1a-RISK1] Lade till ${count} specifika Risk 1-chunks FÖRST (score: 9000, HIGH CONF)`);
 }
 return count;
 }
@@ -276,7 +276,7 @@ const risk2Chunks = allRiskChunks.filter(c =>
 const count = this.addChunks(risk2Chunks, 9000, true);
 if (count > 0) {
 this.forceHighConfidence = true;
-console.log(`[C1b-RISK2] Lade till ${count} specifika Risk 2-chunks FÖRST (score: 9000, HIGH CONF)`);
+// console.log(`[C1b-RISK2] Lade till ${count} specifika Risk 2-chunks FÖRST (score: 9000, HIGH CONF)`);
 }
 return count;
 }
@@ -289,7 +289,7 @@ const hasSpecificKeyword = this.qHas(queryLower, 'risk 1', 'riskettan', 'risk 2'
 if ((intent === 'risk_course' || hasGenericKeyword) && !hasSpecificKeyword) {
 const chunks = this.findBasfaktaBySource('basfakta_riskutbildning_bil_mc.json');
 const count = this.addChunks(chunks, 6500, false);
-console.log(`[C1c-RISK-GENERIC] Lade till ${count} generiska risk-chunks (score: 6500)`);
+// console.log(`[C1c-RISK-GENERIC] Lade till ${count} generiska risk-chunks (score: 6500)`);
 return count;
 }
 return 0;
@@ -303,7 +303,7 @@ if (slots.vehicle === 'MC' || has_mc_keywords) {
 const chunks = this.findBasfaktaBySource('basfakta_mc_a_a1_a2.json');
 const count = this.addChunks(chunks, 85000, true);
 if (count > 0) this.forceHighConfidence = true;
-console.log(`[C2-MC-BEHÖRIGHET] Lade till ${count} MC behörighets-chunks (score: 85000)`);
+// console.log(`[C2-MC-BEHÖRIGHET] Lade till ${count} MC behörighets-chunks (score: 85000)`);
 return count;
 }
 return 0;
@@ -330,14 +330,14 @@ let count = 0;
 if (slots.vehicle === 'MC' || has_paket_keywords) {
 const chunks = this.findBasfaktaBySource('basfakta_lektioner_paket_mc.json');
 count += this.addChunks(chunks, 8500, false);
-console.log(`[C5-PAKET-MC] Lade till ${count} MC-paket-chunks (score: 8500)`);
+// console.log(`[C5-PAKET-MC] Lade till ${count} MC-paket-chunks (score: 8500)`);
 }
 
 // 2. Hantera MC-säsong, vinter och specifika testlektioner
 if (this.qHas(queryLower, 'säsong', 'vinter', 'väder', 'testlektion mc', 'när börjar ni', 'när slutar ni')) {
 const seasonChunks = this.findBasfaktaBySource('basfakta_mc_lektioner_utbildning.json');
 const addedSeason = this.addChunks(seasonChunks, 9200, true); // Prepend: true för hög prio
-console.log(`[C5-SÄSONG-MC] Lade till ${addedSeason} säsongs-chunks (score: 9200)`);
+// console.log(`[C5-SÄSONG-MC] Lade till ${addedSeason} säsongs-chunks (score: 9200)`);
 count += addedSeason;
 }
 
@@ -346,36 +346,36 @@ return count;
 
 // --- C6: TUNGA FORDON/LASTBIL GENERELL ---
 rule_C6_TungaFordon(queryLower, intent, slots) {
-  if (slots.vehicle === 'LASTBIL' || slots.vehicle === 'SLÄP') {
+if (slots.vehicle === 'LASTBIL' || slots.vehicle === 'SLÄP') {
 
-    // Betalningsfrågor är fordonsagnostiska — låt B2-Finance hantera ensam.
-    // Utan denna guard tränger C6-chunks ut "Betalningsalternativ" ur kontexten
-    // när vehicle=LASTBIL är låst från sessionhistorik.
-    if (this.qHas(queryLower, 'klarna', 'swish', 'betala', 'betalning', 'delbetala')) {
-      return 0;
-    }
+// Betalningsfrågor är fordonsagnostiska — låt B2-Finance hantera ensam.
+// Utan denna guard tränger C6-chunks ut "Betalningsalternativ" ur kontexten
+// när vehicle=LASTBIL är låst från sessionhistorik.
+if (this.qHas(queryLower, 'klarna', 'swish', 'betala', 'betalning', 'delbetala')) {
+return 0;
+}
 
-    let chunkSource = (slots.vehicle === 'LASTBIL') 
-      ? 'basfakta_lastbil_c_ce_c1_c1e.json' 
-      : 'basfakta_be_b96.json';
+let chunkSource = (slots.vehicle === 'LASTBIL') 
+? 'basfakta_lastbil_c_ce_c1_c1e.json' 
+: 'basfakta_be_b96.json';
 
-    let score = 6500;
-    let addedCount = 0;
+let score = 6500;
+let addedCount = 0;
 
-    // Om frågan är specifik (innehåller sökord), ge den högre vikt
-    if (this.qHas(queryLower, 'lastbil', 'c-körkort', 'ce', 'släp', 'be-kort', 'b96')) { 
-      score = 7000;
-      // Använder prepend: true för att säkerställa att fakta ligger tidigt i kontexten
-      addedCount = this.addChunks(this.findBasfaktaBySource(chunkSource), score, true);
-      console.log(`[C6-TUNGA FORDON] Lade till ${addedCount} chunks (Kärnfråga, score: ${score})`);
-    } else {
-      // Laddar filen bara baserat på slot
-      addedCount = this.addChunks(this.findBasfaktaBySource(chunkSource), score, false);
-      console.log(`[C6-TUNGA FORDON] Lade till ${addedCount} chunks (Slot-baserad, score: ${score})`);
-    }
-    return addedCount;
-  }
-  return 0;
+// Om frågan är specifik (innehåller sökord), ge den högre vikt
+if (this.qHas(queryLower, 'lastbil', 'c-körkort', 'ce', 'släp', 'be-kort', 'b96')) { 
+score = 7000;
+// Använder prepend: true för att säkerställa att fakta ligger tidigt i kontexten
+addedCount = this.addChunks(this.findBasfaktaBySource(chunkSource), score, true);
+// console.log(`[C6-TUNGA FORDON] Lade till ${addedCount} chunks (Kärnfråga, score: ${score})`);
+} else {
+// Laddar filen bara baserat på slot
+addedCount = this.addChunks(this.findBasfaktaBySource(chunkSource), score, false);
+// console.log(`[C6-TUNGA FORDON] Lade till ${addedCount} chunks (Slot-baserad, score: ${score})`);
+}
+return addedCount;
+}
+return 0;
 }
 
 // --- C7: APPEN MITT KÖRKORT ---
@@ -433,7 +433,7 @@ rule_C9_BilFakta(queryLower, intent, slots) {
 if (this.qHas(queryLower, 'automat', 'manuell', 'villkor 78', 'kod 78', 'körkort för automat', 'körkort för manuell')) {
 const chunks = this.findBasfaktaBySource('basfakta_personbil_b.json');
 const added = this.addChunks(chunks, 85000, true);
-if (added > 0) console.log(`[C9-BIL-FAKTA] Lade till ${added} Automat/Manuell-chunks (score: 85000)`);
+if (added > 0) {/* console.log(`[C9-BIL-FAKTA] Lade till ${added} Automat/Manuell-chunks (score: 85000)`); */}
 return added;
 }
 return 0;
@@ -468,7 +468,7 @@ added += this.addChunks(this.findBasfaktaBySource('basfakta_introduktionskurs_ha
 
 // Rensa policy-chunks för att undvika 24-månaders-förvirring
 this.mustAddChunks = this.mustAddChunks.filter(c => !c.source.includes('policy_kundavtal'));
-console.log(`[FIX-GILTIGHET] Tillstånd (5 år) - Score: 30000 (Intent Match)`);
+// console.log(`[FIX-GILTIGHET] Tillstånd (5 år) - Score: 30000 (Intent Match)`);
 } else {
 // Fallback (8 500 - Kritisk info men fel intent)
 added += this.addChunks(this.findBasfaktaBySource('basfakta_korkortstillstand.json'), 8500, false);
@@ -486,7 +486,7 @@ if (!this.qHas(queryLower, 'tillstånd', 'körkortstillstånd', 'förlänga')) {
 
 if (intent === 'policy' || intent === 'booking' || intent === 'price_lookup' || intent === 'intent_info') {
 added += this.addChunks(this.findBasfaktaBySource('basfakta_policy_kundavtal.json'), 85000, true);
-console.log(`[FIX-GILTIGHET] Paket (24 mån) - Score: 85000 (Intent Match)`);
+// console.log(`[FIX-GILTIGHET] Paket (24 mån) - Score: 85000 (Intent Match)`);
 } else {
 // Fallback (5 000 - Standard)
 added += this.addChunks(this.findBasfaktaBySource('basfakta_policy_kundavtal.json'), 5000, false);
@@ -502,7 +502,7 @@ const riskChunks = this.findBasfaktaBySource('basfakta_riskutbildning_bil_mc.jso
 
 if (intent === 'risk_course' || intent === 'booking' || intent === 'policy') {
 added += this.addChunks(riskChunks, 9500, true);
-console.log(`[FIX-GILTIGHET] Riskutbildning - Score: 9500 (Intent Match)`);
+// console.log(`[FIX-GILTIGHET] Riskutbildning - Score: 9500 (Intent Match)`);
 } else {
 // Fallback för att inte störa om man t.ex. frågar pris på paket som innehåller risk
 added += this.addChunks(riskChunks, 5000, false);
@@ -517,7 +517,7 @@ const guideChunks = this.findBasfaktaBySource('basfakta_12_stegsguide_bil.json')
 
 if (intent === 'intent_info' || intent === 'tillstand_info' || intent === 'booking') {
 added += this.addChunks(guideChunks, 9900, true);
-console.log(`[FIX-GILTIGHET] Stegguide/Prövotid - Score: 9900 (Intent Match)`);
+// console.log(`[FIX-GILTIGHET] Stegguide/Prövotid - Score: 9900 (Intent Match)`);
 } else {
 added += this.addChunks(guideChunks, 5000, false);
 }
@@ -593,7 +593,7 @@ if ((intent === 'intent_info' && vehicle === 'BIL') ||
 const chunks = this.findBasfaktaBySource('basfakta_personbil_b.json');
 if (chunks.length) {
 this.addChunks(chunks, 8500, true);
-console.log(`[FIX-B-KÖRKORT] Lade till ${chunks.length} chunks för Personbil/Ålder`);
+// console.log(`[FIX-B-KÖRKORT] Lade till ${chunks.length} chunks för Personbil/Ålder`);
 return 1;
 }
 }
@@ -606,7 +606,7 @@ if (intent === 'risk_info' || this.qHas(queryLower, 'risk', 'halkbana', 'riskett
 const chunks = this.findBasfaktaBySource('basfakta_riskutbildning_bil_mc.json');
 if (chunks.length > 0) {
 this.addChunks(chunks, 7000, false);
-console.log(`[FIX-RISK-ALLA] Lade till ${chunks.length} generiska risk-chunks`);
+// console.log(`[FIX-RISK-ALLA] Lade till ${chunks.length} generiska risk-chunks`);
 return 1;
 }
 }
@@ -615,56 +615,56 @@ return 0;
 
 // Lastbil Generell & YKB
 rule_Fix_Lastbil_YKB(queryLower, intent) {
-  // Triggers för YKB och lastbilsutbildning (regelverk + tid + förnyelse)
-  const isYKBQuery = this.qHas(queryLower, 'ykb', 'yrkeskompetensbevis', 'grundutbildning', 'fortbildning', '140 tim', '35 tim');
-  const isLastbilQuery = this.qHas(queryLower, 'lastbil', 'c-körkort', 'ce-körkort', 'c1-körkort', 'lastbilsutbildning', 'tung lastbil');
-  const isTimeQuery = this.qHas(queryLower, 'hur lång tid', 'hur länge', 'tid tar', 'timmar');
-  const isFornyaQuery = this.qHas(queryLower, 'förnya', 'förnyelse', 'förnyar');
-  
-  // Kör om det är YKB ELLER (lastbil + (tid/förnya/intent_info))
-  if (isYKBQuery || (isLastbilQuery && (isTimeQuery || isFornyaQuery || intent === 'intent_info' || intent === 'service_inquiry'))) {
-    const chunks = this.findBasfaktaBySource('basfakta_lastbil_c_ce_c1_c1e.json');
-    // Öka score till 18000 för att slå ut pris-chunks (som har ~7000)
-    // prepend: true (tredje parametern) = läggs först i listan
-    const count = this.addChunks(chunks, 18000, true);
-    if (count > 0) {
-      console.log(`[FIX-YKB/LASTBIL] Lade till ${count} basfakta-chunks FÖRE priser (score: 18000)`);
-    }
-    return count;
-  }
-  return 0;
+// Triggers för YKB och lastbilsutbildning (regelverk + tid + förnyelse)
+const isYKBQuery = this.qHas(queryLower, 'ykb', 'yrkeskompetensbevis', 'grundutbildning', 'fortbildning', '140 tim', '35 tim');
+const isLastbilQuery = this.qHas(queryLower, 'lastbil', 'c-körkort', 'ce-körkort', 'c1-körkort', 'lastbilsutbildning', 'tung lastbil');
+const isTimeQuery = this.qHas(queryLower, 'hur lång tid', 'hur länge', 'tid tar', 'timmar');
+const isFornyaQuery = this.qHas(queryLower, 'förnya', 'förnyelse', 'förnyar');
+
+// Kör om det är YKB ELLER (lastbil + (tid/förnya/intent_info))
+if (isYKBQuery || (isLastbilQuery && (isTimeQuery || isFornyaQuery || intent === 'intent_info' || intent === 'service_inquiry'))) {
+const chunks = this.findBasfaktaBySource('basfakta_lastbil_c_ce_c1_c1e.json');
+// Öka score till 18000 för att slå ut pris-chunks (som har ~7000)
+// prepend: true (tredje parametern) = läggs först i listan
+const count = this.addChunks(chunks, 18000, true);
+if (count > 0) {
+// console.log(`[FIX-YKB/LASTBIL] Lade till ${count} basfakta-chunks FÖRE priser (score: 18000)`);
+}
+return count;
+}
+return 0;
 }
 
 // Utbildningstid för alla fordon
 // Denna regel fångar upp generella "hur lång tid tar" frågor
 rule_Fix_Utbildningstid(queryLower, intent, slots) {
-  const isTimeQuery = this.qHas(queryLower, 'hur lång tid', 'hur länge tar', 'tid tar', 'duration', 'hur många timmar');
-  const isUtbildningQuery = this.qHas(queryLower, 'utbildning', 'kurs', 'utbildningen', 'körkort');
-  
-  // Endast om det är en tid-fråga OM utbildning
-  if (isTimeQuery && isUtbildningQuery) {
-    let chunks = [];
-    
-    // Välj basfakta baserat på fordon
-    if (slots.vehicle === 'LASTBIL' || this.qHas(queryLower, 'lastbil', 'c-körkort', 'ce')) {
-      chunks = this.findBasfaktaBySource('basfakta_lastbil_c_ce_c1_c1e.json');
-    } else if (slots.vehicle === 'MC' || this.qHas(queryLower, 'mc', 'motorcykel')) {
-      chunks = this.findBasfaktaBySource('basfakta_mc_lektioner_utbildning.json');
-    } else if (slots.vehicle === 'AM' || this.qHas(queryLower, 'moped', 'am')) {
-      chunks = this.findBasfaktaBySource('basfakta_am_kort_och_kurser.json');
-    } else {
-      // Bil som fallback
-      chunks = this.findBasfaktaBySource('basfakta_lektioner_paket_bil.json');
-    }
-    
-    if (chunks.length > 0) {
-      // Hög prioritet för att slå ut pris-chunks
-      const count = this.addChunks(chunks, 17000, true);
-      console.log(`[FIX-UTBILDNINGSTID] Lade till ${count} chunks för utbildningstid (score: 17000)`);
-      return count;
-    }
-  }
-  return 0;
+const isTimeQuery = this.qHas(queryLower, 'hur lång tid', 'hur länge tar', 'tid tar', 'duration', 'hur många timmar');
+const isUtbildningQuery = this.qHas(queryLower, 'utbildning', 'kurs', 'utbildningen', 'körkort');
+
+// Endast om det är en tid-fråga OM utbildning
+if (isTimeQuery && isUtbildningQuery) {
+let chunks = [];
+
+// Välj basfakta baserat på fordon
+if (slots.vehicle === 'LASTBIL' || this.qHas(queryLower, 'lastbil', 'c-körkort', 'ce')) {
+chunks = this.findBasfaktaBySource('basfakta_lastbil_c_ce_c1_c1e.json');
+} else if (slots.vehicle === 'MC' || this.qHas(queryLower, 'mc', 'motorcykel')) {
+chunks = this.findBasfaktaBySource('basfakta_mc_lektioner_utbildning.json');
+} else if (slots.vehicle === 'AM' || this.qHas(queryLower, 'moped', 'am')) {
+chunks = this.findBasfaktaBySource('basfakta_am_kort_och_kurser.json');
+} else {
+// Bil som fallback
+chunks = this.findBasfaktaBySource('basfakta_lektioner_paket_bil.json');
+}
+
+if (chunks.length > 0) {
+// Hög prioritet för att slå ut pris-chunks
+const count = this.addChunks(chunks, 17000, true);
+// console.log(`[FIX-UTBILDNINGSTID] Lade till ${count} chunks för utbildningstid (score: 17000)`);
+return count;
+}
+}
+return 0;
 }
 
 // Utbildningskontroll (Steg 8)
@@ -708,7 +708,7 @@ c.source && c.source.includes('basfakta_om_foretaget.json') &&
 if (metaChunks.length > 0) {
 totalAdded += this.addChunks(metaChunks, 18000, true);
 if (highConfCount++ < 2) this.forceHighConfidence = true;
-console.log(`[META-PRIS] Lade till ${metaChunks.length} meta-prischunks (score: 18000)`);
+// console.log(`[META-PRIS] Lade till ${metaChunks.length} meta-prischunks (score: 18000)`);
 }
 }
 
@@ -724,7 +724,7 @@ return isBasfakta && hasSource && hasTitle;
 if (fakturaChunks.length > 0) {
 totalAdded += this.addChunks(fakturaChunks, 85000, true);
 if (highConfCount++ < 2) this.forceHighConfidence = true;
-console.log(`[FAKTURAADRESS-GENERELL] Lade till ${fakturaChunks.length} chunks (score: 85000)`);
+// console.log(`[FAKTURAADRESS-GENERELL] Lade till ${fakturaChunks.length} chunks (score: 85000)`);
 } else {
 const allCompanyChunks = this.findBasfaktaBySource('basfakta_om_foretaget.json');
 totalAdded += this.addChunks(allCompanyChunks, 18000, true);
@@ -733,40 +733,40 @@ totalAdded += this.addChunks(allCompanyChunks, 18000, true);
 
 // 1c. HANDLEDARUTBILDNING
 if (this.qHas(queryLower, 'handledar', 'introduktionskurs', 'handledarkurs', 'kostar handledarbevis') ||
-    (this.qHas(queryLower, 'hur lång tid', 'hur lång är') &&
-     this.qHas(queryLower, 'handledar', 'introduktionskurs', 'handledarkurs'))) {
-  const handledarChunks = this.allChunks.filter(c => 
-    this.isBasfakta(c) && 
-    c.source && 
-    c.source.includes('basfakta_introduktionskurs_handledarkurs_bil.json')
-  );
+(this.qHas(queryLower, 'hur lång tid', 'hur lång är') &&
+this.qHas(queryLower, 'handledar', 'introduktionskurs', 'handledarkurs'))) {
+const handledarChunks = this.allChunks.filter(c => 
+this.isBasfakta(c) && 
+c.source && 
+c.source.includes('basfakta_introduktionskurs_handledarkurs_bil.json')
+);
 
-  if (handledarChunks.length > 0) {
-    totalAdded += this.addChunks(handledarChunks, 22000, true);
-    if (highConfCount++ < 2) this.forceHighConfidence = true;
-    console.log(`[HANDLEDAR-GENERELL] Lade till ${handledarChunks.length} chunks (score: 22000)`);
-  }
+if (handledarChunks.length > 0) {
+totalAdded += this.addChunks(handledarChunks, 22000, true);
+if (highConfCount++ < 2) this.forceHighConfidence = true;
+// console.log(`[HANDLEDAR-GENERELL] Lade till ${handledarChunks.length} chunks (score: 22000)`);
+}
 }
 
 // 1d. ÖVNINGSKÖRNING ÅLDER (<16 / FÖRBEREDA SIG)
 if (this.qHas(queryLower, 'fyller 16', 'under 16', 'innan 16', 'förbereda sig') ||
-    (this.qHas(queryLower, 'övningsköra') && this.qHas(queryLower, 'månader', 'snart', 'fylla'))) {
+(this.qHas(queryLower, 'övningsköra') && this.qHas(queryLower, 'månader', 'snart', 'fylla'))) {
 const chunks = this.findBasfaktaBySource('basfakta_personbil_b.json');
 if (chunks.length > 0) {
 totalAdded += this.addChunks(chunks, 85000, true);
 if (highConfCount++ < 2) this.forceHighConfidence = true;
-console.log(`[ÅLD-ÖVNINGSKÖR] Lade till ${chunks.length} chunks för övningskörning <16 (score: 85000)`);
+// console.log(`[ÅLD-ÖVNINGSKÖR] Lade till ${chunks.length} chunks för övningskörning <16 (score: 85000)`);
 }
 }
 
 // 1e. HAR HAFT KÖRKORT X ÅR → HANDLEDARE
 if (this.qHas(queryLower, 'haft körkort', 'har körkort i', 'kört bil i') &&
-    this.qReg(queryLower, /\d+\s*år/)) {
+this.qReg(queryLower, /\d+\s*år/)) {
 const chunks = this.findBasfaktaBySource('basfakta_introduktionskurs_handledarkurs_bil.json');
 if (chunks.length > 0) {
 totalAdded += this.addChunks(chunks, 85000, true);
 if (highConfCount++ < 2) this.forceHighConfidence = true;
-console.log(`[HANDLEDAR-KÖRKORTSÅR] Lade till ${chunks.length} chunks (score: 85000)`);
+// console.log(`[HANDLEDAR-KÖRKORTSÅR] Lade till ${chunks.length} chunks (score: 85000)`);
 }
 }
 
@@ -800,11 +800,11 @@ totalAdded += this.addChunks(this.findBasfaktaBySource('basfakta_goteborg_banpla
 if (highConfCount++ < 2) this.forceHighConfidence = true;
 }
 
-console.log(`\n${'='.repeat(60)}`);
-console.log(`[FORCE-ADD ENGINE v${this.version}] Kör regler...`);
-console.log(`Query: "${queryLower.slice(0, 80)}..."`);
-console.log(`Intent: ${intentResult.intent}, Fordon: ${intentResult.slots.vehicle || 'N/A'}`);
-console.log(`${'='.repeat(60)}`);
+// console.log(`\n${'='.repeat(60)}`);
+// console.log(`[FORCE-ADD ENGINE v${this.version}] Kör regler...`);
+// console.log(`Query: "${queryLower.slice(0, 80)}..."`);
+// console.log(`Intent: ${intentResult.intent}, Fordon: ${intentResult.slots.vehicle || 'N/A'}`);
+// console.log(`${'='.repeat(60)}`);
 
 // --- 1. BASFAKTA PRECISIONS-FIXAR ---
 // Dessa körs först för att fånga upp specifika sökord innan intent-regler
@@ -828,18 +828,18 @@ return { mustAddChunks: [], forceHighConfidence: false };
 
 // Tvinga in körkortstillstånd + handledare vid legala frågor om återkallelse
 if (intent === 'legal_query') {
-  totalAdded += this.addChunks(
-    this.findBasfaktaBySource('basfakta_korkortstillstand.json'),
-    15000, true
-  );
-  const handledarChunks = this.allChunks.filter(c =>
-    this.isBasfakta(c) &&
-    c.source &&
-    c.source.includes('basfakta_introduktionskurs_handledarkurs_bil.json')
-  );
-  totalAdded += this.addChunks(handledarChunks, 12000, false);
-  this.forceHighConfidence = true;
-  console.log(`[LEGAL-QUERY] Körkortstillstånd + handledar-chunks inladdade`);
+totalAdded += this.addChunks(
+this.findBasfaktaBySource('basfakta_korkortstillstand.json'),
+15000, true
+);
+const handledarChunks = this.allChunks.filter(c =>
+this.isBasfakta(c) &&
+c.source &&
+c.source.includes('basfakta_introduktionskurs_handledarkurs_bil.json')
+);
+totalAdded += this.addChunks(handledarChunks, 12000, false);
+this.forceHighConfidence = true;
+// console.log(`[LEGAL-QUERY] Körkortstillstånd + handledar-chunks inladdade`);
 }
 
 // Tvinga in testlektion vid sökning
@@ -878,9 +878,9 @@ totalAdded += this.rule_C1c_RiskGeneric(queryLower, intent, slots);
 totalAdded += this.rule_C7_TeoriAppen(queryLower, intent, slots);
 totalAdded += this.rule_C8_Kontakt(queryLower, intent, slots, lockedCity);
 
-console.log(`\n[FORCE-ADD] Totalt: ${totalAdded} unika chunks tillagda`);
-console.log(`[FORCE-ADD] forceHighConfidence: ${this.forceHighConfidence}`);
-console.log(`${'='.repeat(60)}\n`);
+// console.log(`\n[FORCE-ADD] Totalt: ${totalAdded} unika chunks tillagda`);
+// console.log(`[FORCE-ADD] forceHighConfidence: ${this.forceHighConfidence}`);
+// console.log(`${'='.repeat(60)}\n`);
 
 return {
 mustAddChunks: this.mustAddChunks,

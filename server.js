@@ -146,19 +146,19 @@ db.run("INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE S
 }
 
 async function loadEmailBlocklist() {
-  return new Promise((resolve) => {
-    db.all("SELECT id, pattern, type, added_by FROM email_blocklist ORDER BY created_at DESC", [], (err, rows) => {
-      if (err) {
-        console.warn(`⚠️ [Blocklist] Kunde inte läsa (${err.message}) — startar med tom lista`);
-        emailBlocklist = [];
-        resolve();
-        return;
-      }
-      emailBlocklist = rows || [];
-      console.log(`✅ [Blocklist] ${emailBlocklist.length} poster inlästa`);
-      resolve();
-    });
-  });
+return new Promise((resolve) => {
+db.all("SELECT id, pattern, type, added_by FROM email_blocklist ORDER BY created_at DESC", [], (err, rows) => {
+if (err) {
+console.warn(`⚠️ [Blocklist] Kunde inte läsa (${err.message}) — startar med tom lista`);
+emailBlocklist = [];
+resolve();
+return;
+}
+emailBlocklist = rows || [];
+console.log(`✅ [Blocklist] ${emailBlocklist.length} poster inlästa`);
+resolve();
+});
+});
 }
 
 async function loadOperationSettings() {
@@ -275,45 +275,45 @@ console.error('[AUTO-SUBJECT] Fel:', err.message);
 // 🔁 TS-FALLBACK — Körs när RAG inte hittar svar
 // ==================================================
 async function runTsFallback({ query, responseText, result, v2State }) {
-  const tsMissPatterns = [
-    'hittar ingen information',
-    'har tyvärr inte den informationen',
-    'saknar den informationen',
-    'har tyvärr ingen information',
-    'ingen information om',
-    'inte ge information om',
-    'kan tyvärr inte',
-    'utanför mitt specialområde'
-  ];
-  if (!aiEnabled || !tsMissPatterns.some(p => responseText.toLowerCase().includes(p))) {
-    return responseText;
-  }
-  const sessionTypeForLog = v2State?.session_type || 'unknown';
-  let tsSucceeded = 0;
-  let tsUrlUsed = null;
-  try {
-    const { tryTransportstyrelseFallback, classifyRegulatoryTopic } =
-      require('./utils/transportstyrelsen-fallback');
-    tsUrlUsed = classifyRegulatoryTopic(query);
-    const tsAnswer = await tryTransportstyrelseFallback(query);
-    if (tsAnswer) {
-      tsSucceeded = 1;
-      responseText = tsAnswer;
-      if (typeof result.response_payload === 'string') {
-        result.response_payload = tsAnswer;
-      } else if (result.response_payload) {
-        result.response_payload.answer = tsAnswer;
-      }
-    }
-  } catch (tsErr) {
-    console.warn('[TS-Fallback] Fel:', tsErr.message);
-  }
-  db.run(
-    `INSERT INTO rag_failures (query, session_type, ts_fallback_used, ts_fallback_success, ts_url) VALUES (?, ?, ?, ?, ?)`,
-    [query, sessionTypeForLog, tsUrlUsed ? 1 : 0, tsSucceeded, tsUrlUsed],
-    (err) => { if (err) console.warn('[RAG-Log] DB-fel:', err.message); }
-  );
-  return responseText;
+const tsMissPatterns = [
+'hittar ingen information',
+'har tyvärr inte den informationen',
+'saknar den informationen',
+'har tyvärr ingen information',
+'ingen information om',
+'inte ge information om',
+'kan tyvärr inte',
+'utanför mitt specialområde'
+];
+if (!aiEnabled || !tsMissPatterns.some(p => responseText.toLowerCase().includes(p))) {
+return responseText;
+}
+const sessionTypeForLog = v2State?.session_type || 'unknown';
+let tsSucceeded = 0;
+let tsUrlUsed = null;
+try {
+const { tryTransportstyrelseFallback, classifyRegulatoryTopic } =
+require('./utils/transportstyrelsen-fallback');
+tsUrlUsed = classifyRegulatoryTopic(query);
+const tsAnswer = await tryTransportstyrelseFallback(query);
+if (tsAnswer) {
+tsSucceeded = 1;
+responseText = tsAnswer;
+if (typeof result.response_payload === 'string') {
+result.response_payload = tsAnswer;
+} else if (result.response_payload) {
+result.response_payload.answer = tsAnswer;
+}
+}
+} catch (tsErr) {
+console.warn('[TS-Fallback] Fel:', tsErr.message);
+}
+db.run(
+`INSERT INTO rag_failures (query, session_type, ts_fallback_used, ts_fallback_success, ts_url) VALUES (?, ?, ?, ?, ?)`,
+[query, sessionTypeForLog, tsUrlUsed ? 1 : 0, tsSucceeded, tsUrlUsed],
+(err) => { if (err) console.warn('[RAG-Log] DB-fel:', err.message); }
+);
+return responseText;
 }
 
 // ==================================================
@@ -596,27 +596,27 @@ allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning']
 // =============================================================================
 // Kundchatt AI (anropar OpenAI) — max 30 meddelanden/minut per IP
 app.use('/api/customer/message', rateLimit({
-  windowMs: 60 * 1000,
-  max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'För många meddelanden. Vänta en stund och försök igen.' }
+windowMs: 60 * 1000,
+max: 30,
+standardHeaders: true,
+legacyHeaders: false,
+message: { error: 'För många meddelanden. Vänta en stund och försök igen.' }
 }));
 // Formulärärenden — max 5 per 15 min per IP (stoppar skräppost)
 app.use('/api/customer/message-form', rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'För många inskickade formulär. Försök igen om en stund.' }
+windowMs: 15 * 60 * 1000,
+max: 5,
+standardHeaders: true,
+legacyHeaders: false,
+message: { error: 'För många inskickade formulär. Försök igen om en stund.' }
 }));
 // Filuppladdning — max 20 per timme per IP
 app.use('/api/upload', rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'För många uppladdningar. Försök igen om en stund.' }
+windowMs: 60 * 60 * 1000,
+max: 20,
+standardHeaders: true,
+legacyHeaders: false,
+message: { error: 'För många uppladdningar. Försök igen om en stund.' }
 }));
 
 // Request Logger Middleware
@@ -653,21 +653,21 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Publik endpoint för mail-bilder — serverar bara filer kopplade till mailärenden
 // eller ännu ej patchade (conversation_id = 'unknown'). Alla andra nekas med 403.
 app.get('/api/public/uploads/:filename', (req, res) => {
-  const { filename } = req.params;
-  db.get(
-    `SELECT uf.filepath
-     FROM uploaded_files uf
-     LEFT JOIN chat_v2_state cv ON uf.conversation_id = cv.conversation_id
-     WHERE uf.filename = ? AND (
-       cv.session_type = 'message'
-       OR uf.conversation_id = 'unknown'
-     )`,
-    [filename],
-    (err, row) => {
-      if (err || !row) return res.status(403).send('Åtkomst nekad');
-      res.sendFile(path.resolve(row.filepath));
-    }
-  );
+const { filename } = req.params;
+db.get(
+`SELECT uf.filepath
+FROM uploaded_files uf
+LEFT JOIN chat_v2_state cv ON uf.conversation_id = cv.conversation_id
+WHERE uf.filename = ? AND (
+cv.session_type = 'message'
+OR uf.conversation_id = 'unknown'
+)`,
+[filename],
+(err, row) => {
+if (err || !row) return res.status(403).send('Åtkomst nekad');
+res.sendFile(path.resolve(row.filepath));
+}
+);
 });
 
 // 1. Servera kundchatten från Atlas-roten (ngrok-adress/kundchatt)
@@ -690,18 +690,18 @@ console.log("📁 Skapade saknad mapp: /uploads");
 }
 
 const ALLOWED_MIME_TYPES = [
-  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'text/plain'
+'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+'application/pdf',
+'application/msword',
+'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+'application/vnd.ms-excel',
+'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+'text/plain'
 ];
 
 const ALLOWED_EXTENSIONS = [
-  '.jpg', '.jpeg', '.png', '.gif', '.webp',
-  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt'
+'.jpg', '.jpeg', '.png', '.gif', '.webp',
+'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt'
 ];
 
 const storage = multer.diskStorage({
@@ -719,14 +719,14 @@ const upload = multer({
 storage: storage,
 limits: { fileSize: 10 * 1024 * 1024 }, // Max 10 MB per fil
 fileFilter: (req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  const mimeOk = ALLOWED_MIME_TYPES.includes(file.mimetype);
-  const extOk  = ALLOWED_EXTENSIONS.includes(ext);
-  if (mimeOk && extOk) {
-    cb(null, true);
-  } else {
-    cb(new Error(`Filtypen är inte tillåten: ${file.mimetype}`), false);
-  }
+const ext = path.extname(file.originalname).toLowerCase();
+const mimeOk = ALLOWED_MIME_TYPES.includes(file.mimetype);
+const extOk  = ALLOWED_EXTENSIONS.includes(ext);
+if (mimeOk && extOk) {
+cb(null, true);
+} else {
+cb(new Error(`Filtypen är inte tillåten: ${file.mimetype}`), false);
+}
 }
 });
 
@@ -752,20 +752,20 @@ originalName: req.file.originalname
 
 // Logga filen i DB för TTL-rensning (sker efter svaret)
 const ttlRow = await new Promise(r =>
-  db.get("SELECT value FROM settings WHERE key='upload_ttl_days'", r)
+db.get("SELECT value FROM settings WHERE key='upload_ttl_days'", r)
 );
 const ttlDays = parseInt(ttlRow?.value || '90', 10);
 const conversationId = req.body?.session_id || req.body?.conversation_id || 'unknown';
 const isInternal = conversationId.startsWith('INTERNAL_') ||
-                   (req.body?.is_internal === 'true');
+(req.body?.is_internal === 'true');
 const ttlDaysEffective = isInternal ? 1 : ttlDays;
 const expiresAt = Math.floor(Date.now() / 1000) + (ttlDaysEffective * 86400);
 db.run(
-  `INSERT INTO uploaded_files
-   (conversation_id, filename, original_name, filepath, expires_at)
-   VALUES (?, ?, ?, ?, ?)`,
-  [conversationId, req.file.filename, req.file.originalname, req.file.path, expiresAt],
-  (err) => { if (err) console.warn('[Upload] DB-loggfel:', err.message); }
+`INSERT INTO uploaded_files
+(conversation_id, filename, original_name, filepath, expires_at)
+VALUES (?, ?, ?, ?, ?)`,
+[conversationId, req.file.filename, req.file.originalname, req.file.path, expiresAt],
+(err) => { if (err) console.warn('[Upload] DB-loggfel:', err.message); }
 );
 
 } catch (err) {
@@ -776,37 +776,37 @@ res.status(500).json({ error: 'Kunde inte spara filen' });
 
 // Patch-endpoint: koppla en uppladdad fil till rätt ärende i efterhand
 app.post('/api/upload/patch-conversation', authenticateToken, (req, res) => {
-  const { filename, conversation_id } = req.body;
-  if (!filename || !conversation_id) {
-    return res.status(400).json({ error: 'filename och conversation_id krävs' });
-  }
-  db.run(
-    `UPDATE uploaded_files SET conversation_id = ?
-     WHERE filename = ? AND conversation_id = 'unknown'`,
-    [conversation_id, filename],
-    function(err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ success: true, updated: this.changes });
-      // Sätt 365 dagars TTL för filer nu kopplade till mailärende
-      db.run(
-        `UPDATE uploaded_files SET expires_at = ?
-         WHERE filename = ?
-         AND conversation_id IN (
-           SELECT conversation_id FROM chat_v2_state WHERE session_type = 'message'
-         )`,
-        [Math.floor(Date.now() / 1000) + (365 * 86400), filename],
-        () => {}
-      );
-    }
-  );
+const { filename, conversation_id } = req.body;
+if (!filename || !conversation_id) {
+return res.status(400).json({ error: 'filename och conversation_id krävs' });
+}
+db.run(
+`UPDATE uploaded_files SET conversation_id = ?
+WHERE filename = ? AND conversation_id = 'unknown'`,
+[conversation_id, filename],
+function(err) {
+if (err) return res.status(500).json({ error: err.message });
+res.json({ success: true, updated: this.changes });
+// Sätt 365 dagars TTL för filer nu kopplade till mailärende
+db.run(
+`UPDATE uploaded_files SET expires_at = ?
+WHERE filename = ?
+AND conversation_id IN (
+SELECT conversation_id FROM chat_v2_state WHERE session_type = 'message'
+)`,
+[Math.floor(Date.now() / 1000) + (365 * 86400), filename],
+() => {}
+);
+}
+);
 });
 
 // Felhantering för multer-fel (t.ex. otillåten filtyp)
 app.use((err, req, res, next) => {
-  if (err && err.message && err.message.startsWith('Filtypen är inte')) {
-    return res.status(415).json({ error: err.message });
-  }
-  next(err);
+if (err && err.message && err.message.startsWith('Filtypen är inte')) {
+return res.status(415).json({ error: err.message });
+}
+next(err);
 });
 
 // 4. FIX FÖR REACT 404: Tvinga alla undersidor i kundchatt till dess index.html
@@ -816,14 +816,14 @@ res.sendFile(path.join(__dirname, 'kundchatt', 'index.html'));
 
 // 5b. Widget — servera widget.js med explicit Content-Type
 app.get('/widget.js', (req, res) => {
-  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, max-age=3600');
-  res.sendFile(path.join(__dirname, 'widget.js'));
+res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+res.setHeader('Cache-Control', 'public, max-age=3600');
+res.sendFile(path.join(__dirname, 'widget.js'));
 });
 
 // 5c. Demo-sida för widget-presentation
 app.get('/demo', (req, res) => {
-  res.sendFile(path.join(__dirname, 'demo.html'));
+res.sendFile(path.join(__dirname, 'demo.html'));
 });
 
 // 5. Standard-route för Admin
@@ -974,7 +974,7 @@ socket.to(sessionId).emit('client:agent_typing', { sessionId, agentName });
 // 💬 CLIENT:MESSAGE - HUVUDHANTERARE FÖR CHATT
 // ==================================================================
 socket.on('client:message', async (payload) => {
-console.log(`[SOCKET] Message from ${socket.id}:`, payload.query);
+// console.log(`[SOCKET] Message from ${socket.id}:`, payload.query);
 
 try {
 // 🔥 STEG 1: PLOCKA UT DATA (INKLUSIVE CONTEXT/NAMN)
@@ -1195,11 +1195,11 @@ db.run(
 );
 });
 
-console.log("📤 [SOCKET] Skickar svar till klient:", {
-answer_length: responseText.length,
-sessionId: sessionId,
-has_locked_context: !!contextData.locked_context
-});
+// console.log("📤 [SOCKET] Skickar svar till klient:", {
+//answer_length: responseText.length,
+//sessionId: sessionId,
+//has_locked_context: !!contextData.locked_context
+//});
 
 socket.emit('server:answer', {
 answer: responseText,
@@ -1847,7 +1847,7 @@ const messages = await connection.search(searchCriteria, fetchOptions);
 
 // Logga bara om det finns nya mail att hantera
 if (messages.length > 0) {
-console.log(`📬 Hittade ${messages.length} olästa mail`);
+// console.log(`📬 Hittade ${messages.length} olästa mail`);
 }
 
 for (const item of messages) {
@@ -1863,7 +1863,7 @@ const subject = headerPart.body.subject ? headerPart.body.subject[0] : "(Inget �
 const fromRaw = headerPart.body.from ? headerPart.body.from[0] : "";
 const messageId = headerPart.body['message-id'] ? headerPart.body['message-id'][0] : null;
 
-console.log(`📧 Läser mail: "${subject}" från ${fromRaw}`);
+// console.log(`📧 Läser mail: "${subject}" från ${fromRaw}`);
 
 // 🔥 SPÄRR 1: EKO-SKYDD (Ignorera mail från oss själva)
 const myEmail = process.env.EMAIL_USER.toLowerCase();
@@ -1875,17 +1875,17 @@ continue;
 
 // 🔥 SPÄRR 2: BLOCKLIST (Spam/Reklam-filter)
 {
-  const _bEmail = (fromRaw.match(/<([^>]+)>/)?.[1] || fromRaw).toLowerCase().trim();
-  const _bDomain = _bEmail.split('@')[1] || '';
-  const _isBlocked = emailBlocklist.some(b => {
-    const _p = b.pattern.toLowerCase().replace(/^@/, '');
-    return b.type === 'domain' ? _bDomain === _p : _bEmail === _p;
-  });
-  if (_isBlocked) {
-    console.log(`🚫 [BLOCKLIST] Ignorerar mail från blockerad avsändare: ${_bEmail}`);
-    await connection.addFlags(item.attributes.uid, '\\Seen');
-    continue;
-  }
+const _bEmail = (fromRaw.match(/<([^>]+)>/)?.[1] || fromRaw).toLowerCase().trim();
+const _bDomain = _bEmail.split('@')[1] || '';
+const _isBlocked = emailBlocklist.some(b => {
+const _p = b.pattern.toLowerCase().replace(/^@/, '');
+return b.type === 'domain' ? _bDomain === _p : _bEmail === _p;
+});
+if (_isBlocked) {
+console.log(`🚫 [BLOCKLIST] Ignorerar mail från blockerad avsändare: ${_bEmail}`);
+await connection.addFlags(item.attributes.uid, '\\Seen');
+continue;
+}
 }
 
 // 🔥 FIX 6: FÖRBÄTTRAD ÄRENDE-ID MATCHNING
@@ -2005,61 +2005,61 @@ const parsed = await simpleParser(fullBodyPart.body);
 
 // Extrahera och spara bilagor från inkommande mail
 if (parsed.attachments && parsed.attachments.length > 0) {
-  const allowedMimes = [
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'text/plain'
-  ];
-  for (const attachment of parsed.attachments) {
-    if (!allowedMimes.includes(attachment.contentType)) continue;
-    if (attachment.size > 10 * 1024 * 1024) continue; // Max 10MB
-    try {
-      const uniqueName = `${Date.now()}_${Math.round(Math.random() * 1E9)}${path.extname(attachment.filename || 'file')}`;
-      const filePath = path.join(uploadDir, uniqueName);
-      fs.writeFileSync(filePath, attachment.content);
-      const expiresAt = Math.floor(Date.now() / 1000) + (365 * 86400);
-      db.run(
-        `INSERT INTO uploaded_files
-         (conversation_id, filename, original_name, filepath, expires_at)
-         VALUES (?, ?, ?, ?, ?)`,
-        [conversationId, uniqueName, attachment.filename || uniqueName, filePath, expiresAt],
-        (err) => { if (err) console.warn('[IMAP-Attach] DB-fel:', err.message); }
-      );
-      const isImage = attachment.contentType.startsWith('image/');
-      const publicUrl = `/api/public/uploads/${uniqueName}`;
-      if (attachment.cid) cidMap[attachment.cid] = publicUrl; // Registrera CID-mapping
-      if (isImage) {
-        attachmentMarkdown.push(`![${attachment.filename || 'Bild'}](${publicUrl})`);
-      } else {
-        attachmentMarkdown.push(`📎 [Fil: ${attachment.filename || uniqueName}](${publicUrl})`);
-      }
-      console.log(`[IMAP-Attach] Sparad: ${attachment.filename} -> ${uniqueName}`);
-    } catch (attachErr) {
-      console.warn('[IMAP-Attach] Kunde inte spara bilaga:', attachErr.message);
-    }
-  }
+const allowedMimes = [
+'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+'application/pdf',
+'application/msword',
+'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+'application/vnd.ms-excel',
+'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+'text/plain'
+];
+for (const attachment of parsed.attachments) {
+if (!allowedMimes.includes(attachment.contentType)) continue;
+if (attachment.size > 10 * 1024 * 1024) continue; // Max 10MB
+try {
+const uniqueName = `${Date.now()}_${Math.round(Math.random() * 1E9)}${path.extname(attachment.filename || 'file')}`;
+const filePath = path.join(uploadDir, uniqueName);
+fs.writeFileSync(filePath, attachment.content);
+const expiresAt = Math.floor(Date.now() / 1000) + (365 * 86400);
+db.run(
+`INSERT INTO uploaded_files
+(conversation_id, filename, original_name, filepath, expires_at)
+VALUES (?, ?, ?, ?, ?)`,
+[conversationId, uniqueName, attachment.filename || uniqueName, filePath, expiresAt],
+(err) => { if (err) console.warn('[IMAP-Attach] DB-fel:', err.message); }
+);
+const isImage = attachment.contentType.startsWith('image/');
+const publicUrl = `/api/public/uploads/${uniqueName}`;
+if (attachment.cid) cidMap[attachment.cid] = publicUrl; // Registrera CID-mapping
+if (isImage) {
+attachmentMarkdown.push(`![${attachment.filename || 'Bild'}](${publicUrl})`);
+} else {
+attachmentMarkdown.push(`📎 [Fil: ${attachment.filename || uniqueName}](${publicUrl})`);
+}
+console.log(`[IMAP-Attach] Sparad: ${attachment.filename} -> ${uniqueName}`);
+} catch (attachErr) {
+console.warn('[IMAP-Attach] Kunde inte spara bilaga:', attachErr.message);
+}
+}
 }
 
 // Hämta text i första hand; om enbart HTML, ersätt CID-refs och rensa taggar
 if (parsed.text) {
-  mailContent = parsed.text;
-  // Rensa inbäddade CID-refs och Intercom/mailklient inline-bildmarkeringar
-  // [Image "filename.png? ..."] kan spänna flera rader p.g.a. URL-kodade \n (%0A)
-  mailContent = mailContent
-    .replace(/\[cid:[^\]]+\]/gi, '')
-    .replace(/\[Image\s+"[\s\S]*?"\]/gi, '')
-    .trim();
+mailContent = parsed.text;
+// Rensa inbäddade CID-refs och Intercom/mailklient inline-bildmarkeringar
+// [Image "filename.png? ..."] kan spänna flera rader p.g.a. URL-kodade \n (%0A)
+mailContent = mailContent
+.replace(/\[cid:[^\]]+\]/gi, '')
+.replace(/\[Image\s+"[\s\S]*?"\]/gi, '')
+.trim();
 } else if (parsed.html) {
-  let htmlContent = parsed.html;
-  // Ersätt cid:xxxx med sparade publika URL:er (inline-bilder i Outlook m.fl.)
-  for (const [cid, url] of Object.entries(cidMap)) {
-    htmlContent = htmlContent.replace(new RegExp(`cid:${cid.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'), url);
-  }
-  mailContent = htmlContent.replace(/<[^>]*>?/gm, '');
+let htmlContent = parsed.html;
+// Ersätt cid:xxxx med sparade publika URL:er (inline-bilder i Outlook m.fl.)
+for (const [cid, url] of Object.entries(cidMap)) {
+htmlContent = htmlContent.replace(new RegExp(`cid:${cid.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'), url);
+}
+mailContent = htmlContent.replace(/<[^>]*>?/gm, '');
 }
 }
 } catch (parseErr) {
@@ -2068,38 +2068,38 @@ console.error(`⚠️ Parser-fel: ${parseErr.message}`);
 
 // Rensa bort gamla citat — rad-för-rad, stanna vid citatmarkör
 const quoteStopPatterns = [
-  /^On .+ wrote:?$/i,
-  /^Den .+ skrev:?$/i,
-  /^-----Original Message-----/i,
-  /^Från:/i,
-  /^From:/i,
-  /^_{10,}/,
+/^On .+ wrote:?$/i,
+/^Den .+ skrev:?$/i,
+/^-----Original Message-----/i,
+/^Från:/i,
+/^From:/i,
+/^_{10,}/,
 ];
 const cleanLines = [];
 for (const line of mailContent.split('\n')) {
-  const trimmed = line.trim();
-  if (trimmed.startsWith('>')) break;
-  if (quoteStopPatterns.some(p => p.test(trimmed))) break;
-  // Ta bort Brevo/Sendinblue spårningslänkar
-  const cleaned = trimmed
-    .replace(/\[https?:\/\/[^\]]+(?:brevo|sendinblue|sendibt)[^\]]*\]/gi, '')
-    .replace(/https?:\/\/\S+(?:brevo|sendinblue|sendibt)\S*/gi, '');
-  cleanLines.push(cleaned);
+const trimmed = line.trim();
+if (trimmed.startsWith('>')) break;
+if (quoteStopPatterns.some(p => p.test(trimmed))) break;
+// Ta bort Brevo/Sendinblue spårningslänkar
+const cleaned = trimmed
+.replace(/\[https?:\/\/[^\]]+(?:brevo|sendinblue|sendibt)[^\]]*\]/gi, '')
+.replace(/https?:\/\/\S+(?:brevo|sendinblue|sendibt)\S*/gi, '');
+cleanLines.push(cleaned);
 }
 let cleanMessage = cleanLines.join('\n').trim();
 // Lägg till bilagemärkten om det finns bilagor från mailet
 const fullContent = attachmentMarkdown.length > 0
-  ? cleanMessage + '\n\n' + attachmentMarkdown.join('\n')
-  : cleanMessage;
+? cleanMessage + '\n\n' + attachmentMarkdown.join('\n')
+: cleanMessage;
 
 // Preview för ärendekortet — meningsfullt även för bilagors-only-mail
 const previewContent = cleanMessage.trim()
-  ? fullContent
-  : (attachmentMarkdown.length === 1 && attachmentMarkdown[0].startsWith('![')
-    ? '📷 Bild'
-    : attachmentMarkdown.length > 0
-      ? `📎 ${attachmentMarkdown.length} bilaga(or)`
-      : fullContent);
+? fullContent
+: (attachmentMarkdown.length === 1 && attachmentMarkdown[0].startsWith('![')
+? '📷 Bild'
+: attachmentMarkdown.length > 0
+? `📎 ${attachmentMarkdown.length} bilaga(or)`
+: fullContent);
 
 // FIX: Om städningen raderade allt (Outlook-bugg), använd originaltexten
 if (cleanMessage.length < 2 && mailContent.length > 5) {
@@ -2109,10 +2109,10 @@ cleanMessage = mailContent.trim();
 
 // 🔥 SPÄRR 2: TOM-SKYDD (tillåt bilagemail utan text)
 if ((!cleanMessage || cleanMessage.length < 2) &&
-    attachmentMarkdown.length === 0) {
-  console.warn(`⚠️ Tomt innehåll för ${conversationId}. Sparar EJ.`);
-  await connection.addFlags(item.attributes.uid, '\\Seen');
-  continue;
+attachmentMarkdown.length === 0) {
+console.warn(`⚠️ Tomt innehåll för ${conversationId}. Sparar EJ.`);
+await connection.addFlags(item.attributes.uid, '\\Seen');
+continue;
 }
 
 console.log(`🎯 MATCH! Kundsvar till ärende: ${conversationId}`);
@@ -2234,7 +2234,7 @@ AND s.updated_at IS NOT NULL`,
 });
 
 if (activeRows.length > 0) {
-console.log(`🕒 [INACTIVITY] ${activeRows.length} aktiv AI-session(er) bevakas.`);
+// console.log(`🕒 [INACTIVITY] ${activeRows.length} aktiv AI-session(er) bevakas.`);
 }
 
 for (const row of activeRows) {
@@ -2390,22 +2390,22 @@ const dst = path.join(dir, `atlas_${ts}.db`);
 
 // VACUUM INTO skapar en konsistent kopia inkl. WAL-checkpoint (säkrare än copyFileSync)
 db.run(`VACUUM INTO '${dst}'`, (err) => {
-  if (err) { console.error('❌ [Backup] Fel:', err.message); return; }
-  console.log(`✅ [Backup] atlas.db → ${dst}`);
+if (err) { console.error('❌ [Backup] Fel:', err.message); return; }
+console.log(`✅ [Backup] atlas.db → ${dst}`);
 
-  // Behåll max 14 senaste backuper (7 dagar × 2/dag), radera äldre
-  try {
-    const files = fs.readdirSync(dir)
-      .filter(f => f.startsWith('atlas_') && f.endsWith('.db'))
-      .map(f => ({ name: f, time: fs.statSync(path.join(dir, f)).mtimeMs }))
-      .sort((a, b) => b.time - a.time);
-    files.slice(14).forEach(f => {
-      fs.unlinkSync(path.join(dir, f.name));
-      console.log(`🗑️ [Backup] Raderade gammal backup: ${f.name}`);
-    });
-  } catch (cleanErr) {
-    console.error('⚠️ [Backup] Rensning misslyckades:', cleanErr.message);
-  }
+// Behåll max 14 senaste backuper (7 dagar × 2/dag), radera äldre
+try {
+const files = fs.readdirSync(dir)
+.filter(f => f.startsWith('atlas_') && f.endsWith('.db'))
+.map(f => ({ name: f, time: fs.statSync(path.join(dir, f)).mtimeMs }))
+.sort((a, b) => b.time - a.time);
+files.slice(14).forEach(f => {
+fs.unlinkSync(path.join(dir, f.name));
+console.log(`🗑️ [Backup] Raderade gammal backup: ${f.name}`);
+});
+} catch (cleanErr) {
+console.error('⚠️ [Backup] Rensning misslyckades:', cleanErr.message);
+}
 });
 } catch (e) {
 console.error('❌ [Backup] Fel:', e.message);
@@ -2416,30 +2416,30 @@ console.error('❌ [Backup] Fel:', e.message);
 // 🗑️ TTL-RENSNING: Radera uppladdade filer vars expires_at har passerat
 // =============================================================================
 async function runUploadCleanup() {
-  const nowSec = Math.floor(Date.now() / 1000);
-  db.all(
-    `SELECT id, filepath, filename FROM uploaded_files
-     WHERE deleted = 0 AND expires_at <= ?`,
-    [nowSec],
-    (err, rows) => {
-      if (err) return console.warn('[Upload-Cleanup] DB-fel:', err.message);
-      if (!rows || rows.length === 0) return;
+const nowSec = Math.floor(Date.now() / 1000);
+db.all(
+`SELECT id, filepath, filename FROM uploaded_files
+WHERE deleted = 0 AND expires_at <= ?`,
+[nowSec],
+(err, rows) => {
+if (err) return console.warn('[Upload-Cleanup] DB-fel:', err.message);
+if (!rows || rows.length === 0) return;
 
-      let deleted = 0;
-      for (const row of rows) {
-        try {
-          if (fs.existsSync(row.filepath)) {
-            fs.unlinkSync(row.filepath);
-          }
-          db.run(`UPDATE uploaded_files SET deleted = 1 WHERE id = ?`, [row.id]);
-          deleted++;
-        } catch (e) {
-          console.warn(`[Upload-Cleanup] Kunde inte radera ${row.filepath}:`, e.message);
-        }
-      }
-      console.log(`[Upload-Cleanup] ✅ Rensade ${deleted} utgångna filer`);
-    }
-  );
+let deleted = 0;
+for (const row of rows) {
+try {
+if (fs.existsSync(row.filepath)) {
+fs.unlinkSync(row.filepath);
+}
+db.run(`UPDATE uploaded_files SET deleted = 1 WHERE id = ?`, [row.id]);
+deleted++;
+} catch (e) {
+console.warn(`[Upload-Cleanup] Kunde inte radera ${row.filepath}:`, e.message);
+}
+}
+console.log(`[Upload-Cleanup] ✅ Rensade ${deleted} utgångna filer`);
+}
+);
 }
 
 async function runMonthlyExport() {
@@ -2648,62 +2648,62 @@ res.json({ success: true, field, value: field === 'OPENAI_API_KEY' ? '***' : val
 
 // GET — hämta hela blocklistan (admin only)
 app.get('/api/admin/email-blocklist', authenticateToken, (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
-  db.all("SELECT id, pattern, type, added_by, created_at FROM email_blocklist ORDER BY created_at DESC", [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows || []);
-  });
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+db.all("SELECT id, pattern, type, added_by, created_at FROM email_blocklist ORDER BY created_at DESC", [], (err, rows) => {
+if (err) return res.status(500).json({ error: err.message });
+res.json(rows || []);
+});
 });
 
 // POST — lägg till mönster i blocklistan (admin only)
 app.post('/api/admin/email-blocklist', authenticateToken, (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
-  let { pattern } = req.body;
-  if (!pattern || typeof pattern !== 'string') return res.status(400).json({ error: 'Mönster krävs.' });
-  pattern = pattern.trim().toLowerCase();
-  if (!pattern) return res.status(400).json({ error: 'Mönster krävs.' });
-  // Bestäm typ: domain om det saknar @ men innehåller punkt, eller börjar med @
-  const isDomain = pattern.startsWith('@') || (!pattern.includes('@') && pattern.includes('.'));
-  const type = isDomain ? 'domain' : 'email';
-  const normalized = pattern.replace(/^@/, '');
-  db.run("INSERT OR IGNORE INTO email_blocklist (pattern, type, added_by) VALUES (?, ?, ?)",
-    [normalized, type, req.user.username],
-    function(err) {
-      if (err) return res.status(500).json({ error: err.message });
-      loadEmailBlocklist();
-      res.json({ ok: true, id: this.lastID, pattern: normalized, type });
-    }
-  );
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+let { pattern } = req.body;
+if (!pattern || typeof pattern !== 'string') return res.status(400).json({ error: 'Mönster krävs.' });
+pattern = pattern.trim().toLowerCase();
+if (!pattern) return res.status(400).json({ error: 'Mönster krävs.' });
+// Bestäm typ: domain om det saknar @ men innehåller punkt, eller börjar med @
+const isDomain = pattern.startsWith('@') || (!pattern.includes('@') && pattern.includes('.'));
+const type = isDomain ? 'domain' : 'email';
+const normalized = pattern.replace(/^@/, '');
+db.run("INSERT OR IGNORE INTO email_blocklist (pattern, type, added_by) VALUES (?, ?, ?)",
+[normalized, type, req.user.username],
+function(err) {
+if (err) return res.status(500).json({ error: err.message });
+loadEmailBlocklist();
+res.json({ ok: true, id: this.lastID, pattern: normalized, type });
+}
+);
 });
 
 // DELETE — ta bort mönster ur blocklistan (admin only)
 app.delete('/api/admin/email-blocklist/:id', authenticateToken, (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
-  const id = parseInt(req.params.id, 10);
-  if (!id) return res.status(400).json({ error: 'Ogiltigt ID.' });
-  db.run("DELETE FROM email_blocklist WHERE id = ?", [id], function(err) {
-    if (err) return res.status(500).json({ error: err.message });
-    loadEmailBlocklist();
-    res.json({ ok: true });
-  });
+if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+const id = parseInt(req.params.id, 10);
+if (!id) return res.status(400).json({ error: 'Ogiltigt ID.' });
+db.run("DELETE FROM email_blocklist WHERE id = ?", [id], function(err) {
+if (err) return res.status(500).json({ error: err.message });
+loadEmailBlocklist();
+res.json({ ok: true });
+});
 });
 
 // POST — agent rapporterar ett ärende som skräppost (alla roller)
 // Lägger automatiskt till avsändarens e-post i blocklistan
 app.post('/api/admin/report-spam/:conversationId', authenticateToken, (req, res) => {
-  const { conversationId } = req.params;
-  db.get("SELECT email, name FROM chat_v2_state WHERE conversation_id = ?", [conversationId], (err, row) => {
-    if (err || !row || !row.email) return res.status(404).json({ error: 'Ingen e-post hittad för ärendet.' });
-    const pattern = row.email.toLowerCase().trim();
-    db.run("INSERT OR IGNORE INTO email_blocklist (pattern, type, added_by) VALUES (?, 'email', ?)",
-      [pattern, req.user.username],
-      function(err2) {
-        if (err2) return res.status(500).json({ error: err2.message });
-        loadEmailBlocklist();
-        res.json({ ok: true, pattern, added: this.changes > 0 });
-      }
-    );
-  });
+const { conversationId } = req.params;
+db.get("SELECT email, name FROM chat_v2_state WHERE conversation_id = ?", [conversationId], (err, row) => {
+if (err || !row || !row.email) return res.status(404).json({ error: 'Ingen e-post hittad för ärendet.' });
+const pattern = row.email.toLowerCase().trim();
+db.run("INSERT OR IGNORE INTO email_blocklist (pattern, type, added_by) VALUES (?, 'email', ?)",
+[pattern, req.user.username],
+function(err2) {
+if (err2) return res.status(500).json({ error: err2.message });
+loadEmailBlocklist();
+res.json({ ok: true, pattern, added: this.changes > 0 });
+}
+);
+});
 });
 
 // =====================================================================

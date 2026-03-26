@@ -217,7 +217,7 @@ confidence = 0.65;
 intent = 'unknown';
 }
 
-console.log(`[IntentEngine] parseIntent -> query="${ql}", intent="${intent}", confidence=${confidence}, slots=${JSON.stringify(slots)}`);
+//console.log(`[IntentEngine] parseIntent -> query="${ql}", intent="${intent}", confidence=${confidence}, slots=${JSON.stringify(slots)}`);
 
 return {
 intent,

@@ -626,22 +626,22 @@ Du MÅSTE följa dessa regler slaviskt, även om kontexten verkar vag:
 
 // === FORDONSBEKRÄFTELSE ===
 - Om du svarar om priser, lektioner eller tjänster för ett specifikt fordon — nämn alltid vilket fordon
-  du svarar om tidigt i svaret, så kunden kan bekräfta att du förstått rätt.
-  Exempel: "För **BIL** kostar en lektion..." eller "För din **MC-utbildning**..."
+du svarar om tidigt i svaret, så kunden kan bekräfta att du förstått rätt.
+Exempel: "För **BIL** kostar en lektion..." eller "För din **MC-utbildning**..."
 - Om konversationshistoriken ovan visar att ni pratat om ett specifikt fordon och kunden nu ställer
-  en följdfråga utan att nämna fordon — anta och svara om samma fordon som tidigare.
+en följdfråga utan att nämna fordon — anta och svara om samma fordon som tidigare.
 
 // === FÖLJDFRÅGOR & HISTORIK ===
 - Konversationshistoriken ovan visar tidigare utbyten i denna chatt.
 - Om kunden ställer en kort följdfråga ("vad kostar det?", "hur länge?", "kan man göra det?",
-  "är det 80 min?") — förstå att "det" syftar på det senaste ämnet i konversationen ovan.
+"är det 80 min?") — förstå att "det" syftar på det senaste ämnet i konversationen ovan.
 - Byt ALDRIG fordonstyp i ett svar bara för att kunden inte upprepade fordonet — om historiken
-  visar BIL, svara om BIL tills kunden explicit byter ämne.
+visar BIL, svara om BIL tills kunden explicit byter ämne.
 
 // === SUBJEKTIVA FRÅGOR ===
 - Om kunden ställer en subjektiv eller konversationell fråga ("är det svårt?", "är det roligt?",
-  "är det värt det?", "hinner man med det?", "är det stressigt?", "hur lång tid tar det ungefär?")
-  — besvara den rådgivande och mänskligt utifrån allmän kunskap om körkortsutbildning.
+"är det värt det?", "hinner man med det?", "är det stressigt?", "hur lång tid tar det ungefär?")
+— besvara den rådgivande och mänskligt utifrån allmän kunskap om körkortsutbildning.
 - Rada INTE upp priser eller prislistor som svar på en subjektiv fråga.
 - Håll svaret kort (2–3 meningar), rådgivande och uppmuntrande.
 - Inkludera ALDRIG specifika siffror, priser, åldersgränser eller regeluppgifter i subjektiva svar om de inte finns i kontexten nedan.
@@ -649,16 +649,16 @@ Du MÅSTE följa dessa regler slaviskt, även om kontexten verkar vag:
 // === FALLBACK (INTELLIGENT & MÄNSKLIG) ===
 - Om information saknas i kontexten: GISSA ALDRIG priser, tider, tillgänglighet eller annat du inte vet.
 - Om frågan HANDLAR OM KÖRKORTSUTBILDNING men info saknas: Analysera VAD kunden frågar om och
-  formulera ett kortfattat, mänskligt svar (max 2–3 meningar) som:
-  1. Erkänner att du inte har den specifika informationen
-  2. Förklarar KORT varför (t.ex. att bokningsscheman inte finns i databasen)
-  3. Erbjuder konkret nästa steg: be om mer info OM frågan är vag, tipsa om hemsidan för
-     bokning/tider, ELLER föreslå att kunden klickar på headset-ikonen högst upp för direkt
-     kontakt med en handläggare
+formulera ett kortfattat, mänskligt svar (max 2–3 meningar) som:
+1. Erkänner att du inte har den specifika informationen
+2. Förklarar KORT varför (t.ex. att bokningsscheman inte finns i databasen)
+3. Erbjuder konkret nästa steg: be om mer info OM frågan är vag, tipsa om hemsidan för
+bokning/tider, ELLER föreslå att kunden klickar på headset-ikonen högst upp för direkt
+kontakt med en handläggare
 - Om frågan INTE HANDLAR OM KÖRKORTSUTBILDNING (recept, nyheter, trivia, etc.): Var ärlig och
-  varm — förklara att du är specialiserad på körkortsfrågor och erbjud att hjälpa med det
-  istället. Avsluta med att kunden alltid kan klicka headset-ikonen för att prata med en
-  människa. Säg ALDRIG "jag kan inte hjälpa" — säg vad du KAN hjälpa med.
+varm — förklara att du är specialiserad på körkortsfrågor och erbjud att hjälpa med det
+istället. Avsluta med att kunden alltid kan klicka headset-ikonen för att prata med en
+människa. Säg ALDRIG "jag kan inte hjälpa" — säg vad du KAN hjälpa med.
 - Var varm och mänsklig — förklara, gissa inte.
 
 LÄS NEDAN KONTEXT NOGA OCH SVARA UTIFRÅN DEN (MEN FÖLJ DE KRITISKA REGLERNA ÖVERST):
@@ -821,11 +821,11 @@ tools = globalAvailableTools;
 // Bygg konversationshistorik — max 3 Q&A-par (6 meddelanden) före aktuell fråga
 const _sess = sessions.get(sessionId);
 const _allHistory = (_sess?.messages || [])
-  .filter(m => m.role === 'user' || m.role === 'assistant');
+.filter(m => m.role === 'user' || m.role === 'assistant');
 // Exkludera sista user-meddelandet (det är aktuell fråga, redan i userContent)
 const _historyBase = _allHistory.slice(-1)[0]?.role === 'user'
-  ? _allHistory.slice(-7, -1)
-  : _allHistory.slice(-6);
+? _allHistory.slice(-7, -1)
+: _allHistory.slice(-6);
 const conversationHistory = _historyBase.map(m => ({ role: m.role, content: m.content }));
 
 const messages = [
@@ -905,26 +905,26 @@ async function generateSmartClarification(query, nluResult, detectedCity, detect
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const intentLabel = {
-  price_lookup: 'pris eller kostnad',
-  booking: 'bokning eller lediga tider',
-  risk_info: 'riskutbildning',
-  handledare_course: 'handledarutbildning',
-  tillstand_info: 'körkortstillstånd',
-  contact_info: 'kontaktuppgifter',
-  service_inquiry: 'tjänst eller utbildning',
+price_lookup: 'pris eller kostnad',
+booking: 'bokning eller lediga tider',
+risk_info: 'riskutbildning',
+handledare_course: 'handledarutbildning',
+tillstand_info: 'körkortstillstånd',
+contact_info: 'kontaktuppgifter',
+service_inquiry: 'tjänst eller utbildning',
 }[nluResult?.intent] || 'körkortsfråga';
 
 const vehicleLabel = detectedVehicle
-  ? `kundens fordonstyp verkar vara ${detectedVehicle}`
-  : 'fordonstyp oklart (bil, MC, moped/AM eller lastbil)';
+? `kundens fordonstyp verkar vara ${detectedVehicle}`
+: 'fordonstyp oklart (bil, MC, moped/AM eller lastbil)';
 
 const cityHint = detectedCity
-  ? `Kunden verkar befinna sig i närheten av ${detectedCity}.`
-  : 'Stad är helt okänd.';
+? `Kunden verkar befinna sig i närheten av ${detectedCity}.`
+: 'Stad är helt okänd.';
 
 const prevHistory = lockedCtx.city
-  ? `Kunden har tidigare i sessionen pratat om: ${[lockedCtx.city, lockedCtx.vehicle].filter(Boolean).join(', ')}.`
-  : '';
+? `Kunden har tidigare i sessionen pratat om: ${[lockedCtx.city, lockedCtx.vehicle].filter(Boolean).join(', ')}.`
+: '';
 
 const exampleCities = 'Malmö, Göteborg, Stockholm, Lund, Helsingborg, Uppsala, Linköping, Umeå, Gävle eller Varberg';
 
@@ -933,11 +933,11 @@ En kund har ställt en fråga som är lite för vag för att du ska kunna ge ett
 
 Din uppgift är att skriva ett svar (2–3 meningar, svenska) som:
 1. SPEGLAR kundens ämne — visa att du uppfattat vad de undrar.
-   Exempel: "Jag ser att du undrar om priset för körlektion!"
+Exempel: "Jag ser att du undrar om priset för körlektion!"
 2. GUIDAR med en konkret fråga om det som saknas (stad och/eller fordon).
-   Exempel: "För att jag ska kunna titta i rätt prislista, behöver jag bara veta vilken stad och vilket körkort det gäller?"
+Exempel: "För att jag ska kunna titta i rätt prislista, behöver jag bara veta vilken stad och vilket körkort det gäller?"
 3. GER SNABBEXEMPEL på vanliga städer eller alternativ om stad saknas.
-   Exempel: "Vi finns bland annat i Malmö, Göteborg, Stockholm, Lund och Helsingborg — kanske ett av dem stämmer?"
+Exempel: "Vi finns bland annat i Malmö, Göteborg, Stockholm, Lund och Helsingborg — kanske ett av dem stämmer?"
 
 Var varm, konkret och hjälpsam. Gissa ALDRIG priser eller info du inte fått.
 Avsluta INTE med "Hör av dig om du har frågor" — bjud i stället in kunden att svara direkt i chatten.`;
@@ -1291,8 +1291,8 @@ if (!sessions.has(sessionId)) {createEmptySession(sessionId);}
 
 // Injicera konversationshistorik från payload om den finns
 if (payload.sessionContext && Array.isArray(payload.sessionContext)) {
-  const sess = sessions.get(sessionId);
-  if (sess) sess.messages = payload.sessionContext;
+const sess = sessions.get(sessionId);
+if (sess) sess.messages = payload.sessionContext;
 }
 
 if (payload.locked_context) {
@@ -1431,14 +1431,14 @@ nluResult.intent = 'service_inquiry';
 // Åldersgränsfrågor via "vad är" (intent='intent_info') — behandla som ambiguous för fordonsklarifikation.
 // "Vad är åldersgränsen?" ger annars ett B-körkort-specifikt svar utan att klargöra fordon.
 if (nluResult.intent === 'intent_info' && /åldersgräns/i.test(sanitizedQuery)) {
-  nluResult.intent = 'unknown';
+nluResult.intent = 'unknown';
 }
 
 // Handledarbevis och teori-ingår-frågor via "kostar/hur mycket" tolkas felaktigt som price_lookup.
 // Dessa är faktafrågor (handledarbevis är gratis, AM-kurs inkluderar X teoritimmar) — override till 'unknown'
 // så att RAG söker brett i basfakta istf att leta prisinformation specifikt.
 if (nluResult.intent === 'price_lookup' && /handledarbevis|hur mycket teori|teoritimmar/i.test(sanitizedQuery)) {
-  nluResult.intent = 'unknown';
+nluResult.intent = 'unknown';
 }
 
 if (!nluResult.slots.service) {
@@ -1474,28 +1474,28 @@ break;
 let _alternativesContextNote = '';
 {
 const _hasSuggestedAlts = Array.isArray(session.locked_context?.suggested_alternatives) &&
-  session.locked_context.suggested_alternatives.length > 0;
+session.locked_context.suggested_alternatives.length > 0;
 const _refersToAlternatives = _hasSuggestedAlts &&
-  /\b(de\s+andra|de\s+övriga|alternativ(?:en|et)?|dit\b|dem\b|de\s+kontoren)\b/i.test(sanitizedQuery);
+/\b(de\s+andra|de\s+övriga|alternativ(?:en|et)?|dit\b|dem\b|de\s+kontoren)\b/i.test(sanitizedQuery);
 
 if (_refersToAlternatives) {
-  const _alts = session.locked_context.suggested_alternatives;
-  const _forArea = session.locked_context.suggestions_for_area || nluResult.slots.area || '';
-  const _altCity = lockedContext.city || nluResult.slots.city || '';
+const _alts = session.locked_context.suggested_alternatives;
+const _forArea = session.locked_context.suggestions_for_area || nluResult.slots.area || '';
+const _altCity = lockedContext.city || nluResult.slots.city || '';
 
-  // Rensa stale area-arv så att RAG-filtret inte låser sig på det gamla kontoret
-  nluResult.slots.area = null;
+// Rensa stale area-arv så att RAG-filtret inte låser sig på det gamla kontoret
+nluResult.slots.area = null;
 
-  if (/\bdit\b/i.test(sanitizedQuery) && _alts.length > 1) {
-    // "dit" är tvetydigt med flera alternativ → be kunden precisera
-    _alternativesContextNote = `\n\n[SYSTEMNOTERING — FLYTANDE KONTEXT: Kunden frågar troligen om ett av de alternativa kontor som Atlas nyss rekommenderade som alternativ till ${_forArea}: ${_alts.join(', ')}. Svara varmt och fråga vilket kontor kunden menar, och lista dem som en punktlista.]`;
-  } else if (_alts.length === 1) {
-    // Exakt ett alternativ → lås det direkt
-    nluResult.slots.area = _alts[0];
-  } else {
-    // "de andra", "de övriga" → svara om alla alternativ, ignorera det låsta kontoret
-    _alternativesContextNote = `\n\n[SYSTEMNOTERING — FLYTANDE KONTEXT: Kunden frågar specifikt om de alternativa kontor som Atlas nyss listade i ${_altCity}: ${_alts.join(', ')}. Svara med relevant information om dessa kontor baserat på kontexten. Inkludera INTE upprepad information om ${_forArea} i detta svar.]`;
-  }
+if (/\bdit\b/i.test(sanitizedQuery) && _alts.length > 1) {
+// "dit" är tvetydigt med flera alternativ → be kunden precisera
+_alternativesContextNote = `\n\n[SYSTEMNOTERING — FLYTANDE KONTEXT: Kunden frågar troligen om ett av de alternativa kontor som Atlas nyss rekommenderade som alternativ till ${_forArea}: ${_alts.join(', ')}. Svara varmt och fråga vilket kontor kunden menar, och lista dem som en punktlista.]`;
+} else if (_alts.length === 1) {
+// Exakt ett alternativ → lås det direkt
+nluResult.slots.area = _alts[0];
+} else {
+// "de andra", "de övriga" → svara om alla alternativ, ignorera det låsta kontoret
+_alternativesContextNote = `\n\n[SYSTEMNOTERING — FLYTANDE KONTEXT: Kunden frågar specifikt om de alternativa kontor som Atlas nyss listade i ${_altCity}: ${_alts.join(', ')}. Svara med relevant information om dessa kontor baserat på kontexten. Inkludera INTE upprepad information om ${_forArea} i detta svar.]`;
+}
 }
 }
 
@@ -1538,90 +1538,90 @@ const effectiveIntent = isLegalQuestion ? 'legal_query' : nluResult.intent;
 // Bygger på pending_query i session för att kombinera fråga + svar.
 // ====================================================================
 {
-  const pending = session.locked_context.pending_query;
+const pending = session.locked_context.pending_query;
 
-  // DEL A: Lösa upp ett befintligt pending
-  if (pending) {
-    if (detectedVehicleType) {
-      // Kunden svarade med ett fordon — kombinera originalfråga + svar
-      activeQuery = pending + ' ' + query;
-      activeQueryLower = activeQuery.toLowerCase();
-      session.locked_context.pending_query = null;
-      session.locked_context.pending_query_attempts = 0;
-      console.log(`[PENDING-QUERY] Fordon detekterat (${detectedVehicleType}), kombinerar: "${activeQuery}"`);
-    } else if (nluResult.intent !== 'unknown' && nluResult.intent !== 'service_inquiry') {
-      // Kunden bytte ämne — kassera pending utan att repetera klarifieringsfrågan
-      console.log(`[PENDING-QUERY] Kund bytte ämne (intent=${nluResult.intent}), kasserar pending.`);
-      session.locked_context.pending_query = null;
-      session.locked_context.pending_query_attempts = 0;
-    } else {
-      // Universell faktafråga (t.ex. giltighetstid, hur länge gäller paket) — kassera pending direkt
-      const _isUFQinA = /hur länge.*gäller.*(paket|lektioner?|kursen)|giltighetstid|hur länge .*(riskutbildning|körkortstillstånd|handledarkurs)|faktura|öppettider|kontakt/.test(activeQueryLower);
-      if (_isUFQinA) {
-        console.log(`[PENDING-QUERY] Universell faktafråga i DEL A — kasserar pending, kör RAG direkt.`);
-        session.locked_context.pending_query = null;
-        session.locked_context.pending_query_attempts = 0;
-        // fall through till normal RAG
-      } else {
-      // Kunden svarade fortfarande oklart — räkna upp, eller ge upp efter 2 försök
-      session.locked_context.pending_query_attempts = (session.locked_context.pending_query_attempts || 0) + 1;
-      if (session.locked_context.pending_query_attempts >= 2) {
-        console.log(`[PENDING-QUERY] Max försök nått — kör RAG ändå med tillgänglig kontext.`);
-        session.locked_context.pending_query = null;
-        session.locked_context.pending_query_attempts = 0;
-        // fall through till normal RAG
-      } else {
-        console.log(`[PENDING-QUERY] Ingen fordonstyp i svar, upprepar klarifiering (försök ${session.locked_context.pending_query_attempts}).`);
-        const _pendingClarificationA = await generateSmartClarification(
-          query, nluResult, detectedCity, null, session.locked_context
-        );
-        return res.json({
-          answer: _pendingClarificationA,
-          sessionId,
-          locked_context: session.locked_context
-        });
-      }
-      } // end else (_isUFQinA)
-    }
-  }
+// DEL A: Lösa upp ett befintligt pending
+if (pending) {
+if (detectedVehicleType) {
+// Kunden svarade med ett fordon — kombinera originalfråga + svar
+activeQuery = pending + ' ' + query;
+activeQueryLower = activeQuery.toLowerCase();
+session.locked_context.pending_query = null;
+session.locked_context.pending_query_attempts = 0;
+// console.log(`[PENDING-QUERY] Fordon detekterat (${detectedVehicleType}), kombinerar: "${activeQuery}"`);
+} else if (nluResult.intent !== 'unknown' && nluResult.intent !== 'service_inquiry') {
+// Kunden bytte ämne — kassera pending utan att repetera klarifieringsfrågan
+// console.log(`[PENDING-QUERY] Kund bytte ämne (intent=${nluResult.intent}), kasserar pending.`);
+session.locked_context.pending_query = null;
+session.locked_context.pending_query_attempts = 0;
+} else {
+// Universell faktafråga (t.ex. giltighetstid, hur länge gäller paket) — kassera pending direkt
+const _isUFQinA = /hur länge.*gäller.*(paket|lektioner?|kursen)|giltighetstid|hur länge .*(riskutbildning|körkortstillstånd|handledarkurs)|faktura|öppettider|kontakt/.test(activeQueryLower);
+if (_isUFQinA) {
+// console.log(`[PENDING-QUERY] Universell faktafråga i DEL A — kasserar pending, kör RAG direkt.`);
+session.locked_context.pending_query = null;
+session.locked_context.pending_query_attempts = 0;
+// fall through till normal RAG
+} else {
+// Kunden svarade fortfarande oklart — räkna upp, eller ge upp efter 2 försök
+session.locked_context.pending_query_attempts = (session.locked_context.pending_query_attempts || 0) + 1;
+if (session.locked_context.pending_query_attempts >= 2) {
+// console.log(`[PENDING-QUERY] Max försök nått — kör RAG ändå med tillgänglig kontext.`);
+session.locked_context.pending_query = null;
+session.locked_context.pending_query_attempts = 0;
+// fall through till normal RAG
+} else {
+// console.log(`[PENDING-QUERY] Ingen fordonstyp i svar, upprepar klarifiering (försök ${session.locked_context.pending_query_attempts}).`);
+const _pendingClarificationA = await generateSmartClarification(
+query, nluResult, detectedCity, null, session.locked_context
+);
+return res.json({
+answer: _pendingClarificationA,
+sessionId,
+locked_context: session.locked_context
+});
+}
+} // end else (_isUFQinA)
+}
+}
 
-  // Ord som felaktigt kan matcha "i [Ord]"-mönstret men INTE är städer
-  // Används av okänd-stad-logiken för att undvika false positives
-  const _FAKE_CITY_RE = /^(sverige|mitt|minipaket(et)?|totalpaket(et)?|mellanpaket(et)?|baspaket(et)?|lektionspaket(et)?|trafikverket|transportstyrelsen|internet|eu|ees|europa|hela|appen|staten|kommunen|city|startlektion|intensivvecka(n)?|intensivkurs(en)?|garaget|arkivet|systemet|garaget?)$/i;
+// Ord som felaktigt kan matcha "i [Ord]"-mönstret men INTE är städer
+// Används av okänd-stad-logiken för att undvika false positives
+const _FAKE_CITY_RE = /^(sverige|mitt|minipaket(et)?|totalpaket(et)?|mellanpaket(et)?|baspaket(et)?|lektionspaket(et)?|trafikverket|transportstyrelsen|internet|eu|ees|europa|hela|appen|staten|kommunen|city|startlektion|intensivvecka(n)?|intensivkurs(en)?|garaget|arkivet|systemet|garaget?)$/i;
 
-  // DEL B: Skapa nytt pending om frågan är fordonsspecifik men fordon saknas
-  // Subjektiva/åsiktsfrågor bypassar pending_query — hanteras av SUBJEKTIVA FRÅGOR-regeln
-  const isSubjectiveQuery = /(^är .+\b(bra|rolig|bättre|svår|kul|värt|stressig|bäst|sämst|dålig)\b|^vad tycker|^tycker ni|^rekommenderar ni|nervösa?\b|^vad är bäst|^vilket är bäst)/.test(activeQueryLower);
-  // Universella faktafrågor bypassar pending_query — svar är fordon/stad-oberoende
-  // Använder .* för att hantera "en/ett/din" etc. mellan verb och substantiv
-  // OBS: körlektion/uppkörning tillåter "tid" emellan ("hur lång tid tar uppkörningen") — riskutb tillåter det INTE
-  // (riskutbildning är fordonsspecifik: Risk1 BIL vs MC skiljer sig — måste gå till DEL B)
-  const isUniversalFactQuery = /hur länge .*(riskutbildning|körkortstillstånd|tillstånd|handledarkurs|giltig)|hur länge.*gäller.*(paket|lektioner?|kursen)|hur lång(t)?(\s+tid)? (är|tar|varar) .*(körlektion|uppkörning)|hur lång(t)? (är|tar|varar) .*(riskutb)|giltighetstid|(för \d+ år sedan|historisk)|hur (många|mycket) .*(frågor|rätt) .*(teoriprov|körkortsprovet|prov)|vad händer om .*(riskutbildning|körkortstillstånd|tillstånd) .*(går ut|löper ut|gick ut)|vilken tid på år|mc.säsong|säsong.*mc|när (börjar|slutar|är) .*(mc|motorcykel).*(säsong|säsongen|år)|detsamma oavsett|samma pris.*hela|varierar.*pris.*ort|pris.*varierar.*ort|övre åldersgräns|för gammal.*körkort|gammal.*ta körkort|ingår.*mitt körkort|mitt körkort.*ingår|körkortsapp|vad ingår.*totalpaket|totalpaket.*innehåll|vad ingår.*intensivkurs|intensivkurs.*innehåll|uppkörningsprovet|uppkörning.*prov/.test(activeQueryLower);
-  // Okänd stad bypassar pending_query — fråga aldrig om fordon för städer utanför vårt system
-  // Extraherar "i Stad" från råfrågan (NLU känner inte till okända städer)
-  const possibleCityMatch = query.match(/\bi ([A-ZÅÄÖ][a-zåäö]+)/);
-  const possibleCity = possibleCityMatch ? possibleCityMatch[1].toLowerCase() : null;
-  const isUnknownCityQuery = !!(possibleCity && !_FAKE_CITY_RE.test(possibleCity) && !Object.keys(knownAreas).some(k => k.includes(possibleCity)) && !Object.keys(officeData).some(k => k.includes(possibleCity)));
-  // Frågor om policy/tjänster som saknas i knowledge-basen — inte fordonsspecifika
-  const isPolicyOrPersonQuery = /(avbetalning|delbetalning|specialpris|seniorrabatt|pensionär|teckenspråk|vad heter|vilka.*lärare|chefen|chef.*på|personalnamn|handledarbevis|trafikverkets? avgift|ingår.*trafikverket|hur mycket teori|teoritimmar|gäller.*fortfarande|fortfarande.*gäller|minipaket|mellanpaket|baspaket|lektionspaket|totalpaket|detsamma oavsett|samma pris.*hela|varierar.*pris.*ort|pris.*varierar.*ort)/.test(activeQueryLower);
-  if (!pending && !isSubjectiveQuery && !isUniversalFactQuery && !isUnknownCityQuery && !isPolicyOrPersonQuery) {
-    const hasVehicleTerm = /(körlektion|minuter|timmar|kurs|ingår|körning|utbildning|pris|kostar|paket|lektioner|kostnad|boka|åldersgräns|teoriprov)/.test(activeQueryLower);
-    const noVehicleKnown = !detectedVehicleType;
-    const isAmbiguousIntent = (nluResult.intent === 'unknown' || nluResult.intent === 'service_inquiry');
-    if (isAmbiguousIntent && noVehicleKnown && hasVehicleTerm) {
-      session.locked_context.pending_query = query;
-      session.locked_context.pending_query_attempts = 0;
-      console.log(`[PENDING-QUERY] Fordonsspecifik fråga utan fordon — sparar pending och ber om klarifikation.`);
-      const _pendingClarificationB = await generateSmartClarification(
-        query, nluResult, detectedCity, null, session.locked_context
-      );
-      return res.json({
-        answer: _pendingClarificationB,
-        sessionId,
-        locked_context: session.locked_context
-      });
-    }
-  }
+// DEL B: Skapa nytt pending om frågan är fordonsspecifik men fordon saknas
+// Subjektiva/åsiktsfrågor bypassar pending_query — hanteras av SUBJEKTIVA FRÅGOR-regeln
+const isSubjectiveQuery = /(^är .+\b(bra|rolig|bättre|svår|kul|värt|stressig|bäst|sämst|dålig)\b|^vad tycker|^tycker ni|^rekommenderar ni|nervösa?\b|^vad är bäst|^vilket är bäst)/.test(activeQueryLower);
+// Universella faktafrågor bypassar pending_query — svar är fordon/stad-oberoende
+// Använder .* för att hantera "en/ett/din" etc. mellan verb och substantiv
+// OBS: körlektion/uppkörning tillåter "tid" emellan ("hur lång tid tar uppkörningen") — riskutb tillåter det INTE
+// (riskutbildning är fordonsspecifik: Risk1 BIL vs MC skiljer sig — måste gå till DEL B)
+const isUniversalFactQuery = /hur länge .*(riskutbildning|körkortstillstånd|tillstånd|handledarkurs|giltig)|hur länge.*gäller.*(paket|lektioner?|kursen)|hur lång(t)?(\s+tid)? (är|tar|varar) .*(körlektion|uppkörning)|hur lång(t)? (är|tar|varar) .*(riskutb)|giltighetstid|(för \d+ år sedan|historisk)|hur (många|mycket) .*(frågor|rätt) .*(teoriprov|körkortsprovet|prov)|vad händer om .*(riskutbildning|körkortstillstånd|tillstånd) .*(går ut|löper ut|gick ut)|vilken tid på år|mc.säsong|säsong.*mc|när (börjar|slutar|är) .*(mc|motorcykel).*(säsong|säsongen|år)|detsamma oavsett|samma pris.*hela|varierar.*pris.*ort|pris.*varierar.*ort|övre åldersgräns|för gammal.*körkort|gammal.*ta körkort|ingår.*mitt körkort|mitt körkort.*ingår|körkortsapp|vad ingår.*totalpaket|totalpaket.*innehåll|vad ingår.*intensivkurs|intensivkurs.*innehåll|uppkörningsprovet|uppkörning.*prov/.test(activeQueryLower);
+// Okänd stad bypassar pending_query — fråga aldrig om fordon för städer utanför vårt system
+// Extraherar "i Stad" från råfrågan (NLU känner inte till okända städer)
+const possibleCityMatch = query.match(/\bi ([A-ZÅÄÖ][a-zåäö]+)/);
+const possibleCity = possibleCityMatch ? possibleCityMatch[1].toLowerCase() : null;
+const isUnknownCityQuery = !!(possibleCity && !_FAKE_CITY_RE.test(possibleCity) && !Object.keys(knownAreas).some(k => k.includes(possibleCity)) && !Object.keys(officeData).some(k => k.includes(possibleCity)));
+// Frågor om policy/tjänster som saknas i knowledge-basen — inte fordonsspecifika
+const isPolicyOrPersonQuery = /(avbetalning|delbetalning|specialpris|seniorrabatt|pensionär|teckenspråk|vad heter|vilka.*lärare|chefen|chef.*på|personalnamn|handledarbevis|trafikverkets? avgift|ingår.*trafikverket|hur mycket teori|teoritimmar|gäller.*fortfarande|fortfarande.*gäller|minipaket|mellanpaket|baspaket|lektionspaket|totalpaket|detsamma oavsett|samma pris.*hela|varierar.*pris.*ort|pris.*varierar.*ort)/.test(activeQueryLower);
+if (!pending && !isSubjectiveQuery && !isUniversalFactQuery && !isUnknownCityQuery && !isPolicyOrPersonQuery) {
+const hasVehicleTerm = /(körlektion|minuter|timmar|kurs|ingår|körning|utbildning|pris|kostar|paket|lektioner|kostnad|boka|åldersgräns|teoriprov)/.test(activeQueryLower);
+const noVehicleKnown = !detectedVehicleType;
+const isAmbiguousIntent = (nluResult.intent === 'unknown' || nluResult.intent === 'service_inquiry');
+if (isAmbiguousIntent && noVehicleKnown && hasVehicleTerm) {
+session.locked_context.pending_query = query;
+session.locked_context.pending_query_attempts = 0;
+// console.log(`[PENDING-QUERY] Fordonsspecifik fråga utan fordon — sparar pending och ber om klarifikation.`);
+const _pendingClarificationB = await generateSmartClarification(
+query, nluResult, detectedCity, null, session.locked_context
+);
+return res.json({
+answer: _pendingClarificationB,
+sessionId,
+locked_context: session.locked_context
+});
+}
+}
 }
 
 // ====================================================================
@@ -1692,20 +1692,20 @@ if (nluResult.intent === 'contact_info') mode = 'knowledge';
 // Kunden nämnde en stad som saknas i vårt system — svara direkt utan RAG-sökning.
 // Måste köras FÖRE PROAKTIV KLARIFIERING annars fångas "i Kiruna" av city-klarifiering istället.
 {
-  const _earlyPcM = query.match(/\bi ([A-ZÅÄÖ][a-zåäö]+)/);
-  const _earlyPc = _earlyPcM ? _earlyPcM[1].toLowerCase() : null;
-  // Lokalt definierad kopia — _FAKE_CITY_RE är block-scoped i DEL B-sektionen och ej tillgänglig här
-  const _earlyFakeCityRE = /^(sverige|mitt|minipaket(et)?|totalpaket(et)?|mellanpaket(et)?|baspaket(et)?|lektionspaket(et)?|trafikverket|transportstyrelsen|internet|eu|ees|europa|hela|appen|staten|kommunen|city|startlektion|intensivvecka(n)?|intensivkurs(en)?|garaget|arkivet|systemet|garaget?)$/i;
-  // Kontrollera BÅDE städer (officeData-nycklar) OCH områden (knownAreas) — annars avvisas
-  // giltiga stadsdelar som "Ullevi", "Högsbo" etc. felaktigt som okända städer.
-  const _isKnownArea = knownAreas && Object.keys(knownAreas).some(k => k.includes(_earlyPc));
-  if (_earlyPc && !_earlyFakeCityRE.test(_earlyPc) && !_isKnownArea && !Object.keys(officeData).some(k => k.includes(_earlyPc))) {
-    return res.json({
-      answer: `Vi har tyvärr inga kontor i ${_earlyPcM[1]} ännu. Kontakta gärna vår centralsupport eller besök vår hemsida för att hitta närmaste kontor.`,
-      sessionId,
-      locked_context: session.locked_context
-    });
-  }
+const _earlyPcM = query.match(/\bi ([A-ZÅÄÖ][a-zåäö]+)/);
+const _earlyPc = _earlyPcM ? _earlyPcM[1].toLowerCase() : null;
+// Lokalt definierad kopia — _FAKE_CITY_RE är block-scoped i DEL B-sektionen och ej tillgänglig här
+const _earlyFakeCityRE = /^(sverige|mitt|minipaket(et)?|totalpaket(et)?|mellanpaket(et)?|baspaket(et)?|lektionspaket(et)?|trafikverket|transportstyrelsen|internet|eu|ees|europa|hela|appen|staten|kommunen|city|startlektion|intensivvecka(n)?|intensivkurs(en)?|garaget|arkivet|systemet|garaget?)$/i;
+// Kontrollera BÅDE städer (officeData-nycklar) OCH områden (knownAreas) — annars avvisas
+// giltiga stadsdelar som "Ullevi", "Högsbo" etc. felaktigt som okända städer.
+const _isKnownArea = knownAreas && Object.keys(knownAreas).some(k => k.includes(_earlyPc));
+if (_earlyPc && !_earlyFakeCityRE.test(_earlyPc) && !_isKnownArea && !Object.keys(officeData).some(k => k.includes(_earlyPc))) {
+return res.json({
+answer: `Vi har tyvärr inga kontor i ${_earlyPcM[1]} ännu. Kontakta gärna vår centralsupport eller besök vår hemsida för att hitta närmaste kontor.`,
+sessionId,
+locked_context: session.locked_context
+});
+}
 }
 
 // === PROAKTIV KLARIFIERING: Prisfråga utan känd stad ===
@@ -1719,23 +1719,23 @@ const _isPolicyPersonQ = /(avbetalning|delbetalning|specialpris|seniorrabatt|pen
 // Bokningsfrågor för stadtspecifika tjänster (körlektion/testlektion) kräver känd stad för rätt kontor
 const _hasBookingCitySpecific = /körlektion|testlektion/i.test(activeQueryLower);
 const _proaktivTrigger =
-  !_isPolicyPersonQ && (
-    nluResult.intent === 'price_lookup' ||
-    (['risk_info', 'handledare_course', 'testlesson_info'].includes(nluResult.intent) && _hasPriceWord) ||
-    (nluResult.intent === 'booking' && _hasBookingCitySpecific)
-  );
+!_isPolicyPersonQ && (
+nluResult.intent === 'price_lookup' ||
+(['risk_info', 'handledare_course', 'testlesson_info'].includes(nluResult.intent) && _hasPriceWord) ||
+(nluResult.intent === 'booking' && _hasBookingCitySpecific)
+);
 if (
-  _proaktivTrigger &&
-  !lockedCity &&
-  !detectedCity
+_proaktivTrigger &&
+!lockedCity &&
+!detectedCity
 ) {
-  const clarification = await generateSmartClarification(query, nluResult, null, detectedVehicleType, session.locked_context);
-  return res.json({
-    answer: clarification,
-    context: [],
-    sessionId,
-    debug: { triggered_by: 'price_without_city', intent: nluResult.intent }
-  });
+const clarification = await generateSmartClarification(query, nluResult, null, detectedVehicleType, session.locked_context);
+return res.json({
+answer: clarification,
+context: [],
+sessionId,
+debug: { triggered_by: 'price_without_city', intent: nluResult.intent }
+});
 }
 
 // === STADSKLARIFICERINGS-LOOP ===
@@ -1747,19 +1747,19 @@ if (
 //   _isLocalUFQ       — faktafrågor (giltighetstid, fakturaadress etc.) kräver ingen stad
 //   mode !== 'chat'   — småprat ("Tack", "Hej") ska inte hindras av stadsloop
 {
-  const _lastAiMsg = session.messages.filter(m => m.role !== 'user').slice(-1)[0]?.content || '';
-  const _prevAskedCity = /vilken stad/i.test(_lastAiMsg);
-  const _isLocalUFQ = /giltig|giltighetstid|hur länge.*(gäller|giltig)|hur lång.*varar|handledarbevis|teoritimmar|fakturaadress|kontaktuppgifter|öppettider|körkortstillstånd|tillstånd.*krävs|krävs.*tillstånd/i.test(activeQueryLower);
-  if (_prevAskedCity && !lockedCity && !detectedCity && !_isPolicyPersonQ && !_isLocalUFQ && mode !== 'chat') {
-    console.log(`[CITY-LOOP] Föregående svar bad om stad — kunden gav ingen stad (intent=${nluResult.intent}, vehicle=${detectedVehicleType}). Re-triggar klarifikation.`);
-    const clarification = await generateSmartClarification(query, nluResult, null, detectedVehicleType, session.locked_context);
-    return res.json({
-      answer: clarification,
-      context: [],
-      sessionId,
-      debug: { triggered_by: 'city_question_loop', intent: nluResult.intent }
-    });
-  }
+const _lastAiMsg = session.messages.filter(m => m.role !== 'user').slice(-1)[0]?.content || '';
+const _prevAskedCity = /vilken stad/i.test(_lastAiMsg);
+const _isLocalUFQ = /giltig|giltighetstid|hur länge.*(gäller|giltig)|hur lång.*varar|handledarbevis|teoritimmar|fakturaadress|kontaktuppgifter|öppettider|körkortstillstånd|tillstånd.*krävs|krävs.*tillstånd/i.test(activeQueryLower);
+if (_prevAskedCity && !lockedCity && !detectedCity && !_isPolicyPersonQ && !_isLocalUFQ && mode !== 'chat') {
+// console.log(`[CITY-LOOP] Föregående svar bad om stad — kunden gav ingen stad (intent=${nluResult.intent}, vehicle=${detectedVehicleType}). Re-triggar klarifikation.`);
+const clarification = await generateSmartClarification(query, nluResult, null, detectedVehicleType, session.locked_context);
+return res.json({
+answer: clarification,
+context: [],
+sessionId,
+debug: { triggered_by: 'city_question_loop', intent: nluResult.intent }
+});
+}
 }
 
 // STEP 5: SEARCH & RETRIEVAL (Här börjar nästa sektion i din fil)
@@ -2428,8 +2428,8 @@ error: searchError.message
 try {
 // Sammanfoga evt. alternativ-kontext-notering med lokal tillgänglighetsnotering
 if (_alternativesContextNote) {
-  localAvailabilityNote = (_alternativesContextNote + (localAvailabilityNote || '')).trim();
-  // Rensa detectedArea-argumentet till generate_rag_answer när vi svarat om alternativ
+localAvailabilityNote = (_alternativesContextNote + (localAvailabilityNote || '')).trim();
+// Rensa detectedArea-argumentet till generate_rag_answer när vi svarat om alternativ
 }
 
 // Reberäkna nödvändiga variabler — DEL B-variablerna är block-scoped ({}) och ej tillgängliga här
@@ -2442,19 +2442,19 @@ const _injFakeCityRE = /^(sverige|mitt|minipaket(et)?|totalpaket(et)?|mellanpake
 
 // Okänd stad: injicera kritisk systemnotering direkt i kontexten
 if (_injPc && !_injFakeCityRE.test(_injPc) && !Object.keys(knownAreas).some(k => k.includes(_injPc)) && !Object.keys(officeData).some(k => k.includes(_injPc))) {
-  const unknownCityName = _injPcMatch[1];
-  const unknownCityNote = `\n\n[KRITISK SYSTEMNOTERING: Kunden frågade om "${unknownCityName}". Vi har INGA kontor i ${unknownCityName}. Du MÅSTE svara direkt: "Vi har tyvärr inga kontor i ${unknownCityName} ännu. Kontakta gärna vår centralsupport eller besök vår hemsida för att hitta närmaste kontor." Fråga ALDRIG om fordon.]`;
-  localAvailabilityNote = (localAvailabilityNote || '') + unknownCityNote;
+const unknownCityName = _injPcMatch[1];
+const unknownCityNote = `\n\n[KRITISK SYSTEMNOTERING: Kunden frågade om "${unknownCityName}". Vi har INGA kontor i ${unknownCityName}. Du MÅSTE svara direkt: "Vi har tyvärr inga kontor i ${unknownCityName} ännu. Kontakta gärna vår centralsupport eller besök vår hemsida för att hitta närmaste kontor." Fråga ALDRIG om fordon.]`;
+localAvailabilityNote = (localAvailabilityNote || '') + unknownCityNote;
 }
 
 // Prisfråga utan stad: injicera stark fråga-om-stad-notering
 // Förhindrar att Atlas listar priser från flera orter när ingen stad angetts
 const _noPriceWithoutCity = nluResult.intent === 'price_lookup'
-  && !lockedCity && !detectedCity && !_injPc
-  && !_injIsUFQ;
+&& !lockedCity && !detectedCity && !_injPc
+&& !_injIsUFQ;
 if (_noPriceWithoutCity) {
-  const noCityPriceNote = '\n\n[KRITISK SYSTEMNOTERING: Kunden frågar om pris men har INTE angett någon stad. Du MÅSTE fråga: "Vilken stad/ort gäller din fråga?" Ge INGA priser — inte ens ett enda exempel från en stad. Ange INGA prissiffror alls förrän kunden angett stad.]';
-  localAvailabilityNote = (localAvailabilityNote || '') + noCityPriceNote;
+const noCityPriceNote = '\n\n[KRITISK SYSTEMNOTERING: Kunden frågar om pris men har INTE angett någon stad. Du MÅSTE fråga: "Vilken stad/ort gäller din fråga?" Ge INGA priser — inte ens ett enda exempel från en stad. Ange INGA prissiffror alls förrän kunden angett stad.]';
+localAvailabilityNote = (localAvailabilityNote || '') + noCityPriceNote;
 }
 
 // Körlektion-fråga utan MC-kontext → injicera bil-standard
@@ -2462,18 +2462,18 @@ if (_noPriceWithoutCity) {
 const _isKorlektionQuery = /körlektion/i.test(activeQueryLower) && _injIsUFQ;
 const _vehicleContextIsMC = (detectedVehicleType === 'MC' || session?.locked_context?.vehicle === 'MC');
 if (_isKorlektionQuery && !_vehicleContextIsMC) {
-  const korlektionNote = '\n\n[SYSTEMNOTERING: Kunden frågar om körlektion utan att specifikt nämna MC eller annat fordon. Svara med bil-standard: "En körlektion för **bil** tar **80 minuter**." Nämn INTE MC-lektionens längd om inte kunden explicit frågade om MC.]';
-  localAvailabilityNote = (localAvailabilityNote || '') + korlektionNote;
+const korlektionNote = '\n\n[SYSTEMNOTERING: Kunden frågar om körlektion utan att specifikt nämna MC eller annat fordon. Svara med bil-standard: "En körlektion för **bil** tar **80 minuter**." Nämn INTE MC-lektionens längd om inte kunden explicit frågade om MC.]';
+localAvailabilityNote = (localAvailabilityNote || '') + korlektionNote;
 }
 
 // FAKTURAADRESS-TVÅNG: Förhindrar att AI upprepar tidigare konversationssvar
 if (queryLower.includes('fakturaadress')) {
-  localAvailabilityNote = '\n\n[KRITISK SYSTEMNOTERING: Kunden ställer en FAKTURAADRESS-fråga. Du MÅSTE svara ENBART med fakturaadress-information från KONTEXT-sektionen nedan. Ignorera ALL pris- och paketinformation från konversationshistoriken. Ge de exakta adresserna från kontexten.]';
+localAvailabilityNote = '\n\n[KRITISK SYSTEMNOTERING: Kunden ställer en FAKTURAADRESS-fråga. Du MÅSTE svara ENBART med fakturaadress-information från KONTEXT-sektionen nedan. Ignorera ALL pris- och paketinformation från konversationshistoriken. Ge de exakta adresserna från kontexten.]';
 }
 
 // PAKET-GILTIGHET-TVÅNG: Förhindrar onödig klarifikationsfråga om giltighetstid
 if ((queryLower.includes('giltig') || queryLower.includes('gäller') || queryLower.includes('länge')) && queryLower.includes('paket')) {
-  localAvailabilityNote = (localAvailabilityNote || '') + '\n\n[KRITISK SYSTEMNOTERING: Kunden frågar om giltighetstid för paket. Svara ALLTID direkt: alla paket och köp av tjänster har giltighetstid **2 år (24 månader)** från köpdatumet. Fråga INTE om vilket paket — svaret gäller ALLA paket.]';
+localAvailabilityNote = (localAvailabilityNote || '') + '\n\n[KRITISK SYSTEMNOTERING: Kunden frågar om giltighetstid för paket. Svara ALLTID direkt: alla paket och köp av tjänster har giltighetstid **2 år (24 månader)** från köpdatumet. Fråga INTE om vilket paket — svaret gäller ALLA paket.]';
 }
 
 const _effectiveArea = _alternativesContextNote ? null : detectedArea;
@@ -2748,10 +2748,10 @@ messages: []
 };
 }
 
-console.log(`[STATE EXTRACT] Returnerar från session:`, JSON.stringify({
-locked_context: session.locked_context,
-vehicle_exists: !!session.locked_context.vehicle
-}));
+// console.log(`[STATE EXTRACT] Returnerar från session:`, JSON.stringify({
+//locked_context: session.locked_context,
+//vehicle_exists: !!session.locked_context.vehicle
+//}));
 
 return {
 locked_context: session.locked_context,
