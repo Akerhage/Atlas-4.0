@@ -19,12 +19,44 @@ test('live Atlas login succeeds for the Playwright user', async ({ page }) => {
 
   await page.locator('#login-user').fill(username);
   await page.locator('#login-pass').fill(password);
+
+  const loginResponsePromise = page.waitForResponse((response) => {
+    return response.request().method() === 'POST' &&
+      response.url().includes('/api/auth/login');
+  }, { timeout: 30_000 });
+
   await page.locator('#login-form').locator('button[type="submit"]').click();
 
-  await page.waitForFunction(() => {
-    return Boolean(window.localStorage.getItem('atlas_token')) &&
-      Boolean(window.localStorage.getItem('atlas_user'));
-  }, null, { timeout: 30_000 });
+  const loginResponse = await loginResponsePromise;
+  const responseText = await loginResponse.text();
+
+  let responseJson = null;
+  try {
+    responseJson = JSON.parse(responseText);
+  } catch {
+    responseJson = null;
+  }
+
+  if (!loginResponse.ok()) {
+    const loginErrorText = (await page.locator('#login-error').textContent() || '').trim();
+    const apiErrorText = typeof responseJson?.error === 'string' ? responseJson.error : '';
+    const fallbackText = responseText.trim();
+
+    throw new Error(
+      `Atlas login failed (${loginResponse.status()}): ${apiErrorText || loginErrorText || fallbackText || 'empty response body'}`
+    );
+  }
+
+  await expect.poll(async () => {
+    try {
+      return await page.evaluate(() => ({
+        hasToken: Boolean(window.localStorage.getItem('atlas_token')),
+        hasUser: Boolean(window.localStorage.getItem('atlas_user')),
+      }));
+    } catch {
+      return { hasToken: false, hasUser: false };
+    }
+  }, { timeout: 30_000 }).toEqual({ hasToken: true, hasUser: true });
 
   // Appen laddar själv om efter lyckad login. Vi laddar om roten en gång till
   // för att verifiera post-login-state deterministiskt i samma test.
