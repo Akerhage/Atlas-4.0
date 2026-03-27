@@ -16,7 +16,7 @@ Design: Cyan & Mint accents, Deep blacks, Soft glows, Luxury feels
 --text-secondary: #a0c4d9;
 --accent-primary: #00d4ff;
 --accent-hover: #00ffa3;
---border-color: rgba(0, 212, 255, 0.15);
+--border-color: rgba(0, 212, 255, 0.10);
 
 /* === MAILMALLAR & INKORG – ATLAS NAVIGATOR (cyan/mint) === */
 --group-bg: rgba(0, 212, 255, 0.08);
@@ -243,17 +243,6 @@ inset 0 1px 0 rgba(255, 255, 255, 0.2);
 ::-webkit-scrollbar-thumb:hover {
 background: linear-gradient(180deg, #00ffa3, #00d4ff);
 box-shadow: 0 0 20px rgba(0, 255, 163, 0.8);
-}
-
-/* === EXTRA PREMIUM TOUCHES === */
-.template-item.active {
-background: linear-gradient(90deg, 
-rgba(0, 212, 255, 0.15) 0%, 
-rgba(0, 255, 163, 0.1) 100%);
-border-left: 3px solid #00ffa3;
-box-shadow: 
-inset 0 0 20px rgba(0, 212, 255, 0.1),
-0 4px 16px rgba(0, 212, 255, 0.2);
 }
 
 .status-lamp-dot.green {

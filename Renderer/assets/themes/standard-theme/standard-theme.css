@@ -63,3 +63,10 @@ body {
     filter: none !important;
 }
 
+/* ── Hem-vy (Gör rektangeln bakom sökrutan synlig) ─────────────── */
+#view-chat #home-chat-footer.chat-input-area {
+    background: var(--bg-frosty-content) !important;
+    border-top: 1px solid var(--border-color) !important;
+    border-left: 1px solid var(--border-color) !important;
+    border-right: 1px solid var(--border-color) !important;
+}

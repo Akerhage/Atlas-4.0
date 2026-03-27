@@ -217,7 +217,7 @@ border-left: 2px solid transparent;
 margin-bottom: 2px;
 font-weight: 500;
 font-size: 14px;
-color: rgba(255, 255, 255, 0.38);
+color: rgba(255, 255, 255, 0.65);
 cursor: pointer;
 transition: color 0.2s ease, border-color 0.2s ease;
 display: flex !important;
@@ -238,7 +238,7 @@ position: relative;
 .sidebar .menu-item:hover {
 background: none !important;
 background-color: transparent !important;
-color: rgba(255, 255, 255, 0.65) !important;
+color: rgba(255, 255, 255, 0.85) !important;
 transform: none !important;
 box-shadow: none !important;
 }
@@ -482,7 +482,7 @@ box-shadow: var(--shadow-small) !important;
 /* =============================================================================
 HEM-VYN (Home) - MASTER LAYOUT KONSOLIDERAD
 ============================================================================= */
-/* HEM SKRIVRUTA (Den runda snygga) */
+/* HEM SKRIVRUTA */
 #home-chat-footer.chat-input-area {
 display: flex !important;
 width: 100% !important;
@@ -492,6 +492,7 @@ background: transparent !important;
 align-items: center !important;
 justify-content: center !important;
 flex-shrink: 0 !important;
+border-radius: 0 !important;
 }
 
 #home-chat-footer #chat-form {
@@ -499,15 +500,15 @@ display: flex !important;
 width: 100% !important;
 max-width: 1000px !important;
 background: var(--bg-frosty-input-area) !important;
-border-radius: 40px !important;
-padding: 8px 22px !important;
+border-radius: 20px !important;
+padding: 8px 8px 8px 22px !important; /* <--- Ändrad! Endast 8px till höger nu */
 border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 #home-chat-footer #chat-form:focus-within {
-transform: translateY(-2px) !important;
-border-color: var(--accent-primary) !important;
-box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35) !important;
+    /* transform: translateY(-2px) !important; <-- TA BORT! */
+    border-color: rgba(255, 255, 255, 0.2) !important; /* Dämpa färgen */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important; /* Standard skugga */
 }
 
 #home-chat-footer #my-chat-input {
@@ -600,10 +601,11 @@ font-style: italic !important;
 }
 
 #my-ticket-chat-input:focus {
-border-color: rgba(255, 255, 255, 0.25) !important;
-background: rgba(255, 255, 255, 0.04) !important;
-outline: none !important;
-box-shadow: none !important;
+    /* Döda gamla koden och sätt in denna */
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
 /* Nollställer blå fokuskontur i Inkorg & Mina Ärenden */
@@ -949,10 +951,10 @@ font-family: inherit;
 
 .glass-modal-body input:focus,
 .glass-modal-body textarea:focus {
-background: rgba(0, 0, 0, 0.6) !important;
-border-color: var(--accent-primary) !important;
-outline: none !important;
-box-shadow: 0 0 12px color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    background: rgba(0, 0, 0, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important; /* Mjuk färg */
+    outline: none !important;
+    box-shadow: none !important; /* Ta bort glöden */
 }
 
 .glass-modal-footer { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 10px; }
@@ -1638,7 +1640,7 @@ gap: 12px !important;
 /* Gör headern dragbar (frameless window) */
 -webkit-app-region: drag;
 user-select: none;
-border-radius: 0 0 14px 0 !important;
+border-radius: 0 !important;
 }
 /* Knappar och interaktiva element i headern ska INTE dra fönstret */
 .chat-header button,
@@ -1804,7 +1806,7 @@ padding: 14px 20px !important;
 template-editor-container har margin: 24px (--spacing-lg), kompenseras här. */
 min-height: calc(var(--panel-label-height) - var(--spacing-lg)) !important;
 border-top: 3px solid;
-border-radius: 12px 12px 0 0 !important;
+border-radius: 0 !important;
 background: linear-gradient(90deg, rgba(255,255,255,0.03), transparent), rgba(0,0,0,0.2) !important;
 flex-shrink: 0 !important;
 flex-wrap: nowrap !important;
@@ -2282,7 +2284,7 @@ box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 LAYOUT
 ============================================================================= */
 .detail-bottom-area {
-border-radius: 0 0 16px 16px !important; 
+border-radius: 0 !important;
 position: relative; 
 z-index: 10;
 background: #1e1e1e !important; 
@@ -2592,22 +2594,21 @@ TEMPLATE ITEMS
 ============================================================================= */
 /* Mall-item: platt, ren stil — ingen shimmer/glow/translateX */
 .template-item {
-background: transparent;
-border: none;
-border-left: 2px solid rgba(255, 255, 255, 0.08);
-border-radius: 0;
-padding: 10px 12px !important;
-margin: 2px 0;
-min-height: 42px !important;
-display: flex !important;
-align-items: center !important;
-justify-content: space-between !important;
-transition: background 0.15s ease, border-color 0.15s ease;
-cursor: pointer;
-position: relative;
-overflow: hidden;
-box-shadow: none;
-width: 100% !important;
+    background: rgba(255, 255, 255, 0.03); /* Ger en väldigt subtil ifylld bakgrund */
+    border: 1px solid rgba(255, 255, 255, 0.08); /* Skapar en tunn och fin ram runt HELA kortet */
+    border-radius: 8px; /* Ger kortet mjuka, moderna hörn */
+    padding: 10px 12px !important;
+    margin: 6px 0 !important; /* Ökar avståndet mellan korten så de separeras */
+    min-height: 42px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: none; /* Ingen hoppig skugga! */
+    width: 100% !important;
 }
 
 .template-item::before { display: none !important; }
@@ -2620,8 +2621,10 @@ box-shadow: none;
 }
 
 .template-item.active {
-border-color: var(--accent-primary);
-background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+    border-color: var(--accent-primary) !important;
+    /* Lägger en 1px extra "ram" inuti kortet för att markera det tydligt hela vägen runt */
+    box-shadow: inset 0 0 0 2px var(--accent-primary) !important; 
+    background: color-mix(in srgb, var(--accent-primary) 15%, transparent) !important;
 }
 
 .template-title { color: var(--text-primary); font-weight: 600; font-size: 13px; }
@@ -3404,7 +3407,7 @@ padding: 15px 20px !important;
 background: transparent !important;
 border: none !important;
 border-bottom: 2px solid transparent !important;
-color: rgba(255, 255, 255, 0.38) !important;
+color: rgba(255, 255, 255, 0.65) !important;
 cursor: pointer !important;
 transition: color 0.2s ease, border-color 0.2s ease !important;
 font-weight: 500 !important;
@@ -3413,7 +3416,7 @@ letter-spacing: 0.2px !important;
 }
 
 .header-tab:hover {
-color: rgba(255, 255, 255, 0.65) !important;
+color: rgba(255, 255, 255, 0.85) !important;
 }
 
 .header-tab.active {

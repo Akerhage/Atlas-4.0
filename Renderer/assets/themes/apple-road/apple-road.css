@@ -28,9 +28,9 @@ Fil: apple-road/apple-road.css
 --item-border: rgba(255,159,67,0.25);
 --accent: #ff9f43;
 
---bg-frosty-sidebar: rgba(30,25,20,0.92);
---bg-frosty-header: rgba(30,25,20,0.92);
---bg-frosty-content: rgba(40,32,26,0.82);
+--bg-frosty-sidebar: rgba(30,15,12,0.95);
+--bg-frosty-header: rgba(25,20,14,0.95);
+--bg-frosty-content: rgba(35,26,20,0.80);
 --bg-frosty-bubble-atlas: rgba(50,42,35,0.92);
 --bg-frosty-bubble-user: linear-gradient(135deg, #ff9f43 0%, #ffb86c 100%);
 --bg-frosty-input-area: rgba(35,28,22,0.88);

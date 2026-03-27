@@ -34,9 +34,9 @@ Fil: sunset-horizon/sunset-horizon.css
 --accent: #ff6b9d;
 
 /* Glassmorphism med guld-glow */
---bg-frosty-sidebar: rgba(31, 14, 46, 0.88);
---bg-frosty-header: rgba(42, 21, 64, 0.85);
---bg-frosty-content: rgba(45, 24, 68, 0.82);
+--bg-frosty-sidebar: rgba(26, 10, 31, 0.95);
+--bg-frosty-header: rgba(31, 14, 46, 0.92);
+--bg-frosty-content: rgba(42, 21, 64, 0.85);
 --bg-frosty-bubble-atlas: rgba(61, 34, 85, 0.95);
 --bg-frosty-bubble-user: linear-gradient(135deg, #ff6b9d 0%, #ffa07a 50%, #b24bf3 100%);
 --bg-frosty-input-area: rgba(42, 21, 64, 0.88);
@@ -87,37 +87,23 @@ z-index: 1;
 /* === GLASSPANELER === */
 .sidebar, .chat-header, .chat-input-area, .about-container,
 .template-editor-container, .template-list-container {
-backdrop-filter: blur(var(--blur-amount)) saturate(170%);
--webkit-backdrop-filter: blur(var(--blur-amount)) saturate(170%);
-background: var(--bg-frosty-sidebar);
-border: 1px solid var(--border-color);
-box-shadow: 
-0 12px 50px rgba(0, 0, 0, 0.6),
-inset 0 1px 0 rgba(255, 255, 255, 0.1),
-0 0 45px rgba(255, 107, 157, 0.15);
-transition: var(--transition-slow);
-border-radius: 20px;
-overflow: hidden;
+    backdrop-filter: blur(var(--blur-amount)) saturate(170%);
+    -webkit-backdrop-filter: blur(var(--blur-amount)) saturate(170%);
+    background: var(--bg-frosty-sidebar);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); /* Ren, vanlig mörk skugga */
+    transition: var(--transition-slow);
+    border-radius: 18px;
+    overflow: hidden;
 }
 
 .sidebar:hover, .about-container:hover {
-box-shadow:
-0 16px 60px rgba(0, 0, 0, 0.7),
-0 0 60px rgba(255, 107, 157, 0.25),
-0 0 80px rgba(255, 215, 0, 0.15);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); /* Ren, vanlig mörk skugga */
 }
 
-/* === SIDEBAR LOGO === */
-.sidebar-logo {
-filter: drop-shadow(0 6px 20px rgba(255, 107, 157, 0.5))
-drop-shadow(0 0 30px rgba(255, 215, 0, 0.3));
-transition: var(--transition-slow);
-}
-
-.sidebar:hover .sidebar-logo {
-filter: drop-shadow(0 18px 45px rgba(255, 107, 157, 0.7))
-drop-shadow(0 10px 40px rgba(255, 215, 0, 0.5));
-}
+/* Döda glowet på loggan */
+.sidebar-logo { filter: none !important; }
+.sidebar:hover .sidebar-logo { filter: none !important; }
 
 /* Menystil hanteras av style.css — inga temaoverrides */
 
@@ -206,14 +192,12 @@ background: transparent;
 ::-webkit-scrollbar-thumb {
 background: linear-gradient(180deg, #ff6b9d, #ffa07a, #ffd700);
 border-radius: 10px;
-box-shadow: 
-0 0 25px rgba(255, 107, 157, 0.6),
-inset 0 1px 0 rgba(255, 255, 255, 0.2);
+box-shadow: none !important;
 }
 
 ::-webkit-scrollbar-thumb:hover {
 background: linear-gradient(180deg, #ffd700, #ffa07a, #ff6b9d);
-box-shadow: 0 0 35px rgba(255, 215, 0, 0.8);
+box-shadow: none !important;
 }
 
 /* === SERVER STATUS === */
@@ -310,15 +294,7 @@ box-shadow: 0 4px 16px var(--group-shadow);
 
 .template-group-header:hover {
 background: var(--group-hover);
-box-shadow: 0 6px 24px var(--group-shadow-hover);
-}
-
-.template-item:hover {
-background: var(--item-hover);
-border-color: var(--accent-gold);
-box-shadow: 
-0 6px 24px rgba(255, 107, 157, 0.25),
-0 0 30px rgba(255, 215, 0, 0.15);
+box-shadow: none !important;
 }
 
 /* === SÖKFÄLT STYLING === */
