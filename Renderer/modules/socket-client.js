@@ -709,7 +709,7 @@ updateInboxBadge?.();
 });
 
 // LIVE VY-SYNK: Uppdaterar allowed_views direkt när admin ändrar vy-behörigheter
-window.socketAPI.on('agent:views_updated', ({ username, allowed_views }) => {
+window.socketAPI.on('agent:views_updated', ({ username, allowed_views, role }) => {
 console.log(`👁️ [LIVE] Vy-behörigheter uppdaterade: ${username}`);
 
 // Gäller bara den inloggade agenten
@@ -717,8 +717,11 @@ if (currentUser?.username !== username) return;
 
 // Synka state och localStorage
 currentUser.allowed_views = allowed_views;
+// Uppdatera rollen om servern skickat med den — skyddar mot cachad admin-roll
+// (t.ex. om admin precis ändrat någon från admin → agent)
+if (role) currentUser.role = role;
 localStorage.setItem('atlas_user', JSON.stringify(currentUser));
-console.log(`✅ [LIVE] Egna allowed_views uppdaterade till: ${allowed_views || 'alla'}`);
+console.log(`✅ [LIVE] Egna allowed_views uppdaterade till: ${allowed_views || 'alla'} | roll: ${currentUser.role}`);
 
 // Uppdatera sidebaren direkt
 if (typeof updateInboxVisibility === 'function') updateInboxVisibility();
@@ -730,6 +733,30 @@ const allowed = allowed_views ? JSON.parse(allowed_views) : null;
 if (allowed && currentView && !allowed.includes(currentView) && currentView !== 'chat' && currentView !== 'admin') {
 console.warn(`⚠️ [LIVE] Aktuell vy "${currentView}" är inte längre tillåten — omdirigerar till Hem`);
 if (typeof switchView === 'function') switchView('chat');
+}
+});
+
+// LIVE ROLL-SYNK: Uppdaterar roll direkt när admin ändrar en agents roll
+window.socketAPI.on('agent:profile_updated', ({ username, role }) => {
+console.log(`👤 [LIVE] Roll uppdaterad för: ${username} → ${role}`);
+
+// Gäller bara den inloggade agenten
+if (currentUser?.username !== username) return;
+
+// Synka state och localStorage
+currentUser.role = role;
+localStorage.setItem('atlas_user', JSON.stringify(currentUser));
+console.log(`✅ [LIVE] Egen roll uppdaterad till: ${role}`);
+
+// Uppdatera sidebaren direkt (nu med korrekt roll)
+if (typeof updateInboxVisibility === 'function') updateInboxVisibility();
+
+// Om agenten är på admin-vyn men inte längre har adminroll → skicka till Hem
+const activeItem = document.querySelector('.menu-item.active');
+const currentView = activeItem?.dataset.view;
+if (role !== 'admin' && currentView === 'admin') {
+    console.warn(`⚠️ [LIVE] Ej längre admin — omdirigerar från admin-vyn till Hem`);
+    if (typeof switchView === 'function') switchView('chat');
 }
 });
 

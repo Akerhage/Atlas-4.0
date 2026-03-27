@@ -109,6 +109,11 @@ console.error("Update profile error:", err);
 return res.status(500).json({ error: "Kunde inte uppdatera profil" });
 }
 console.log(`👤 [ADMIN] Uppdaterade profil för @${username} (ID: ${userId})`);
+// Live-uppdatering: ny agentfärg och eventuell rolländring
+if (typeof io !== 'undefined') {
+    if (agent_color) io.emit('agent:color_updated', { username, color: agent_color });
+    if (role) io.emit('agent:profile_updated', { username, role });
+}
 res.json({ success: true });
 });
 } catch (e) {
@@ -126,6 +131,12 @@ if (userId === req.user.id) return res.status(400).json({ error: "Du kan inte ä
 
 db.run("UPDATE users SET role = ? WHERE id = ?", [newRole, userId], (err) => {
 if (err) return res.status(500).json({ error: "Kunde inte uppdatera roll" });
+// Live-uppdatering: slå upp username och meddela agentens klient
+db.get("SELECT username FROM users WHERE id = ?", [userId], (e2, row) => {
+    if (!e2 && row && typeof io !== 'undefined') {
+        io.emit('agent:profile_updated', { username: row.username, role: newRole });
+    }
+});
 res.json({ success: true });
 });
 });
@@ -482,9 +493,13 @@ return res.status(500).json({ error: err.message });
 }
 console.log(`✅ [VIEWS] Uppdaterade allowed_views för @${username}: ${value}`);
 
-// Live-uppdatering: Meddela agentens klient direkt
+// Live-uppdatering: slå upp aktuell roll och meddela agentens klient direkt
+// (inkludera rollen så klienten kan korrigera cachad admin-roll)
 if (typeof io !== 'undefined') {
-io.emit('agent:views_updated', { username, allowed_views: value });
+    db.get("SELECT role FROM users WHERE username = ?", [username], (e2, row) => {
+        const role = (!e2 && row) ? row.role : null;
+        io.emit('agent:views_updated', { username, allowed_views: value, role });
+    });
 }
 
 res.json({ success: true, allowed_views: value });
@@ -554,6 +569,10 @@ if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access deni
 const { username, newRole } = req.body;
 db.run("UPDATE users SET role = ? WHERE username = ?", [newRole, username], (err) => {
 if (err) return res.status(500).json({ error: err.message });
+// Live-uppdatering: meddela agentens klient direkt om rollbytet
+if (typeof io !== 'undefined') {
+    io.emit('agent:profile_updated', { username, role: newRole });
+}
 res.json({ success: true });
 });
 });

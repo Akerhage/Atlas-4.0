@@ -21,6 +21,10 @@ const LOGIN_WINDOW_MS    = 15 * 60 * 1000; // 15 minuter
 let jwtExpiresIn = '24h';
 router.setJwtExpiresIn = (val) => { jwtExpiresIn = val; };
 
+// Socket.io-instans — injiceras från server.js via setIo() för live-uppdateringar
+let io = null;
+router.setIo = (ioInstance) => { io = ioInstance; };
+
 // =============================================================================
 // AUTHENTICATION ENDPOINTS
 // =============================================================================
@@ -139,6 +143,10 @@ db.run(sql, [display_name, status_text, agent_color, avatar_id, userId], (err) =
 if (err) {
 console.error("Update profile error:", err);
 return res.status(500).json({ error: "Kunde inte uppdatera profil" });
+}
+// Live-uppdatering: meddela alla klienter om ny agentfärg
+if (io && agent_color) {
+    io.emit('agent:color_updated', { username: req.user.username, color: agent_color });
 }
 res.json({ success: true });
 });

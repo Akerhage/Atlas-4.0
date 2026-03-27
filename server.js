@@ -834,6 +834,7 @@ res.sendFile(path.join(__dirname, 'Renderer', 'index.html'));
 // Auth-routes och publika endpoints (login, lösenord, profil, seed, version)
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
+authRoutes.setIo(io); // Injicera socket-instansen för live-uppdateringar vid profilsave
 
 // ✅ NY PUBLIC ENDPOINT: Hämtar alla kontor till kundchatten (Atlas 4.0)
 app.get('/api/public/offices', async (req, res) => {

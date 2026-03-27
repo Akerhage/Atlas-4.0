@@ -979,7 +979,7 @@ overlay.style.display = 'none';
 
 // ===== MANUAL-NEDLADDNING =====
 window.openAtlasManual = function() {
-showToast('📄 Manualen är under framtagning. Kontakta din admin för tillgång.');
+_downloadAtlasManual('Atlas_Användarmanual.docx');
 };
 
 // ===== GLOBAL ESC KEY HANDLER FÖR ALLA MODALER =====
