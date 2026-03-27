@@ -8,6 +8,51 @@ function getRequiredEnv(name) {
   return value;
 }
 
+function parseAllowedViews(rawValue) {
+  if (!rawValue) return null;
+  if (Array.isArray(rawValue)) return rawValue;
+  try {
+    const parsed = JSON.parse(rawValue);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function getExpectedVisibleViews(user) {
+  const role = user?.role || '';
+  const isAdmin = role === 'admin';
+  const allowed = parseAllowedViews(user?.allowed_views ?? null);
+
+  const visibleViews = ['chat'];
+
+  if (isAdmin || !allowed || allowed.includes('my-tickets')) visibleViews.push('my-tickets');
+  if (isAdmin) visibleViews.push('inbox');
+  if (isAdmin || !allowed || allowed.includes('archive')) visibleViews.push('archive');
+  if (isAdmin || !allowed || allowed.includes('customers')) visibleViews.push('customers');
+
+  const adminKeys = ['admin-users', 'admin-offices', 'admin-config'];
+  const agentHasAdminAccess = !isAdmin && allowed && adminKeys.some((key) => allowed.includes(key));
+  if (isAdmin || agentHasAdminAccess) visibleViews.push('admin');
+
+  if (isAdmin || !allowed || allowed.includes('templates')) visibleViews.push('templates');
+  if (isAdmin || !allowed || allowed.includes('about')) visibleViews.push('about');
+
+  return visibleViews;
+}
+
+async function getVisibleMenuViews(page) {
+  return await page.evaluate(() => {
+    return Array.from(document.querySelectorAll('.sidebar-menu .menu-item[data-view]'))
+      .filter((item) => {
+        const styles = window.getComputedStyle(item);
+        return styles.display !== 'none' && styles.visibility !== 'hidden';
+      })
+      .map((item) => item.dataset.view)
+      .filter(Boolean);
+  });
+}
+
 async function loginToLiveAtlas(page) {
   const username = getRequiredEnv('ATLAS_E2E_USERNAME');
   const password = getRequiredEnv('ATLAS_E2E_PASSWORD');
@@ -96,6 +141,9 @@ async function openLiveView(page, viewId) {
 
 module.exports = {
   getRequiredEnv,
+  getExpectedVisibleViews,
+  getVisibleMenuViews,
   loginToLiveAtlas,
   openLiveView,
+  parseAllowedViews,
 };
