@@ -56,45 +56,11 @@ body { background: var(--bg-image) center/cover no-repeat fixed; color: #ffffff 
     background: rgba(2, 2, 2, 0.99) !important;
 }
 
-.menu-item.active {
-    background: linear-gradient(90deg, rgba(16, 185, 129, 0.35), transparent) !important;
-    border-left: 3px solid var(--accent-primary) !important;
-}
+/* Menystil hanteras av style.css — inga temaoverrides */
 
 /* ═══════════════════════════════════════════════════════════════
    ONYX EXPANSION PATCH - ÖVRIGA VYER & EFFEKTER
    ═══════════════════════════════════════════════════════════════ */
-
-/* --- 1. PREMIUM MENU ITEMS (Glidande effekt) --- */
-.menu-item {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-left: 3px solid transparent;
-}
-
-/* Den glidande bakgrunden vid hover */
-.menu-item::before {
-    content: '';
-    position: absolute;
-    left: -100%; top: 0;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.1), transparent);
-    transition: left 0.5s ease;
-}
-.menu-item:hover::before { left: 100%; }
-
-.menu-item:hover {
-    background: rgba(16, 185, 129, 0.05);
-    color: var(--accent-primary);
-}
-
-.menu-item.active {
-    background: linear-gradient(90deg, rgba(16, 185, 129, 0.2), transparent) !important;
-    border-left: 3px solid var(--accent-primary) !important;
-    color: #ffffff;
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
-}
 
 /* --- 2. OM-SIDAN (Guider & Genvägar) --- */
 .guide-step {
@@ -163,13 +129,7 @@ body { background: var(--bg-image) center/cover no-repeat fixed; color: #ffffff 
     box-shadow: 0 0 15px #10b981;
 }
 
-/* --- 4. NOTIS-BADGE (Röd/Rosa för maximal kontrast) --- */
-.nav-badge {
-    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.6) !important;
-    color: white !important;
-    border: 1px solid rgba(239, 68, 68, 0.4);
-}
+/* --- 4. MINI CHAT (börjar nedan) --- */
 
 /* --- 5. MINI CHAT (Inuti ärendevyn) --- */
 #view-my-tickets .message.agent .bubble {
@@ -222,49 +182,3 @@ body { background: var(--bg-image) center/cover no-repeat fixed; color: #ffffff 
     filter: none !important;
 }
 
-.sidebar .menu-item {
-    transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.16s ease !important;
-}
-
-.sidebar .menu-item:hover {
-    transform: none !important;
-    box-shadow: none !important;
-}
-
-.sidebar .menu-item.active {
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-primary) 22%, transparent) !important;
-}
-
-.sidebar .menu-item::before,
-.sidebar .menu-item.active::before,
-.sidebar .menu-item:hover::before {
-    box-shadow: none !important;
-}
-
-
-/* Sidebar edge softening (all themes) */
-.sidebar {
-    box-shadow: none !important;
-    border-right: 1px solid color-mix(in srgb, var(--accent-primary) 16%, rgba(255,255,255,0.08)) !important;
-}
-
-.sidebar .menu-item::before {
-    width: 2px !important;
-    opacity: 0.45 !important;
-}
-
-.sidebar .menu-item:hover::before {
-    height: 52% !important;
-    opacity: 0.58 !important;
-}
-
-.sidebar .menu-item.active::before {
-    height: 68% !important;
-    opacity: 0.72 !important;
-}
-
-.sidebar .menu-item.active {
-    border-left-width: 2px !important;
-    border-left-color: color-mix(in srgb, var(--accent-primary) 70%, transparent) !important;
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-primary) 14%, transparent) !important;
-}

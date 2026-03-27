@@ -80,12 +80,15 @@ db.run(`CREATE TABLE IF NOT EXISTS templates (
 id INTEGER PRIMARY KEY,
 title TEXT,
 content TEXT,
-group_name TEXT
+group_name TEXT,
+owner TEXT DEFAULT NULL
 )`, (err) => {
 if (err) {
 console.error('❌ FATAL: Could not create templates table:', err);
 process.exit(1);
 }
+// Migration: lägg till owner-kolumn om den saknas (ignorerar fel om den redan finns)
+db.run(`ALTER TABLE templates ADD COLUMN owner TEXT DEFAULT NULL`, () => {});
 console.log('✅ Table "templates" ready');
 checkAllTablesCreated();
 });
@@ -647,9 +650,9 @@ else resolve(rows);
 function saveTemplate(template) {
 return new Promise((resolve, reject) => {
 db.run(
-`INSERT OR REPLACE INTO templates (id, title, group_name, content) 
-VALUES (?, ?, ?, ?)`,
-[template.id, template.title, template.group_name || 'Övrigt', template.content],
+`INSERT OR REPLACE INTO templates (id, title, group_name, content, owner)
+VALUES (?, ?, ?, ?, ?)`,
+[template.id, template.title, template.group_name || null, template.content, template.owner || null],
 (err) => {
 if (err) reject(err);
 else resolve();

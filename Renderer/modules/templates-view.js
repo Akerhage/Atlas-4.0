@@ -5,6 +5,32 @@
 // ANVÄNDS AV: renderer.js
 // ============================================
 
+// Fasta grupper för teammallar (samma ordning som flikarna)
+const TEMPLATE_FIXED_GROUPS = ['AM', 'BIL', 'MC', 'SLÄP', 'LASTBIL/BUSS', 'ENGELSKA', 'ÖVRIGA'];
+
+// Aktiv flik — 'mine' för privata, annars ett gruppnamn
+let currentTemplateTab = 'mine';
+
+// Byt aktiv flik och re-rendera
+function switchTemplateTab(group) {
+currentTemplateTab = group;
+
+// Uppdatera knapp-stilar
+document.querySelectorAll('#template-tabs .header-tab').forEach(btn => {
+btn.classList.toggle('active', btn.dataset.group === group);
+});
+
+// Visa/dölj GRUPP-väljaren (dold vid "Mina Mallar")
+const groupWrapper = document.getElementById('template-group-wrapper');
+if (groupWrapper) groupWrapper.style.display = (group === 'mine') ? 'none' : 'flex';
+
+// Stäng redigeraren och visa placeholder vid fliktbyte
+if (DOM.editorForm) DOM.editorForm.style.display = 'none';
+if (DOM.editorPlaceholder) DOM.editorPlaceholder.style.removeProperty('display');
+
+renderTemplates(State.templates);
+}
+
 // ==========================================================
 // MALL-HANTERARE — LADDA
 // ==========================================================
@@ -33,52 +59,44 @@ if (!DOM.templateList) console.warn("⚠️ DOM.templateList saknas - kan inte r
 return;
 }
 
+// Uppdatera badge på "Mina Mallar"-fliken
+const myCount = (list || []).filter(t => t.owner && t.owner === currentUser.username).length;
+const mineBadge = document.getElementById('badge-tmpl-mine');
+if (mineBadge) {
+mineBadge.textContent = myCount;
+mineBadge.style.display = myCount > 0 ? 'inline-flex' : 'none';
+}
+
+// Filtrera baserat på aktiv flik
+let filtered;
+if (currentTemplateTab === 'mine') {
+filtered = (list || []).filter(t => t.owner && t.owner === currentUser.username);
+} else {
+// Teammallar: visa mallar som matchar gruppen (eller ÖVRIGA för okända grupper)
+if (currentTemplateTab === 'ÖVRIGA') {
+filtered = (list || []).filter(t => !t.owner && (!t.group_name || !TEMPLATE_FIXED_GROUPS.includes(t.group_name)));
+} else {
+filtered = (list || []).filter(t => !t.owner && t.group_name === currentTemplateTab);
+}
+}
+
 // Agentens profilfärg styr mallarnas färgtema
 const styles = getAgentStyles(currentUser.username);
 DOM.templateList.innerHTML = '';
 
-if (list.length === 0) {
-DOM.templateList.innerHTML = '<div class="template-item-empty">Inga mallar hittades.</div>';
+if (filtered.length === 0) {
+DOM.templateList.innerHTML = '<div style="padding:16px 12px; color:var(--text-secondary); font-size:13px; opacity:0.6;">Inga mallar här ännu.</div>';
 return;
 }
 
-// Gruppering baserat på group_name
-const groups = {};
-list.forEach(t => {
-const g = t.group_name || 'Övrigt';
-if (!groups[g]) groups[g] = [];
-groups[g].push(t);
-});
+// Flat lista — sorterad alfabetiskt, inga grupp-headers (tabs i header visar kontexten)
+filtered.sort((a, b) => a.title.localeCompare(b.title, 'sv'));
 
-Object.keys(groups).sort().forEach(gName => {
-groups[gName].sort((a, b) => a.title.localeCompare(b.title, 'sv'));
-const header = document.createElement('div');
-header.className = 'template-group-header';
-
-header.style.setProperty('--group-bg', styles.bg, 'important');
-header.style.setProperty('--group-text', styles.main, 'important');
-header.style.setProperty('--group-border', styles.border, 'important');
-header.style.setProperty('border-left', `4px solid ${styles.main}`, 'important');
-
-header.innerHTML = `
-<div class="group-header-content">
-<span class="group-arrow" style="color:${styles.main} !important;">▶</span>
-<span class="group-name" style="color:${styles.main} !important;">${gName}</span>
-</div>
-<span class="group-count" style="background:${styles.main} !important; color: white !important;">${groups[gName].length}</span>
-`;
-
-const content = document.createElement('div');
-content.className = 'template-group-content';
-
-groups[gName].forEach(t => {
+filtered.forEach(t => {
 const item = document.createElement('div');
 item.className = 'template-item';
-
-// Subtil vänsterkant på varje mall för att knyta ihop temat
 item.style.setProperty('border-left', `2px solid ${styles.border}`, 'important');
 
-// Get content preview (first 60 chars, strip HTML but preserve block spacing)
 const _previewHtml = (t.content || '').replace(/<\/?(p|div|br)[^>]*>/gi, ' ');
 const tempDiv = document.createElement('div');
 tempDiv.innerHTML = _previewHtml;
@@ -92,24 +110,8 @@ item.innerHTML = `
 </div>
 `;
 
-item.onclick = () => {
-if (typeof openTemplateEditor === 'function') {
-openTemplateEditor(t);
-} else {
-console.error("Kritiskt fel: openTemplateEditor saknas fortfarande i scope!");
-}
-};
-
-content.appendChild(item);
-});
-
-header.onclick = () => {
-content.classList.toggle('expanded');
-header.querySelector('.group-arrow').classList.toggle('expanded');
-};
-
-DOM.templateList.appendChild(header);
-DOM.templateList.appendChild(content);
+item.onclick = () => openTemplateEditor(t);
+DOM.templateList.appendChild(item);
 });
 }
 
@@ -137,7 +139,21 @@ if (DOM.editorForm) DOM.editorForm.style.setProperty('display', 'flex', 'importa
 // Fyller i fälten
 if (DOM.inputs.id) DOM.inputs.id.value = t.id;
 if (DOM.inputs.title) DOM.inputs.title.value = t.title;
-if (DOM.inputs.group) DOM.inputs.group.value = t.group_name || '';
+
+// Sätt grupp: välj matchande option eller ÖVRIGA som fallback
+const groupInput = DOM.inputs.group;
+if (groupInput) {
+const groupVal = TEMPLATE_FIXED_GROUPS.includes(t.group_name) ? t.group_name : 'ÖVRIGA';
+groupInput.value = groupVal;
+}
+
+// Sätt owner
+const ownerInput = document.getElementById('template-owner-input');
+if (ownerInput) ownerInput.value = t.owner || '';
+
+// Visa/dölj grupp-väljaren
+const groupWrapper = document.getElementById('template-group-wrapper');
+if (groupWrapper) groupWrapper.style.display = t.owner ? 'none' : 'flex';
 
 if (quill) {
 quill.root.innerHTML = t.content;

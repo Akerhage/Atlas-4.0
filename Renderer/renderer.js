@@ -1649,7 +1649,22 @@ if (DOM.editorForm) DOM.editorForm.style.display = 'flex';
 
 if (DOM.inputs.id) DOM.inputs.id.value = '';
 if (DOM.inputs.title) DOM.inputs.title.value = '';
-if (DOM.inputs.group) DOM.inputs.group.value = '';
+
+// Förifyll grupp och owner baserat på aktiv flik
+const activeTab = document.querySelector('#template-tabs .header-tab.active')?.dataset?.group || 'mine';
+const ownerInput = document.getElementById('template-owner-input');
+const groupWrapper = document.getElementById('template-group-wrapper');
+
+if (activeTab === 'mine') {
+// Privat mall — dölj grupp, sätt owner
+if (groupWrapper) groupWrapper.style.display = 'none';
+if (ownerInput) ownerInput.value = currentUser?.username || '';
+} else {
+// Teammall — visa grupp förvald till aktiv flik
+if (groupWrapper) groupWrapper.style.display = 'flex';
+if (DOM.inputs.group) DOM.inputs.group.value = activeTab;
+if (ownerInput) ownerInput.value = '';
+}
 
 if (quill && quill.root) quill.root.innerHTML = '';
 
@@ -1670,10 +1685,12 @@ e.preventDefault();
 const saveBtn = DOM.editorForm.querySelector('button[type="submit"]');
 if (saveBtn) saveBtn.disabled = true;
 
+const ownerVal = document.getElementById('template-owner-input')?.value || null;
 const newTemplate = {
 id: DOM.inputs.id?.value ? parseInt(DOM.inputs.id.value) : Date.now(),
 title: DOM.inputs.title?.value || 'Namnlös mall',
-group_name: DOM.inputs.group?.value || 'Övrigt',
+group_name: ownerVal ? null : (DOM.inputs.group?.value || 'ÖVRIGA'),
+owner: ownerVal || null,
 content: quill ? quill.root.innerHTML : ''
 };
 

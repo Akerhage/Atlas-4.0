@@ -66,55 +66,7 @@ border: 1px solid rgba(0, 212, 255, 0.2);
 box-shadow: 0 8px 28px rgba(0, 212, 255, 0.22), 0 0 40px rgba(0, 255, 163, 0.12);
 }
 
-/* === PREMIUM MENU ITEMS === */
-.menu-item {
-color: var(--text-secondary);
-position: relative;
-overflow: visible;
-border-left: 2px solid transparent;
-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.menu-item::before {
-content: '';
-position: absolute;
-left: -2px;
-top: 50%;
-transform: translateY(-50%);
-width: 2px;
-height: 0;
-background: linear-gradient(180deg, #00d4ff, #00ffa3);
-border-radius: 0 2px 2px 0;
-transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-box-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
-}
-
-.menu-item:hover {
-background: rgba(0, 212, 255, 0.08);
-color: #00d4ff;
-box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.08);
-}
-
-.menu-item:hover::before {
-height: 70%;
-}
-
-.menu-item.active {
-background: linear-gradient(90deg, 
-rgba(0, 212, 255, 0.2) 0%, 
-rgba(0, 255, 163, 0.1) 100%);
-color: #00ffa3;
-font-weight: 700;
-border-left: 2px solid #00ffa3;
-box-shadow: 
-inset 0 0 30px rgba(0, 255, 163, 0.15),
-0 4px 20px rgba(0, 212, 255, 0.2);
-}
-
-.menu-item.active::before {
-height: 85%;
-box-shadow: 0 0 15px rgba(0, 255, 163, 0.8);
-}
+/* Menystil hanteras av style.css — inga temaoverrides */
 
 /* === PREMIUM HEADER === */
 .chat-header {
@@ -319,15 +271,6 @@ box-shadow: none !important;
 color: #ffffff !important;
 }
 
-.nav-badge {
-/* "Redline Red" - Tänk rödmarkeringen på en varvräknare. 
-Extrem kontrast mot det cyan/gröna temat. */
-background: linear-gradient(135deg, #ff4757, #ff6b81) !important;
-box-shadow: 0 0 20px rgba(255, 71, 87, 0.7) !important;
-color: white !important;
-text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Glödande text */
-border: 1px solid rgba(255, 71, 87, 0.4); /* Tunn "glas"-kant */
-}
 
 /* Behåller dina snygga neon-taggar */
 .tag-chatt {
@@ -409,49 +352,3 @@ transform: none !important;
 filter: none !important;
 }
 
-.sidebar .menu-item {
-transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.16s ease !important;
-}
-
-.sidebar .menu-item:hover {
-transform: none !important;
-box-shadow: none !important;
-}
-
-.sidebar .menu-item.active {
-box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-primary) 22%, transparent) !important;
-}
-
-.sidebar .menu-item::before,
-.sidebar .menu-item.active::before,
-.sidebar .menu-item:hover::before {
-box-shadow: none !important;
-}
-
-
-/* Sidebar edge softening (all themes) */
-.sidebar {
-    box-shadow: none !important;
-    border-right: 1px solid color-mix(in srgb, var(--accent-primary) 16%, rgba(255,255,255,0.08)) !important;
-}
-
-.sidebar .menu-item::before {
-    width: 2px !important;
-    opacity: 0.45 !important;
-}
-
-.sidebar .menu-item:hover::before {
-    height: 52% !important;
-    opacity: 0.58 !important;
-}
-
-.sidebar .menu-item.active::before {
-    height: 68% !important;
-    opacity: 0.72 !important;
-}
-
-.sidebar .menu-item.active {
-    border-left-width: 2px !important;
-    border-left-color: color-mix(in srgb, var(--accent-primary) 70%, transparent) !important;
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-primary) 14%, transparent) !important;
-}

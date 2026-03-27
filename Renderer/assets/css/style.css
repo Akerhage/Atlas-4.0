@@ -207,66 +207,55 @@ height: calc(100% - 150px);
 }
 
 /* =============================================================================
-SIDEBAR MENU - HOVER & ACTIVE
+SIDEBAR MENU - HOVER & ACTIVE — MINIMALISTISK STIL (matchar header-flikar)
+Använder .sidebar .menu-item för att vinna mot tema-overrides utan !important
 ============================================================================= */
 .menu-item {
-padding: 12px var(--spacing-md);
-border-radius: var(--border-radius-md);
-margin-bottom: 6px;
-font-weight: 600;
-font-size: 15px;
-color: var(--text-secondary);
+padding: 10px var(--spacing-md);
+border-radius: 0;
+border-left: 2px solid transparent;
+margin-bottom: 2px;
+font-weight: 500;
+font-size: 14px;
+color: rgba(255, 255, 255, 0.38);
 cursor: pointer;
-transition: color var(--transition-fast), background var(--transition-fast);
+transition: color 0.2s ease, border-color 0.2s ease;
 display: flex !important;
 align-items: center !important;
 gap: 12px;
 position: relative;
 }
 
-.menu-item .menu-text { color: inherit; font-weight: 600; letter-spacing: -0.2px; }
-.menu-item .menu-icon { display: inline-flex; width: 20px; height: 20px; align-items: center; justify-content: center; opacity: 0.85; flex-shrink: 0; }
+.menu-item .menu-text { color: inherit; font-weight: inherit; letter-spacing: 0; }
+.menu-item .menu-icon { display: inline-flex; width: 20px; height: 20px; align-items: center; justify-content: center; opacity: 1; flex-shrink: 0; }
 
-.menu-item::before {
-content: '';
-position: absolute;
-left: 0;
-top: 50%;
-transform: translateY(-50%);
-width: 3px;
-height: 0;
-background: var(--accent-primary);
-border-radius: 0 3px 3px 0;
-transition: height var(--transition-fast);
-}
+/* Gammal animerad bar — dold */
+.menu-item::before { display: none !important; }
+.menu-item:hover::before { display: none !important; }
+.menu-item.active::before { display: none !important; }
 
-/* 1. HOVER-EFFEKT */
-.menu-item:hover {
-background: rgba(255, 255, 255, 0.07) !important;
-color: var(--text-primary) !important;
+/* 1. HOVER — högre specificitet (.sidebar prefix) för att slå tema-CSS */
+.sidebar .menu-item:hover {
+background: none !important;
+background-color: transparent !important;
+color: rgba(255, 255, 255, 0.65) !important;
 transform: none !important;
 box-shadow: none !important;
 }
 
-.menu-item:hover::before { 
-height: 60% !important; 
+/* 2. AKTIVT LÄGE — bara en accent-border-left, ingen bakgrund */
+.sidebar .menu-item.active {
+background: none !important;
+background-color: transparent !important;
+background-image: none !important;
+color: var(--accent-primary) !important;
+box-shadow: none !important;
+border-left: 2px solid var(--accent-primary) !important;
+font-weight: 600 !important;
 }
 
-/* 2. AKTIVT LÄGE (Markerad flik) */
-.menu-item.active {
-background: linear-gradient(135deg, rgba(0, 113, 227, 0.15), rgba(0, 113, 227, 0.07)) !important;
-color: white !important;
-box-shadow: inset 0 0 0 1px rgba(0, 113, 227, 0.2) !important;
-border-left: 3px solid var(--accent-primary) !important;
-}
-
-/* Döljer audit-varning för SVG i aktivt läge */
 .menu-item.active svg {
 color: var(--accent-primary) !important;
-}
-
-.menu-item.active::before { 
-height: 80% !important; 
 }
 
 /* Rad 225 - Tystar audit för klassen .active */
@@ -624,30 +613,31 @@ border-color: rgba(255,255,255,0.2) !important;
 box-shadow: none !important;
 }
 
-/* Send-knappen (class send-button-ticket) */
+/* Send-knappen (class send-button-ticket) — cirkulär, matchar Inkorgens stil */
 .send-button-ticket {
-width: 36px !important;
-height: 36px !important;
-min-width: 36px !important;
-border-radius: 8px !important;
+width: 40px !important;
+height: 40px !important;
+min-width: 40px !important;
+border-radius: 50% !important;
 background: var(--accent-primary) !important;
-border: 1px solid rgba(255, 255, 255, 0.15) !important;
+border: none !important;
 display: flex !important;
 justify-content: center !important;
 align-items: center !important;
 cursor: pointer !important;
 color: white !important;
-transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+transition: opacity 0.15s ease, transform 0.15s ease !important;
 flex-shrink: 0 !important;
-box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35) !important;
+box-shadow: none !important;
 }
 
 .send-button-ticket:hover {
 opacity: 0.85 !important;
+transform: scale(1.05) !important;
 }
 
-.send-button-ticket:active { opacity: 0.7 !important; }
-.send-button-ticket svg { width: 20px !important; height: 20px !important; fill: currentColor !important; }
+.send-button-ticket:active { opacity: 0.7 !important; transform: scale(0.95) !important; }
+.send-button-ticket svg { width: 18px !important; height: 18px !important; fill: currentColor !important; }
 
 /* === HEADER BUTTON (Standard) === */
 .header-button {
@@ -682,16 +672,16 @@ SMART BADGES (MAIL & INBOX)
 display: inline-flex;
 align-items: center;
 justify-content: center;
-min-width: 24px;
-height: 24px;
-padding: 0 8px;
-border-radius: 12px;
+min-width: 18px;
+height: 18px;
+padding: 0 5px;
+border-radius: 6px;
 font-size: 11px;
-font-weight: 700;
-color: white;
-box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-background: var(--accent-primary); 
-border: 1px solid rgba(255, 255, 255, 0.1);
+font-weight: 500;
+color: color-mix(in srgb, var(--accent-primary) 75%, white);
+box-shadow: none;
+background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
+border: none;
 }
 
 .live-badge, .mail-badge {
@@ -1288,27 +1278,28 @@ display: inline-flex !important;
 align-items: center !important;
 justify-content: center !important;
 margin-left: auto !important;
-border-radius: 12px !important;
-min-width: 22px !important;
-height: 22px !important;
-padding: 0 7px !important;
-font-size: 13px !important;
-font-weight: 900 !important;
-color: white !important;
-text-shadow: 0 1px 2px rgba(0,0,0,0.4) !important; 
+border-radius: 6px !important;
+min-width: 18px !important;
+height: 18px !important;
+padding: 0 5px !important;
+font-size: 11px !important;
+font-weight: 500 !important;
+background: color-mix(in srgb, var(--accent-primary) 18%, transparent) !important;
+color: color-mix(in srgb, var(--accent-primary) 75%, white) !important;
+text-shadow: none !important;
 }
 
 #badge-inbox {
-background: linear-gradient(135deg, #ff4757, #ff6b81) !important;
-box-shadow: 0 0 5px rgba(255, 71, 87, 0.35) !important;
-border: 1.5px solid rgba(255, 71, 87, 0.5) !important;
+background: color-mix(in srgb, var(--accent-primary) 18%, transparent) !important;
+box-shadow: none !important;
+border: none !important;
 }
 
 #badge-my-tickets {
-background: linear-gradient(135deg, var(--accent-primary), rgba(0,0,0,0.2)) !important;
-box-shadow: 0 0 5px rgba(0, 113, 227, 0.35) !important;
-border: 1.5px solid var(--accent-primary) !important;
-color: white !important;
+background: color-mix(in srgb, var(--accent-primary) 18%, transparent) !important;
+box-shadow: none !important;
+border: none !important;
+color: color-mix(in srgb, var(--accent-primary) 75%, white) !important;
 }
 
 
@@ -2007,26 +1998,27 @@ REPLY & SEND BUTTONS
 ============================================================================= */
 #btn-reply-action,
 #btn-send-mail-action {
-width: 42px !important;
-height: 42px !important;
+width: 40px !important;
+height: 40px !important;
+min-width: 40px !important;
 display: flex !important;
 align-items: center !important;
 justify-content: center !important;
-border-radius: 8px !important;
+border-radius: 50% !important;
 cursor: pointer !important;
-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; 
-border: 1.5px solid var(--accent-primary) !important; 
-color: var(--accent-primary) !important;
-background: rgba(0, 0, 0, 0.2) !important;
-box-shadow: 0 0 8px var(--accent-primary) !important; 
+transition: opacity 0.15s ease, transform 0.15s ease !important;
+border: none !important;
+color: white !important;
+background: var(--accent-primary) !important;
+box-shadow: none !important;
+flex-shrink: 0 !important;
 }
 
 #btn-reply-action:hover,
 #btn-send-mail-action:hover {
-background: var(--accent-primary) !important; 
-color: #000 !important; 
-transform: translateY(-3px) scale(1.05) !important;
-box-shadow: 0 0 20px var(--accent-primary) !important;
+opacity: 0.85 !important;
+transform: scale(1.05) !important;
+box-shadow: none !important;
 }
 
 /* *** === LAYOUT-LÅS & SCROLL === *** */
@@ -2337,8 +2329,8 @@ flex-shrink: 0 !important;
 background: var(--accent-primary) !important;
 border-color: var(--accent-primary) !important;
 color: #fff !important;
-transform: translateY(-1px) !important;
-box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+transform: none !important;
+box-shadow: none !important;
 }
 
 /* =============================================================================
@@ -2391,18 +2383,6 @@ flex-shrink: 0;
 #view-my-tickets .list-panel-header {
 min-height: 101px;
 margin-bottom: 28px; /* panel-label-total(129) bibehålls: 101+28=129 */
-position: relative;
-border-bottom: none;
-box-shadow: 0 4px 24px -6px color-mix(in srgb, var(--accent-primary) 25%, transparent);
-}
-#view-my-tickets .list-panel-header::after {
-content: '';
-position: absolute;
-bottom: 0;
-left: 0;
-right: 115px; /* stannar tydligt innan SVG-ikonen (~27px buffert) */
-height: 1px;
-background: color-mix(in srgb, var(--accent-primary) 22%, var(--border-color));
 }
 #view-my-tickets .list-panel-header h3 {
 flex: 1;
@@ -2429,10 +2409,6 @@ Lager: gradient → radial-glow (agentfärg bakom ikonen) → SVG-ikon (vit kont
 #view-inbox .list-panel-header {
 min-height: 101px;
 margin-bottom: 28px; /* panel-label-total(129) bibehålls: 101+28=129 */
-margin-left: calc(-1 * var(--spacing-lg));
-position: relative;
-border-bottom: none;
-box-shadow: 0 4px 24px -6px color-mix(in srgb, var(--accent-primary) 25%, transparent);
 background-image:
 linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.065) 100%),
 radial-gradient(circle at calc(100% - 52px) 50%, color-mix(in srgb, var(--accent-primary) 22%, transparent) 0%, transparent 60%),
@@ -2441,20 +2417,11 @@ background-position: 0 0, 0 0, calc(100% - 16px) 50%;
 background-size: auto, auto, 72px 72px;
 background-repeat: repeat, no-repeat, no-repeat;
 }
-/* Inbox ::after skapar border som stannar tydligt innan SVG-ikonen */
-#view-inbox .list-panel-header::after {
-content: '';
-position: absolute;
-bottom: 0;
-left: 0;
-right: 115px; /* stannar tydligt innan SVG-ikonen (~27px buffert) */
-height: 1px;
-background: color-mix(in srgb, var(--accent-primary) 22%, var(--border-color));
-}
-/* Inbox h3: flex:1 gör att h3 kan växa men stannar vid flex-layoutens gräns */
-#view-inbox .list-panel-header h3 {
-flex: 1;
-min-width: 0;
+/* Inbox/MyTickets h3: max-width begränsar bredden så att border-bottom INTE
+   sträcker sig till SVG-vattenmärket (~88px från höger kant) */
+#view-inbox .list-panel-header h3,
+#view-my-tickets .list-panel-header h3 {
+max-width: calc(100% - 100px);
 }
 #view-my-tickets .list-panel-header {
 background-image:
@@ -2501,7 +2468,7 @@ justify-content: space-between !important;
 padding: 12px 20px 12px 24px !important;
 min-height: 103px !important;
 border-bottom: 1px solid color-mix(in srgb, var(--accent-primary) 34%, var(--border-color)) !important;
-margin-bottom: 53px !important; /* panel-label-total(156) - 103 */
+margin-bottom: 8px !important;
 flex-shrink: 0 !important;
 box-shadow: 0 4px 24px -6px color-mix(in srgb, var(--accent-primary) 25%, transparent),
 inset 0 -1px 0 color-mix(in srgb, var(--accent-primary) 10%, transparent) !important;
@@ -2539,54 +2506,47 @@ text-overflow: ellipsis;
 /* =============================================================================
 TEMPLATE GROUPS & HEADERS
 ============================================================================= */
+/* Grupp-header: platt, minimalistisk — ingen glow/shimmer */
 .template-group-header {
-background: linear-gradient(135deg, var(--group-bg, rgba(0, 113, 227, 0.08)), rgba(0, 0, 0, 0.12));
-padding: 8px 12px;
-margin: 12px 0 0 0;
-border-radius: 12px;
+background: transparent;
+padding: 8px 10px 8px 12px;
+margin: 10px 0 0 0;
+border-radius: 0;
 cursor: pointer;
 user-select: none;
-font-weight: 700;
-font-size: 13px !important;
-letter-spacing: 0.3px;
+font-weight: 600;
+font-size: 11px !important;
+letter-spacing: 0.7px;
+text-transform: uppercase;
 color: var(--group-text, var(--accent-primary));
 display: flex;
 align-items: center;
 justify-content: space-between;
-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-border: 1px solid var(--group-border, rgba(0, 113, 227, 0.15));
-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+transition: color 0.15s ease;
+border: none;
+border-left: 2px solid var(--group-border, rgba(0, 113, 227, 0.35));
+box-shadow: none;
 position: relative;
 overflow: hidden;
 }
 
-.template-group-header::before {
-content: '';
-position: absolute;
-top: 0;
-left: -100%;
-width: 100%;
-height: 100%;
-background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-transition: left 0.5s ease;
-}
-
-.template-group-header:hover::before { left: 100%; }
+.template-group-header::before { display: none !important; }
 
 .template-group-header:hover {
-background: linear-gradient(135deg, var(--group-hover, rgba(0, 113, 227, 0.1)), rgba(0, 0, 0, 0.15));
-box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
-border-color: rgba(0, 113, 227, 0.35);
+background: rgba(255, 255, 255, 0.03);
+box-shadow: none;
+border-color: var(--group-text, var(--accent-primary));
 }
 
 .group-header-content { display: flex; align-items: center; gap: 10px; flex: 1; }
 
 .group-arrow {
-font-size: 0.9em;
-transition: transform 0.3s ease, color 0.3s ease;
-color: var(--accent, var(--accent-primary));
-font-weight: bold;
-width: 16px;
+font-size: 0.8em;
+transition: transform 0.15s ease;
+color: inherit;
+font-weight: 400;
+width: 14px;
+opacity: 0.7;
 }
 
 .group-arrow.expanded { transform: rotate(90deg); }
@@ -2595,16 +2555,16 @@ width: 16px;
 .template-group-content {
 max-height: 0;
 overflow: hidden;
-transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.3s ease;
+transition: max-height 0.2s ease, opacity 0.15s ease;
 opacity: 0;
-padding: 0 4px;
+padding: 0;
 }
 
 .template-group-content.expanded {
-max-height: none !important; 
+max-height: none !important;
 opacity: 1;
-padding: 8px 4px 16px 4px;
-overflow: visible !important; 
+padding: 4px 0 12px 0;
+overflow: visible !important;
 }
 
 .collapse-all-btn {
@@ -2621,58 +2581,47 @@ justify-content: center;
 }
 
 .collapse-all-btn:hover {
-background: var(--accent-primary);
-border-color: var(--accent-primary);
-color: white;
-transform: scale(1.05);
+background: rgba(255, 255, 255, 0.1);
+border-color: rgba(255, 255, 255, 0.25);
+color: var(--text-primary);
+transform: none;
 }
 
 /* =============================================================================
 TEMPLATE ITEMS
 ============================================================================= */
+/* Mall-item: platt, ren stil — ingen shimmer/glow/translateX */
 .template-item {
-background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.2));
-border: 1px solid rgba(255, 255, 255, 0.08);
-border-radius: 8px;
-padding: 12px 14px !important;
-margin: 6px 0;
+background: transparent;
+border: none;
+border-left: 2px solid rgba(255, 255, 255, 0.08);
+border-radius: 0;
+padding: 10px 12px !important;
+margin: 2px 0;
 min-height: 42px !important;
 display: flex !important;
 align-items: center !important;
 justify-content: space-between !important;
-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+transition: background 0.15s ease, border-color 0.15s ease;
 cursor: pointer;
 position: relative;
 overflow: hidden;
-box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+box-shadow: none;
 width: 100% !important;
 }
 
-/* Swish-effekt vid hover */
-.template-item::before {
-content: '';
-position: absolute;
-left: -100%;
-top: 0;
-width: 100%;
-height: 100%;
-background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-transition: left 0.5s ease;
-pointer-events: none;
-}
-
-.template-item:hover::before { left: 100%; }
+.template-item::before { display: none !important; }
 
 .template-item:hover {
-background: rgba(255, 255, 255, 0.08);
-border-color: var(--accent-primary); 
-transform: translateX(4px); 
-box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+background: rgba(255, 255, 255, 0.05);
+border-color: color-mix(in srgb, var(--accent-primary) 50%, transparent);
+transform: none;
+box-shadow: none;
 }
 
 .template-item.active {
 border-color: var(--accent-primary);
-background: rgba(255, 255, 255, 0.1);
+background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
 }
 
 .template-title { color: var(--text-primary); font-weight: 600; font-size: 13px; }
@@ -4585,12 +4534,10 @@ Quill-toolbar: dold i placeholder-läge
 display: none !important;
 }
 
-/* =============================================================================
-Sidebar-ikon glow: dämpad
-============================================================================= */
+/* Sidebar-ikon glow: borttagen för minimalistisk stil */
 .menu-item.active .menu-icon svg,
 .menu-item:hover .menu-icon svg {
-filter: drop-shadow(0 0 3px var(--accent-primary)) !important;
+filter: none !important;
 }
 
 /* ===================================================

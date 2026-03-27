@@ -87,22 +87,17 @@ h1, h2, h3, .app-name, .logo-fallback {
    HOVER- OCH KNAPP-EFFEKTER (Ingen zoom)
 ================================================================= */
 
-/* Förhindra att knappar, ärendekort och menyer zoomar eller flyttar sig när man hovrar */
+/* Förhindra att knappar och kort zoomar eller flyttar sig när man hovrar */
 .team-ticket-card:hover,
-.menu-item:hover,
 .action-btn:hover,
 .ln-btn:hover,
 .ln-btn:active {
     transform: none !important;
     filter: none !important;
-    background-color: var(--bg-dark-tertiary) !important; /* Använd ett enkelt färgbyte istället */
+    background-color: var(--bg-dark-tertiary) !important;
 }
 
-/* Sidomenyns aktiva state - platt markering */
-.sidebar .menu-item.active {
-    box-shadow: none !important;
-    background-color: rgba(255, 255, 255, 0.08) !important;
-}
+/* Menystil hanteras av style.css — inga temaoverrides */
 
 .team-ticket-card {
     border-left: 4px solid var(--agent-color, #333) !important; /* Behåll agentens färg som en tydlig list till vänster */

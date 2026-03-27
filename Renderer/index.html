@@ -178,6 +178,16 @@ Hem
 </svg>
 Mailmallar
 </h2>
+<div class="header-tabs" id="template-tabs">
+<button class="header-tab active" data-group="mine" onclick="switchTemplateTab('mine')">Mina Mallar <span class="tab-badge" id="badge-tmpl-mine" style="display:none;">0</span></button>
+<button class="header-tab" data-group="AM" onclick="switchTemplateTab('AM')">AM</button>
+<button class="header-tab" data-group="BIL" onclick="switchTemplateTab('BIL')">BIL</button>
+<button class="header-tab" data-group="MC" onclick="switchTemplateTab('MC')">MC</button>
+<button class="header-tab" data-group="SLÄP" onclick="switchTemplateTab('SLÄP')">SLÄP</button>
+<button class="header-tab" data-group="LASTBIL/BUSS" onclick="switchTemplateTab('LASTBIL/BUSS')">LASTBIL</button>
+<button class="header-tab" data-group="ENGELSKA" onclick="switchTemplateTab('ENGELSKA')">ENGELSKA</button>
+<button class="header-tab" data-group="ÖVRIGA" onclick="switchTemplateTab('ÖVRIGA')">ÖVRIGA</button>
+</div>
 <div class="header-actions">
 <button id="new-template-btn" title="Skapa ny mall">
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -194,11 +204,6 @@ Mailmallar
 </div>
 <div style="display:flex; gap:6px; align-items:center; margin-bottom:10px;">
 <input type="text" id="template-search-input" placeholder="Sök mall..." style="flex:1; padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); color:inherit; font-size:13px; box-sizing:border-box;">
-<button id="collapse-all-btn" class="collapse-all-btn" title="Expandera/Kollapsa alla" style="width:34px; height:34px; flex-shrink:0; padding:0; background:transparent; border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:var(--text-secondary); display:flex; align-items:center; justify-content:center; cursor:pointer;">
-<svg id="collapse-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<polyline points="6 9 12 15 18 9"></polyline>
-</svg>
-</button>
 </div>
 <div id="template-list"></div>
 </div>
@@ -217,14 +222,23 @@ Visa hjälpguide
 </div>
 <form id="template-editor-form" style="display: none; flex-direction: column; height: 100%; overflow: hidden;">
 <input type="hidden" id="template-id-input">
+<input type="hidden" id="template-owner-input">
 <div class="detail-header-top" style="flex-shrink:0; padding: 15px 20px 0px 20px; display:flex; flex-direction:row; align-items:flex-end; gap:15px;">
 <div style="flex: 3; display:flex; flex-direction:column; gap:4px;">
 <label style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-secondary); letter-spacing:0.5px; margin-left:2px;">Titel</label>
 <input type="text" id="template-title-input" class="filter-input" placeholder="T.ex. 'Svar på prisfråga'" style="width: 100%; height:36px; padding:0 10px; font-size:14px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.15);">
 </div>
-<div style="flex: 1; display:flex; flex-direction:column; gap:4px;">
+<div id="template-group-wrapper" style="flex: 1; display:flex; flex-direction:column; gap:4px;">
 <label style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-secondary); letter-spacing:0.5px; margin-left:2px;">Grupp</label>
-<input type="text" id="template-group-input" class="filter-input" placeholder="T.ex. 'Allmänt'" style="width: 100%; height:36px; padding:0 10px; font-size:14px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.15);">
+<select id="template-group-input" class="filter-select" style="width: 100%; height:36px; padding:0 8px; font-size:14px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.15); color:inherit;">
+<option value="AM">AM</option>
+<option value="BIL">BIL</option>
+<option value="MC">MC</option>
+<option value="SLÄP">SLÄP</option>
+<option value="LASTBIL/BUSS">LASTBIL/BUSS</option>
+<option value="ENGELSKA">ENGELSKA</option>
+<option value="ÖVRIGA">ÖVRIGA</option>
+</select>
 </div>
 </div>
 <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;">

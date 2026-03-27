@@ -40,20 +40,21 @@ res.status(500).json({ error: "Database error" });
 // ENDPOINT: /api/templates/save (SPARA/UPPDATERA MALL VIA WEBB)
 // -------------------------------------------------------------------------
 router.post('/templates/save', authenticateToken, (req, res) => {
-const { id, title, content, group_name } = req.body;
+const { id, title, content, group_name, owner } = req.body;
 const sql = `
-INSERT INTO templates (id, title, content, group_name)
-VALUES (?, ?, ?, ?)
+INSERT INTO templates (id, title, content, group_name, owner)
+VALUES (?, ?, ?, ?, ?)
 ON CONFLICT(id) DO UPDATE SET
 title = excluded.title,
 content = excluded.content,
-group_name = excluded.group_name
+group_name = excluded.group_name,
+owner = excluded.owner
 `;
 
 // Använd id från body eller skapa nytt om det saknas
 const finalId = id || Date.now();
 
-db.run(sql, [finalId, title, content, group_name], function(err) {
+db.run(sql, [finalId, title, content, group_name, owner || null], function(err) {
 if (err) {
 console.error("Template Save Error:", err);
 return res.status(500).json({ error: "Kunde inte spara mallen" });

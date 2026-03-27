@@ -777,7 +777,7 @@ style="flex:1; min-height:44px; max-height:300px; resize:vertical; padding:8px 1
 background:rgba(255,255,255,0.07); border:1px solid ${styles.border};
 color:var(--text-primary); font-size:13px; font-family:inherit; box-sizing:border-box;
 overflow-y:auto; transition:height 0.15s ease;"></textarea>
-<button id="btn-quick-reply-send" title="Skicka svar" style="flex-shrink:0; width:36px; height:36px; border-radius:8px;
+<button id="btn-quick-reply-send" title="Skicka svar" style="flex-shrink:0; width:40px; height:40px; border-radius:50%;
 background:${styles.main}; color:white; border:none; cursor:pointer;
 display:flex; align-items:center; justify-content:center;">
 ${UI_ICONS.SEND}
