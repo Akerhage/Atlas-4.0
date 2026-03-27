@@ -9,6 +9,10 @@
     "start": "node server.js",
     "dev": "npm run electron",
     "electron": "chcp 65001 && electron .",
+    "playwright:server": "node playwright/mock-server.js",
+    "test:e2e": "playwright test --config=playwright.config.js",
+    "test:e2e:headed": "playwright test --config=playwright.config.js --headed",
+    "test:e2e:ui": "playwright test --config=playwright.config.js --ui",
     "setversion": "node tests/scripts/set_version.js",
     "gitpush": "node tests/scripts/git-push.js",
     "agenttest": "node tests/scripts/test_agent.js",
@@ -98,6 +102,7 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "electron": "^39.1.2",
     "electron-builder": "^24.13.3",
     "rimraf": "^6.1.2"

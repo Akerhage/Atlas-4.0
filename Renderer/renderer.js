@@ -1442,12 +1442,16 @@ if (DOM.serverVersion) DOM.serverVersion.textContent = sVer;
 }
 
 // 5. Autentisering och system-start (SERVER_URL är nu korrekt satt)
-checkAuth();
+const hasValidSession = checkAuth();
 await preloadOffices();
+if (hasValidSession) {
 await preloadUsers();
+}
 initHeroPlaceholders();
 
-// Socket-start
+// Socket-start + auth-skyddade bootstrap-anrop körs bara när session finns.
+// Webb-login använder egen modal och får inte trigga 401-loopar innan användaren loggat in.
+if (hasValidSession) {
 if (typeof io === 'undefined') {
 loadSocketIoScriptWithRetry();
 } else {
@@ -1463,6 +1467,7 @@ setInterval(() => {
 if (!authToken) return;
 updateInboxBadge();
 }, 60000);
+}
 
 // =====================================
 // 3. Init Quill & Globala lyssnare (SÄKRAD)
@@ -1495,7 +1500,9 @@ if (saveBtn) saveBtn.disabled = false;
 // 4. Init State
 // =====================================
 initChat();
+if (hasValidSession) {
 await loadTemplates();
+}
 
 // =====================================
 // 5. Tema (SÄKRAD)
