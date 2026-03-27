@@ -59,6 +59,7 @@
     "review": "node tests/scripts/atlas_review.js",
     "audit:roles": "node tests/scripts/audit-roles.js",
     "stress:arende": "node tests/scripts/test-stress-arende.js",
+    "test:e2e:live": "playwright test e2e",
     "test:e2e:live-login": "playwright test e2e/live-login.spec.js"
   },
   "keywords": [
