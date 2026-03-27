@@ -24,6 +24,10 @@ async function loginToLiveAtlas(page) {
     return response.request().method() === 'POST' &&
       response.url().includes('/api/auth/login');
   }, { timeout: 30_000 });
+  const postLoginNavigationPromise = page.waitForNavigation({
+    waitUntil: 'domcontentloaded',
+    timeout: 10_000,
+  }).catch(() => null);
 
   await page.locator('#login-form').locator('button[type="submit"]').click();
 
@@ -58,7 +62,11 @@ async function loginToLiveAtlas(page) {
     }
   }, { timeout: 30_000 }).toEqual({ hasToken: true, hasUser: true });
 
-  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await postLoginNavigationPromise;
+
+  if (!(await page.locator('#user-profile-container').isVisible())) {
+    await page.reload({ waitUntil: 'domcontentloaded' });
+  }
 
   await expect(page.locator('#user-profile-container')).toBeVisible({ timeout: 30_000 });
   await expect(page.locator('#login-btn-sidebar')).toBeHidden();
