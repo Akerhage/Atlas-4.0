@@ -1,0 +1,65 @@
+name: Playwright Live Login
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Live URL to test
+        required: true
+        default: https://www.atlas-support.se
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  live-login:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ATLAS_E2E_BASE_URL: ${{ github.event.inputs.base_url }}
+      ATLAS_E2E_USERNAME: playwright_user
+      ATLAS_E2E_PASSWORD: ${{ secrets.ATLAS_E2E_PASSWORD }}
+      CI: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Validate live login credentials
+        shell: bash
+        run: |
+          if [ -z "${ATLAS_E2E_PASSWORD}" ]; then
+            echo "Missing repository secret: ATLAS_E2E_PASSWORD"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run live login test
+        run: npm run test:e2e:live-login -- --project=chromium
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-live-login-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload Playwright test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-live-login-results
+          path: test-results/
+          retention-days: 30

@@ -6,6 +6,8 @@ server_log.txt
 # ========= Node.js =========
 node_modules/
 package-lock.json
+playwright-report/
+test-results/
 
 # ========= Tests & Scripts (Helt isolerat) =========
 /tests/

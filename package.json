@@ -58,7 +58,8 @@
     "resetdb": "node tests/scripts/fix_reset_all_clean_restart.js",
     "review": "node tests/scripts/atlas_review.js",
     "audit:roles": "node tests/scripts/audit-roles.js",
-    "stress:arende": "node tests/scripts/test-stress-arende.js"
+    "stress:arende": "node tests/scripts/test-stress-arende.js",
+    "test:e2e:live-login": "playwright test e2e/live-login.spec.js"
   },
   "keywords": [
     "trafikskola",
@@ -98,6 +99,7 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.0",
     "electron": "^39.1.2",
     "electron-builder": "^24.13.3",
     "rimraf": "^6.1.2"
