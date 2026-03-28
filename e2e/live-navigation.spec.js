@@ -53,9 +53,10 @@ test('live Atlas navigates across deployed views without mutating data', async (
 
   if (actualViews.includes('customers')) {
     await openLiveView(page, 'customers');
-    await expect(page.locator('#customer-list')).toBeVisible();
+    await expect(page.locator('#customer-placeholder')).toBeVisible();
     await expect(page.locator('#customer-search-top')).toBeVisible();
     await expect(page.locator('#customer-search-main')).toBeVisible();
+    await expect(page.locator('#customer-detail')).toBeHidden();
   }
 
   if (actualViews.includes('templates')) {
