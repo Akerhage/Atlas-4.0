@@ -240,3 +240,61 @@ server/
 - [x] Mobile hamburger menu — toggle sidebar, overlay backdrop, responsive layout
 - [x] Quill rich text editor — lazy-loaded ReactQuill with dark theme, code-split (206KB separate chunk)
 - [x] Deployed E2E tests — `deployed.spec.ts` + GitHub Actions workflow `playwright-react-e2e.yml`
+
+---
+
+## Phase 3: Database Migration (Future — after NestJS port is complete)
+
+The current database is SQLite with a basic setup that works but has significant limitations for a production support system. This phase should be tackled **after** the NestJS business logic ports are fully done and tested against the current SQLite database.
+
+### Current State
+
+- **SQLite** single-file database (`atlas.db`)
+- Schema defined via `CREATE TABLE IF NOT EXISTS` in `db.js` (no versioning)
+- Migrations via `ALTER TABLE ADD COLUMN` with error swallowing (no rollback)
+- Messages stored as JSON blobs in `context_store.context_data` (not queryable)
+- No foreign key enforcement in practice
+- Single writer at a time (SQLite limitation)
+- Backup via `VACUUM INTO` on a timer (no point-in-time recovery)
+
+### Target State
+
+**Prisma ORM + PostgreSQL**
+
+Why Prisma:
+- Generates TypeScript types from schema (shared with React frontend)
+- Versioned, reversible migrations (`prisma migrate`)
+- Type-safe queries replace raw SQL strings
+- Visual DB browser (`prisma studio`)
+- First-class NestJS integration
+
+Why PostgreSQL:
+- Concurrent connections (multiple agents writing simultaneously)
+- Proper full-text search (replace MiniSearch)
+- JSON column support when needed, but with proper relations where possible
+- Managed backups with point-in-time recovery
+- Hetzner can run PostgreSQL natively or via managed service
+
+### Schema Improvements
+
+| Current Problem | Prisma/PostgreSQL Solution |
+|----------------|--------------------------|
+| JSON blob for messages in `context_store` | Proper `Message` table with ticket relation |
+| Comma-separated `routing_tag` in `users` | Many-to-many `User ↔ Office` relation |
+| No migration history | `prisma migrate` with versioned SQL files |
+| `ALTER TABLE` error swallowing | Schema diffing, up/down migrations |
+| No foreign keys enforced | Prisma enforces relations at schema level |
+| Raw SQL in `database.service.ts` | `prisma.ticket.findMany({ include: { messages: true } })` |
+| Single SQLite file, locks on write | PostgreSQL connection pool |
+
+### Migration Steps (when ready)
+
+1. Install Prisma in `server/`: `npm install prisma @prisma/client`
+2. Define `schema.prisma` matching current 11 tables
+3. Run `prisma db pull` against existing SQLite to verify schema matches
+4. Generate Prisma Client, replace `DatabaseService` methods with Prisma calls
+5. Write data migration script: SQLite → PostgreSQL
+6. Set up PostgreSQL on Hetzner VPS
+7. Switch `DATABASE_URL` in `.env` from SQLite to PostgreSQL
+8. Run `prisma migrate deploy` in production
+9. Remove `db.js` and `better-sqlite3` dependency
