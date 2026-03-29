@@ -189,5 +189,5 @@ server/
 - [x] Update `server.js` — serves `client/dist/` with fallback to `Renderer/`, SPA catch-all route
 - [x] Update `main.js` — loads `http://localhost:3001` instead of `file://`, removed preload dependency
 - [x] Mobile hamburger menu — toggle sidebar, overlay backdrop, responsive layout
-- [ ] Quill rich text editor integration for Templates
-- [ ] E2E test updates for deployed environment
+- [x] Quill rich text editor — lazy-loaded ReactQuill with dark theme, code-split (206KB separate chunk)
+- [x] Deployed E2E tests — `deployed.spec.ts` + GitHub Actions workflow `playwright-react-e2e.yml`

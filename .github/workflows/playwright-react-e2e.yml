@@ -1,0 +1,72 @@
+name: Playwright React E2E
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Live URL to test (React frontend)
+        required: true
+        default: https://www.atlas-support.se
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  react-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ATLAS_E2E_BASE_URL: ${{ github.event.inputs.base_url }}
+      ATLAS_E2E_USER: playwright_user
+      ATLAS_E2E_PASS: ${{ secrets.ATLAS_E2E_PASSWORD }}
+      CI: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Validate credentials
+        shell: bash
+        run: |
+          if [ -z "${ATLAS_E2E_PASS}" ]; then
+            echo "Missing repository secret: ATLAS_E2E_PASSWORD"
+            exit 1
+          fi
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Install Playwright browser
+        working-directory: client
+        run: npx playwright install --with-deps chromium
+
+      - name: Run deployed E2E suite
+        working-directory: client
+        run: npx playwright test e2e/deployed.spec.ts --project=chromium
+
+      - name: Run full E2E suite
+        working-directory: client
+        run: npx playwright test --project=chromium
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-e2e-report
+          path: client/playwright-report/
+          retention-days: 30
+
+      - name: Upload test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-e2e-results
+          path: client/test-results/
+          retention-days: 30
