@@ -129,8 +129,8 @@ export default function Inbox() {
   ]
 
   return (
-    <div className="layout-split" id="view-inbox" style={{ display: 'flex' }}>
-      <div className="list-panel">
+    <div className="layout-split" id="view-inbox" style={{ display: 'flex', flexDirection: 'row', flex: 1, height: '100%', overflow: 'hidden' }}>
+      <div className="list-panel" style={{ width: 380, minWidth: 320, flexShrink: 0, display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
         <header className="chat-header glass-effect">
           <h2>Inkorgen</h2>
           <div className="header-tabs">
