@@ -13,7 +13,7 @@ export default function Layout({ children }: LayoutProps) {
   const closeMenu = useCallback(() => setMobileMenuOpen(false), [])
 
   return (
-    <div className="app-container">
+    <div className="app-container" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       {/* Mobile hamburger button */}
       <button
         className="mobile-hamburger-btn"
@@ -38,11 +38,14 @@ export default function Layout({ children }: LayoutProps) {
         <div className="mobile-overlay" onClick={closeMenu} />
       )}
 
-      <div className={`sidebar-wrapper${mobileMenuOpen ? ' mobile-open' : ''}`}>
+      <div
+        className={`sidebar-wrapper${mobileMenuOpen ? ' mobile-open' : ''}`}
+        style={{ width: 260, minWidth: 260, flexShrink: 0 }}
+      >
         <Sidebar />
       </div>
 
-      <main className="main-content-area" onClick={closeMenu}>
+      <main className="main-content-area" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }} onClick={closeMenu}>
         {children}
       </main>
       <ToastContainer />
