@@ -29,15 +29,14 @@ export class AuthService {
     const user = await this.validateUser(username, password);
     const payload: JwtPayload = { sub: user.id, username: user.username, role: user.role };
 
-    const { passwordHash, ...safeUser } = user;
     return {
       token: this.jwtService.sign(payload),
-      user: safeUser,
+      user: this.toSnakeCase(user),
     };
   }
 
   async getAllUsers() {
-    return this.prisma.user.findMany({
+    const users = await this.prisma.user.findMany({
       select: {
         id: true, username: true, displayName: true, role: true,
         agentColor: true, avatarId: true, statusText: true,
@@ -45,6 +44,22 @@ export class AuthService {
       },
       orderBy: { displayName: 'asc' },
     });
+    return users.map(u => this.toSnakeCase(u));
+  }
+
+  // Map Prisma camelCase to snake_case for frontend compatibility
+  private toSnakeCase(user: Record<string, unknown>) {
+    const { passwordHash, displayName, agentColor, avatarId, statusText, isOnline, lastSeen, allowedViews, createdAt, ...rest } = user;
+    return {
+      ...rest,
+      display_name: displayName ?? null,
+      agent_color: agentColor ?? '#0071e3',
+      avatar_id: avatarId ?? 0,
+      status_text: statusText ?? '',
+      is_online: isOnline ?? false,
+      last_seen: lastSeen ?? null,
+      allowed_views: allowedViews ?? null,
+    };
   }
 
   async updateProfile(userId: number, data: Record<string, unknown>) {
