@@ -127,6 +127,11 @@ export default function TicketDetail({ conversationId, onArchived, onDeleted }: 
                     <span dangerouslySetInnerHTML={{ __html: UI_ICONS.MAIL }} /> Mail
                   </span>
                 )}
+                {(ticket as any).vehicle && (
+                  <span className="pill" style={{ fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                    <span dangerouslySetInnerHTML={{ __html: UI_ICONS.CAR }} /> {(ticket as any).vehicle}
+                  </span>
+                )}
                 {ticket.customer_email && (
                   <span className="pill" style={{ fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
                     <span dangerouslySetInnerHTML={{ __html: UI_ICONS.MAIL }} /> {ticket.customer_email}
@@ -174,39 +179,42 @@ export default function TicketDetail({ conversationId, onArchived, onDeleted }: 
           }
 
           if (isCustomer) {
-            // Customer message — left-aligned with avatar
+            // Customer message — left-aligned with colored avatar
             return (
               <div key={i} className="msg-row user" style={{ display: 'flex', width: '100%', marginBottom: 15, justifyContent: 'flex-start' }}>
                 <div className="msg-avatar" style={{
                   background: styles.main, color: 'white', width: 36, height: 36,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: '50%', fontWeight: 'bold', marginRight: 12, flexShrink: 0,
+                  fontSize: 14,
                 }}>
                   {initial}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', maxWidth: '80%' }}>
                   <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 4, paddingLeft: 2 }}>
-                    <b>{senderLabel}</b>{timeStr ? ` · ${timeStr}` : ''}
+                    <b>{senderLabel}</b> · {timeStr}
                   </div>
                   <div className="bubble" style={{
-                    background: `${styles.bubbleBg}`, border: `1px solid ${styles.border}`,
-                    color: 'var(--text-primary)', padding: 15, borderRadius: 12,
+                    background: styles.bubbleBg, border: `1px solid ${styles.border}`,
+                    color: 'var(--text-primary)', padding: '12px 15px', borderRadius: 12,
+                    lineHeight: 1.5, fontSize: 14,
                   }} dangerouslySetInnerHTML={{ __html: msg.content }} />
                 </div>
               </div>
             )
           }
 
-          // Agent/Atlas message — right-aligned with avatar
-          const agentStyles = msg.role === 'atlas' ? null : getAgentStyles(ticket.owner || '', officeData, usersCache, currentUser)
-          const avatarBg = agentStyles ? agentStyles.main : '#3a3a3c'
-          const avatarContent = agentStyles ? senderLabel.charAt(0).toUpperCase() : '🤖'
+          // Agent/Atlas message — right-aligned with avatar on right
+          const isAtlasMsg = msg.role === 'atlas'
+          const agentStyles = isAtlasMsg ? null : getAgentStyles(ticket.owner || '', officeData, usersCache, currentUser)
+          const avatarBg = isAtlasMsg ? '#3a3a3c' : (agentStyles?.main || '#3a3a3c')
+          const avatarContent = isAtlasMsg ? '🤖' : senderLabel.charAt(0).toUpperCase()
 
           return (
             <div key={i} className="msg-row atlas" style={{ display: 'flex', width: '100%', marginBottom: 15, justifyContent: 'flex-end' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', maxWidth: '80%' }}>
                 <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 4, paddingRight: 2 }}>
-                  {senderLabel}{timeStr ? ` · ${timeStr}` : ''}
+                  {senderLabel} · {timeStr}
                 </div>
                 <div className="bubble" style={{
                   background: 'var(--bg-dark-tertiary)', border: '1px solid rgba(255,255,255,0.1)',
