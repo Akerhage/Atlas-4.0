@@ -1,0 +1,293 @@
+name: CI/CD Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy to Hetzner VPS after tests pass'
+        required: false
+        default: false
+        type: boolean
+      skip_e2e:
+        description: 'Skip E2E tests (faster CI)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  # ============================================================
+  # STAGE 1: Lint + Type Check + Format
+  # ============================================================
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci --legacy-peer-deps
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Server — Type check
+        working-directory: server
+        run: npm run lint
+
+      - name: Server — Format check
+        working-directory: server
+        run: npm run format:check
+
+      - name: Client — Lint + Type check
+        working-directory: client
+        run: npm run lint
+
+      - name: Client — Format check
+        working-directory: client
+        run: npm run format:check
+
+  # ============================================================
+  # STAGE 2: Build
+  # ============================================================
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci --legacy-peer-deps
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Build server
+        working-directory: server
+        run: npm run build
+
+      - name: Build client
+        working-directory: client
+        run: npm run build
+
+      - name: Upload server build
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-dist
+          path: server/dist/
+          retention-days: 1
+
+      - name: Upload client build
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist/
+          retention-days: 1
+
+  # ============================================================
+  # STAGE 3: Unit Tests
+  # ============================================================
+  # test-server:
+  #   name: Server Unit Tests
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
+  #   needs: build
+  #
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: actions/setup-node@v5
+  #       with:
+  #         node-version: 20
+  #     - name: Install dependencies
+  #       working-directory: server
+  #       run: npm ci --legacy-peer-deps
+  #     - name: Run tests
+  #       working-directory: server
+  #       run: npm test
+  #
+  # Uncomment when unit tests are written (jest + ts-jest configured)
+
+  # ============================================================
+  # STAGE 4: E2E Tests
+  # ============================================================
+  test-e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build
+    if: ${{ github.event.inputs.skip_e2e != 'true' }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci --legacy-peer-deps
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: client
+        run: npx playwright install --with-deps chromium
+
+      - name: Download server build
+        uses: actions/download-artifact@v4
+        with:
+          name: server-dist
+          path: server/dist/
+
+      - name: Start server
+        working-directory: server
+        run: node dist/main.js &
+        env:
+          JWT_SECRET: ci-test-secret
+          NODE_ENV: test
+
+      - name: Wait for server
+        run: |
+          for i in $(seq 1 30); do
+            curl -s http://localhost:3001/api/public/version && break
+            sleep 1
+          done
+
+      - name: Run E2E tests
+        working-directory: client
+        run: npx playwright test --project=chromium
+        env:
+          ATLAS_E2E_BASE_URL: http://localhost:3001
+          ATLAS_E2E_USER: admin
+          ATLAS_E2E_PASS: admin123
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: client/playwright-report/
+          retention-days: 14
+
+      - name: Upload test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: client/test-results/
+          retention-days: 14
+
+  # ============================================================
+  # STAGE 5: Deploy to Hetzner VPS
+  # ============================================================
+  deploy:
+    name: Deploy to Hetzner
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build, test-e2e]
+    # DISABLED: Set deploy input to true to activate
+    if: ${{ github.event.inputs.deploy == 'true' }}
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download server build
+        uses: actions/download-artifact@v4
+        with:
+          name: server-dist
+          path: server/dist/
+
+      - name: Download client build
+        uses: actions/download-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist/
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 204.168.129.104 >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Create backup on server
+        run: |
+          ssh root@204.168.129.104 "
+            TIMESTAMP=\$(date +%Y%m%d-%H%M%S)
+            cp -r /apps/atlas/ /apps/atlas-backup-\${TIMESTAMP}/ 2>/dev/null || true
+            echo 'Backup created: atlas-backup-'\${TIMESTAMP}
+          "
+
+      - name: Deploy server build
+        run: |
+          rsync -avz --delete \
+            server/dist/ \
+            server/package.json \
+            server/package-lock.json \
+            root@204.168.129.104:/apps/atlas/server/
+
+      - name: Deploy client build
+        run: |
+          rsync -avz --delete \
+            client/dist/ \
+            root@204.168.129.104:/apps/atlas/client/dist/
+
+      - name: Deploy config files
+        run: |
+          scp ecosystem.config.js root@204.168.129.104:/apps/atlas/
+          scp config.json root@204.168.129.104:/apps/atlas/
+
+      - name: Install server dependencies on VPS
+        run: |
+          ssh root@204.168.129.104 "
+            cd /apps/atlas/server && npm ci --legacy-peer-deps --production
+          "
+
+      - name: Restart PM2
+        run: |
+          ssh root@204.168.129.104 "
+            cd /apps/atlas && pm2 restart ecosystem.config.js --update-env
+          "
+
+      - name: Health check
+        run: |
+          sleep 5
+          STATUS=$(ssh root@204.168.129.104 "curl -s -o /dev/null -w '%{http_code}' http://localhost:3001/api/public/version")
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Health check failed (HTTP $STATUS)"
+            echo "Rolling back..."
+            ssh root@204.168.129.104 "
+              LATEST_BACKUP=\$(ls -td /apps/atlas-backup-* 2>/dev/null | head -1)
+              if [ -n \"\$LATEST_BACKUP\" ]; then
+                rm -rf /apps/atlas/
+                mv \$LATEST_BACKUP /apps/atlas/
+                cd /apps/atlas && pm2 restart ecosystem.config.js --update-env
+                echo 'Rollback complete'
+              fi
+            "
+            exit 1
+          fi
+          echo "✅ Health check passed (HTTP $STATUS)"
