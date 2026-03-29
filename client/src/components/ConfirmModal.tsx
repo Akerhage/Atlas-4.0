@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, createContext, useContext } from 'react'
+import './Modal.css'
 
 interface ConfirmOptions {
   title: string

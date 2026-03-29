@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
+import '../components/TicketCard.css'
+import '../components/Common.css'
 import { useSocket } from '../context/SocketContext'
 import { useAuth } from '../context/AuthContext'
 import { useDataStore } from '../hooks/useDataStore'

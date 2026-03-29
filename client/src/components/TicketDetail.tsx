@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import './ChatMessages.css'
+import './TicketCard.css'
 import { useAuth } from '../context/AuthContext'
 import { useSocket } from '../context/SocketContext'
 import { useDataStore } from '../hooks/useDataStore'

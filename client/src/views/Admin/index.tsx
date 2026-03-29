@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import './Admin.css'
 import { useAuth } from '../../context/AuthContext'
 import AdminUserList from './AdminUserList'
 import AdminUserDetail from './AdminUserDetail'

@@ -1,0 +1,213 @@
+/* *** === KNAPPAR, BADGES & INKORGSKOMPONENTER === *** */
+
+/* =============================================================================
+SMART BADGES (MAIL & INBOX)
+============================================================================= */
+.group-badge,
+.group-count {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+min-width: 18px;
+height: 18px;
+padding: 0 5px;
+border-radius: 6px;
+font-size: 11px;
+font-weight: 500;
+color: color-mix(in srgb, var(--accent-primary) 75%, white);
+box-shadow: none;
+background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
+border: none;
+}
+
+.live-badge, .mail-badge {
+background: #ff4444 !important; 
+border-color: rgba(255, 68, 68, 0.5) !important;
+animation: pulse-badge 2s infinite;
+}
+
+.picked-badge {
+background: var(--accent-primary) !important;
+border-color: rgba(0, 113, 227, 0.5) !important;
+}
+
+.group-count.empty,
+.group-badge:empty, 
+span.group-count.empty {
+background: transparent !important;
+color: var(--text-secondary) !important;
+border: 1px solid var(--border-color) !important;
+box-shadow: none !important;
+}
+
+@keyframes pulse-badge {
+0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
+70% { box-shadow: 0 0 0 6px rgba(255, 68, 68, 0); }
+100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+}
+
+/* =============================================================================
+SETTINGS VIEW & SECTIONS
+============================================================================= */
+.settings-view {
+flex: 1;
+display: flex;
+flex-direction: column;
+height: 100vh;
+background-color: transparent;
+overflow: hidden;
+}
+
+.about-container {
+flex: 1;
+padding: var(--spacing-lg) var(--spacing-xl);
+overflow-y: auto !important;
+max-width: 700px;
+max-height: calc(100vh - 120px);
+margin: var(--spacing-lg) auto;
+background-color: var(--bg-frosty-content);
+border-radius: var(--border-radius-lg);
+border: 1px solid var(--border-color);
+}
+
+.about-container > * { flex-shrink: 0; }
+.about-container::after { content: ''; display: block; height: 40px; flex-shrink: 0; }
+
+.about-container .section,
+#quick-guide-section,
+#appearance-section,
+#app-info-section {
+margin-bottom: var(--spacing-lg);
+}
+
+.guide-section { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+
+.guide-step {
+display: flex;
+align-items: flex-start;
+gap: 8px;
+padding: 6px 8px;
+background-color: rgba(58, 58, 60, 0.4);
+border-radius: var(--border-radius-md);
+border-left: 4px solid var(--accent-primary);
+transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.guide-step:hover { background: rgba(0, 113, 227, 0.06); }
+
+.step-number {
+display: flex;
+align-items: center;
+justify-content: center;
+width: 24px;
+height: 24px;
+background: linear-gradient(135deg, #007aff, #0056b3);
+color: white;
+border-radius: 50%;
+font-weight: 700;
+font-size: 13px;
+flex-shrink: 0;
+box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+}
+
+.step-content { flex: 1; padding-top: 2px; font-size: 13px; line-height: 1.5; }
+.step-content strong { color: var(--accent-primary); font-weight: 600; }
+
+.setting-item {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: var(--spacing-md);
+background-color: rgba(58, 58, 60, 0.3);
+border-radius: var(--border-radius-sm);
+margin-bottom: var(--spacing-sm);
+}
+
+.setting-item label { font-weight: 600; color: var(--text-primary); font-size: 15px; }
+
+#theme-select {
+background-color: var(--bg-dark-tertiary);
+border: 1px solid var(--border-color);
+border-radius: var(--border-radius-sm);
+padding: 8px 12px;
+color: var(--text-primary);
+font-family: var(--font-family);
+font-size: 14px;
+cursor: pointer;
+min-width: 180px;
+}
+
+#theme-select:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1); }
+#theme-select option { background-color: var(--bg-dark-secondary); color: var(--text-primary); padding: 8px; }
+
+.status-item, .info-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 6px; font-size: 15px; }
+.status-lamp-container { display: flex; align-items: center; gap: var(--spacing-sm); font-weight: 500; }
+.status-lamp-dot { width: 14px; height: 14px; border-radius: 50%; }
+.status-lamp-dot.green { 
+background-color: var(--status-success); 
+opacity: 1; 
+box-shadow: 0 0 8px var(--status-success); 
+}
+.status-info, #app-version-display, #server-version-display { color: var(--text-secondary); font-family: 'SF Mono', 'Monaco', 'Courier New', monospace; font-size: 13px; }
+.info-label { font-weight: 600; color: var(--text-primary); }
+
+.shortcut-list { display: flex; flex-direction: column; gap: var(--spacing-sm); margin-top: var(--spacing-md); }
+
+.shortcut-item {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 12px var(--spacing-md);
+background-color: rgba(58, 58, 60, 0.3);
+border-radius: var(--border-radius-sm);
+transition: background-color var(--transition-fast);
+}
+
+.shortcut-item:hover { background-color: rgba(58, 58, 60, 0.5); }
+
+.shortcut-item kbd {
+display: inline-block;
+padding: 6px 12px;
+background: linear-gradient(180deg, #3a3a3c, #2c2c2e);
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 6px;
+font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+font-size: 12px;
+color: var(--text-primary);
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* =============================================================================
+INBOX & MINI CHAT COMPONENTS
+============================================================================= */
+.inbox-mode-controls {
+display: flex;
+gap: 10px;
+margin-bottom: 15px;
+padding: 6px;
+background: rgba(0,0,0,0.1);
+border-radius: 8px;
+border: 1px solid var(--border-color);
+}
+
+.inbox-mode-btn {
+flex: 1;
+background: transparent;
+border: 1px solid transparent;
+color: var(--text-secondary);
+padding: 8px 12px;
+border-radius: 6px;
+cursor: pointer;
+font-weight: 600;
+transition: background 0.15s, color 0.15s;
+font-size: 13px;
+}
+
+.inbox-mode-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+
+.inbox-mode-btn.active {
+background: var(--accent-primary);
+color: white;
+box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+

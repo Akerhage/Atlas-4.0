@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import './Modal.css'
 import { notes as notesApi } from '../services/api'
 import { showToast } from './ToastContainer'
 import { ADMIN_UI_ICONS } from '../utils/constants'

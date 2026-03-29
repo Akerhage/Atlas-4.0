@@ -1,0 +1,688 @@
+/* *** === MALLAR & MAIL === *** */
+
+/* =============================================================================
+MAILMALLAR - KNAPPAR - IKONER
+============================================================================= */
+/* Ny mall-knappen: text + ikon = auto-bredd, separat från de rena ikonknapparna */
+#new-template-btn {
+width: auto !important;
+height: 36px !important;
+padding: 0 14px !important;
+gap: 7px !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+border-radius: 10px !important;
+background: rgba(255, 255, 255, 0.05) !important;
+border: 1px solid rgba(255, 255, 255, 0.12) !important;
+color: var(--text-primary) !important;
+font-size: 12px !important;
+font-weight: 600 !important;
+cursor: pointer !important;
+transition: all 0.2s ease !important;
+position: relative !important;
+z-index: 50 !important;
+pointer-events: auto !important;
+white-space: nowrap !important;
+}
+
+#new-template-btn svg {
+width: 15px !important;
+height: 15px !important;
+stroke: currentColor !important;
+flex-shrink: 0 !important;
+}
+
+#new-template-btn:hover {
+background: var(--accent-primary) !important;
+border-color: var(--accent-primary) !important;
+color: #fff !important;
+transform: none !important;
+box-shadow: none !important;
+}
+
+/* =============================================================================
+LIST-PANEL-HEADER — Rubrikruta inuti sidopanelen
+Sträcker sig från toppen av split-ytan ner till "Atlas-koordinatlinjen" —
+samma Y som underkanten på Atlas-loggan i sidomenyn. Text centrerad vertikalt.
+Negativa marginaler spänner hela bredden.
+============================================================================= */
+.list-panel-header {
+/* margin-bottom = total - height, håller innehållet nedan på exakt samma Y */
+margin: calc(-1 * var(--spacing-lg)) calc(-1 * var(--spacing-lg)) calc(var(--panel-label-total) - var(--panel-label-height));
+padding: 12px 20px 12px 24px;
+min-height: var(--panel-label-height);
+background: var(--bg-frosty-header);
+background-image: linear-gradient(180deg,
+rgba(255,255,255,0.01) 0%,
+rgba(255,255,255,0.03) 55%,
+rgba(255,255,255,0.065) 100%);
+border-bottom: 1px solid color-mix(in srgb, var(--accent-primary) 22%, var(--border-color));
+border-radius: 0;
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-shrink: 0;
+gap: 8px;
+box-shadow: 0 4px 24px -6px color-mix(in srgb, var(--accent-primary) 25%, transparent),
+inset 0 -1px 0 color-mix(in srgb, var(--accent-primary) 10%, transparent);
+}
+.list-panel-header h3 {
+margin: 0 !important;
+font-size: 11px !important;
+text-transform: uppercase;
+letter-spacing: 0.9px !important;
+font-weight: 700;
+color: var(--text-secondary);
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+padding-bottom: 5px;
+border-bottom: 2px solid color-mix(in srgb, var(--accent-primary) 38%, transparent);
+}
+.list-panel-header .panel-actions {
+display: flex;
+align-items: center;
+gap: 6px;
+flex-shrink: 0;
+}
+
+/* Mina Ärenden: 101px ger border i linje med sidebar-logga-kanten */
+#view-my-tickets .list-panel-header {
+min-height: 101px;
+margin-bottom: 28px; /* panel-label-total(129) bibehålls: 101+28=129 */
+}
+#view-my-tickets .list-panel-header h3 {
+flex: 1;
+min-width: 0;
+}
+
+/* Garaget: filterfält ovanför; rubrikrutan startar precis vid filtrets nedkant.
+margin-top = -spacing-lg (=−24px) för att ta upp hela container-paddingen */
+#view-archive .list-panel-header {
+min-height: auto;
+padding: 12px 20px 20px 24px;
+align-items: center;
+margin-top: calc(-1 * var(--spacing-lg));
+margin-bottom: calc(var(--spacing-md) + 6px);
+}
+#view-archive #archive-list {
+padding-top: 10px !important;
+}
+
+/* Per-vy SVG-vattenmärken + agentfärgat glöd (--accent-primary = agent_color från login).
+Lager: gradient → radial-glow (agentfärg bakom ikonen) → SVG-ikon (vit kontur) */
+/* Inkorgen: 101px ger border i linje med sidebar-logga-kanten (101+28=129)
+   margin-left explicit för att garantera att linjen når vänster kant */
+#view-inbox .list-panel-header {
+min-height: 101px;
+margin-bottom: 28px; /* panel-label-total(129) bibehålls: 101+28=129 */
+background-image:
+linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.065) 100%),
+radial-gradient(circle at calc(100% - 52px) 50%, color-mix(in srgb, var(--accent-primary) 22%, transparent) 0%, transparent 60%),
+url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.09'%3E%3Cpolyline points='22 12 16 12 14 15 10 15 8 12 2 12'/%3E%3Cpath d='M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E");
+background-position: 0 0, 0 0, calc(100% - 16px) 50%;
+background-size: auto, auto, 72px 72px;
+background-repeat: repeat, no-repeat, no-repeat;
+}
+/* Inbox/MyTickets h3: max-width begränsar bredden så att border-bottom INTE
+   sträcker sig till SVG-vattenmärket (~88px från höger kant) */
+#view-inbox .list-panel-header h3,
+#view-my-tickets .list-panel-header h3 {
+max-width: calc(100% - 100px);
+}
+#view-my-tickets .list-panel-header {
+background-image:
+linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.065) 100%),
+radial-gradient(circle at calc(100% - 52px) 50%, color-mix(in srgb, var(--accent-primary) 22%, transparent) 0%, transparent 60%),
+url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.09'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E");
+background-position: 0 0, 0 0, calc(100% - 16px) 50%;
+background-size: auto, auto, 72px 72px;
+background-repeat: repeat, no-repeat, no-repeat;
+}
+#view-customers .list-panel-header {
+background-image:
+linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.065) 100%),
+radial-gradient(circle at calc(100% - 52px) 50%, color-mix(in srgb, var(--accent-primary) 22%, transparent) 0%, transparent 60%),
+url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.09'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+background-position: 0 0, 0 0, calc(100% - 16px) 50%;
+background-size: auto, auto, 72px 72px;
+background-repeat: repeat, no-repeat, no-repeat;
+}
+#view-templates .list-panel-header {
+background-image:
+linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.065) 100%),
+radial-gradient(circle at calc(100% - 52px) 50%, color-mix(in srgb, var(--accent-primary) 22%, transparent) 0%, transparent 60%),
+url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.09'%3E%3Cpath d='M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z'/%3E%3C/svg%3E");
+background-position: 0 0, 0 0, calc(100% - 16px) 50%;
+background-size: auto, auto, 72px 72px;
+background-repeat: repeat, no-repeat, no-repeat;
+}
+
+/* Admin-sidopanel: pane-header — matchar list-panel-header, ikon till höger */
+.admin-sidebar-list .pane-header {
+--pane-glow-x: calc(100% - 52px);
+background: var(--bg-frosty-header) !important;
+background-image:
+linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.065) 100%),
+radial-gradient(circle at var(--pane-glow-x) 50%, color-mix(in srgb, var(--accent-primary) 22%, transparent) 0%, transparent 60%),
+url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.09'%3E%3Cpath d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/%3E%3C/svg%3E") !important;
+background-position: 0 0, 0 0, calc(100% - 16px) 50% !important;
+background-size: auto, auto, 72px 72px !important;
+background-repeat: repeat, no-repeat, no-repeat !important;
+display: flex !important;
+align-items: center !important;
+justify-content: space-between !important;
+padding: 12px 20px 12px 24px !important;
+min-height: 103px !important;
+border-bottom: 1px solid color-mix(in srgb, var(--accent-primary) 34%, var(--border-color)) !important;
+margin-bottom: 8px !important;
+flex-shrink: 0 !important;
+box-shadow: 0 4px 24px -6px color-mix(in srgb, var(--accent-primary) 25%, transparent),
+inset 0 -1px 0 color-mix(in srgb, var(--accent-primary) 10%, transparent) !important;
+}
+.admin-sidebar-list .pane-header h3 {
+font-size: 11px !important;
+text-transform: uppercase !important;
+letter-spacing: 0.9px !important;
+font-weight: 700 !important;
+margin: 0 !important;
+padding-bottom: 5px !important;
+border-bottom: 2px solid color-mix(in srgb, var(--accent-primary) 38%, transparent) !important;
+}
+/* Flikar med knapp (agents/offices): skölden förskjuts vänster för att ge plats åt knappen */
+.admin-sidebar-list .pane-header.has-action {
+--pane-glow-x: calc(100% - 90px);
+background-position: 0 0, 0 0, calc(100% - 60px) 50% !important;
+}
+
+/* =============================================================================
+TEMPLATES & INBOX LAYOUT
+============================================================================= */
+.template-list-container h3 {
+margin: 0 0 var(--spacing-md) 0;
+color: var(--text-secondary);
+font-size: 11px !important;
+text-transform: uppercase;
+letter-spacing: 0.5px !important;
+font-weight: 700;
+white-space: nowrap !important;   
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+/* =============================================================================
+TEMPLATE GROUPS & HEADERS
+============================================================================= */
+/* Grupp-header: platt, minimalistisk — ingen glow/shimmer */
+.template-group-header {
+background: transparent;
+padding: 8px 10px 8px 12px;
+margin: 10px 0 0 0;
+border-radius: 0;
+cursor: pointer;
+user-select: none;
+font-weight: 600;
+font-size: 11px !important;
+letter-spacing: 0.7px;
+text-transform: uppercase;
+color: var(--group-text, var(--accent-primary));
+display: flex;
+align-items: center;
+justify-content: space-between;
+transition: color 0.15s ease;
+border: none;
+border-left: 2px solid var(--group-border, rgba(0, 113, 227, 0.35));
+box-shadow: none;
+position: relative;
+overflow: hidden;
+}
+
+.template-group-header::before { display: none !important; }
+
+.template-group-header:hover {
+background: rgba(255, 255, 255, 0.03);
+box-shadow: none;
+border-color: var(--group-text, var(--accent-primary));
+}
+
+.group-header-content { display: flex; align-items: center; gap: 10px; flex: 1; }
+
+.group-arrow {
+font-size: 0.8em;
+transition: transform 0.15s ease;
+color: inherit;
+font-weight: 400;
+width: 14px;
+opacity: 0.7;
+}
+
+.group-arrow.expanded { transform: rotate(90deg); }
+.group-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.template-group-content {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.2s ease, opacity 0.15s ease;
+opacity: 0;
+padding: 0;
+}
+
+.template-group-content.expanded {
+max-height: none !important;
+opacity: 1;
+padding: 4px 0 12px 0;
+overflow: visible !important;
+}
+
+.collapse-all-btn {
+background: var(--bg-dark-tertiary);
+border: 1px solid var(--border-color);
+border-radius: var(--border-radius-sm);
+padding: 10px;
+cursor: pointer;
+color: var(--text-secondary);
+transition: all var(--transition-fast);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.collapse-all-btn:hover {
+background: rgba(255, 255, 255, 0.1);
+border-color: rgba(255, 255, 255, 0.25);
+color: var(--text-primary);
+transform: none;
+}
+
+/* =============================================================================
+TEMPLATE ITEMS
+============================================================================= */
+/* Mall-item: platt, ren stil — ingen shimmer/glow/translateX */
+.template-item {
+    background: rgba(255, 255, 255, 0.03); /* Ger en väldigt subtil ifylld bakgrund */
+    border: 1px solid rgba(255, 255, 255, 0.08); /* Skapar en tunn och fin ram runt HELA kortet */
+    border-radius: 8px; /* Ger kortet mjuka, moderna hörn */
+    padding: 10px 12px !important;
+    margin: 6px 0 !important; /* Ökar avståndet mellan korten så de separeras */
+    min-height: 42px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: none; /* Ingen hoppig skugga! */
+    width: 100% !important;
+}
+
+.template-item::before { display: none !important; }
+
+.template-item:hover {
+background: rgba(255, 255, 255, 0.05);
+border-color: color-mix(in srgb, var(--accent-primary) 50%, transparent);
+transform: none;
+box-shadow: none;
+}
+
+.template-item.active {
+    border-color: var(--accent-primary) !important;
+    /* Lägger en 1px extra "ram" inuti kortet för att markera det tydligt hela vägen runt */
+    box-shadow: inset 0 0 0 2px var(--accent-primary) !important; 
+    background: color-mix(in srgb, var(--accent-primary) 15%, transparent) !important;
+}
+
+.template-title { color: var(--text-primary); font-weight: 600; font-size: 13px; }
+
+.template-item-content { display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+
+.template-preview {
+font-size: 12px;
+opacity: 0.7;
+color: var(--text-secondary);
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+line-height: 1.3;
+}
+
+.template-copy-btn {
+background: rgba(0, 0, 0, 0.25);
+border: 1px solid rgba(255, 255, 255, 0.08);
+cursor: pointer;
+padding: 6px 8px;
+border-radius: 6px;
+opacity: 0.6;
+transition: all 0.2s ease;
+color: var(--text-secondary);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.template-copy-btn:hover {
+opacity: 1;
+background: var(--accent-primary);
+border-color: var(--accent-primary);
+color: white;
+transform: scale(1.1);
+box-shadow: 0 3px 10px rgba(0, 113, 227, 0.4);
+}
+
+/* =============================================================================
+TEMPLATE EDITOR & PLACEHOLDERS
+============================================================================= */
+/* template-item-empty: visas i listan när inga mallar finns */
+.template-item-empty {
+color: var(--text-secondary);
+font-style: italic;
+text-align: center;
+padding: var(--spacing-lg);
+font-size: 13px;
+}
+
+/* SETTINGS — Kompakta mail-mallar. Rör ej global .template-item */
+#view-templates .template-item {
+padding: 7px 12px !important;
+min-height: 30px !important;
+margin: 3px 0 !important;
+}
+
+/* visas i redigeringsytan för mailmallar.
+OBS: Ingen !important på display — JS kontrollerar show/hide via inline style */
+#editor-placeholder {
+color: var(--text-secondary);
+font-style: italic;
+text-align: center;
+outline: none !important;
+background: transparent !important;
+border: none !important;
+box-shadow: none !important;
+margin: 0 !important;
+padding: 0 !important;
+font-size: 15px;
+flex: 1;
+min-height: 0;
+display: flex;
+justify-content: center;
+align-items: center;
+flex-direction: column;
+overflow: hidden;
+}
+
+/* Dessa placeholders använder .hero-placeholder-klassen i HTML — se .hero-placeholder nedan */
+/* #my-detail-placeholder, #inbox-placeholder, #archive-placeholder, #admin-placeholder */
+
+.editor-buttons {
+display: flex !important;
+align-items: center !important;
+justify-content: flex-end !important;
+gap: 12px !important;
+padding: 0 10px !important; 
+position: relative !important;
+}
+
+/* =============================================================================
+TEMPLATE EDITOR & FORM
+============================================================================= */
+/* 2. Själva formuläret */
+/* OBS: display utan !important — JS kontrollerar show/hide via style="display:none/flex" */
+#template-editor-form { 
+display: flex; 
+flex-direction: column !important; 
+height: 100% !important; 
+padding: 20px !important;
+}
+
+/* 3. Etiketter (Labels) — explicit färg för läsbarhet i alla teman */
+#template-editor-form label {
+font-weight: 600 !important;
+color: rgba(255, 255, 255, 0.55) !important;
+margin-bottom: var(--spacing-xs) !important;
+font-size: 13px !important;
+text-transform: uppercase !important;
+letter-spacing: 0.8px !important;
+}
+
+/* 4. Kombinerad Input & Textarea (Löser dubblett-varning) */
+#template-editor-form input[type="text"],
+#template-editor-form textarea {
+background-color: var(--bg-dark-tertiary) !important;
+border: 1px solid var(--border-color) !important;
+border-radius: var(--border-radius-sm) !important;
+padding: 12px !important;
+color: var(--text-primary) !important;
+font-size: 15px !important;
+font-family: var(--font-family) !important;
+margin-bottom: var(--spacing-lg) !important;
+transition: all 0.2s ease !important;
+}
+
+/* 5. Fokus-lägen */
+#template-editor-form input[type="text"]:focus,
+#template-editor-form textarea:focus {
+outline: none !important;
+border-color: var(--accent-primary) !important;
+box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1) !important;
+}
+
+/* =============================================================================
+TEMPLATE ACTION BUTTONS
+============================================================================= */
+#save-template-btn {
+width: 38px !important;
+height: 38px !important;
+padding: 0 !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+border-radius: 8px !important;
+background: rgba(255, 255, 255, 0.05) !important;
+transition: all 0.2s ease !important;
+flex-shrink: 0 !important;
+border: 1.5px solid #10b981 !important;
+color: #10b981 !important;
+}
+/* display utan !important: tillåter JS att dölja knappen med element.style.display = 'none' */
+#delete-template-btn {
+width: 38px !important;
+height: 38px !important;
+padding: 0 !important;
+display: flex;
+align-items: center !important;
+justify-content: center !important;
+border-radius: 8px !important;
+background: rgba(255, 255, 255, 0.05) !important;
+transition: all 0.2s ease !important;
+flex-shrink: 0 !important;
+}
+
+#delete-template-btn:hover {
+background: #ff4444 !important;
+border-color: #ff4444 !important;
+color: white !important;
+transform: translateY(-2px) !important;
+box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4) !important;
+}
+
+#save-template-btn:hover {
+background: #10b981 !important;
+color: #000 !important;
+transform: translateY(-2px) !important;
+box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4) !important;
+}
+
+#view-templates .chat-input-area {
+display: none !important;
+}
+
+/* =============================================================================
+DESKTOP GLOBAL
+============================================================================= */
+.atlas-help-overlay {
+position: fixed !important;
+top: 0 !important;
+left: 0 !important;
+width: 100% !important;
+height: 100% !important;
+background: rgba(0, 0, 0, 0.75) !important;
+z-index: 9999 !important;
+
+/* LAYOUT: Centrerar innehållet när den väl är öppen */
+align-items: center !important;
+justify-content: center !important;
+
+/* VIKTIGT: Ingen !important här, så JS kan gömma/visa rutan */
+display: none; 
+pointer-events: auto !important; /* Säkerställer att X-knappen går att klicka på */
+}
+
+/* =============================================================================
+INFO-MODALEN - DÖLJ CHATRUTA
+============================================================================= */
+.atlas-help-overlay .chat-input-area,
+.atlas-help-overlay #chat-form,
+.atlas-help-overlay #my-chat-input,
+.atlas-help-overlay #send-button {
+display: none !important; 
+}
+
+/* Säkerställ att modalen inte ärver chat-input styling */
+.atlas-help-overlay .glass-modal-box {
+padding: 30px !important;
+overflow-y: auto !important;
+max-height: 80vh !important;
+}
+
+/* =============================================================================
+ANIMATIONS & HELP OVERLAY
+============================================================================= */
+@keyframes fadeInRight {
+from { opacity: 0; transform: translateX(20px); }
+to { opacity: 1; transform: translateX(0); }
+}
+
+.help-content h4 {
+display: flex !important;
+align-items: center !important;
+gap: 8px !important;
+color: rgba(255,255,255,0.88) !important;
+font-weight: 500 !important;
+margin-top: 0;
+font-size: 16px;
+border-bottom: 1px solid rgba(255,255,255,0.1);
+padding-bottom: 12px;
+margin-bottom: 18px;
+}
+
+/* =============================================
+HJÄLP-MODAL STYLAD VYRUBRRIK
+(matchar showCustomersInfoModal-stilen)
+============================================= */
+.help-view-header {
+display: flex;
+align-items: center;
+gap: 14px;
+margin: -32px -32px 20px;
+padding: 20px 24px 18px;
+border-bottom: 1px solid rgba(255,255,255,0.07);
+background: linear-gradient(90deg, rgba(255,255,255,0.035), transparent);
+border-radius: 14px 14px 0 0;
+}
+.help-view-icon-circle {
+width: 38px;
+height: 38px;
+border-radius: 50%;
+background: rgba(255,255,255,0.07);
+border: 1px solid rgba(255,255,255,0.14);
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+color: var(--accent-primary);
+}
+.help-view-title {
+font-size: 15px;
+font-weight: 700;
+color: var(--accent-primary);
+}
+.help-view-subtitle {
+font-size: 11px;
+color: rgba(255,255,255,0.38);
+margin-top: 2px;
+}
+.help-content ul { padding-left: 0; list-style: none; margin: 0; }
+.help-content li { margin-bottom: 14px; font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.85) !important; }
+.help-content b { color: var(--accent-primary) !important; }
+
+/* =============================================================================
+STEG 1: MASTER MODAL STYLING (SYNCHRONIZED)
+============================================================================= */
+.atlas-help-overlay .help-modal-box,
+.glass-modal-box {
+position: relative !important;
+width: 500px !important;
+max-width: 95vw !important;
+max-height: 80vh !important;
+background: var(--bg-frosty-content, rgba(13, 16, 28, 0.92)) !important;
+backdrop-filter: blur(16px) !important;
+-webkit-backdrop-filter: blur(16px) !important;
+border: 1px solid var(--border-color) !important;
+border-top: 2px solid var(--accent-primary) !important;
+border-radius: 16px !important;
+padding: 32px !important;
+box-shadow: 0 20px 60px rgba(0,0,0,0.70), 0 4px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07) !important;
+overflow-y: auto !important;
+scrollbar-gutter: stable;
+}
+
+
+/* ============================================================
+MODAL X-KNAPP (help-close-btn)
+============================================================ */
+#help-close-btn {
+position: absolute !important;
+top: 14px !important;
+right: 14px !important;
+width: 30px !important;
+height: 30px !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+background: rgba(255, 255, 255, 0.06) !important;
+border: 1px solid rgba(255, 255, 255, 0.1) !important;
+border-radius: 8px !important;
+color: var(--text-secondary) !important;
+font-size: 16px !important;
+cursor: pointer !important;
+transition: all 0.2s ease !important;
+z-index: 10 !important;
+line-height: 1 !important;
+padding: 0 !important;
+}
+#help-close-btn:hover {
+background: rgba(255, 255, 255, 0.12) !important;
+color: var(--text-primary) !important;
+border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Gemensam scrollbar-design */
+.glass-modal-box::-webkit-scrollbar,
+.atlas-help-overlay .help-modal-box::-webkit-scrollbar { width: 6px; }
+
+.glass-modal-box::-webkit-scrollbar-track,
+.atlas-help-overlay .help-modal-box::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+
+.glass-modal-box::-webkit-scrollbar-thumb,
+.atlas-help-overlay .help-modal-box::-webkit-scrollbar-thumb {
+background: var(--accent-primary);
+border-radius: 3px;
+transition: background 0.2s;
+}
+
+.glass-modal-box::-webkit-scrollbar-thumb:hover,
+.atlas-help-overlay .help-modal-box::-webkit-scrollbar-thumb:hover {
+background: var(--accent-hover);
+}
+

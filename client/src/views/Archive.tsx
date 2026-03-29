@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import '../components/TicketCard.css'
 import { useAuth } from '../context/AuthContext'
 import { useDataStore } from '../hooks/useDataStore'
 import { archive as archiveApi } from '../services/api'

@@ -1,0 +1,270 @@
+/* *** === MODALER & DIALOGER === *** */
+
+/* =============================================================================
+MASTER MODAL DESIGN (Popup & Confirmation)
+============================================================================= */
+.custom-modal-overlay {
+position: fixed !important;
+top: 0 !important;
+left: 0 !important;
+width: 100% !important;
+height: 100% !important;
+background: rgba(0, 0, 0, 0.55) !important;
+z-index: 10000 !important;
+display: none; /* Ändras till flex av JS */
+align-items: center !important; /* Centrerar vertikalt */
+justify-content: center !important; /* Centrerar horisontellt */
+pointer-events: auto;
+}
+
+.modal-close {
+position: absolute;
+top: 12px;
+right: 12px;
+background: transparent;
+border: none;
+color: var(--text-secondary);
+font-size: 20px;
+line-height: 1;
+cursor: pointer;
+padding: 6px 8px;
+border-radius: 6px;
+transition: background 0.15s ease, transform 0.15s ease;
+z-index: 10;
+}
+.modal-close:hover { 
+background: rgba(255,255,255,0.06); 
+color: var(--text-primary);
+transform: rotate(90deg);
+}
+
+.glass-modal-header h3, #confirm-title {
+margin-top: 0 !important;
+margin-bottom: 15px !important;
+font-size: 18px !important;
+font-weight: 800 !important;
+color: var(--accent-primary) !important;
+text-transform: uppercase;
+letter-spacing: 1px;
+border-bottom: 1px solid rgba(255,255,255,0.1);
+padding-bottom: 12px;
+}
+
+.glass-modal-body p {
+font-size: 14px;
+line-height: 1.6;
+color: var(--text-secondary);
+margin-bottom: 25px;
+}
+
+.glass-modal-body input, 
+.glass-modal-body textarea {
+background: rgba(0, 0, 0, 0.4) !important;
+border: 1px solid rgba(255, 255, 255, 0.15) !important;
+color: var(--text-primary) !important;
+padding: 12px 15px !important;
+border-radius: 8px !important;
+width: 100% !important;
+margin-bottom: 12px !important;
+transition: border-color 0.15s ease, background 0.15s ease;
+font-family: inherit;
+}
+
+.glass-modal-body input:focus,
+.glass-modal-body textarea:focus {
+    background: rgba(0, 0, 0, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important; /* Mjuk färg */
+    outline: none !important;
+    box-shadow: none !important; /* Ta bort glöden */
+}
+
+.glass-modal-footer { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 10px; }
+
+.btn-modal-confirm {
+background: var(--accent-primary) !important; 
+color: #000 !important;
+border: none !important;
+padding: 10px 24px !important;
+border-radius: 8px !important;
+font-weight: 700 !important;
+cursor: pointer !important;
+transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+display: flex !important;
+align-items: center !important;
+gap: 8px !important;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+.btn-modal-confirm:hover {
+background: var(--accent-hover) !important;
+}
+
+.btn-modal-cancel {
+background: rgba(255, 255, 255, 0.05) !important;
+border: 1px solid rgba(255, 255, 255, 0.1) !important;
+color: var(--text-secondary) !important;
+padding: 10px 20px !important;
+border-radius: 8px !important;
+font-weight: 600 !important;
+cursor: pointer !important;
+transition: all 0.2s ease !important;
+}
+
+.btn-modal-cancel:hover { 
+background: rgba(255, 255, 255, 0.1) !important; 
+color: var(--text-primary) !important;
+border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.btn-modal-logout {
+background: rgba(255, 59, 48, 0.1) !important;
+border: 1px solid rgba(255, 59, 48, 0.2) !important;
+color: #ff4444 !important;
+padding: 10px 20px !important;
+border-radius: 8px !important;
+cursor: pointer !important;
+font-weight: 700 !important;
+margin-right: auto;
+transition: all 0.2s ease !important;
+}
+
+.btn-modal-logout:hover {
+background: #ff4444 !important;
+color: white !important;
+box-shadow: 0 0 20px rgba(255, 68, 68, 0.4);
+}
+
+.btn-modal-confirm:active, .btn-modal-cancel:active, .btn-modal-logout:active {
+transform: translateY(0) scale(0.98) !important;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { 
+from { transform: scale(0.95); opacity: 0; } 
+to { transform: scale(1); opacity: 1; } 
+}
+
+.custom-modal-overlay[style*="display: none"] { pointer-events: none !important; }
+
+/* Bekräftelsedialog MÅSTE alltid ligga ovanpå notes-modalen (ID-selektor vinner över klass-selektor) */
+#atlas-confirm-modal { z-index: 35000 !important; }
+/* Notes-modalen hamnar däremot under confirm, men ovanför reader-modal (10000) */
+#atlas-notes-modal  { z-index: 10100 !important; }
+
+/* =============================================================================
+INTERNAL NOTES MODAL
+============================================================================= */
+.notes-modal-content {
+gap: 15px;
+max-height: 70vh;
+}
+
+.notes-list {
+overflow-y: auto;
+padding-right: 5px;
+}
+
+.note-item {
+background: rgba(255, 255, 255, 0.05);
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 8px;
+padding: 10px;
+position: relative;
+}
+
+.note-header {
+font-size: 12px !important;
+color: rgba(255, 255, 255, 0.65) !important;
+text-transform: uppercase;
+font-weight: bold;
+white-space: normal !important;
+overflow: hidden !important;
+display: -webkit-box !important;
+-webkit-line-clamp: 2 !important;
+line-clamp: 2 !important;
+-webkit-box-orient: vertical !important;
+line-height: 1.4 !important;
+/* Layout (display, margin) raderad */
+}
+
+.note-actions {
+gap: 10px;
+justify-content: flex-end;
+}
+
+.note-action-btn {
+background: none;
+border: none;
+cursor: pointer;
+opacity: 0.6;
+transition: opacity 0.2s;
+padding: 4px;
+}
+
+.note-action-btn:hover { opacity: 1; }
+
+.note-input-area {
+border-top: 1px solid rgba(255, 255, 255, 0.1);
+padding-top: 15px;
+gap: 10px;
+}
+
+#note-textarea {
+background: rgba(0, 0, 0, 0.3);
+border: 1px solid rgba(255, 255, 255, 0.2);
+border-radius: 6px;
+color: white;
+padding: 10px;
+resize: none;
+height: 80px;
+font-family: inherit;
+}
+
+/* =============================================================================
+NOTES BUTTON STYLING (HELT TEMASTYRD - INGA RAMAR)
+============================================================================= */
+
+.notes-trigger-btn {
+background: none !important;
+border: none !important;
+box-shadow: none !important;
+padding: 0 !important;
+margin: 0 6px !important;
+cursor: pointer;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+transition: opacity 0.15s ease, color 0.15s ease;
+outline: none !important;
+}
+
+.notes-trigger-btn svg {
+width: 18px !important;
+height: 18px !important;
+/* Ärver färgen från parent via style="color:${styles.main}" */
+stroke: currentColor !important;
+stroke-width: 2.2px !important;
+fill: none !important;
+opacity: 0.6;
+transition: all 0.2s ease !important;
+}
+
+.notes-trigger-btn:hover svg {
+opacity: 1;
+}
+
+/* 🔥 AKTIV STATUS: Glöd i kontorets färg när anteckningar finns */
+.notes-trigger-btn.has-notes-active svg {
+stroke: currentColor !important;
+opacity: 1 !important;
+filter: drop-shadow(0 0 8px currentColor) !important;
+animation: pulse-theme-glow 2.5s ease-in-out infinite;
+}
+
+/* Animation som pulsar kontorets glöd — subtil (max 5px) */
+@keyframes pulse-theme-glow {
+0% { filter: drop-shadow(0 0 2px currentColor); opacity: 0.7; }
+50% { filter: drop-shadow(0 0 5px currentColor); opacity: 0.7; }
+100% { filter: drop-shadow(0 0 2px currentColor); opacity: 0.7; }
+}
+

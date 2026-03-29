@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import 'react-quill-new/dist/quill.snow.css'
+import './Templates.css'
 
 const ReactQuill = lazy(() => import('react-quill-new'))
 import { templates as templatesApi } from '../services/api'

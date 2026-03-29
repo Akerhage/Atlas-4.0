@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import './Modal.css'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useDataStore } from '../hooks/useDataStore'

@@ -1,0 +1,221 @@
+/* *** === CHATTVY & FORMULÄR === *** */
+
+/* =============================================================================
+CHAT MESSAGES & MAIL MODES
+============================================================================= */
+.chat-messages {
+flex: 1;
+overflow-y: auto;
+padding: var(--spacing-lg);
+display: flex;
+flex-direction: column;
+gap: var(--spacing-md);
+}
+
+/* Mail Mode */
+.mail-mode .chat-messages { gap: 0; }
+.mail-mode .message { max-width: 100%; }
+.mail-mode .message .bubble {
+background: none !important;
+box-shadow: none !important;
+border-radius: 0 !important;
+padding: 0 !important;
+color: var(--text-primary) !important;
+white-space: pre-wrap;
+}
+
+/* Agent Mode / Template Editor - Behåller design, layout styrs av Brandvägg */
+.template-editor-container .message.atlas .bubble {
+background: var(--bg-frosty-bubble-atlas) !important;
+backdrop-filter: blur(var(--blur-amount)) !important;
+-webkit-backdrop-filter: blur(var(--blur-amount)) !important;
+border: 1px solid var(--border-color) !important;
+color: #ffffff !important;
+box-shadow: var(--shadow-small) !important;
+}
+
+/* =============================================================================
+HEM-VYN (Home) - MASTER LAYOUT KONSOLIDERAD
+============================================================================= */
+/* HEM SKRIVRUTA */
+#home-chat-footer.chat-input-area {
+display: flex !important;
+width: 100% !important;
+min-height: 100px !important;
+padding: 20px 40px !important;
+background: transparent !important;
+align-items: center !important;
+justify-content: center !important;
+flex-shrink: 0 !important;
+border-radius: 0 !important;
+}
+
+#home-chat-footer #chat-form {
+display: flex !important;
+width: 100% !important;
+max-width: 1000px !important;
+background: var(--bg-frosty-input-area) !important;
+border-radius: 20px !important;
+padding: 8px 8px 8px 22px !important; /* <--- Ändrad! Endast 8px till höger nu */
+border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+#home-chat-footer #chat-form:focus-within {
+    /* transform: translateY(-2px) !important; <-- TA BORT! */
+    border-color: rgba(255, 255, 255, 0.2) !important; /* Dämpa färgen */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important; /* Standard skugga */
+}
+
+#home-chat-footer #my-chat-input {
+flex: 1 !important;
+background: transparent !important;
+border: none !important;
+outline: none !important;
+color: var(--text-primary) !important;
+font-size: 16px !important;
+}
+
+#home-chat-footer #send-button {
+width: 38px !important;
+height: 38px !important;
+border-radius: 50% !important;
+background: var(--accent-primary) !important;
+color: white !important;
+border: none !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+margin-left: 15px !important;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+#home-chat-footer #send-button:hover {
+background: var(--accent-hover) !important;
+}
+
+#home-chat-footer #send-button svg {
+width: 16px !important;
+height: 16px !important;
+stroke-width: 3px !important;
+}
+
+/* =============================================================================
+CHAT FORM MASTER CLASS - UNIFIED PREMIUM LOOK (HEM-1)
+============================================================================= */
+/* 7. FOOTERS - Chat-input för ärenden */
+#inbox-footer, 
+#my-tickets-footer, 
+#archive-footer {
+display: flex !important;
+flex-direction: column !important;
+width: 100% !important;
+background: rgba(10, 8, 20, 0.6) !important;
+backdrop-filter: blur(12px) !important;
+-webkit-backdrop-filter: blur(12px) !important;
+flex-shrink: 0 !important;
+padding: 0 !important;
+border-top: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* ===  MINA ÄRENDEN: FOOTER FORM (targeting rätt IDs från index.html) === */
+/* OBS: display utan !important — JS kontrollerar show/hide via style="display:none/flex" */
+#my-ticket-chat-form {
+display: flex;
+flex-direction: row !important;
+align-items: center !important;
+gap: 8px !important;
+padding: 8px 16px 4px !important;
+background: transparent !important;
+border: none !important;
+}
+
+/* Textrutan */
+#my-ticket-chat-input {
+flex: 1 !important;
+background: rgba(0, 0, 0, 0.2) !important;
+border: 1px solid rgba(255, 255, 255, 0.1) !important;
+border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+border-radius: 10px !important;
+color: var(--text-primary) !important;
+font-size: 13px !important;
+padding: 8px 12px !important;
+resize: vertical !important;
+min-height: 40px !important;
+max-height: 250px !important;
+overflow-y: auto !important;
+outline: none !important;
+transition: border-color 0.2s ease, height 0.15s ease !important;
+font-family: inherit !important;
+line-height: 1.5 !important;
+}
+
+#my-ticket-chat-input::placeholder {
+color: var(--text-secondary) !important;
+opacity: 0.55 !important;
+font-style: italic !important;
+}
+
+#my-ticket-chat-input:focus {
+    /* Döda gamla koden och sätt in denna */
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Nollställer blå fokuskontur i Inkorg & Mina Ärenden */
+#my-chat-input:focus {
+outline: none !important;
+border-color: rgba(255,255,255,0.2) !important;
+box-shadow: none !important;
+}
+
+/* Send-knappen (class send-button-ticket) — cirkulär, matchar Inkorgens stil */
+.send-button-ticket {
+width: 40px !important;
+height: 40px !important;
+min-width: 40px !important;
+border-radius: 50% !important;
+background: var(--accent-primary) !important;
+border: none !important;
+display: flex !important;
+justify-content: center !important;
+align-items: center !important;
+cursor: pointer !important;
+color: white !important;
+transition: opacity 0.15s ease, transform 0.15s ease !important;
+flex-shrink: 0 !important;
+box-shadow: none !important;
+}
+
+.send-button-ticket:hover {
+opacity: 0.85 !important;
+transform: scale(1.05) !important;
+}
+
+.send-button-ticket:active { opacity: 0.7 !important; transform: scale(0.95) !important; }
+.send-button-ticket svg { width: 18px !important; height: 18px !important; fill: currentColor !important; }
+
+/* === HEADER BUTTON (Standard) === */
+.header-button {
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+transition: all 0.2s ease;
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 10px;
+color: rgba(255, 255, 255, 0.75);
+background: rgba(255, 255, 255, 0.04);
+box-shadow: none;
+}
+
+.header-button:hover {
+background: rgba(255, 255, 255, 0.1);
+border-color: rgba(255, 255, 255, 0.2);
+color: white;
+transform: none;
+}
+
+.header-button:active { opacity: 0.8; }
+

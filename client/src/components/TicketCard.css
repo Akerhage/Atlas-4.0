@@ -1,0 +1,333 @@
+/* *** === ÄRENDEKORT & CLAIM === *** */
+
+/* =============================================================================
+MASTER TICKET CARD DESIGN
+============================================================================= */
+
+/* 1. Själva kortet - Basdesign */
+.team-ticket-card, 
+.archive-card {
+position: relative !important;
+display: flex !important;
+flex-direction: column !important;
+padding: 12px 14px 38px 14px !important;
+width: 100% !important;
+margin-bottom: 8px !important;
+min-height: 85px !important;
+background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.12)) !important;
+/* Border är grå, men vänsterkanten är dynamisk */
+border: 1px solid rgba(255, 255, 255, 0.08) !important;
+border-left: 4px solid var(--agent-color, #0071e3) !important; 
+border-radius: 14px !important;
+transition: all 0.18s ease !important;
+cursor: pointer !important;
+overflow: hidden !important;
+}
+
+/* 2. Den färgade kanten till vänster (Agent-färg) */
+.team-ticket-card::before,
+.archive-card::before {
+content: '' !important;
+position: absolute !important;
+left: 0 !important;
+top: 0 !important;
+width: 3px !important;
+height: 100% !important;
+border-radius: 4px 0 0 4px !important;
+background: var(--agent-color, var(--accent-primary)) !important;
+opacity: 0.85 !important;
+z-index: 2;
+}
+
+/* CSS-logik för arkiv-filtret */
+.template-group-content.hide-ai-chats .is-ai-chat {
+display: none !important;
+}
+
+/* 3. Hover & Aktivt läge */
+.team-ticket-card:hover,
+.archive-card:hover {
+background: rgba(255, 255, 255, 0.08) !important;
+border-color: color-mix(in srgb, var(--agent-color, #fff) 30%, transparent) !important;
+}
+
+.team-ticket-card.active-ticket {
+/* Subtil bakgrundsgradient i kortets accentfärg */
+background: linear-gradient(90deg, color-mix(in srgb, var(--agent-color, #0071e3) 18%, transparent), transparent) !important;
+border-color: color-mix(in srgb, var(--agent-color, #0071e3) 60%, rgba(255,255,255,0.2)) !important;
+border-left-color: var(--agent-color, #0071e3) !important;
+box-shadow: none !important;
+}
+
+/* 4. Titel & Topp-höger sektion (Fordon/Notes) */
+.ticket-header-row {
+display: flex !important;
+justify-content: space-between !important;
+align-items: flex-start !important;
+width: 100% !important;
+margin-bottom: 4px !important;
+}
+
+.ticket-title {
+font-size: 13px !important;
+font-weight: 700 !important;
+color: var(--text-primary) !important;
+white-space: nowrap !important;
+overflow: hidden !important;
+text-overflow: ellipsis !important;
+flex: 1 !important;
+display: flex !important;
+align-items: center !important;
+gap: 8px !important;
+}
+
+.ticket-top-right {
+display: flex !important;
+align-items: center !important;
+gap: 10px !important;
+flex-shrink: 0 !important;
+margin-left: 10px !important;
+}
+
+/* Stilar för ikoner i topp-höger */
+.ticket-top-right svg, 
+.ticket-top-right .type-icon {
+width: 16px !important;
+height: 16px !important;
+opacity: 0.8 !important;
+display: flex !important;
+}
+
+/* 5. Preview Text */
+.ticket-preview {
+font-size: 12px !important;
+color: rgba(255, 255, 255, 0.5) !important;
+display: -webkit-box !important;
+-webkit-line-clamp: 1 !important;
+line-clamp: 1 !important;
+-webkit-box-orient: vertical !important;
+overflow: hidden !important;
+margin: 0 !important;
+padding-right: 40px !important; /* Plats för orangea knappen mitt på kortet */
+}
+
+/* 6. DEN MÖRKA LISTEN I BOTTEN (Admin-looken) */
+.ticket-footer-bar {
+position: absolute !important;
+bottom: 0 !important;
+left: 0 !important;
+right: 0 !important;
+height: 32px !important;
+background: rgba(0, 0, 0, 0.25) !important; 
+display: flex !important;
+justify-content: space-between !important;
+align-items: center !important;
+padding: 0 12px 0 14px !important;
+border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.ticket-time {
+font-size: 10px !important;
+color: rgba(255, 255, 255, 0.35) !important;
+font-family: monospace !important;
+}
+
+.ticket-tag {
+font-size: 9px !important;
+padding: 2px 7px !important;
+border-radius: 4px !important;
+background: rgba(255, 255, 255, 0.05) !important;
+color: var(--agent-color, #fff) !important;
+font-weight: 800 !important;
+text-transform: uppercase !important;
+letter-spacing: 0.5px !important;
+
+/* Förhindrar radbrytning och skyddar kortets layout */
+white-space: nowrap !important;
+display: inline-block !important;
+max-width: 85px !important;
+overflow: hidden !important;
+text-overflow: clip !important;
+}
+
+/* 7. Den orangea MINI-KNAPPEN (Inget hopp) */
+.mini-action-btn {
+position: absolute !important;
+right: 10px !important;
+top: 50% !important; /* Centrerad vertikalt */
+transform: translateY(-50%) !important;
+width: 28px !important;
+height: 28px !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+border-radius: 6px !important;
+background: rgba(243, 156, 18, 0.1) !important;
+border: 1px solid rgba(243, 156, 18, 0.3) !important;
+opacity: 0;
+transition: opacity 0.2s ease !important;
+z-index: 10 !important;
+}
+
+.mini-action-btn svg {
+width: 14px !important;
+height: 14px !important;
+stroke: currentColor !important;
+stroke-width: 2.2px !important;
+fill: none !important;
+}
+
+/* Inkorgen: cursor under Notes-ikonen */
+.claim-mini-btn {
+position: absolute !important;
+right: 14px !important;
+top: 48px !important; /* Alltid exakt under Notes-ikonen */
+width: 20px !important;
+height: 20px !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+background: none !important;
+border: none !important;
+opacity: 0;
+transition: opacity 0.2s ease !important;
+transform: none !important;
+}
+
+.team-ticket-card:hover .claim-mini-btn {
+opacity: 1 !important;
+}
+
+.claim-mini-btn svg {
+width: 16px !important;
+height: 16px !important;
+stroke: currentColor !important;
+fill: none !important;
+}
+
+/* Visa knappen vid hovring - HELT STILL */
+.team-ticket-card:hover .mini-action-btn, 
+.archive-card:hover .mini-action-btn {
+opacity: 1 !important;
+}
+
+.mini-action-btn:hover {
+background: rgba(243, 156, 18, 0.2) !important;
+border-color: #f39c12 !important;
+}
+
+/* =============================================================================
+CLAIM-HANDEN (INKORGEN)
+============================================================================= */
+
+/* Unifierad styling för handen (Inkorgen) */
+.team-ticket-card .claim-mini-btn,
+.team-ticket-card .claim-action {
+position: absolute !important;
+top: 26px !important;      /* Ändrat från 48px för att landa precis under Notes */
+right: 14px !important;    /* Linjerad vertikalt med Notes-ikonen */
+width: 20px !important;
+height: 20px !important;
+background: none !important;
+border: none !important;
+box-shadow: none !important;
+opacity: 0;
+transition: opacity 0.2s ease !important;
+transform: none !important;
+z-index: 10 !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+}
+
+/* Visa handen vid hovring på kortet */
+.team-ticket-card:hover .claim-mini-btn,
+.team-ticket-card:hover .claim-action {
+opacity: 1 !important;
+}
+
+/* =============================================================================
+TEAM VIEW: INTERNAL CHATS
+============================================================================= */
+
+/* Kortet i listan (Garaget/Inkorg/Mina Ärenden) */
+.team-ticket-card.internal-ticket {
+border-left: 4px solid #f1c40f !important;
+background: rgba(241, 196, 15, 0.08) !important;
+}
+
+/* Taggen (texten) inuti kortet */
+.internal-ticket .ticket-tag {
+color: #f1c40f !important;
+background: rgba(241, 196, 15, 0.15) !important;
+border: 1px solid rgba(241, 196, 15, 0.3) !important;
+}
+
+/* Ikon-färg och glöd vid hover — ärver från parent color */
+.claim-mini-btn svg,
+.claim-action svg {
+width: 16px !important;
+height: 16px !important;
+stroke: currentColor !important;
+fill: none !important;
+transition: transform 0.2s ease;
+}
+
+.claim-mini-btn:hover svg,
+.claim-action:hover svg {
+transform: scale(1.2);
+filter: drop-shadow(0 0 5px currentColor);
+}
+
+/* =============================================================================
+ARCHIVE & RESTORE BUTTONS (Orange)
+============================================================================= */
+.btn-archive-red,
+#btn-archive,
+#btn-archive-my,
+#archive-restore-btn {
+color: #f39c12 !important;
+border-color: rgba(243, 156, 18, 0.3) !important;
+background: rgba(243, 156, 18, 0.05) !important;
+cursor: pointer !important;
+transition: all 0.2s ease !important;
+}
+
+.btn-archive-red:hover,
+#btn-archive:hover,
+#btn-archive-my:hover,
+#archive-restore-btn:hover {
+background: rgba(243, 156, 18, 0.2) !important;
+border-color: #f39c12 !important;
+color: white !important;
+transform: scale(1.05);
+}
+
+/* Kortets mini-arkivknapp följer kontorets accentfärg (satt via inline style="color:...") */
+.archive-action {
+border-color: currentColor !important;
+background: transparent !important;
+cursor: pointer !important;
+transition: all 0.2s ease !important;
+}
+.archive-action:hover {
+background: rgba(255, 255, 255, 0.08) !important;
+border-color: currentColor !important;
+box-shadow: 0 0 10px rgba(255, 255, 255, 0.1) !important;
+transform: scale(1.05);
+}
+
+/* Döda den blåa randen i botten av detaljpanelen */
+.templates-view .template-editor-container {
+border-bottom: none !important;
+}
+
+/* Neutralisera glass-effect-glöd på detaljpanelen — subtle, inte blå */
+.template-editor-container.glass-effect {
+border: 1px solid rgba(255, 255, 255, 0.08) !important;
+box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3) !important;
+outline: none !important;
+backdrop-filter: blur(10px) !important;
+-webkit-backdrop-filter: blur(10px) !important;
+}
+

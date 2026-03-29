@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import './Home.css'
 import { useSocket } from '../context/SocketContext'
 import { useAuth } from '../context/AuthContext'
 import type { ChatMessage } from '../types'
