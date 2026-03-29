@@ -215,8 +215,8 @@ export default function TicketDetail({ conversationId, onArchived, onDeleted }: 
               {!isSystem && (
                 <>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>
-                    {isCustomer ? customerName : isAtlas ? 'Atlas AI' : isAgent ? (ticket.owner || 'Agent') : msg.role}
-                    {msg.timestamp && ` · ${smartTime(msg.timestamp)}`}
+                    {isCustomer ? customerName : isAtlas ? 'Atlas' : isAgent ? (ticket.owner || 'Agent') : msg.role}
+                    {(msg.timestamp || msg.createdAt) && ` · ${smartTime(msg.timestamp || msg.createdAt || '')}`}
                   </div>
                   <div className="bubble-content" dangerouslySetInnerHTML={{ __html: msg.content }} />
                 </>

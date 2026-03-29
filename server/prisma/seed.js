@@ -225,6 +225,19 @@ async function main() {
     { ticketId: 'chat_live_004', role: 'atlas', content: 'Hej Fatima! Ja, vi erbjuder AM-utbildning (EU-moped). Du behöver vara minst 15 år. Kursen innehåller teori och praktik.' },
     { ticketId: 'chat_live_004', role: 'customer', content: 'Vad kostar det?' },
 
+    // chat_live_003 — Mohammed testlesson
+    { ticketId: 'chat_live_003', role: 'customer', content: 'I would like to book a test lesson please' },
+    { ticketId: 'chat_live_003', role: 'atlas', content: 'Hi Mohammed! A test lesson (provlektion) is a discounted first lesson of 80 minutes for new car students. Which city would you prefer?' },
+    { ticketId: 'chat_live_003', role: 'customer', content: 'Stockholm Östermalm' },
+
+    // chat_live_005 — Gustav lastbil
+    { ticketId: 'chat_live_005', role: 'customer', content: 'Har ni lastbilsutbildning?' },
+    { ticketId: 'chat_live_005', role: 'atlas', content: 'Hej Gustav! Ja, vi erbjuder utbildning för C-körkort (tung lastbil) och CE-körkort. Behöver du även YKB?' },
+    { ticketId: 'chat_live_005', role: 'customer', content: 'Ja, jag behöver YKB-grundutbildning 140 timmar' },
+
+    // mail_inbound_002 — Per förlängning
+    { ticketId: 'mail_inbound_002', role: 'customer', content: 'Hej!\n\nMitt baspaket gick ut förra månaden. Kan jag förlänga det eller måste jag köpa ett nytt?\n\nMvh Per Nilsson', isEmail: true },
+
     // chat_claimed_001 — Sofia (hel konversation med eskalering)
     { ticketId: 'chat_claimed_001', role: 'customer', content: 'Hej, jag har frågor om mitt paket' },
     { ticketId: 'chat_claimed_001', role: 'atlas', content: 'Hej Sofia! Vad kan jag hjälpa dig med?' },

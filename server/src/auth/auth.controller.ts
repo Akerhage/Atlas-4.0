@@ -42,6 +42,16 @@ export class AuthController {
 
   @Get('public/offices')
   async getOffices() {
-    return this.prisma.office.findMany({ orderBy: [{ city: 'asc' }, { area: 'asc' }] });
+    const offices = await this.prisma.office.findMany({ orderBy: [{ city: 'asc' }, { area: 'asc' }] });
+    return offices.map(o => ({
+      id: o.id,
+      name: o.name,
+      routing_tag: o.routingTag,
+      city: o.city,
+      area: o.area,
+      office_color: o.officeColor,
+      phone: o.phone,
+      email: o.email,
+    }));
   }
 }

@@ -49,6 +49,8 @@ export interface ChatMessage {
   role: 'user' | 'atlas' | 'agent' | 'customer' | 'system'
   content: string
   timestamp?: string
+  createdAt?: string
+  isEmail?: boolean
 }
 
 export interface Template {
