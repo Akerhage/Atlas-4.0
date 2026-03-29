@@ -185,9 +185,9 @@ server/
 - [x] Profile settings modal — ProfileModal with avatar/color/status/password
 - [x] Mail composer modal — MailComposer with external/internal mode toggle
 - [x] Playwright e2e tests — auth, navigation, views (3 spec files)
-- [ ] Bulk operations in Inbox (multi-select + batch claim/archive)
+- [x] Bulk operations in Inbox — multi-select with checkboxes, floating toolbar, batch claim/archive
+- [x] Update `server.js` — serves `client/dist/` with fallback to `Renderer/`, SPA catch-all route
+- [x] Update `main.js` — loads `http://localhost:3001` instead of `file://`, removed preload dependency
+- [x] Mobile hamburger menu — toggle sidebar, overlay backdrop, responsive layout
 - [ ] Quill rich text editor integration for Templates
-- [ ] Update `server.js` to serve `client/dist/` instead of `Renderer/`
-- [ ] Update Electron `main.js` to load from web URL instead of file://
-- [ ] Mobile hamburger menu support
-- [ ] E2E test updates for new frontend
+- [ ] E2E test updates for deployed environment

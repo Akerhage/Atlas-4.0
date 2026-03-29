@@ -152,9 +152,6 @@ loaderWindow = null;
 function createMainWindow() {
 if (mainWindow) return;
 
-let indexPath = getRendererPath('index.html');
-if (!fs.existsSync(indexPath)) indexPath = getLocalPath('index.html');
-
 mainWindow = new BrowserWindow({
 width: 1600, height: 950,
 minWidth: 1280, minHeight: 760,
@@ -164,29 +161,28 @@ icon: getRendererPath('assets/icons/app/icon.ico'),
 autoHideMenuBar: true,
 titleBarStyle: 'hidden',
 titleBarOverlay: { color: '#0a0f1a', symbolColor: '#00d4b4', height: 36 },
-webPreferences: { 
-preload: path.join(__dirname, 'preload.js'), 
-contextIsolation: true, 
+webPreferences: {
+contextIsolation: true,
 nodeIntegration: false,
 sandbox: false,
 backgroundThrottling: false
 }
 });
 
-// CSP Header Override (Socket.io Security Fix)
+// CSP Header Override — tillåt localhost:3001 + ngrok för React app
 session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
 callback({
 responseHeaders: {
 ...details.responseHeaders,
 'Content-Security-Policy': [
-// Tillåter externa bilder och Socket.IO via CSP
-"default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:3001; connect-src 'self' http://localhost:* ws://localhost:* https://*.ngrok-free.dev wss://*.ngrok-free.dev; img-src 'self' data: http: https:;"
+"default-src 'self' 'unsafe-inline' data: http://localhost:3001; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:3001; connect-src 'self' http://localhost:* ws://localhost:* https://*.ngrok-free.dev wss://*.ngrok-free.dev; img-src 'self' data: http: https:; style-src 'self' 'unsafe-inline' http://localhost:3001;"
 ]
 }
 });
 });
 
-mainWindow.loadURL(`file://${indexPath}`);
+// Ladda React-appen via HTTP istället för file:// — eliminerar IPC-behovet
+mainWindow.loadURL(`http://localhost:${SERVER_PORT}`);
 
 // Window Lifecycle Events
 mainWindow.once('ready-to-show', () => {

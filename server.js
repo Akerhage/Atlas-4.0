@@ -673,8 +673,13 @@ res.sendFile(path.resolve(row.filepath));
 // 1. Servera kundchatten från Atlas-roten (ngrok-adress/kundchatt)
 app.use('/kundchatt', express.static(path.join(__dirname, 'kundchatt')));
 
-// 2. Servera Admin-gränssnittet (Renderer)
+// 2. Servera React-gränssnittet (client/dist för produktion, Renderer som fallback)
+const clientDistPath = path.join(__dirname, 'client', 'dist');
+if (fs.existsSync(clientDistPath)) {
+app.use(express.static(clientDistPath));
+} else {
 app.use(express.static(path.join(__dirname, 'Renderer')));
+}
 
 // 3. Socket.io biblioteket
 app.use('/socket.io', express.static(path.join(__dirname, 'node_modules/socket.io/client-dist')));
@@ -826,9 +831,14 @@ app.get('/demo', (req, res) => {
 res.sendFile(path.join(__dirname, 'demo.html'));
 });
 
-// 5. Standard-route för Admin
+// 5. Standard-route — React SPA med fallback till Renderer
 app.get('/', (req, res) => {
+const reactIndex = path.join(__dirname, 'client', 'dist', 'index.html');
+if (fs.existsSync(reactIndex)) {
+res.sendFile(reactIndex);
+} else {
 res.sendFile(path.join(__dirname, 'Renderer', 'index.html'));
+}
 });
 
 // Auth-routes och publika endpoints (login, lösenord, profil, seed, version)
@@ -1799,6 +1809,23 @@ app.use('/api', notesRoutes);
 const webhookRoutes = require('./routes/webhook');
 app.use('/', webhookRoutes);
 webhookRoutes.init({ io, sendToLHC, parseContextData, HUMAN_TRIGGERS, HUMAN_RESPONSE_TEXT });
+
+// =============================================================================
+// 🔄 SPA CATCH-ALL — React Router stöd (måste vara EFTER alla API-routes)
+// =============================================================================
+const reactIndex = path.join(__dirname, 'client', 'dist', 'index.html');
+if (fs.existsSync(reactIndex)) {
+app.get('*', (req, res, next) => {
+// Skippa API-anrop, uploads, kundchatt, socket.io och statiska filer
+if (req.path.startsWith('/api') || req.path.startsWith('/team') ||
+    req.path.startsWith('/search_all') || req.path.startsWith('/socket.io') ||
+    req.path.startsWith('/uploads') || req.path.startsWith('/kundchatt') ||
+    req.path.startsWith('/webhook') || req.path.includes('.')) {
+  return next();
+}
+res.sendFile(reactIndex);
+});
+}
 
 // =============================================================================
 // 📬 IMAP LISTENER - FIXAD VERSION (MED ECHO-SKYDD & KORREKT PARSING)

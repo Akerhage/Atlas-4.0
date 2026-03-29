@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useDataStore } from '../hooks/useDataStore'
 import { team } from '../services/api'
 import { getAgentStyles, resolveLabel, smartTime, stripHtml } from '../utils/styling'
+import { showToast } from '../components/ToastContainer'
 import TicketDetail from '../components/TicketDetail'
 import type { Ticket } from '../types'
 
@@ -17,6 +18,10 @@ export default function Inbox() {
   const [activeTab, setActiveTab] = useState<InboxTab>('chats')
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // Bulk mode state
+  const [bulkMode, setBulkMode] = useState(false)
+  const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set())
 
   const fetchTickets = useCallback(async () => {
     try {
@@ -71,6 +76,50 @@ export default function Inbox() {
     }
   }
 
+  // Bulk operations
+  const toggleBulkSelect = (id: string) => {
+    setBulkSelected(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const exitBulkMode = () => {
+    setBulkMode(false)
+    setBulkSelected(new Set())
+  }
+
+  const bulkClaim = async () => {
+    if (bulkSelected.size === 0) return
+    try {
+      await Promise.all(
+        Array.from(bulkSelected).map(id => team.claimTicket(id))
+      )
+      showToast(`${bulkSelected.size} ärenden plockade!`, 3000, 'success')
+      exitBulkMode()
+      fetchTickets()
+    } catch (err) {
+      showToast('Bulk-plockning misslyckades.', 3000, 'error')
+    }
+  }
+
+  const bulkArchive = async () => {
+    if (bulkSelected.size === 0) return
+    if (!window.confirm(`Arkivera ${bulkSelected.size} ärenden?`)) return
+    try {
+      await Promise.all(
+        Array.from(bulkSelected).map(id => team.archiveTicket(id))
+      )
+      showToast(`${bulkSelected.size} ärenden arkiverade!`, 3000, 'success')
+      exitBulkMode()
+      fetchTickets()
+    } catch (err) {
+      showToast('Bulk-arkivering misslyckades.', 3000, 'error')
+    }
+  }
+
   const tabs: { key: InboxTab; label: string }[] = [
     { key: 'chats', label: 'Nya Live-Chattar' },
     { key: 'mail', label: 'Nya Mail-ärenden' },
@@ -103,7 +152,45 @@ export default function Inbox() {
               )
             })}
           </div>
+          <div className="header-actions" style={{ display: 'flex', gap: 6, marginLeft: 8 }}>
+            <button
+              className={`icon-only-btn${bulkMode ? ' active' : ''}`}
+              onClick={() => bulkMode ? exitBulkMode() : setBulkMode(true)}
+              title={bulkMode ? 'Avsluta markering' : 'Markera flera'}
+              style={{ fontSize: 12 }}
+            >
+              {bulkMode ? '✕' : '☑'}
+            </button>
+          </div>
         </header>
+
+        {/* Bulk action toolbar */}
+        {bulkMode && bulkSelected.size > 0 && (
+          <div
+            id="bulk-action-toolbar"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '8px 16px',
+              background: 'var(--bg-dark-secondary)',
+              borderBottom: '1px solid var(--border-color)',
+            }}
+          >
+            <span className="bulk-count-label" style={{ fontSize: 12, color: 'var(--text-secondary)', flex: 1 }}>
+              {bulkSelected.size} markerade
+            </span>
+            <button className="btn-glass-small" onClick={bulkClaim} style={{ fontSize: 11 }}>
+              Plocka alla
+            </button>
+            <button className="btn-glass-small" onClick={bulkArchive} style={{ fontSize: 11, color: '#ff4444' }}>
+              Arkivera alla
+            </button>
+            <button className="btn-glass-small" onClick={exitBulkMode} style={{ fontSize: 11 }}>
+              Avbryt
+            </button>
+          </div>
+        )}
 
         <div className="ticket-list">
           {loading && <div className="loading-spinner">Laddar...</div>}
@@ -124,18 +211,28 @@ export default function Inbox() {
             )
             const label = resolveLabel(ticket.routing_tag, officeData)
             const isSelected = selectedTicket === ticket.conversation_id
+            const isBulkChecked = bulkSelected.has(ticket.conversation_id)
 
             return (
               <div
                 key={ticket.conversation_id}
-                className={`team-ticket-card${isSelected ? ' selected' : ''}`}
+                className={`team-ticket-card${isSelected ? ' selected' : ''}${isBulkChecked ? ' bulk-selected' : ''}`}
                 style={{
                   borderLeft: `3px solid ${styles.main}`,
-                  background: isSelected ? styles.bg : undefined,
+                  background: isSelected ? styles.bg : isBulkChecked ? 'rgba(0,113,227,0.06)' : undefined,
                 }}
-                onClick={() => setSelectedTicket(ticket.conversation_id)}
+                onClick={() => bulkMode ? toggleBulkSelect(ticket.conversation_id) : setSelectedTicket(ticket.conversation_id)}
               >
                 <div className="ticket-card-header">
+                  {bulkMode && (
+                    <input
+                      type="checkbox"
+                      checked={isBulkChecked}
+                      onChange={() => toggleBulkSelect(ticket.conversation_id)}
+                      onClick={e => e.stopPropagation()}
+                      style={{ marginRight: 8, cursor: 'pointer' }}
+                    />
+                  )}
                   <span className="pill" style={{ background: styles.tagBg, color: styles.main }}>
                     {label}
                   </span>
@@ -147,7 +244,7 @@ export default function Inbox() {
                 <div className="ticket-card-preview">
                   {stripHtml(ticket.last_message)}
                 </div>
-                {ticket.status === 'open' && (
+                {!bulkMode && ticket.status === 'open' && (
                   <div className="ticket-card-actions">
                     <button
                       className="btn-claim"
