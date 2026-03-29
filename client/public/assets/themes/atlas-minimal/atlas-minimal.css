@@ -1,0 +1,149 @@
+/* ═══════════════════════════════════════════════════════════════
+   ATLAS MINIMAL — "Tråk-temat" (Reduced Motion & Flat Design)
+   Design: Inga animationer, inga skuggor, ingen transparens.
+   Fokus på maximal läsbarhet och noll distraktioner.
+═══════════════════════════════════════════════════════════════ */
+
+:root {
+    /* 1. SOLID BAKGRUND (Ingen naturbild, bara en lugn mörkgrå) */
+    --bg-image: none !important;
+    --bg-color: #121212 !important;
+    
+    /* 2. PLATTA FÄRGER (Tar bort all "frostig" glassmorphism) */
+    --bg-dark-primary: #1a1a1a !important;
+    --bg-dark-secondary: #222222 !important;
+    --bg-dark-tertiary: #2a2a2a !important;
+    
+    /* Ersätt rgba/transparens med solida hex-färger för att slippa blur */
+    --bg-frosty-sidebar: #181818 !important;
+    --bg-frosty-header: #1e1e1e !important;
+    --bg-frosty-content: #121212 !important;
+    --bg-frosty-bubble-atlas: #252525 !important;
+    
+    /* Nollställ oskärpa */
+    --blur-amount: 0px !important;
+
+    /* 3. LUGNARE TEXTKONTRAST */
+    --text-primary: #e0e0e0 !important;
+    --text-secondary: #888888 !important;
+    --border-color: #333333 !important;
+}
+
+/* =================================================================
+   ÖVERSKRIDNINGAR: STÄNG AV ALLT "BLINK BLINK"
+================================================================= */
+
+/* Tvinga bakgrunden att vara solid */
+body {
+    background: var(--bg-color) !important;
+}
+
+/* Stäng av alla mjuka övergångar (snabbar också upp UI:t markant) */
+* {
+    transition: none !important;
+}
+
+/* Dölj alla dekorationer, bakgrundsglöd och shimmer-effekter */
+.bg-glow, 
+.ring-pulse, 
+.ring-spin, 
+.ln-btn-shimmer {
+    display: none !important;
+    animation: none !important;
+}
+
+/* Stäng av pulserande och in-slide animationer */
+.animate-pulse-soft, 
+.animate-fade-in-up, 
+.animate-slide-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* =================================================================
+   PLATT DESIGN: BORT MED SKUGGOR (Box-shadows)
+================================================================= */
+
+/* Istället för djupa skuggor, använd en skarp, tunn border (1px) */
+.glass-modal-box,
+.team-ticket-card,
+.bubble-shadow-atlas,
+.bubble-shadow-user,
+.sidebar,
+.card,
+.notif-panel {
+    box-shadow: none !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 4px !important; /* Gör designen lite mer fyrkantig och "system"-aktig */
+}
+
+/* Nollställ text-skuggor */
+h1, h2, h3, .app-name, .logo-fallback {
+    text-shadow: none !important;
+}
+
+/* =================================================================
+   HOVER- OCH KNAPP-EFFEKTER (Ingen zoom)
+================================================================= */
+
+/* Förhindra att knappar och kort zoomar eller flyttar sig när man hovrar */
+.team-ticket-card:hover,
+.action-btn:hover,
+.ln-btn:hover,
+.ln-btn:active {
+    transform: none !important;
+    filter: none !important;
+    background-color: var(--bg-dark-tertiary) !important;
+}
+
+/* Menystil hanteras av style.css — inga temaoverrides */
+
+.team-ticket-card {
+    border-left: 4px solid var(--agent-color, #333) !important; /* Behåll agentens färg som en tydlig list till vänster */
+    margin-bottom: 4px !important; /* Tighta till listan lite */
+}
+
+/* =================================================================
+   DÖDA KVARVARANDE GLOW (Knappar och Sidomeny)
+================================================================= */
+
+/* Ta bort glow på alla primära knappar (t.ex. Send-knappen i chatten) */
+button, 
+.ln-btn, 
+.action-btn, 
+.chat-submit-btn,
+.icon-only-btn {
+    box-shadow: none !important;
+}
+
+/* Om ikoner inuti sidomenyn eller knappar har drop-shadow (SVG-glow) */
+.sidebar .menu-item svg,
+.sidebar .menu-item i,
+.header-actions svg {
+    filter: none !important;
+    drop-shadow: none !important;
+}
+
+/* Ta bort eventuellt ljus bakom hela sidomenyn */
+.sidebar {
+    box-shadow: none !important;
+    border-right: 1px solid var(--border-color) !important;
+}
+
+/* =================================================================
+   EXKLUZIV BAKGRUND FÖR HEM-VYN
+================================================================= */
+#view-chat {
+    background-image: url('./atlas-minimal-bg.jpg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    /* Lägger en mörk toning över bilden så att ljusa detaljer inte gör texten svårläst */
+    box-shadow: inset 0 0 0 2000px rgba(18, 18, 18, 0.7) !important; 
+}
+
+/* Ser till att chatt-ytan i mitten blir helt transparent så bilden syns */
+#view-chat .chat-messages,
+#view-chat .chat-input-area {
+    background: transparent !important;
+}
