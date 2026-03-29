@@ -144,14 +144,6 @@ filter: none !important;
 /* =============================================================================
    MAIN LAYOUT — sidebar + content area + split panels
    ============================================================================= */
-.sidebar-wrapper {
-  width: 260px;
-  min-width: 260px;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 10;
-}
-
 .main-content-area {
   flex: 1 1 0%;
   display: flex;
@@ -159,8 +151,6 @@ filter: none !important;
   height: 100vh;
   overflow: hidden;
   min-width: 0;
-  position: relative;
-  z-index: 1;
 }
 
 .layout-split {
