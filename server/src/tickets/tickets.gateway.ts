@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { TicketsService } from './tickets.service';
+import { RagService } from '../rag/rag.service';
 
 @WebSocketGateway({
   cors: { origin: '*', credentials: true },
@@ -24,6 +25,7 @@ export class TicketsGateway implements OnGatewayConnection, OnGatewayDisconnect 
   constructor(
     private jwtService: JwtService,
     private ticketsService: TicketsService,
+    private ragService: RagService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -137,16 +139,30 @@ export class TicketsGateway implements OnGatewayConnection, OnGatewayDisconnect 
   // --- Customer events ---
 
   @SubscribeMessage('client:message')
-  handleClientMessage(
-    @MessageBody() data: { query: string; sessionId: string; session_type: string; context?: unknown },
+  async handleClientMessage(
+    @MessageBody() data: { query: string; sessionId: string; isFirstMessage?: boolean; session_type: string; context?: { locked_context?: Record<string, unknown> } },
     @ConnectedSocket() client: Socket,
   ) {
-    // TODO: Wire to RAG service for AI response
-    // For now, echo back a placeholder
-    client.emit('server:answer', {
-      answer: 'RAG-pipeline ej kopplad ännu i NestJS-versionen.',
-      sessionId: data.sessionId,
-    });
+    try {
+      const result = await this.ragService.query({
+        query: data.query,
+        sessionId: data.sessionId,
+        isFirstMessage: data.isFirstMessage,
+        session_type: data.session_type,
+        context: data.context as any,
+      });
+
+      client.emit('server:answer', {
+        answer: result.answer,
+        sessionId: data.sessionId,
+        locked_context: result.locked_context,
+      });
+    } catch (err) {
+      console.error('RAG query error:', err);
+      client.emit('server:error', {
+        message: 'Ett fel uppstod vid bearbetning av frågan.',
+      });
+    }
   }
 
   @SubscribeMessage('client:typing')
