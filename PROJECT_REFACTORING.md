@@ -138,6 +138,8 @@ client/
 
 5. **React Context over Redux** — Auth, Socket, and Theme state managed via React Context. Lightweight, sufficient for this app's state complexity.
 
+6. **Playwright E2E tests** — New test suite in `client/e2e/` targeting the React app. Tests cover authentication, navigation, view rendering, tab switching, and UI state. Uses Vite dev server via `webServer` config for local runs, or `ATLAS_E2E_BASE_URL` for remote targets.
+
 ---
 
 ## Phase 2: Backend Refactoring (Planned, paused)
