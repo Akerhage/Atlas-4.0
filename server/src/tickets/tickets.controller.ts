@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -21,8 +21,8 @@ export class TicketsController {
 
   @Post('team/claim')
   @UseGuards(JwtAuthGuard)
-  claimTicket(@Body() body: { conversationId: string }, @Query() req) {
-    return this.ticketsService.claimTicket(body.conversationId, req.username);
+  claimTicket(@Body() body: { conversationId: string }, @Request() req) {
+    return this.ticketsService.claimTicket(body.conversationId, req.user.username);
   }
 
   @Post('team/assign')

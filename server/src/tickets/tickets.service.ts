@@ -1,79 +1,161 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from '../database/database.service';
-import type { Ticket } from '../shared/types';
+import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
 export class TicketsService {
-  constructor(private db: DatabaseService) {}
+  constructor(private prisma: PrismaService) {}
 
-  getInbox(): Ticket[] {
-    return this.db.getTeamInbox();
+  async getInbox() {
+    const tickets = await this.prisma.ticket.findMany({
+      where: { status: { in: ['open', 'claimed'] } },
+      include: { owner: { select: { username: true } }, office: { select: { routingTag: true } } },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    return tickets.map(t => ({
+      conversation_id: t.id,
+      channel: t.channel,
+      status: t.status,
+      routing_tag: t.office?.routingTag || null,
+      owner: t.owner?.username || null,
+      customer_name: t.customerName,
+      customer_email: t.customerEmail,
+      customer_phone: t.customerPhone,
+      last_message: t.lastMessage,
+      human_mode: t.humanMode,
+      created_at: t.createdAt.toISOString(),
+      updated_at: t.updatedAt.toISOString(),
+    }));
   }
 
-  getTicket(conversationId: string) {
-    return this.db.getTicketById(conversationId);
+  async getTicket(conversationId: string) {
+    const t = await this.prisma.ticket.findUnique({
+      where: { id: conversationId },
+      include: { owner: { select: { username: true } }, office: { select: { routingTag: true } } },
+    });
+    if (!t) return null;
+
+    return {
+      conversation_id: t.id,
+      channel: t.channel,
+      status: t.status,
+      routing_tag: t.office?.routingTag || null,
+      owner: t.owner?.username || null,
+      customer_name: t.customerName,
+      customer_email: t.customerEmail,
+      customer_phone: t.customerPhone,
+      last_message: t.lastMessage,
+      human_mode: t.humanMode,
+      created_at: t.createdAt.toISOString(),
+      updated_at: t.updatedAt.toISOString(),
+    };
   }
 
-  getMessages(conversationId: string) {
-    // Messages are stored in context_store.messages as JSON
-    const row = this.db.raw
-      .prepare('SELECT messages FROM context_store WHERE conversation_id = ?')
-      .get(conversationId) as { messages?: string } | undefined;
-
-    if (!row?.messages) return [];
-
-    try {
-      return JSON.parse(row.messages);
-    } catch {
-      return [];
-    }
+  async getMessages(conversationId: string) {
+    return this.prisma.message.findMany({
+      where: { ticketId: conversationId },
+      orderBy: { createdAt: 'asc' },
+      select: { role: true, content: true, createdAt: true, isEmail: true },
+    });
   }
 
-  claimTicket(conversationId: string, agent: string) {
-    const ticket = this.db.getTicketById(conversationId);
-    const previousOwner = ticket?.owner;
-    this.db.claimTicket(conversationId, agent);
+  async claimTicket(conversationId: string, agentUsername: string) {
+    const agent = await this.prisma.user.findUnique({ where: { username: agentUsername } });
+    if (!agent) throw new Error('Agent not found');
+
+    const ticket = await this.prisma.ticket.findUnique({ where: { id: conversationId }, include: { owner: true } });
+    const previousOwner = ticket?.owner?.username || null;
+
+    await this.prisma.ticket.update({
+      where: { id: conversationId },
+      data: { ownerId: agent.id, status: 'claimed' },
+    });
+
     return { success: true, previousOwner };
   }
 
-  assignTicket(conversationId: string, targetAgent: string) {
-    this.db.assignTicket(conversationId, targetAgent);
+  async assignTicket(conversationId: string, targetUsername: string) {
+    const agent = await this.prisma.user.findUnique({ where: { username: targetUsername } });
+    if (!agent) throw new Error('Agent not found');
+
+    await this.prisma.ticket.update({
+      where: { id: conversationId },
+      data: { ownerId: agent.id, status: 'claimed' },
+    });
+
     return { success: true };
   }
 
-  archiveTicket(conversationId: string) {
-    this.db.archiveTicket(conversationId);
+  async archiveTicket(conversationId: string) {
+    await this.prisma.ticket.update({
+      where: { id: conversationId },
+      data: { status: 'closed', archivedAt: new Date() },
+    });
     return { success: true };
   }
 
-  deleteTicket(conversationId: string) {
-    this.db.deleteConversation(conversationId);
+  async deleteTicket(conversationId: string) {
+    await this.prisma.ticket.delete({ where: { id: conversationId } });
     return { success: true };
   }
 
-  restoreTicket(conversationId: string) {
-    this.db.raw
-      .prepare("UPDATE chat_v2_state SET status = 'open', owner = NULL, archived_at = NULL WHERE conversation_id = ?")
-      .run(conversationId);
+  async restoreTicket(conversationId: string) {
+    await this.prisma.ticket.update({
+      where: { id: conversationId },
+      data: { status: 'open', ownerId: null, archivedAt: null },
+    });
     return { success: true };
   }
 
-  searchInbox(query: string) {
-    return this.db.raw
-      .prepare(`
-        SELECT cs.conversation_id, cs.last_message, cs.updated_at,
-               v2.session_type as channel, v2.owner, v2.routing_tag, v2.status,
-               v2.customer_name, v2.customer_email
-        FROM context_store cs
-        JOIN chat_v2_state v2 ON cs.conversation_id = v2.conversation_id
-        WHERE v2.status IN ('open', 'claimed')
-          AND (cs.last_message LIKE ? OR v2.customer_name LIKE ? OR v2.customer_email LIKE ?)
-        ORDER BY cs.updated_at DESC
-      `)
-      .all(`%${query}%`, `%${query}%`, `%${query}%`);
+  async searchInbox(query: string) {
+    return this.prisma.ticket.findMany({
+      where: {
+        status: { in: ['open', 'claimed'] },
+        OR: [
+          { lastMessage: { contains: query } },
+          { customerName: { contains: query } },
+          { customerEmail: { contains: query } },
+        ],
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
   }
 
-  getArchive(search?: string, limit?: number, offset?: number) {
-    return this.db.getArchivedTickets(search, limit, offset);
+  async getArchive(search?: string, limit = 50, offset = 0) {
+    const where: any = { status: 'closed' };
+    if (search) {
+      where.OR = [
+        { lastMessage: { contains: search } },
+        { customerName: { contains: search } },
+        { customerEmail: { contains: search } },
+      ];
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.ticket.findMany({
+        where,
+        include: { owner: { select: { username: true } }, office: { select: { routingTag: true } } },
+        orderBy: { updatedAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      this.prisma.ticket.count({ where }),
+    ]);
+
+    return {
+      items: items.map(t => ({
+        conversation_id: t.id,
+        channel: t.channel,
+        status: t.status,
+        routing_tag: t.office?.routingTag || null,
+        owner: t.owner?.username || null,
+        customer_name: t.customerName,
+        customer_email: t.customerEmail,
+        last_message: t.lastMessage,
+        created_at: t.createdAt.toISOString(),
+        updated_at: t.updatedAt.toISOString(),
+      })),
+      total,
+    };
   }
 }
