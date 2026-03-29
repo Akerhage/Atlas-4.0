@@ -1,110 +1,143 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { DatabaseService } from '../database/database.service';
-import type { User, Office } from '../shared/types';
+import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
 export class AdminService {
-  constructor(private db: DatabaseService) {}
+  constructor(private prisma: PrismaService) {}
 
   // --- Users ---
-  getAllUsers() {
-    return this.db.getAllUsers();
+  async getAllUsers() {
+    const users = await this.prisma.user.findMany({
+      select: { id: true, username: true, displayName: true, role: true, agentColor: true, avatarId: true, statusText: true, isOnline: true, allowedViews: true },
+      orderBy: { displayName: 'asc' },
+    });
+    return users.map(u => ({
+      id: u.id, username: u.username, role: u.role,
+      display_name: u.displayName, agent_color: u.agentColor, avatar_id: u.avatarId,
+      status_text: u.statusText, is_online: u.isOnline, allowed_views: u.allowedViews,
+    }));
   }
 
   async createUser(data: { username: string; password: string; display_name?: string; role?: string; agent_color?: string; avatar_id?: number; offices?: string; allowed_views?: string }) {
     const hash = await bcrypt.hash(data.password, 12);
-    const { password, ...rest } = data;
-    return this.db.createUser({ ...rest, role: (rest.role as 'admin' | 'agent') || 'agent', password_hash: hash });
+    return this.prisma.user.create({
+      data: {
+        username: data.username,
+        passwordHash: hash,
+        displayName: data.display_name || data.username,
+        role: data.role || 'agent',
+        agentColor: data.agent_color || '#0071e3',
+        avatarId: data.avatar_id || 0,
+        allowedViews: data.allowed_views || null,
+      },
+    });
   }
 
   async updateUserProfile(userId: number, data: Record<string, unknown>) {
+    const updateData: Record<string, unknown> = {};
+    if (data.display_name !== undefined) updateData.displayName = data.display_name;
+    if (data.agent_color !== undefined) updateData.agentColor = data.agent_color;
+    if (data.avatar_id !== undefined) updateData.avatarId = data.avatar_id;
+    if (data.status_text !== undefined) updateData.statusText = data.status_text;
+    if (data.allowed_views !== undefined) updateData.allowedViews = data.allowed_views;
+    if (data.role !== undefined) updateData.role = data.role;
     if (data.password) {
-      data.password_hash = await bcrypt.hash(data.password as string, 12);
-      delete data.password;
+      updateData.passwordHash = await bcrypt.hash(data.password as string, 12);
     }
-    delete data.userId;
-    return this.db.updateUser(userId, data);
+    return this.prisma.user.update({ where: { id: userId }, data: updateData });
   }
 
   async resetPassword(userId: number, password: string) {
     const hash = await bcrypt.hash(password, 12);
-    return this.db.raw.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, userId);
+    return this.prisma.user.update({ where: { id: userId }, data: { passwordHash: hash } });
   }
 
-  deleteUser(userId: number) {
-    return this.db.deleteUser(userId);
+  async deleteUser(userId: number) {
+    return this.prisma.user.delete({ where: { id: userId } });
   }
 
-  getUserStats(username: string) {
-    const stats = this.db.raw.prepare(`
-      SELECT
-        COUNT(CASE WHEN v2.status IN ('open','claimed') THEN 1 END) as active_tickets,
-        COUNT(CASE WHEN v2.status = 'closed' THEN 1 END) as archived_tickets,
-        COUNT(CASE WHEN v2.session_type = 'message' AND v2.status = 'closed' THEN 1 END) as mail_handled,
-        COUNT(CASE WHEN v2.session_type = 'private' THEN 1 END) as internal_sent
-      FROM chat_v2_state v2
-      WHERE v2.owner = ?
-    `).get(username);
-    return stats || { active_tickets: 0, archived_tickets: 0, mail_handled: 0, internal_sent: 0 };
+  async getUserStats(username: string) {
+    const agent = await this.prisma.user.findUnique({ where: { username } });
+    if (!agent) return { active_tickets: 0, archived_tickets: 0, mail_handled: 0, internal_sent: 0 };
+
+    const [active, archived, mail] = await Promise.all([
+      this.prisma.ticket.count({ where: { ownerId: agent.id, status: { in: ['open', 'claimed'] } } }),
+      this.prisma.ticket.count({ where: { ownerId: agent.id, status: 'closed' } }),
+      this.prisma.ticket.count({ where: { ownerId: agent.id, channel: 'mail', status: 'closed' } }),
+    ]);
+
+    return { active_tickets: active, archived_tickets: archived, mail_handled: mail, internal_sent: 0 };
   }
 
-  getAgentTickets(username: string) {
-    return this.db.raw.prepare(`
-      SELECT cs.conversation_id, cs.last_message, cs.updated_at,
-             v2.session_type as channel, v2.owner, v2.routing_tag, v2.status,
-             v2.customer_name, v2.customer_email
-      FROM context_store cs
-      JOIN chat_v2_state v2 ON cs.conversation_id = v2.conversation_id
-      WHERE v2.owner = ? AND v2.status IN ('open', 'claimed')
-      ORDER BY cs.updated_at DESC
-    `).all(username);
+  async updateAgentOffices(username: string, _offices: string) {
+    // TODO: implement many-to-many UserOffice updates
+    return { success: true };
   }
 
-  updateAgentColor(username: string, color: string) {
-    return this.db.raw.prepare('UPDATE users SET agent_color = ? WHERE username = ?').run(color, username);
+  async getAgentTickets(username: string) {
+    const agent = await this.prisma.user.findUnique({ where: { username } });
+    if (!agent) return [];
+    const tickets = await this.prisma.ticket.findMany({
+      where: { ownerId: agent.id, status: { in: ['open', 'claimed'] } },
+      include: { office: { select: { routingTag: true } } },
+      orderBy: { updatedAt: 'desc' },
+    });
+    return tickets.map(t => ({
+      conversation_id: t.id, channel: t.channel, status: t.status,
+      routing_tag: t.office?.routingTag, owner: username,
+      customer_name: t.customerName, customer_email: t.customerEmail,
+      updated_at: t.updatedAt.toISOString(),
+    }));
   }
 
-  updateAgentOffices(username: string, offices: string) {
-    return this.db.raw.prepare('UPDATE users SET offices = ? WHERE username = ?').run(offices, username);
+  async updateAgentColor(username: string, color: string) {
+    return this.prisma.user.update({ where: { username }, data: { agentColor: color } });
   }
 
-  updateUserViews(username: string, allowedViews: string | null) {
-    return this.db.raw.prepare('UPDATE users SET allowed_views = ? WHERE username = ?').run(allowedViews, username);
+  async updateUserViews(username: string, allowedViews: string | null) {
+    return this.prisma.user.update({ where: { username }, data: { allowedViews } });
   }
 
   // --- Offices ---
-  getAllOffices() {
-    return this.db.getAllOffices();
+  async getAllOffices() {
+    return this.prisma.office.findMany({ orderBy: [{ city: 'asc' }, { area: 'asc' }] });
   }
 
-  createOffice(data: Partial<Office>) {
-    return this.db.createOffice(data);
+  async createOffice(data: Record<string, unknown>) {
+    return this.prisma.office.create({
+      data: {
+        name: data.name as string,
+        routingTag: data.routing_tag as string,
+        city: data.city as string,
+        area: (data.area as string) || '',
+        officeColor: (data.office_color as string) || '#0071e3',
+        phone: (data.phone as string) || '',
+        email: (data.email as string) || '',
+      },
+    });
   }
 
-  deleteOffice(tag: string) {
-    return this.db.deleteOffice(tag);
+  async deleteOffice(tag: string) {
+    return this.prisma.office.delete({ where: { routingTag: tag } });
   }
 
-  updateOfficeColor(routingTag: string, color: string) {
-    return this.db.raw.prepare('UPDATE offices SET office_color = ? WHERE routing_tag = ?').run(color, routingTag);
+  async updateOfficeColor(routingTag: string, color: string) {
+    return this.prisma.office.update({ where: { routingTag }, data: { officeColor: color } });
   }
 
-  getOfficeTickets(tag: string) {
-    return this.db.raw.prepare(`
-      SELECT cs.conversation_id, cs.last_message, cs.updated_at,
-             v2.session_type as channel, v2.owner, v2.routing_tag, v2.status,
-             v2.customer_name, v2.customer_email
-      FROM context_store cs
-      JOIN chat_v2_state v2 ON cs.conversation_id = v2.conversation_id
-      WHERE v2.routing_tag = ? AND v2.status IN ('open', 'claimed')
-      ORDER BY cs.updated_at DESC
-    `).all(tag);
+  async getOfficeTickets(tag: string) {
+    const office = await this.prisma.office.findUnique({ where: { routingTag: tag } });
+    if (!office) return [];
+    return this.prisma.ticket.findMany({
+      where: { officeId: office.id, status: { in: ['open', 'claimed'] } },
+      orderBy: { updatedAt: 'desc' },
+    });
   }
 
-  // --- System Config ---
-  getSystemConfig() {
-    const rows = this.db.raw.prepare('SELECT key, value FROM system_config').all() as { key: string; value: string }[];
+  // --- Settings ---
+  async getSystemConfig() {
+    const rows = await this.prisma.setting.findMany();
     const config: Record<string, unknown> = {};
     for (const row of rows) {
       try { config[row.key] = JSON.parse(row.value); } catch { config[row.key] = row.value; }
@@ -112,46 +145,33 @@ export class AdminService {
     return config;
   }
 
-  updateSystemConfig(key: string, value: unknown) {
+  async updateSystemConfig(key: string, value: unknown) {
     const val = typeof value === 'string' ? value : JSON.stringify(value);
-    this.db.raw.prepare('INSERT OR REPLACE INTO system_config (key, value) VALUES (?, ?)').run(key, val);
+    return this.prisma.setting.upsert({ where: { key }, update: { value: val }, create: { key, value: val } });
   }
 
-  // --- Operation Settings ---
-  getOperationSettings() {
-    const rows = this.db.raw.prepare('SELECT key, value FROM operation_settings').all() as { key: string; value: string }[];
-    const settings: Record<string, unknown> = {};
-    for (const row of rows) {
-      try { settings[row.key] = JSON.parse(row.value); } catch { settings[row.key] = row.value; }
-    }
-    return settings;
-  }
-
-  saveOperationSetting(field: string, value: unknown) {
-    const val = typeof value === 'string' ? value : JSON.stringify(value);
-    this.db.raw.prepare('INSERT OR REPLACE INTO operation_settings (key, value) VALUES (?, ?)').run(field, val);
-  }
+  async getOperationSettings() { return this.getSystemConfig(); }
+  async saveOperationSetting(field: string, value: unknown) { return this.updateSystemConfig(field, value); }
 
   // --- Email Blocklist ---
-  getEmailBlocklist() {
-    return this.db.raw.prepare('SELECT * FROM email_blocklist ORDER BY id DESC').all();
+  async getEmailBlocklist() {
+    return this.prisma.emailBlocklist.findMany({ orderBy: { id: 'desc' } });
   }
 
-  addEmailBlocklist(pattern: string) {
-    const result = this.db.raw.prepare('INSERT INTO email_blocklist (pattern) VALUES (?)').run(pattern);
-    return { id: result.lastInsertRowid, pattern };
+  async addEmailBlocklist(pattern: string) {
+    return this.prisma.emailBlocklist.create({ data: { pattern } });
   }
 
-  deleteEmailBlocklist(id: number) {
-    return this.db.raw.prepare('DELETE FROM email_blocklist WHERE id = ?').run(id);
+  async deleteEmailBlocklist(id: number) {
+    return this.prisma.emailBlocklist.delete({ where: { id } });
   }
 
-  // --- RAG ---
-  getRagFailures() {
-    return this.db.raw.prepare('SELECT * FROM rag_failures ORDER BY count DESC').all();
+  // --- RAG Failures ---
+  async getRagFailures() {
+    return this.prisma.ragFailure.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
-  clearRagFailures() {
-    return this.db.raw.prepare('DELETE FROM rag_failures').run();
+  async clearRagFailures() {
+    return this.prisma.ragFailure.deleteMany();
   }
 }

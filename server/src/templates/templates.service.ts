@@ -1,20 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from '../database/database.service';
-import type { Template } from '../shared/types';
+import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
 export class TemplatesService {
-  constructor(private db: DatabaseService) {}
+  constructor(private prisma: PrismaService) {}
 
-  getAll(): Template[] {
-    return this.db.getAllTemplates();
+  async getAll() {
+    return this.prisma.template.findMany({ orderBy: { name: 'asc' } });
   }
 
-  save(data: Partial<Template>) {
-    return this.db.saveTemplate(data);
+  async save(data: { id?: number; name?: string; subject?: string; body?: string; category?: string }) {
+    if (data.id) {
+      return this.prisma.template.update({
+        where: { id: data.id },
+        data: { name: data.name, subject: data.subject, body: data.body, category: data.category },
+      });
+    }
+    return this.prisma.template.create({
+      data: { name: data.name || '', subject: data.subject || '', body: data.body || '', category: data.category },
+    });
   }
 
-  delete(id: number) {
-    return this.db.deleteTemplate(id);
+  async delete(id: number) {
+    return this.prisma.template.delete({ where: { id } });
   }
 }

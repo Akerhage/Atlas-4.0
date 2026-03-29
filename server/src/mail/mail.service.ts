@@ -4,7 +4,7 @@ import * as nodemailer from 'nodemailer';
 import * as imapSimple from 'imap-simple';
 import { simpleParser } from 'mailparser';
 import { v4 as uuid } from 'uuid';
-import { DatabaseService } from '../database/database.service';
+import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
 export class MailService implements OnModuleInit, OnModuleDestroy {
@@ -16,7 +16,7 @@ export class MailService implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     private config: ConfigService,
-    private db: DatabaseService,
+    private prisma: PrismaService,
   ) {}
 
   onModuleInit() {
@@ -58,11 +58,9 @@ export class MailService implements OnModuleInit, OnModuleDestroy {
     console.log('✅ Mail transporter recreated (hot-reload)');
   }
 
-  private loadBlocklist() {
+  private async loadBlocklist() {
     try {
-      this.emailBlocklist = this.db.raw
-        .prepare('SELECT pattern, type FROM email_blocklist')
-        .all() as Array<{ pattern: string; type: string }>;
+      this.emailBlocklist = await this.prisma.emailBlocklist.findMany({ select: { pattern: true, type: true } });
       console.log(`✅ Email blocklist loaded: ${this.emailBlocklist.length} rules`);
     } catch {
       this.emailBlocklist = [];
@@ -129,18 +127,18 @@ export class MailService implements OnModuleInit, OnModuleDestroy {
     });
 
     // Create ticket in database
-    this.db.raw.prepare(`
-      INSERT OR IGNORE INTO context_store (conversation_id, context_data, last_message_id, updated_at)
-      VALUES (?, ?, 1, strftime('%s','now'))
-    `).run(conversationId, JSON.stringify({
-      messages: [{ role: 'agent', content: opts.body, isEmail: true, messageId: sentInfo.messageId, timestamp: Date.now() }],
-      locked_context: { email: opts.to, subject: opts.subject },
-    }));
-
-    this.db.raw.prepare(`
-      INSERT OR IGNORE INTO chat_v2_state (conversation_id, human_mode, owner, session_type, source, email, updated_at)
-      VALUES (?, 1, ?, 'message', 'agent', ?, strftime('%s','now'))
-    `).run(conversationId, opts.agent, opts.to);
+    const agent = await this.prisma.user.findUnique({ where: { username: opts.agent } });
+    await this.prisma.ticket.create({
+      data: {
+        id: conversationId, channel: 'mail', status: 'claimed', humanMode: true,
+        source: 'agent', customerEmail: opts.to, subject: opts.subject,
+        lastMessage: opts.body, lastMessageId: 1,
+        ownerId: agent?.id,
+      },
+    });
+    await this.prisma.message.create({
+      data: { ticketId: conversationId, role: 'agent', content: opts.body, isEmail: true, messageId: sentInfo.messageId },
+    });
 
     return { conversationId, messageId: sentInfo.messageId };
   }
@@ -244,9 +242,7 @@ export class MailService implements OnModuleInit, OnModuleDestroy {
       await this.appendToTicket(conversationId, cleanContent, senderName, senderEmail, parsed.messageId);
     } else {
       // Check if inbound mail creation is enabled
-      const imapInbound = this.db.raw
-        .prepare("SELECT value FROM settings WHERE key = 'imap_inbound'")
-        .get() as { value: string } | undefined;
+      const imapInbound = await this.prisma.setting.findUnique({ where: { key: 'imap_inbound' } });
 
       if (imapInbound?.value === 'true') {
         conversationId = `MAIL_INBOUND_${uuid()}`;
@@ -261,36 +257,23 @@ export class MailService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async appendToTicket(conversationId: string, content: string, name: string, email: string, messageId?: string) {
-    const existing = this.db.raw
-      .prepare('SELECT context_data, last_message_id FROM context_store WHERE conversation_id = ?')
-      .get(conversationId) as { context_data: string; last_message_id: number } | undefined;
+    const ticket = await this.prisma.ticket.findUnique({ where: { id: conversationId } });
+    if (!ticket) return;
 
-    if (!existing) return;
-
-    const contextData = JSON.parse(existing.context_data || '{}');
-    const messages = contextData.messages || [];
-    messages.push({
-      role: 'customer',
-      content,
-      timestamp: Date.now(),
-      isEmail: true,
-      messageId: messageId || undefined,
+    await this.prisma.message.create({
+      data: { ticketId: conversationId, role: 'customer', content, isEmail: true, messageId: messageId || null },
     });
-    contextData.messages = messages;
 
-    const newId = (existing.last_message_id || 0) + 1;
-    this.db.raw.prepare(`
-      UPDATE context_store SET context_data = ?, last_message_id = ?, updated_at = strftime('%s','now')
-      WHERE conversation_id = ?
-    `).run(JSON.stringify(contextData), newId, conversationId);
+    await this.prisma.ticket.update({
+      where: { id: conversationId },
+      data: {
+        lastMessage: content,
+        lastMessageId: ticket.lastMessageId + 1,
+        humanMode: true,
+        status: ticket.status === 'closed' ? 'open' : ticket.status,
+      },
+    });
 
-    // Reactivate if archived
-    this.db.raw.prepare(`
-      UPDATE chat_v2_state SET human_mode = 1, is_archived = 0, updated_at = strftime('%s','now')
-      WHERE conversation_id = ?
-    `).run(conversationId);
-
-    // Emit socket events
     if (this.io) {
       this.io.emit('team:customer_reply', { conversation_id: conversationId, message: content });
       this.io.emit('team:update', { type: 'new_message', conversationId });
@@ -298,18 +281,16 @@ export class MailService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async createInboundTicket(conversationId: string, subject: string, content: string, name: string, email: string) {
-    this.db.raw.prepare(`
-      INSERT OR IGNORE INTO context_store (conversation_id, context_data, last_message_id, updated_at)
-      VALUES (?, ?, 1, strftime('%s','now'))
-    `).run(conversationId, JSON.stringify({
-      messages: [{ role: 'customer', content, timestamp: Date.now(), isEmail: true }],
-      locked_context: { name, email, subject },
-    }));
-
-    this.db.raw.prepare(`
-      INSERT OR IGNORE INTO chat_v2_state (conversation_id, human_mode, session_type, source, email, name, updated_at)
-      VALUES (?, 1, 'message', 'inbound', ?, ?, strftime('%s','now'))
-    `).run(conversationId, email, name);
+    await this.prisma.ticket.create({
+      data: {
+        id: conversationId, channel: 'mail', humanMode: true,
+        source: 'inbound', customerEmail: email, customerName: name,
+        subject, lastMessage: content, lastMessageId: 1,
+      },
+    });
+    await this.prisma.message.create({
+      data: { ticketId: conversationId, role: 'customer', content, isEmail: true },
+    });
 
     if (this.io) {
       this.io.emit('team:new_ticket', { conversationId, channel: 'mail' });

@@ -10,7 +10,7 @@ import { ForceAddEngine } from './engines/force-add-engine';
 import { resolveContext, type ContextSlots } from './utils/context-lock';
 import { resolvePrice, type KnowledgeChunk } from './utils/price-resolver';
 import { tryTransportstyrelseFallback } from './utils/transportstyrelsen-fallback';
-import { DatabaseService } from '../database/database.service';
+import { PrismaService } from '../database/prisma.service';
 
 const MAX_CONTEXT_TOKENS = 2500;
 const MIN_CONFIDENCE = 0.25;
@@ -48,7 +48,7 @@ export class RagService implements OnModuleInit {
 
   constructor(
     private configService: ConfigService,
-    private db: DatabaseService,
+    private prisma: PrismaService,
   ) {
     this.openai = new OpenAI({
       apiKey: this.configService.get<string>('OPENAI_API_KEY'),
@@ -366,11 +366,11 @@ Om du inte hittar svaret i kontexten ovan, erkänn det ärligt. Gissa aldrig pri
     return answer;
   }
 
-  private logRagFailure(query: string, sessionType: string, tsUsed: boolean, tsSuccess: boolean, tsUrl: string | null) {
+  private async logRagFailure(query: string, sessionType: string, tsUsed: boolean, tsSuccess: boolean, tsUrl: string | null) {
     try {
-      this.db.raw.prepare(
-        'INSERT INTO rag_failures (query, session_type, ts_fallback_used, ts_fallback_success, ts_url) VALUES (?, ?, ?, ?, ?)',
-      ).run(query, sessionType, tsUsed ? 1 : 0, tsSuccess ? 1 : 0, tsUrl);
+      await this.prisma.ragFailure.create({
+        data: { query, sessionType, tsFallbackUsed: tsUsed, tsFallbackSuccess: tsSuccess, tsUrl },
+      });
     } catch (err) {
       console.error('Failed to log RAG failure:', err);
     }
