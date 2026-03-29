@@ -210,19 +210,38 @@ server/
 
 ---
 
-## What Has NOT Changed
+## Legacy Files Removed
 
-- `server.js` — untouched
-- `db.js` — untouched
-- `routes/` — untouched
-- `middleware/` — untouched
-- `utils/` — untouched
-- `patch/` — untouched
-- `knowledge/` — untouched
-- `kundchatt/` — untouched
-- `e2e/` — untouched
-- `main.js` — untouched (Electron main process)
-- All backend logic — untouched
+The following files were deleted after the NestJS backend became a complete replacement:
+
+| Removed | Replaced by |
+|---------|-------------|
+| `server.js` (2,739 lines) | `server/src/` (12 NestJS modules) |
+| `db.js` (1,025 lines) | `server/src/database/database.service.ts` |
+| `legacy_engine.js` (2,762 lines) | `server/src/rag/` (6 files) |
+| `widget.js` | Served by NestJS static |
+| `routes/` (10 files, 4,509 lines) | NestJS controllers |
+| `middleware/auth.js` | `server/src/auth/jwt-auth.guard.ts` |
+| `utils/` (5 files) | `server/src/rag/utils/` |
+| `patch/` (2 files) | `server/src/rag/engines/` |
+| `Renderer/` (28 modules, ~16K lines) | `client/src/` (42 React components) |
+| `preload.js`, `preload-loader.js` | Removed (no IPC needed) |
+| `main-client.js` | Removed (Electron loads web URL) |
+| `e2e/` (old Playwright specs) | `client/e2e/` (135 tests) |
+| `playwright.config.js` | `client/playwright.config.ts` |
+| `ngrok.exe`, `sqlite3.exe` | Removed (should never have been in git) |
+
+## What Remains
+
+- `main.js` — Electron shell (loads `http://localhost:3001`)
+- `client/` — React 19 frontend
+- `server/` — NestJS backend
+- `knowledge/` — KB JSON files (read by server)
+- `kundchatt/` — Customer chat widget (separate app)
+- `config.json` — App config
+- `ecosystem.config.js` — PM2 config (updated: `server/dist/main.js`)
+- `deploy.ps1`, `pull.ps1`, `publish.ps1` — Deployment scripts (need updating for new paths)
+- `demo.html`, `starta_atlas.bat` — Misc utilities
 
 ---
 

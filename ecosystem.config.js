@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: 'atlas',
-    script: 'server.js',
+    script: 'server/dist/main.js',
     restart_delay: 3000,
     max_memory_restart: '500M',
     cron_restart: '0 3 * * *',
