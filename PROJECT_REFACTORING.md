@@ -143,21 +143,70 @@ client/
 
 ---
 
-## Phase 2: Backend Refactoring (Planned, paused)
+## Phase 2: Backend — NestJS Migration
 
-Backend TypeScript migration and restructuring was planned but is paused because the vitest tests + TS migration was done on another machine and the branch wasn't pushed.
+The Express.js monolith (`server.js`, 2,739 lines) is being replaced with a NestJS application in `server/`.
 
-Planned structure:
+### Architecture
+
 ```
 server/
-├── server.ts
-├── db.ts
-├── legacy_engine.ts
-├── routes/
-├── middleware/
-├── utils/
-└── patch/
+├── src/
+│   ├── main.ts                  ← NestJS bootstrap (port 3001)
+│   ├── app.module.ts            ← Root module, imports all feature modules
+│   ├── shared/types.ts          ← Shared TypeScript interfaces
+│   ├── database/
+│   │   ├── database.module.ts   ← Global module
+│   │   └── database.service.ts  ← better-sqlite3 wrapper (all queries)
+│   ├── auth/
+│   │   ├── auth.module.ts
+│   │   ├── auth.controller.ts   ← login, profile, users, version
+│   │   ├── auth.service.ts      ← JWT, bcrypt, validation
+│   │   ├── jwt.strategy.ts      ← Passport JWT strategy
+│   │   └── jwt-auth.guard.ts    ← @UseGuards(JwtAuthGuard)
+│   ├── tickets/
+│   │   ├── tickets.module.ts
+│   │   ├── tickets.controller.ts ← inbox, claim, assign, archive, delete
+│   │   ├── tickets.service.ts    ← ticket CRUD + search
+│   │   └── tickets.gateway.ts    ← Socket.IO: all real-time events
+│   ├── admin/
+│   │   ├── admin.module.ts
+│   │   ├── admin.controller.ts  ← 30+ admin endpoints
+│   │   └── admin.service.ts     ← users, offices, config, blocklist
+│   ├── customers/
+│   │   ├── customers.module.ts
+│   │   ├── customers.controller.ts
+│   │   └── customers.service.ts
+│   ├── templates/               ← CRUD for email templates
+│   ├── notes/                   ← CRUD for ticket notes
+│   ├── knowledge/               ← KB file read/write + basfakta
+│   ├── rag/                     ← AI/LLM service (TODO: port legacy_engine)
+│   ├── mail/                    ← IMAP + Nodemailer (TODO: port from server.js)
+│   └── webhook/                 ← LiveHelperChat webhook (TODO: port)
+├── nest-cli.json
+├── tsconfig.json
+└── package.json
 ```
+
+### What's ported to NestJS
+- [x] Database service (better-sqlite3) — all queries from db.js
+- [x] Auth: login, JWT, profile update, password change, user list
+- [x] Tickets: inbox, claim, assign, archive, delete, search, messages
+- [x] Socket.IO gateway: all agent/customer/admin events with decorators
+- [x] Admin: 30+ endpoints (users, offices, config, blocklist, RAG failures)
+- [x] Customers: list + search + history
+- [x] Templates: CRUD
+- [x] Notes: CRUD
+- [x] Knowledge: file I/O for office JSON + basfakta editor
+- [x] Webhook: placeholder for LHC integration
+
+### Still TODO (business logic ports)
+- [ ] RAG pipeline (legacy_engine.js → rag.service.ts)
+- [ ] IMAP listener (server.js → mail.service.ts)
+- [ ] Email sending (Nodemailer → mail.service.ts)
+- [ ] Webhook processing (webhook.js → webhook.service.ts)
+- [ ] File upload (Multer integration)
+- [ ] Rate limiting (@nestjs/throttler)
 
 ---
 
