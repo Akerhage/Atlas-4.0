@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSocket } from '../context/SocketContext'
 import { AVATAR_ICONS } from '../utils/constants'
 import { useDataStore } from '../hooks/useDataStore'
+import ProfileModal from './ProfileModal'
 
 interface NavItem {
   path: string
@@ -69,6 +71,8 @@ export default function Sidebar() {
   const { isConnected } = useSocket()
   const { badges } = useDataStore()
 
+  const [showProfile, setShowProfile] = useState(false)
+
   if (!user) return null
 
   const isAdmin = user.role === 'admin'
@@ -99,6 +103,7 @@ export default function Sidebar() {
   const avatarSvg = AVATAR_ICONS[user.avatar_id ?? 0] || ''
 
   return (
+    <>
     <nav className="sidebar glass-effect">
       <div className="sidebar-header">
         <img
@@ -147,7 +152,7 @@ export default function Sidebar() {
       </ul>
 
       <div className="sidebar-footer">
-        <div className="user-profile-container" id="user-profile-container">
+        <div className="user-profile-container" id="user-profile-container" onClick={() => setShowProfile(true)} style={{ cursor: 'pointer' }}>
           <div
             className="user-avatar"
             style={{ borderColor: color }}
@@ -198,5 +203,7 @@ export default function Sidebar() {
         </div>
       </div>
     </nav>
+    {showProfile && <ProfileModal onClose={() => setShowProfile(false)} />}
+    </>
   )
 }
