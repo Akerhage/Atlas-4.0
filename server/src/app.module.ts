@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { join } from 'path';
 
 import { DatabaseModule } from './database/database.module';
@@ -14,6 +15,7 @@ import { TemplatesModule } from './templates/templates.module';
 import { NotesModule } from './notes/notes.module';
 import { KnowledgeModule } from './knowledge/knowledge.module';
 import { WebhookModule } from './webhook/webhook.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -22,6 +24,25 @@ import { WebhookModule } from './webhook/webhook.module';
       isGlobal: true,
       envFilePath: join(__dirname, '..', '..', '.env'),
     }),
+
+    // Rate limiting
+    ThrottlerModule.forRoot([
+      {
+        name: 'short',
+        ttl: 60000,       // 1 minute
+        limit: 30,        // 30 requests per minute (customer chat)
+      },
+      {
+        name: 'medium',
+        ttl: 900000,      // 15 minutes
+        limit: 5,         // 5 requests per 15 min (form submissions)
+      },
+      {
+        name: 'long',
+        ttl: 3600000,     // 1 hour
+        limit: 20,        // 20 requests per hour (file uploads)
+      },
+    ]),
 
     // Serve React frontend (client/dist)
     ServeStaticModule.forRoot({
@@ -41,6 +62,7 @@ import { WebhookModule } from './webhook/webhook.module';
     NotesModule,
     KnowledgeModule,
     WebhookModule,
+    UploadModule,
   ],
 })
 export class AppModule {}
