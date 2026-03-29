@@ -99,7 +99,8 @@ client/
 | `modules/chat-engine.js` | Inlined in `views/Home.tsx` | ChatSession state managed by useState |
 | `modules/modals.js` (confirm/prompt) | `components/ConfirmModal.tsx` | Promise-based confirm/prompt via React Context |
 | `modules/modals.js` (assign) | `components/AssignModal.tsx` | Agent assignment modal |
-| `modules/modals.js` (profile/mail) | **TODO** — ProfileModal, MailComposer | Pending migration |
+| `modules/modals.js` (profile) | `components/ProfileModal.tsx` | Avatar, color, status, password change |
+| `modules/modals.js` (mail composer) | `components/MailComposer.tsx` | External email + internal agent messaging |
 | `modules/notif-system.js` | `components/NotifBell.tsx` | Notification bell + history panel with localStorage |
 | `modules/notes-system.js` | `components/NotesModal.tsx` | Full CRUD notes modal |
 | `modules/detail-ui.js` + reply logic | `components/TicketDetail.tsx` | Full detail panel: header, messages, reply, actions |
@@ -181,8 +182,9 @@ server/
 - [x] Migrate Admin sub-views (13 modules) — 12 React components in `views/Admin/`
 - [x] Migrate shared components — ConfirmModal, AssignModal, NotesModal, NotifBell, BroadcastModal
 - [x] Ticket detail panel — TicketDetail with messages, reply, claim/assign/archive/delete actions
-- [ ] Profile settings modal (avatar, color, status, password change)
-- [ ] Mail composer modal (new mail/internal message with file upload)
+- [x] Profile settings modal — ProfileModal with avatar/color/status/password
+- [x] Mail composer modal — MailComposer with external/internal mode toggle
+- [x] Playwright e2e tests — auth, navigation, views (3 spec files)
 - [ ] Bulk operations in Inbox (multi-select + batch claim/archive)
 - [ ] Quill rich text editor integration for Templates
 - [ ] Update `server.js` to serve `client/dist/` instead of `Renderer/`
