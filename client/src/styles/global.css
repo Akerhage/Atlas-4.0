@@ -538,22 +538,17 @@ box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
 /* =============================================================================
 LAYOUT-LÅS & VYARKITEKTUR
 ============================================================================= */
-/* 1. RESET & GRUNDSTRUKTUR (Hanterar .chat-view och .templates-view) */
-#view-chat, #view-inbox, #view-my-tickets, #view-archive, 
+/* Views — React Router handles visibility, no display:none needed */
+#view-chat, #view-inbox, #view-my-tickets, #view-archive,
 #view-settings, #view-templates, #view-admin,
 .chat-view, .templates-view {
-display: none; 
-flex: 1 !important;
-height: 100vh !important;
-width: 100% !important;
-overflow: hidden !important;
-background: transparent !important;
+flex: 1;
+height: 100%;
+overflow: hidden;
+background: transparent;
 }
 
-/* Garaget (archive) är column: filter ovanpå, sedan split under */
-#view-archive[style*="display: flex"] {
-flex-direction: column !important;
-}
+/* Archive uses same layout-split as others */
 
 /* layout-split defined in main layout section above */
 
