@@ -106,25 +106,23 @@ jobs:
   # ============================================================
   # STAGE 3: Unit Tests
   # ============================================================
-  # test-server:
-  #   name: Server Unit Tests
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 10
-  #   needs: build
-  #
-  #   steps:
-  #     - uses: actions/checkout@v5
-  #     - uses: actions/setup-node@v5
-  #       with:
-  #         node-version: 20
-  #     - name: Install dependencies
-  #       working-directory: server
-  #       run: npm ci --legacy-peer-deps
-  #     - name: Run tests
-  #       working-directory: server
-  #       run: npm test
-  #
-  # Uncomment when unit tests are written (jest + ts-jest configured)
+  test-server:
+    name: Server Unit Tests (91 tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - name: Install dependencies
+        working-directory: server
+        run: npm ci --legacy-peer-deps
+      - name: Run tests
+        working-directory: server
+        run: npm test
 
   # ============================================================
   # STAGE 4: E2E Tests
@@ -133,7 +131,7 @@ jobs:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: build
+    needs: [build, test-server]
     if: ${{ github.event.inputs.skip_e2e != 'true' }}
 
     steps:
