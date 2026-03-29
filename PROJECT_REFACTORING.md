@@ -3,317 +3,228 @@
 Branch: `daniel/refactoring`
 Started: 2026-03-29
 
-This document tracks all structural changes made during the refactoring of Atlas 4.0.
-
 ---
 
 ## Overview
 
-The goal of this branch is to modernize the Atlas frontend from vanilla JavaScript to a React + TypeScript application, while preserving all existing functionality and visual design.
+Complete modernization of Atlas from a vanilla JS + Express monolith to a React + NestJS + Prisma stack with TypeScript throughout.
+
+**Before:** 1 monolithic `server.js` (2,739 lines), 1 monolithic `Renderer/` (28 JS modules, ~16K lines), raw SQLite via `db.js`, no tests.
+
+**After:** `client/` (React 19 + Vite), `server/` (NestJS 11 + Prisma 7), 226 tests, CI/CD pipeline.
 
 ---
 
-## Phase 1: Frontend Migration (Renderer → React)
+## Phase 1: Frontend — React Migration (DONE)
 
-### What was done
+Replaced `Renderer/` (vanilla JS) with `client/` (React 19 + TypeScript + Vite).
 
-The entire `Renderer/` directory (vanilla JS frontend) is being replaced by a new `client/` directory containing a React + Vite + TypeScript application.
+| Component | Files | What |
+|-----------|-------|------|
+| Views | 7 + 12 admin | Home, Inbox, MyTickets, Archive, Customers, Templates, Admin (12 sub-views) |
+| Components | 10 | Sidebar, Layout, TicketDetail, ConfirmModal, AssignModal, NotesModal, NotifBell, BroadcastModal, ProfileModal, MailComposer, ToastContainer |
+| Context | 3 | AuthContext, SocketContext, ThemeContext |
+| Services | 2 | api.ts (unified HTTP), socket.ts (Socket.IO) |
+| Utils | 2 | styling.ts (color system), constants.ts (icons) |
+| Hooks | 1 | useDataStore (offices, users, badges) |
 
-### Architecture Changes
+### CSS Organization
+Global CSS split into 9 component files (same class names, zero visual change):
+- `global.css` (1,822 lines) — variables, reset, layout
+- `Sidebar.css`, `ChatMessages.css`, `Modal.css`, `TicketCard.css`, `Common.css`, `Home.css`, `Templates.css`, `Admin.css`
+- `mobile.css` — all rules wrapped in `@media (max-width: 768px)`
 
-| Before | After | Why |
-|--------|-------|-----|
-| Vanilla JS with `<script defer>` tags | React 19 + TypeScript + Vite | Modern component architecture, type safety, better DX |
-| Global namespace (`window.*` functions) | ES modules with imports | Proper encapsulation, no name collisions |
-| Manual view switching (`display: none/flex`) | React Router | Standard SPA routing with URL support |
-| Global `State` object + `localStorage` | React Context (Auth, Socket, Theme) | Predictable state management, reactive updates |
-| Dual IPC/HTTP code paths (`ipc-bridges.js`) | Single HTTP API layer (`services/api.ts`) | Eliminated redundant Electron IPC middleman |
-| Socket.IO loaded dynamically with retry | Socket.IO client via npm + context | Proper dependency management |
-| CSS in `Renderer/assets/css/` | CSS copied to `client/src/styles/` | Same CSS, new location |
-| Static assets in `Renderer/assets/` | Static assets in `client/public/assets/` | Vite serves from `public/` |
-
-### New Directory: `client/`
-
-```
-client/
-├── public/
-│   └── assets/              ← copied from Renderer/assets/
-│       ├── audio/           ← notification sounds (pling-1..5.mp3)
-│       ├── icons/           ← SVG menu icons + app icon
-│       ├── images/          ← logo.png
-│       └── themes/          ← 5 theme folders with CSS + backgrounds
-├── src/
-│   ├── main.tsx             ← App entry point
-│   ├── App.tsx              ← Root component with React Router
-│   ├── types.ts             ← Shared TypeScript interfaces
-│   ├── components/
-│   │   ├── Layout.tsx       ← App shell (sidebar + content)
-│   │   ├── Sidebar.tsx      ← Navigation sidebar
-│   │   └── ToastContainer.tsx ← Toast notification system
-│   ├── context/
-│   │   ├── AuthContext.tsx   ← Auth state (token, user, login/logout)
-│   │   ├── SocketContext.tsx ← Socket.IO connection lifecycle
-│   │   └── ThemeContext.tsx  ← Theme + accent color management
-│   ├── hooks/
-│   │   └── useDataStore.ts  ← Shared data (offices, users, badges)
-│   ├── services/
-│   │   ├── api.ts           ← Unified HTTP API layer
-│   │   └── socket.ts        ← Socket.IO connection manager
-│   ├── utils/
-│   │   ├── constants.ts     ← SVG icons, version (from ui-constants.js)
-│   │   └── styling.ts       ← Color system, labels (from styling-utils.js)
-│   ├── styles/
-│   │   ├── global.css       ← copied from Renderer/assets/css/style.css
-│   │   └── mobile.css       ← copied from Renderer/assets/css/mobile.css
-│   └── views/
-│       ├── LoginPage.tsx    ← Login form (from renderer.js login modal)
-│       ├── Home.tsx         ← Private AI chat (from view-chat)
-│       ├── Inbox.tsx        ← Team inbox (from inbox-view.js)
-│       ├── MyTickets.tsx    ← Agent tickets (from tickets-view.js)
-│       ├── Archive.tsx      ← Closed tickets (from archive-view.js)
-│       ├── Customers.tsx    ← Customer directory (from customers-view.js)
-│       ├── Templates.tsx    ← Email templates (from templates-view.js)
-│       └── Admin.tsx        ← Admin dashboard (from admin-*.js modules)
-├── index.html
-├── vite.config.ts           ← Dev proxy to localhost:3001
-├── tsconfig.json
-├── tsconfig.app.json
-├── tsconfig.node.json
-└── package.json
-```
-
-### File Mapping: Old → New
-
-| Old File (Renderer/) | New File (client/src/) | Notes |
-|----------------------|----------------------|-------|
-| `renderer.js` (2211 lines) | Split into multiple files | Auth → AuthContext, views → separate components, state → contexts |
-| `modules/ui-constants.js` | `utils/constants.ts` | Direct port with TypeScript types |
-| `modules/styling-utils.js` | `utils/styling.ts` | Direct port, functions now take data as params instead of reading globals |
-| `modules/socket-client.js` | `services/socket.ts` + `context/SocketContext.tsx` | Socket lifecycle managed by React |
-| `modules/ipc-bridges.js` | **REMOVED** — replaced by `services/api.ts` | Dual IPC/HTTP paths eliminated |
-| `modules/inbox-view.js` | `views/Inbox.tsx` | React component with hooks |
-| `modules/tickets-view.js` | `views/MyTickets.tsx` | React component with hooks |
-| `modules/archive-view.js` | `views/Archive.tsx` | React component with hooks |
-| `modules/customers-view.js` | `views/Customers.tsx` | React component with hooks |
-| `modules/templates-view.js` | `views/Templates.tsx` | React component with hooks |
-| `modules/chat-engine.js` | Inlined in `views/Home.tsx` | ChatSession state managed by useState |
-| `modules/modals.js` (confirm/prompt) | `components/ConfirmModal.tsx` | Promise-based confirm/prompt via React Context |
-| `modules/modals.js` (assign) | `components/AssignModal.tsx` | Agent assignment modal |
-| `modules/modals.js` (profile) | `components/ProfileModal.tsx` | Avatar, color, status, password change |
-| `modules/modals.js` (mail composer) | `components/MailComposer.tsx` | External email + internal agent messaging |
-| `modules/notif-system.js` | `components/NotifBell.tsx` | Notification bell + history panel with localStorage |
-| `modules/notes-system.js` | `components/NotesModal.tsx` | Full CRUD notes modal |
-| `modules/detail-ui.js` + reply logic | `components/TicketDetail.tsx` | Full detail panel: header, messages, reply, actions |
-| `modules/bulk-ops.js` | **TODO** — integrated into Inbox | Pending migration |
-| `modules/admin/admin-core.js` | `views/Admin/index.tsx` | Tab switching, dirty form guard, layout |
-| `modules/admin/admin-users.js` | `views/Admin/AdminUserList.tsx` | User list with avatars, online status |
-| `modules/admin/admin-users.js` (detail) | `views/Admin/AdminUserDetail.tsx` | User detail: stats, tickets, color picker, actions |
-| `modules/admin/admin-forms.js` | `views/Admin/AdminUserForm.tsx` | Create/edit agent form with avatar picker, office/view permissions |
-| `modules/admin/admin-offices.js` (list) | `views/Admin/AdminOfficeList.tsx` | Office list grouped by city |
-| `modules/admin/admin-offices.js` (detail) | `views/Admin/AdminOfficeDetail.tsx` | Office detail: tickets, agents, contact info, color picker |
-| `modules/admin/admin-forms.js` (office) | `views/Admin/AdminOfficeForm.tsx` | Create office form |
-| `modules/admin/admin-config.js` (nav) | `views/Admin/AdminConfigNav.tsx` | Config section navigation (10 sections) |
-| `modules/admin/admin-config.js` (detail) | `views/Admin/AdminConfigDetail.tsx` | Generic config renderer + delegates to specialized components |
-| `modules/admin/admin-audit.js` | `views/Admin/AdminAbout.tsx` | Version info, stats, theme/sound settings, shortcuts |
-| `modules/admin/admin-drift.js` | `views/Admin/AdminDrift.tsx` | Drift settings with lock/unlock, email blocklist |
-| `modules/admin/admin-knowledge.js` | `views/Admin/AdminKnowledge.tsx` | KB file browser and section editor |
-| `modules/admin/admin-gaps.js` | `views/Admin/AdminGaps.tsx` | Knowledge gaps with AI analysis per gap + bulk |
-| `modules/admin/admin-agents.js` | Inlined in `AdminUserDetail.tsx` | Color update flow (self vs other agent) |
-| `modules/admin/admin-broadcast.js` | `components/BroadcastModal.tsx` | Agent + office broadcast via socket |
-| `modules/admin/admin-reader.js` | Merged into `components/TicketDetail.tsx` | Same detail panel used everywhere |
-| `modules/admin/admin-tools.js` | Inlined in detail components | Delete user/office/section, reset password |
-| `assets/css/style.css` | `styles/global.css` | Copied as-is, no modifications |
-| `assets/css/mobile.css` | `styles/mobile.css` | Copied as-is, no modifications |
-| `loader.html` / `loader.js` | **REMOVED** | Electron-specific loader, replaced by LoginPage |
-| `index.html` | `index.html` (new, minimal) | Vite entry point, React mounts to `#root` |
-
-### Key Design Decisions
-
-1. **Dropped Electron IPC layer** — The app now uses HTTP fetch exclusively. Electron becomes a thin wrapper that loads the web app URL. This eliminates `ipc-bridges.js`, `preload.js`, `preload-loader.js` and the dual code paths.
-
-2. **Preserved CSS as-is** — `style.css` (148K) is imported globally without modification to ensure visual fidelity. Same class names are used in React components.
-
-3. **Critical color system preserved exactly** — `getAgentStyles()` with its priority order (office → agent → currentUser → fallback) is ported verbatim. Output keys `{main, bg, tagBg, bubbleBg, border}` are unchanged.
-
-4. **Vite dev proxy** — During development, Vite proxies `/api`, `/team`, `/search_all`, and `/socket.io` to `localhost:3001` so the React dev server works alongside the existing backend.
-
-5. **React Context over Redux** — Auth, Socket, and Theme state managed via React Context. Lightweight, sufficient for this app's state complexity.
-
-6. **Playwright E2E tests** — New test suite in `client/e2e/` targeting the React app. Tests cover authentication, navigation, view rendering, tab switching, and UI state. Uses Vite dev server via `webServer` config for local runs, or `ATLAS_E2E_BASE_URL` for remote targets.
+### Key Decisions
+- Dropped Electron IPC — app uses HTTP + Socket.IO only
+- React Router replaces manual `display:none` view switching
+- Quill rich text editor (lazy-loaded, code-split)
+- Mobile hamburger menu with responsive layout
 
 ---
 
-## Phase 2: Backend — NestJS Migration
+## Phase 2: Backend — NestJS Migration (DONE)
 
-The Express.js monolith (`server.js`, 2,739 lines) is being replaced with a NestJS application in `server/`.
+Replaced `server.js` + `db.js` + `routes/` + `middleware/` + `utils/` + `patch/` with NestJS in `server/`.
 
-### Architecture
+### Modules (12)
 
-```
-server/
-├── src/
-│   ├── main.ts                  ← NestJS bootstrap (port 3001)
-│   ├── app.module.ts            ← Root module, imports all feature modules
-│   ├── shared/types.ts          ← Shared TypeScript interfaces
-│   ├── database/
-│   │   ├── database.module.ts   ← Global module
-│   │   └── database.service.ts  ← better-sqlite3 wrapper (all queries)
-│   ├── auth/
-│   │   ├── auth.module.ts
-│   │   ├── auth.controller.ts   ← login, profile, users, version
-│   │   ├── auth.service.ts      ← JWT, bcrypt, validation
-│   │   ├── jwt.strategy.ts      ← Passport JWT strategy
-│   │   └── jwt-auth.guard.ts    ← @UseGuards(JwtAuthGuard)
-│   ├── tickets/
-│   │   ├── tickets.module.ts
-│   │   ├── tickets.controller.ts ← inbox, claim, assign, archive, delete
-│   │   ├── tickets.service.ts    ← ticket CRUD + search
-│   │   └── tickets.gateway.ts    ← Socket.IO: all real-time events
-│   ├── admin/
-│   │   ├── admin.module.ts
-│   │   ├── admin.controller.ts  ← 30+ admin endpoints
-│   │   └── admin.service.ts     ← users, offices, config, blocklist
-│   ├── customers/
-│   │   ├── customers.module.ts
-│   │   ├── customers.controller.ts
-│   │   └── customers.service.ts
-│   ├── templates/               ← CRUD for email templates
-│   ├── notes/                   ← CRUD for ticket notes
-│   ├── knowledge/               ← KB file read/write + basfakta
-│   ├── rag/                     ← AI/LLM service (TODO: port legacy_engine)
-│   ├── mail/                    ← IMAP + Nodemailer (TODO: port from server.js)
-│   └── webhook/                 ← LiveHelperChat webhook (TODO: port)
-├── nest-cli.json
-├── tsconfig.json
-└── package.json
-```
+| Module | What | Status |
+|--------|------|--------|
+| `database` | Prisma + better-sqlite3 adapter | Done |
+| `auth` | JWT login, Passport, guards, profile | Done |
+| `tickets` | Inbox CRUD + Socket.IO gateway | Done |
+| `admin` | 30+ endpoints (users, offices, config, blocklist) | Done |
+| `rag` | Intent engine, force-add engine, OpenAI, Transportstyrelsen fallback | Done |
+| `mail` | IMAP listener + Nodemailer SMTP | Done |
+| `customers` | List + search + history | Done |
+| `templates` | CRUD | Done |
+| `notes` | CRUD | Done |
+| `knowledge` | Office JSON + basfakta file I/O | Done |
+| `upload` | Multer + TTL cleanup | Done |
+| `webhook` | LiveHelperChat with HMAC verification | Done |
 
-### What's ported to NestJS
-- [x] Database service (better-sqlite3) — all queries from db.js
-- [x] Auth: login, JWT, profile update, password change, user list
-- [x] Tickets: inbox, claim, assign, archive, delete, search, messages
-- [x] Socket.IO gateway: all agent/customer/admin events with decorators
-- [x] Admin: 30+ endpoints (users, offices, config, blocklist, RAG failures)
-- [x] Customers: list + search + history
-- [x] Templates: CRUD
-- [x] Notes: CRUD
-- [x] Knowledge: file I/O for office JSON + basfakta editor
-- [x] Webhook: placeholder for LHC integration
+### RAG Pipeline (6 files)
+- `rag.service.ts` — Main orchestrator (knowledge loading, MiniSearch, OpenAI, session management)
+- `engines/intent-engine.ts` — NLU with 11 intent patterns, city/area/vehicle slot extraction
+- `engines/force-add-engine.ts` — Critical chunk injection (20+ rules, tiered scoring)
+- `utils/context-lock.ts` — Slot conflict resolution (prevents "Ullevi i Eslöv")
+- `utils/price-resolver.ts` — 3-step price lookup (exact → city median → global)
+- `utils/transportstyrelsen-fallback.ts` — Regulatory page fetch + secondary AI call
 
-### Still TODO (business logic ports)
-- [ ] RAG pipeline (legacy_engine.js → rag.service.ts)
-- [ ] IMAP listener (server.js → mail.service.ts)
-- [ ] Email sending (Nodemailer → mail.service.ts)
-- [ ] Webhook processing (webhook.js → webhook.service.ts)
-- [ ] File upload (Multer integration)
-- [ ] Rate limiting (@nestjs/throttler)
+---
+
+## Phase 3: Database — Prisma ORM (DONE)
+
+Replaced raw SQLite (`db.js` with `CREATE TABLE IF NOT EXISTS`) with Prisma 7.
+
+### Schema: 13 Models
+
+| Model | Relations | What |
+|-------|-----------|------|
+| `User` | → offices (M2M), → tickets, → notes | Agents with roles, colors, avatars |
+| `Office` | → agents (M2M), → tickets | 47 driving school locations |
+| `UserOffice` | User ↔ Office | Many-to-many junction |
+| `Ticket` | → owner (User), → office, → messages, → notes, → files | Main conversation entity |
+| `Message` | → ticket | Individual messages (replaces JSON blob) |
+| `TicketNote` | → ticket, → agent | Agent notes on tickets |
+| `CustomerNote` | → agent | Per-customer context notes |
+| `Template` | — | Email/message templates |
+| `Setting` | — | Runtime key-value config |
+| `RagFailure` | — | Knowledge gap tracking |
+| `UploadedFile` | → ticket | File attachments with TTL |
+| `EmailBlocklist` | — | Spam filter patterns |
+| `LocalQaHistory` | — | QA training history |
+
+### Key Improvements Over Old DB
+- Proper `Message` table (was JSON blob in `context_store`)
+- Many-to-many `User ↔ Office` (was comma-separated string)
+- Versioned migrations via `prisma migrate`
+- Type-safe queries via Prisma Client
+- Visual DB browser via `prisma studio`
+
+### Seed Data
+`npm run db:seed` creates: 4 users, 47 offices, 20 agent-office assignments, 19 tickets, 50 messages, 8 ticket notes, 5 customer notes, 6 templates, 8 RAG failures, 3 blocklist entries, 5 QA history, 6 settings.
+
+### Future: PostgreSQL
+Currently using SQLite via `@prisma/adapter-better-sqlite3`. To switch to PostgreSQL:
+1. Change `provider` in `schema.prisma` from `sqlite` to `postgresql`
+2. Set `DATABASE_URL` to PostgreSQL connection string
+3. Run `prisma migrate deploy`
 
 ---
 
 ## Legacy Files Removed
 
-The following files were deleted after the NestJS backend became a complete replacement:
-
-| Removed | Replaced by |
-|---------|-------------|
-| `server.js` (2,739 lines) | `server/src/` (12 NestJS modules) |
-| `db.js` (1,025 lines) | `server/src/database/database.service.ts` |
-| `legacy_engine.js` (2,762 lines) | `server/src/rag/` (6 files) |
-| `widget.js` | Served by NestJS static |
-| `routes/` (10 files, 4,509 lines) | NestJS controllers |
-| `middleware/auth.js` | `server/src/auth/jwt-auth.guard.ts` |
-| `utils/` (5 files) | `server/src/rag/utils/` |
-| `patch/` (2 files) | `server/src/rag/engines/` |
-| `Renderer/` (28 modules, ~16K lines) | `client/src/` (42 React components) |
-| `preload.js`, `preload-loader.js` | Removed (no IPC needed) |
-| `main-client.js` | Removed (Electron loads web URL) |
-| `e2e/` (old Playwright specs) | `client/e2e/` (135 tests) |
-| `playwright.config.js` | `client/playwright.config.ts` |
-| `ngrok.exe`, `sqlite3.exe` | Removed (should never have been in git) |
-
-## What Remains
-
-- `main.js` — Electron shell (loads `http://localhost:3001`)
-- `client/` — React 19 frontend
-- `server/` — NestJS backend
-- `knowledge/` — KB JSON files (read by server)
-- `kundchatt/` — Customer chat widget (separate app)
-- `config.json` — App config
-- `ecosystem.config.js` — PM2 config (updated: `server/dist/main.js`)
-- `deploy.ps1`, `pull.ps1`, `publish.ps1` — Deployment scripts (need updating for new paths)
-- `demo.html`, `starta_atlas.bat` — Misc utilities
+| Removed | Lines | Replaced by |
+|---------|-------|-------------|
+| `server.js` | 2,739 | `server/src/` (12 NestJS modules) |
+| `db.js` | 1,025 | `server/src/database/prisma.service.ts` |
+| `legacy_engine.js` | 2,762 | `server/src/rag/` (6 files) |
+| `routes/` (10 files) | 4,509 | NestJS controllers |
+| `Renderer/` (28 modules) | ~16,000 | `client/src/` (42 React components) |
+| `middleware/auth.js` | 35 | `server/src/auth/jwt-auth.guard.ts` |
+| `utils/` (5 files) | 499 | `server/src/rag/utils/` |
+| `patch/` (2 files) | 1,125 | `server/src/rag/engines/` |
+| `preload.js`, `preload-loader.js`, `main-client.js` | — | Removed (no IPC needed) |
+| `e2e/` (old specs) | — | `client/e2e/` (135 tests) |
+| `ngrok.exe`, `sqlite3.exe` | 35MB | Removed |
+| `package.json` (root) | — | Removed (use `client/` and `server/` separately) |
 
 ---
 
-## Remaining Work
+## Testing
 
-- [x] Migrate Admin sub-views (13 modules) — 12 React components in `views/Admin/`
-- [x] Migrate shared components — ConfirmModal, AssignModal, NotesModal, NotifBell, BroadcastModal
-- [x] Ticket detail panel — TicketDetail with messages, reply, claim/assign/archive/delete actions
-- [x] Profile settings modal — ProfileModal with avatar/color/status/password
-- [x] Mail composer modal — MailComposer with external/internal mode toggle
-- [x] Playwright e2e tests — auth, navigation, views (3 spec files)
-- [x] Bulk operations in Inbox — multi-select with checkboxes, floating toolbar, batch claim/archive
-- [x] Update `server.js` — serves `client/dist/` with fallback to `Renderer/`, SPA catch-all route
-- [x] Update `main.js` — loads `http://localhost:3001` instead of `file://`, removed preload dependency
-- [x] Mobile hamburger menu — toggle sidebar, overlay backdrop, responsive layout
-- [x] Quill rich text editor — lazy-loaded ReactQuill with dark theme, code-split (206KB separate chunk)
-- [x] Deployed E2E tests — `deployed.spec.ts` + GitHub Actions workflow `playwright-react-e2e.yml`
+### Unit Tests (91 — Jest + @nestjs/testing)
+
+| Spec | Tests | Coverage |
+|------|-------|----------|
+| `auth.service.spec.ts` | 5 | Login, password, version |
+| `tickets.service.spec.ts` | 9 | Inbox, claim, assign, archive, messages |
+| `admin.service.spec.ts` | 11 | Users, offices, config, blocklist |
+| `context-lock.spec.ts` | 11 | City/area/vehicle resolution |
+| `price-resolver.spec.ts` | 8 | Exact, median, fallback, safety |
+| `intent-engine.spec.ts` | 13 | 7 intents, slots, vehicles |
+| `force-add-engine.spec.ts` | 11 | Rule injection, deduplication |
+| `notes.service.spec.ts` | 4 | CRUD |
+| `templates.service.spec.ts` | 4 | CRUD |
+| `webhook.service.spec.ts` | 4 | Signature, escalation, RAG |
+
+### E2E Tests (135 — Playwright)
+
+| Spec | Tests | Coverage |
+|------|-------|----------|
+| `auth.spec.ts` | 4 | Login/logout |
+| `navigation.spec.ts` | 9 | All 7 views |
+| `views.spec.ts` | 9 | Chat, tabs, search |
+| `chat.spec.ts` | 10 | Send/receive, AI response |
+| `tickets.spec.ts` | 13 | Detail panel, messages, actions |
+| `bulk-ops.spec.ts` | 7 | Multi-select, toolbar |
+| `modals.spec.ts` | 15 | Profile, notes, assign |
+| `admin.spec.ts` | 19 | Agents, offices, config |
+| `search.spec.ts` | 7 | Archive + customer search |
+| `templates.spec.ts` | 8 | Quill editor, CRUD |
+| `theme-and-ui.spec.ts` | 16 | Colors, status, placeholders |
+| `mobile.spec.ts` | 8 | Hamburger, responsive |
+| `deployed.spec.ts` | 10 | Live smoke tests |
 
 ---
 
-## Phase 3: Database Migration (Future — after NestJS port is complete)
+## CI/CD Pipeline
 
-The current database is SQLite with a basic setup that works but has significant limitations for a production support system. This phase should be tackled **after** the NestJS business logic ports are fully done and tested against the current SQLite database.
+GitHub Actions workflow (`workflow_dispatch`):
 
-### Current State
+```
+Lint → Build → Unit Tests (91) → E2E Tests (135) → Deploy to Hetzner (disabled)
+```
 
-- **SQLite** single-file database (`atlas.db`)
-- Schema defined via `CREATE TABLE IF NOT EXISTS` in `db.js` (no versioning)
-- Migrations via `ALTER TABLE ADD COLUMN` with error swallowing (no rollback)
-- Messages stored as JSON blobs in `context_store.context_data` (not queryable)
-- No foreign key enforcement in practice
-- Single writer at a time (SQLite limitation)
-- Backup via `VACUUM INTO` on a timer (no point-in-time recovery)
+Deploy stage (when activated):
+- rsync `server/dist/` + `client/dist/` to VPS
+- Automatic backup before deploy
+- Health check with automatic rollback on failure
+- Requires `HETZNER_SSH_KEY` secret
 
-### Target State
+---
 
-**Prisma ORM + PostgreSQL**
+## Project Structure
 
-Why Prisma:
-- Generates TypeScript types from schema (shared with React frontend)
-- Versioned, reversible migrations (`prisma migrate`)
-- Type-safe queries replace raw SQL strings
-- Visual DB browser (`prisma studio`)
-- First-class NestJS integration
-
-Why PostgreSQL:
-- Concurrent connections (multiple agents writing simultaneously)
-- Proper full-text search (replace MiniSearch)
-- JSON column support when needed, but with proper relations where possible
-- Managed backups with point-in-time recovery
-- Hetzner can run PostgreSQL natively or via managed service
-
-### Schema Improvements
-
-| Current Problem | Prisma/PostgreSQL Solution |
-|----------------|--------------------------|
-| JSON blob for messages in `context_store` | Proper `Message` table with ticket relation |
-| Comma-separated `routing_tag` in `users` | Many-to-many `User ↔ Office` relation |
-| No migration history | `prisma migrate` with versioned SQL files |
-| `ALTER TABLE` error swallowing | Schema diffing, up/down migrations |
-| No foreign keys enforced | Prisma enforces relations at schema level |
-| Raw SQL in `database.service.ts` | `prisma.ticket.findMany({ include: { messages: true } })` |
-| Single SQLite file, locks on write | PostgreSQL connection pool |
-
-### Migration Steps (when ready)
-
-1. Install Prisma in `server/`: `npm install prisma @prisma/client`
-2. Define `schema.prisma` matching current 11 tables
-3. Run `prisma db pull` against existing SQLite to verify schema matches
-4. Generate Prisma Client, replace `DatabaseService` methods with Prisma calls
-5. Write data migration script: SQLite → PostgreSQL
-6. Set up PostgreSQL on Hetzner VPS
-7. Switch `DATABASE_URL` in `.env` from SQLite to PostgreSQL
-8. Run `prisma migrate deploy` in production
-9. Remove `db.js` and `better-sqlite3` dependency
+```
+Atlas-4.0/
+├── client/                    React 19 + Vite + TypeScript
+│   ├── src/
+│   │   ├── components/        10 shared components
+│   │   ├── views/             7 views + 12 admin sub-views
+│   │   ├── context/           Auth, Socket, Theme
+│   │   ├── services/          API + Socket.IO
+│   │   ├── hooks/             useDataStore
+│   │   ├── utils/             styling + constants
+│   │   └── styles/            global.css + 8 component CSS files
+│   ├── e2e/                   135 Playwright tests
+│   └── package.json
+├── server/                    NestJS 11 + Prisma 7
+│   ├── src/
+│   │   ├── auth/              JWT, Passport, guards
+│   │   ├── tickets/           CRUD + Socket.IO gateway
+│   │   ├── admin/             30+ admin endpoints
+│   │   ├── rag/               AI pipeline (6 files)
+│   │   ├── mail/              IMAP + Nodemailer
+│   │   ├── database/          Prisma + better-sqlite3
+│   │   ├── customers/         List + history
+│   │   ├── templates/         CRUD
+│   │   ├── notes/             CRUD
+│   │   ├── knowledge/         KB file I/O
+│   │   ├── upload/            Multer + TTL
+│   │   └── webhook/           LiveHelperChat
+│   ├── prisma/
+│   │   ├── schema.prisma      13 models
+│   │   ├── migrations/        Versioned SQL
+│   │   └── seed.js            Complete test data
+│   ├── test/                  91 Jest unit tests
+│   └── package.json
+├── knowledge/                 65 KB JSON files
+├── kundchatt/                 Customer chat widget
+├── main.js                    Electron shell
+├── .github/workflows/         CI/CD pipelines
+├── GETTING_STARTED.md         Setup instructions
+├── README.md                  Project overview
+└── PROJECT_REFACTORING.md     This file
+```
