@@ -114,80 +114,172 @@ async function main() {
   console.log(`✅ Offices: ${offices.length} kontor`);
 
   // ============================================
-  // USER-OFFICE ASSIGNMENTS
+  // USER-OFFICE ASSIGNMENTS (spread agents across offices)
   // ============================================
-  const gbgUllevi = await prisma.office.findUnique({ where: { routingTag: 'my_driving_academy_goteborg_ullevi' } });
-  const gbgHogsbo = await prisma.office.findUnique({ where: { routingTag: 'my_driving_academy_goteborg_hogsbo' } });
-  const sthlmOstermalm = await prisma.office.findUnique({ where: { routingTag: 'my_driving_academy_stockholm_ostermalm' } });
-  const malmoBulltofta = await prisma.office.findUnique({ where: { routingTag: 'martenssons_trafikskola_malmo_bulltofta' } });
+  const officeRefs = {};
+  const allOffices = await prisma.office.findMany();
+  for (const o of allOffices) officeRefs[o.routingTag] = o;
 
-  const assignments = [
-    { userId: admin.id, officeId: gbgUllevi.id },
-    { userId: agent1.id, officeId: gbgUllevi.id },
-    { userId: agent1.id, officeId: gbgHogsbo.id },
-    { userId: agent2.id, officeId: sthlmOstermalm.id },
-    { userId: agent3.id, officeId: malmoBulltofta.id },
+  const assignmentPairs = [
+    // Admin: Göteborg kontor
+    [admin.id, 'my_driving_academy_goteborg_ullevi'],
+    [admin.id, 'my_driving_academy_goteborg_hogsbo'],
+    [admin.id, 'my_driving_academy_goteborg_storaholm'],
+    // Sara: Göteborg-regionen
+    [agent1.id, 'my_driving_academy_goteborg_ullevi'],
+    [agent1.id, 'my_driving_academy_goteborg_hogsbo'],
+    [agent1.id, 'my_driving_academy_goteborg_molndal'],
+    [agent1.id, 'my_driving_academy_goteborg_molnlycke'],
+    [agent1.id, 'my_driving_academy_goteborg_vastra_frolunda'],
+    [agent1.id, 'my_driving_academy_kungsbacka'],
+    // Johan: Stockholm-kontor
+    [agent2.id, 'my_driving_academy_stockholm_ostermalm'],
+    [agent2.id, 'my_driving_academy_stockholm_kungsholmen_lindhagsplan'],
+    [agent2.id, 'my_driving_academy_stockholm_sodermalm'],
+    [agent2.id, 'my_driving_academy_stockholm_solna'],
+    [agent2.id, 'my_driving_academy_stockholm_djursholm'],
+    // Maria: Malmö + Skåne
+    [agent3.id, 'martenssons_trafikskola_malmo_bulltofta'],
+    [agent3.id, 'martenssons_trafikskola_malmo_city'],
+    [agent3.id, 'martenssons_trafikskola_malmo_triangeln'],
+    [agent3.id, 'martenssons_trafikskola_helsingborg_city'],
+    [agent3.id, 'martenssons_trafikskola_lund_katedral'],
+    [agent3.id, 'martenssons_trafikskola_kristianstad'],
   ];
 
-  for (const a of assignments) {
+  for (const [userId, tag] of assignmentPairs) {
+    const office = officeRefs[tag];
+    if (!office) continue;
     await prisma.userOffice.upsert({
-      where: { userId_officeId: { userId: a.userId, officeId: a.officeId } },
+      where: { userId_officeId: { userId, officeId: office.id } },
       update: {},
-      create: a,
+      create: { userId, officeId: office.id },
     });
   }
-  console.log(`✅ Office assignments: ${assignments.length} kopplingar`);
+  console.log(`✅ Office assignments: ${assignmentPairs.length} kopplingar`);
 
   // ============================================
-  // TICKETS
+  // TICKETS (diverse test data)
   // ============================================
+  const gbgUllevi = officeRefs['my_driving_academy_goteborg_ullevi'];
+  const gbgHogsbo = officeRefs['my_driving_academy_goteborg_hogsbo'];
+  const sthlmOstermalm = officeRefs['my_driving_academy_stockholm_ostermalm'];
+  const malmoBulltofta = officeRefs['martenssons_trafikskola_malmo_bulltofta'];
+  const malmoCity = officeRefs['martenssons_trafikskola_malmo_city'];
+  const hbgCity = officeRefs['martenssons_trafikskola_helsingborg_city'];
+  const lundKatedral = officeRefs['martenssons_trafikskola_lund_katedral'];
+  const sthlmSodermalm = officeRefs['my_driving_academy_stockholm_sodermalm'];
+
   const tickets = [
-    // Nya livechattar (open, no owner)
+    // === NYA LIVE-CHATTAR (open, no owner) ===
     { id: 'chat_live_001', channel: 'chat', status: 'open', humanMode: true, customerName: 'Erik Svensson', customerEmail: 'erik@example.com', customerPhone: '070-123 45 67', lastMessage: 'Hej, jag vill veta mer om ert körkortspaket!', vehicle: 'BIL', officeId: gbgUllevi.id },
     { id: 'chat_live_002', channel: 'chat', status: 'open', humanMode: true, customerName: 'Anna Johansson', customerEmail: 'anna@example.com', lastMessage: 'Vad kostar MC-kort hos er?', vehicle: 'MC', officeId: gbgHogsbo.id },
     { id: 'chat_live_003', channel: 'chat', status: 'open', humanMode: true, customerName: 'Mohammed Al-Rashid', customerEmail: 'mo@example.com', lastMessage: 'I would like to book a test lesson please', vehicle: 'BIL', officeId: sthlmOstermalm.id },
+    { id: 'chat_live_004', channel: 'chat', status: 'open', humanMode: true, customerName: 'Fatima Khadiri', customerEmail: 'fatima@example.com', lastMessage: 'Hej! Kan jag boka AM-kort hos er i Malmö?', vehicle: 'AM', officeId: malmoCity.id },
+    { id: 'chat_live_005', channel: 'chat', status: 'open', humanMode: true, customerName: 'Gustav Lindqvist', customerEmail: 'gustav@example.com', lastMessage: 'Har ni lastbilsutbildning?', vehicle: 'LASTBIL', officeId: hbgCity.id },
 
-    // Nya mail-ärenden (open, no owner)
-    { id: 'mail_inbound_001', channel: 'mail', status: 'open', humanMode: true, customerName: 'Lisa Borg', customerEmail: 'lisa.borg@gmail.com', lastMessage: 'Hej! Jag undrar om ni har några lediga tider för intensivkurs i augusti?', subject: 'Intensivkurs augusti', officeId: gbgUllevi.id },
-    { id: 'mail_inbound_002', channel: 'mail', status: 'open', humanMode: true, customerName: 'Per Nilsson', customerEmail: 'per.nilsson@hotmail.com', lastMessage: 'Mitt paket gick ut förra månaden, kan jag förlänga det?', subject: 'Förlängning av paket', officeId: malmoBulltofta.id },
+    // === NYA MAIL-ÄRENDEN (open, no owner) ===
+    { id: 'mail_inbound_001', channel: 'mail', status: 'open', humanMode: true, customerName: 'Lisa Borg', customerEmail: 'lisa.borg@gmail.com', lastMessage: 'Hej! Lediga tider för intensivkurs i augusti?', subject: 'Intensivkurs augusti', officeId: gbgUllevi.id },
+    { id: 'mail_inbound_002', channel: 'mail', status: 'open', humanMode: true, customerName: 'Per Nilsson', customerEmail: 'per.nilsson@hotmail.com', lastMessage: 'Mitt paket gick ut, kan jag förlänga?', subject: 'Förlängning av paket', officeId: malmoBulltofta.id },
+    { id: 'mail_inbound_003', channel: 'mail', status: 'open', humanMode: true, customerName: 'Emma Strand', customerEmail: 'emma.strand@outlook.com', lastMessage: 'Jag vill köpa ett presentkort till min dotter', subject: 'Presentkort', officeId: lundKatedral.id },
 
-    // Plockade ärenden (claimed by agents)
-    { id: 'chat_claimed_001', channel: 'chat', status: 'claimed', humanMode: true, customerName: 'Sofia Pettersson', customerEmail: 'sofia@example.com', customerPhone: '073-987 65 43', lastMessage: 'Tack! Jag vill boka in mig på risk 1 också.', vehicle: 'BIL', ownerId: agent1.id, officeId: gbgUllevi.id },
-    { id: 'chat_claimed_002', channel: 'chat', status: 'claimed', humanMode: true, customerName: 'Oscar Bergström', customerEmail: 'oscar@example.com', lastMessage: 'Kan jag byta från manuell till automat mitt i paketet?', vehicle: 'BIL', ownerId: agent2.id, officeId: sthlmOstermalm.id },
-    { id: 'mail_claimed_001', channel: 'mail', status: 'claimed', humanMode: true, customerName: 'Karin Lund', customerEmail: 'karin.lund@company.se', lastMessage: 'Jag behöver avboka min lektion imorgon pga sjukdom.', subject: 'Avbokning lektion', ownerId: admin.id, officeId: gbgUllevi.id },
+    // === PLOCKADE ÄRENDEN (claimed by agents) ===
+    { id: 'chat_claimed_001', channel: 'chat', status: 'claimed', humanMode: true, customerName: 'Sofia Pettersson', customerEmail: 'sofia@example.com', customerPhone: '073-987 65 43', lastMessage: 'Tack! Jag vill boka risk 1 också.', vehicle: 'BIL', ownerId: agent1.id, officeId: gbgUllevi.id },
+    { id: 'chat_claimed_002', channel: 'chat', status: 'claimed', humanMode: true, customerName: 'Oscar Bergström', customerEmail: 'oscar@example.com', lastMessage: 'Kan jag byta till automat mitt i paketet?', vehicle: 'BIL', ownerId: agent2.id, officeId: sthlmOstermalm.id },
+    { id: 'chat_claimed_003', channel: 'chat', status: 'claimed', humanMode: true, customerName: 'Nour Mansour', customerEmail: 'nour@example.com', lastMessage: 'Tack, jag väntar på bekräftelsen', vehicle: 'BIL', ownerId: agent3.id, officeId: malmoBulltofta.id },
+    { id: 'mail_claimed_001', channel: 'mail', status: 'claimed', humanMode: true, customerName: 'Karin Lund', customerEmail: 'karin.lund@company.se', lastMessage: 'Jag behöver avboka pga sjukdom.', subject: 'Avbokning lektion', ownerId: admin.id, officeId: gbgUllevi.id },
+    { id: 'mail_claimed_002', channel: 'mail', status: 'claimed', humanMode: true, customerName: 'Henrik Åström', customerEmail: 'henrik@foretag.se', lastMessage: 'Vi vill boka 5 platser på YKB-kurs', subject: 'YKB företagsbokning', ownerId: agent2.id, officeId: sthlmSodermalm.id },
 
-    // Arkiverade ärenden
+    // === ARKIVERADE ÄRENDEN ===
     { id: 'chat_archived_001', channel: 'chat', status: 'closed', humanMode: false, customerName: 'David Ek', customerEmail: 'david@example.com', lastMessage: 'Perfekt, då ses vi på tisdag!', vehicle: 'BIL', ownerId: agent1.id, officeId: gbgUllevi.id, closeReason: 'Löst', archivedAt: new Date('2026-03-25') },
-    { id: 'mail_archived_001', channel: 'mail', status: 'closed', humanMode: false, customerName: 'Elin Forsberg', customerEmail: 'elin@example.com', lastMessage: 'Tack för snabbt svar!', subject: 'Fråga om presentkort', ownerId: agent3.id, officeId: malmoBulltofta.id, closeReason: 'Löst', archivedAt: new Date('2026-03-20') },
+    { id: 'mail_archived_001', channel: 'mail', status: 'closed', humanMode: false, customerName: 'Elin Forsberg', customerEmail: 'elin@example.com', lastMessage: 'Tack för snabbt svar!', subject: 'Presentkort', ownerId: agent3.id, officeId: malmoBulltofta.id, closeReason: 'Löst', archivedAt: new Date('2026-03-20') },
     { id: 'chat_archived_002', channel: 'chat', status: 'closed', humanMode: false, customerName: 'Ali Hassan', customerEmail: 'ali@example.com', lastMessage: 'Ok tack, jag bokar via hemsidan.', vehicle: 'MC', ownerId: agent2.id, officeId: sthlmOstermalm.id, closeReason: 'Kund bokade själv', archivedAt: new Date('2026-03-15') },
+    { id: 'chat_archived_003', channel: 'chat', status: 'closed', humanMode: false, customerName: 'Maja Öberg', customerEmail: 'maja@example.com', lastMessage: 'Jättebra, tack för all hjälp!', vehicle: 'BIL', ownerId: agent1.id, officeId: gbgHogsbo.id, closeReason: 'Löst', archivedAt: new Date('2026-03-10') },
+    { id: 'mail_archived_002', channel: 'mail', status: 'closed', humanMode: false, customerName: 'Lars Björk', customerEmail: 'lars.bjork@gmail.com', lastMessage: 'Fakturan är betald, tack!', subject: 'Fakturafråga', ownerId: admin.id, officeId: gbgUllevi.id, closeReason: 'Löst', archivedAt: new Date('2026-03-05') },
+    { id: 'chat_archived_004', channel: 'chat', status: 'closed', humanMode: false, customerName: 'Ida Wallin', customerEmail: 'ida@example.com', lastMessage: 'Okej, jag hör av mig nästa vecka', vehicle: 'AM', ownerId: agent3.id, officeId: hbgCity.id, closeReason: 'Kund återkommer', archivedAt: new Date('2026-02-28') },
   ];
 
   for (const t of tickets) {
     await prisma.ticket.upsert({ where: { id: t.id }, update: {}, create: t });
   }
-  console.log(`✅ Tickets: ${tickets.length} ärenden`);
+  console.log(`✅ Tickets: ${tickets.length} ärenden (5 live-chattar, 3 mail, 5 plockade, 7 arkiverade)`);
 
   // ============================================
-  // MESSAGES
+  // MESSAGES (deeper conversations)
   // ============================================
   const messages = [
+    // chat_live_001 — Erik vill veta om paket
     { ticketId: 'chat_live_001', role: 'customer', content: 'Hej, jag vill veta mer om ert körkortspaket!' },
-    { ticketId: 'chat_live_001', role: 'atlas', content: 'Hej Erik! Vi har flera paket. Vårt populäraste är Baspaketet med 15 lektioner, Risk 1 och Risk 2. Vilken stad gäller det?' },
+    { ticketId: 'chat_live_001', role: 'atlas', content: 'Hej Erik! Vi har flera paket att välja mellan:\n\n• **Minipaket** (5 lektioner)\n• **Mellanpaket** (10 lektioner)\n• **Baspaket** (15 lektioner + Risk 1 + Risk 2)\n\nVilken stad gäller det?' },
     { ticketId: 'chat_live_001', role: 'customer', content: 'Göteborg, Ullevi-kontoret' },
+    { ticketId: 'chat_live_001', role: 'atlas', content: 'Bra val! På Ullevi erbjuder vi alla paket. Baspaketet är populärast — det inkluderar 15 körlektioner, Risk 1 och Risk 2. Vill du veta priset?' },
+    { ticketId: 'chat_live_001', role: 'customer', content: 'Ja tack! Och vad ingår i Risk 1?' },
+
+    // chat_live_002 — Anna frågar om MC
+    { ticketId: 'chat_live_002', role: 'customer', content: 'Vad kostar MC-kort hos er?' },
+    { ticketId: 'chat_live_002', role: 'atlas', content: 'Hej Anna! MC-utbildning erbjuds under säsongen mars/april till oktober/november. Vi har MC-paket med max 10 lektioner. Vilken stad?' },
+    { ticketId: 'chat_live_002', role: 'customer', content: 'Göteborg Högsbo' },
+
+    // chat_live_004 — Fatima AM-kort
+    { ticketId: 'chat_live_004', role: 'customer', content: 'Hej! Kan jag boka AM-kort hos er i Malmö?' },
+    { ticketId: 'chat_live_004', role: 'atlas', content: 'Hej Fatima! Ja, vi erbjuder AM-utbildning (EU-moped). Du behöver vara minst 15 år. Kursen innehåller teori och praktik.' },
+    { ticketId: 'chat_live_004', role: 'customer', content: 'Vad kostar det?' },
+
+    // chat_claimed_001 — Sofia (hel konversation med eskalering)
     { ticketId: 'chat_claimed_001', role: 'customer', content: 'Hej, jag har frågor om mitt paket' },
     { ticketId: 'chat_claimed_001', role: 'atlas', content: 'Hej Sofia! Vad kan jag hjälpa dig med?' },
+    { ticketId: 'chat_claimed_001', role: 'customer', content: 'Hur länge gäller mitt baspaket?' },
+    { ticketId: 'chat_claimed_001', role: 'atlas', content: 'Köp och paket gäller i **24 månader** från köpdatum. Genomförda kurser och körkortstillstånd gäller i **5 år**.' },
     { ticketId: 'chat_claimed_001', role: 'customer', content: 'Jag vill prata med människa' },
     { ticketId: 'chat_claimed_001', role: 'system', content: 'Kund eskalerade till live-chatt' },
     { ticketId: 'chat_claimed_001', role: 'agent', content: 'Hej Sofia! Jag heter Sara och hjälper dig gärna. Vad gäller det?' },
+    { ticketId: 'chat_claimed_001', role: 'customer', content: 'Jag köpte baspaketet för 6 månader sen men har inte hunnit börja. Är det fortfarande giltigt?' },
+    { ticketId: 'chat_claimed_001', role: 'agent', content: 'Ja, ditt paket gäller i 24 månader från köpdatum. Du har alltså 18 månader kvar. Vill du boka in din första lektion?' },
     { ticketId: 'chat_claimed_001', role: 'customer', content: 'Tack! Jag vill boka in mig på risk 1 också.' },
+
+    // chat_claimed_002 — Oscar automat-fråga
     { ticketId: 'chat_claimed_002', role: 'customer', content: 'Kan jag byta från manuell till automat mitt i paketet?' },
-    { ticketId: 'chat_claimed_002', role: 'agent', content: 'Hej Oscar! Ja det går bra. Villkor 78 tillkommer dock på körkortet om du kör upp på automat.' },
-    { ticketId: 'mail_claimed_001', role: 'customer', content: 'Hej!\n\nJag behöver avboka min lektion imorgon pga sjukdom.\n\nMvh Karin', isEmail: true },
-    { ticketId: 'mail_claimed_001', role: 'agent', content: 'Hej Karin!\n\nDu debiteras inte om du skickar giltigt läkarintyg inom 1 vecka.\n\nMvh Patrik', isEmail: true },
-    { ticketId: 'mail_inbound_001', role: 'customer', content: 'Hej! Jag undrar om ni har lediga tider för intensivkurs i augusti?', isEmail: true },
+    { ticketId: 'chat_claimed_002', role: 'agent', content: 'Hej Oscar! Ja det går bra att byta. Tänk dock på att om du gör uppkörningen på automat får du villkor 78 på ditt körkort, vilket innebär att du bara får köra automatväxlade bilar.' },
+    { ticketId: 'chat_claimed_002', role: 'customer', content: 'Kan jag ta bort villkor 78 senare?' },
+    { ticketId: 'chat_claimed_002', role: 'agent', content: 'Ja, du kan göra ett nytt körprov på manuell bil för att ta bort villkoret. Det kostar en uppkörningsavgift till Trafikverket.' },
+    { ticketId: 'chat_claimed_002', role: 'customer', content: 'Ok, jag funderar på det. Tack!' },
+
+    // chat_claimed_003 — Nour bekräftelse
+    { ticketId: 'chat_claimed_003', role: 'customer', content: 'Hej, jag har bokat en lektion men fått ingen bekräftelse' },
+    { ticketId: 'chat_claimed_003', role: 'agent', content: 'Hej Nour! Låt mig kolla. Vilken dag och tid bokade du?' },
+    { ticketId: 'chat_claimed_003', role: 'customer', content: 'Tisdag 15:00 på Bulltofta' },
+    { ticketId: 'chat_claimed_003', role: 'agent', content: 'Jag hittar din bokning! Bekräftelsen skickas till din e-post inom kort. Du är bokad tisdag kl 15:00.' },
+    { ticketId: 'chat_claimed_003', role: 'customer', content: 'Tack, jag väntar på bekräftelsen' },
+
+    // mail_claimed_001 — Karin avbokning
+    { ticketId: 'mail_claimed_001', role: 'customer', content: 'Hej!\n\nJag behöver avboka min lektion imorgon (tisdag) pga sjukdom. Jag har läkarintyg.\n\nMvh Karin Lund', isEmail: true },
+    { ticketId: 'mail_claimed_001', role: 'agent', content: 'Hej Karin!\n\nTack för att du hör av dig. Du debiteras inte om du skickar giltigt läkarintyg inom 1 vecka. Observera att VAB inte räknas.\n\nSkicka läkarintyget till: goteborg.ullevi@trafikskolan.com\n\nMvh Patrik', isEmail: true },
+    { ticketId: 'mail_claimed_001', role: 'customer', content: 'Tack! Jag skickar läkarintyget idag.\n\nMvh Karin', isEmail: true },
+
+    // mail_claimed_002 — Henrik YKB
+    { ticketId: 'mail_claimed_002', role: 'customer', content: 'Hej!\n\nVi är ett åkeri som behöver boka YKB-fortbildning för 5 förare. Har ni lediga platser i april?\n\nMvh Henrik Åström\nTransportbolaget AB', isEmail: true },
+    { ticketId: 'mail_claimed_002', role: 'agent', content: 'Hej Henrik!\n\nAbsolut, vi har YKB-fortbildning (35 timmar) i april. Jag skickar en offert till er.\n\nMvh Johan', isEmail: true },
+
+    // mail_inbound_001 — Lisa intensivkurs
+    { ticketId: 'mail_inbound_001', role: 'customer', content: 'Hej!\n\nJag undrar om ni har lediga tider för intensivkurs i augusti? Jag bor i Göteborg och vill ta B-körkort.\n\nMvh Lisa Borg', isEmail: true },
+
+    // mail_inbound_003 — Emma presentkort
+    { ticketId: 'mail_inbound_003', role: 'customer', content: 'Hej!\n\nJag vill köpa ett presentkort på körkortspaket till min dotter som fyller 18 i juni. Hur gör jag?\n\nMvh Emma Strand', isEmail: true },
+
+    // Arkiverade konversationer
     { ticketId: 'chat_archived_001', role: 'customer', content: 'Vilken tid är min lektion på tisdag?' },
-    { ticketId: 'chat_archived_001', role: 'agent', content: 'Din lektion är kl 14:00. Glöm inte legitimation!' },
+    { ticketId: 'chat_archived_001', role: 'agent', content: 'Din lektion är kl 14:00 på Ullevi. Glöm inte ta med legitimation!' },
+    { ticketId: 'chat_archived_001', role: 'customer', content: 'Ska jag ha med något annat?' },
+    { ticketId: 'chat_archived_001', role: 'agent', content: 'Nej, bara legitimation och bekväma skor. Vi ses!' },
     { ticketId: 'chat_archived_001', role: 'customer', content: 'Perfekt, då ses vi på tisdag!' },
+
+    { ticketId: 'chat_archived_003', role: 'customer', content: 'Hej, har ni testlektion?' },
+    { ticketId: 'chat_archived_003', role: 'atlas', content: 'Hej Maja! Ja, testlektion (provlektion) är en rabatterad första lektion på 80 minuter för nya bil-elever.' },
+    { ticketId: 'chat_archived_003', role: 'customer', content: 'Vad kostar den?' },
+    { ticketId: 'chat_archived_003', role: 'atlas', content: 'Testlektionen kostar normalt ett reducerat pris. Vill du boka en på Högsbo?' },
+    { ticketId: 'chat_archived_003', role: 'customer', content: 'Ja tack!' },
+    { ticketId: 'chat_archived_003', role: 'agent', content: 'Hej Maja! Du är bokad för testlektion fredag kl 10:00 på Högsbo.' },
+    { ticketId: 'chat_archived_003', role: 'customer', content: 'Jättebra, tack för all hjälp!' },
   ];
 
   for (const m of messages) {
@@ -199,10 +291,12 @@ async function main() {
   // TEMPLATES
   // ============================================
   const templates = [
-    { name: 'Välkomstmail', subject: 'Välkommen till My Driving Academy!', body: '<p>Hej!</p><p>Tack för att du valt oss. Vi ser fram emot att hjälpa dig!</p><p>Boka din första lektion via hemsidan.</p><p>Mvh,<br>My Driving Academy</p>', category: 'BIL' },
-    { name: 'Påminnelse Risk 1', subject: 'Påminnelse: Risk 1', body: '<p>Hej!</p><p>Påminnelse om Risk 1 (ca 3,5 timmar).</p><ul><li>Ta med legitimation</li><li>Var på plats 10 min innan</li></ul><p>Mvh</p>', category: 'BIL' },
-    { name: 'Avbokning bekräftelse', subject: 'Bekräftelse på avbokning', body: '<p>Hej!</p><p>Din lektion är avbokad. Vid sjukdom: skicka läkarintyg inom 1 vecka.</p><p>Mvh</p>', category: 'BIL' },
-    { name: 'MC-säsong start', subject: 'MC-säsongen har börjat!', body: '<p>Hej!</p><p>MC-säsongen är igång (mars/april–oktober/november). Boka idag!</p><p>Mvh</p>', category: 'MC' },
+    { name: 'Välkomstmail', subject: 'Välkommen till My Driving Academy!', body: '<p>Hej!</p><p>Tack för att du valt oss för din körkortsutbildning. Vi ser fram emot att hjälpa dig!</p><p>Boka din första lektion via vår hemsida eller ring oss.</p><p>Med vänliga hälsningar,<br>My Driving Academy</p>', category: 'BIL' },
+    { name: 'Påminnelse Risk 1', subject: 'Påminnelse: Risk 1 utbildning', body: '<p>Hej!</p><p>Påminnelse om din Risk 1 utbildning (ca 3,5 timmar).</p><ul><li>Ta med giltig legitimation</li><li>Var på plats 10 minuter innan start</li><li>Risk 1 för bil och MC är separata kurser</li></ul><p>Mvh,<br>My Driving Academy</p>', category: 'BIL' },
+    { name: 'Avbokning bekräftelse', subject: 'Bekräftelse på avbokning', body: '<p>Hej!</p><p>Vi bekräftar att din lektion har avbokats.</p><p><strong>Vid sjukdom:</strong> Du debiteras inte om giltigt läkarintyg skickas in inom 1 vecka. OBS: VAB räknas inte.</p><p>Vill du boka ny tid? Kontakta oss eller boka via hemsidan.</p><p>Mvh,<br>My Driving Academy</p>', category: 'BIL' },
+    { name: 'MC-säsong start', subject: 'MC-säsongen har börjat!', body: '<p>Hej!</p><p>MC-säsongen är igång! Vi erbjuder MC-utbildning från <strong>mars/april till oktober/november</strong>.</p><p>Boka din plats redan idag — populära tider fylls snabbt.</p><p>Mvh,<br>My Driving Academy</p>', category: 'MC' },
+    { name: 'Paketinfo Bil', subject: 'Information om våra körkortspaket', body: '<p>Hej!</p><p>Här är våra paket för B-körkort:</p><ul><li><strong>Minipaket:</strong> 5 lektioner</li><li><strong>Mellanpaket:</strong> 10 lektioner</li><li><strong>Baspaket:</strong> 15 lektioner + Risk 1 + Risk 2</li><li><strong>Totalpaket:</strong> 15 lektioner + Risk 1 + Risk 2 + Mitt Körkort-appen</li></ul><p>Alla paket gäller i 24 månader.</p><p>Mvh</p>', category: 'BIL' },
+    { name: 'Presentkort', subject: 'Ditt presentkort från My Driving Academy', body: '<p>Hej!</p><p>Grattis! Du har fått ett presentkort på körkortsutbildning. Presentkortet gäller i <strong>1 år</strong> från utfärdandedatum.</p><p>Kontakta oss för att boka din första lektion.</p><p>Mvh</p>', category: 'BIL' },
   ];
 
   for (const t of templates) {
@@ -214,10 +308,82 @@ async function main() {
   // ============================================
   // TICKET NOTES
   // ============================================
-  await prisma.ticketNote.create({ data: { ticketId: 'chat_claimed_001', agentId: agent1.id, content: 'Kund vill boka Risk 1. Ledig plats 5 april.' } });
-  await prisma.ticketNote.create({ data: { ticketId: 'mail_claimed_001', agentId: admin.id, content: 'Kund skickar läkarintyg inom veckan. Följ upp.' } });
-  await prisma.ticketNote.create({ data: { ticketId: 'chat_claimed_002', agentId: agent2.id, content: 'Informerat om villkor 78. Kund funderar.' } });
-  console.log(`✅ Notes: 3 anteckningar`);
+  const notes = [
+    { ticketId: 'chat_claimed_001', agentId: agent1.id, content: 'Kund vill boka Risk 1. Ledig plats 5 april. Kolla om hon vill boka via telefon eller hemsida.' },
+    { ticketId: 'chat_claimed_001', agentId: admin.id, content: 'Sara kollar tillgänglighet. Kund är nöjd med paketinfo.' },
+    { ticketId: 'mail_claimed_001', agentId: admin.id, content: 'Kund skickar läkarintyg inom veckan. Följ upp fredag om det inte kommit.' },
+    { ticketId: 'chat_claimed_002', agentId: agent2.id, content: 'Informerat om villkor 78. Kund funderar på att byta till automat.' },
+    { ticketId: 'chat_claimed_003', agentId: agent3.id, content: 'Bekräftelse skickad via e-post. Kund nöjd.' },
+    { ticketId: 'mail_claimed_002', agentId: agent2.id, content: 'Företagsbokning 5 platser YKB april. Skickat offert.' },
+    { ticketId: 'chat_archived_001', agentId: agent1.id, content: 'Kund bokad tisdag 14:00. Första lektion.' },
+    { ticketId: 'chat_archived_003', agentId: agent1.id, content: 'Testlektion bokad fredag 10:00 Högsbo. Ny elev.' },
+  ];
+  for (const n of notes) {
+    await prisma.ticketNote.create({ data: n });
+  }
+  console.log(`✅ Ticket notes: ${notes.length} anteckningar`);
+
+  // ============================================
+  // CUSTOMER NOTES (per customer, not ticket)
+  // ============================================
+  const customerNotes = [
+    { customerEmail: 'sofia@example.com', agentId: agent1.id, content: 'Stamkund. Köpte baspaket 2025-09. Har gjort 3 av 15 lektioner. Föredrar morgontider.' },
+    { customerEmail: 'oscar@example.com', agentId: agent2.id, content: 'Funderar på automat vs manuell. Har kört 8 lektioner manuell hittills.' },
+    { customerEmail: 'karin.lund@company.se', agentId: admin.id, content: 'Företagskund via TransportAB. Avbokar ofta pga jobb. Alltid sjukintyg.' },
+    { customerEmail: 'erik@example.com', agentId: agent1.id, content: 'Ny kund. Intresserad av baspaket Ullevi. Ska återkomma.' },
+    { customerEmail: 'lisa.borg@gmail.com', agentId: admin.id, content: 'Vill göra intensivkurs augusti. Behöver körkortstillstånd först.' },
+  ];
+  for (const cn of customerNotes) {
+    await prisma.customerNote.create({ data: cn });
+  }
+  console.log(`✅ Customer notes: ${customerNotes.length} kundanteckningar`);
+
+  // ============================================
+  // RAG FAILURES (knowledge gaps for admin view)
+  // ============================================
+  const ragFailures = [
+    { query: 'Kan jag ta körkort med ADHD?', sessionType: 'customer', tsFallbackUsed: true, tsFallbackSuccess: false, tsUrl: 'https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/medicinska-krav/' },
+    { query: 'Vad händer om jag kör på rött ljus?', sessionType: 'customer', tsFallbackUsed: false, tsFallbackSuccess: false },
+    { query: 'Hur lång tid tar det att ta körkort?', sessionType: 'customer', tsFallbackUsed: false, tsFallbackSuccess: false },
+    { query: 'Kan jag öva med min pappas bil?', sessionType: 'customer', tsFallbackUsed: true, tsFallbackSuccess: true, tsUrl: 'https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/handledarskap-och-ovningskorning/' },
+    { query: 'Vad kostar det att ta MC-kort i Umeå?', sessionType: 'customer', tsFallbackUsed: false, tsFallbackSuccess: false },
+    { query: 'Behöver jag glasögon för att ta körkort?', sessionType: 'customer', tsFallbackUsed: true, tsFallbackSuccess: true, tsUrl: 'https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/medicinska-krav/' },
+    { query: 'Finns det körkort för elscooter?', sessionType: 'customer', tsFallbackUsed: false, tsFallbackSuccess: false },
+    { query: 'Kan man ta B-körkort vid 16 års ålder?', sessionType: 'customer', tsFallbackUsed: true, tsFallbackSuccess: false, tsUrl: 'https://www.transportstyrelsen.se/sv/vagtrafik/korkort/ta-korkort/' },
+  ];
+  for (const rf of ragFailures) {
+    await prisma.ragFailure.create({ data: rf });
+  }
+  console.log(`✅ RAG failures: ${ragFailures.length} kunskapsluckor`);
+
+  // ============================================
+  // EMAIL BLOCKLIST
+  // ============================================
+  const blocklist = [
+    { pattern: '*@spam-domain.com', type: 'email', addedBy: 'admin' },
+    { pattern: 'no-reply@*', type: 'email', addedBy: 'admin' },
+    { pattern: '*@mailer-daemon.*', type: 'email', addedBy: 'system' },
+  ];
+  for (const b of blocklist) {
+    const exists = await prisma.emailBlocklist.findFirst({ where: { pattern: b.pattern } });
+    if (!exists) await prisma.emailBlocklist.create({ data: b });
+  }
+  console.log(`✅ Email blocklist: ${blocklist.length} mönster`);
+
+  // ============================================
+  // LOCAL QA HISTORY
+  // ============================================
+  const qaHistory = [
+    { question: 'Vad kostar körlektion i Göteborg?', answer: 'En körlektion på 40 min kostar ca 650-750 kr beroende på kontor.', isArchived: false },
+    { question: 'Hur bokar jag risk 1?', answer: 'Du kan boka Risk 1 via vår hemsida eller ringa ditt lokala kontor.', isArchived: false },
+    { question: 'Gäller presentkort på alla kontor?', answer: 'Ja, presentkort gäller på alla våra kontor i Sverige.', isArchived: true, solutionText: 'Lagt till i basfakta_om_foretaget.json' },
+    { question: 'Kan jag göra Risk 2 före Risk 1?', answer: 'Nej, Risk 1 måste vara genomförd innan du gör Risk 2.', isArchived: false },
+    { question: 'Vad är skillnaden mellan minipaket och baspaket?', answer: 'Minipaket har 5 lektioner, Baspaket har 15 lektioner + Risk 1 + Risk 2.', isArchived: true, solutionText: 'Täckt av basfakta_lektioner_paket_bil.json' },
+  ];
+  for (const qa of qaHistory) {
+    await prisma.localQaHistory.create({ data: qa });
+  }
+  console.log(`✅ QA History: ${qaHistory.length} poster`);
 
   // ============================================
   // SETTINGS
@@ -236,9 +402,15 @@ async function main() {
   }
   console.log(`✅ Settings: ${settings.length} inställningar`);
 
+  // ============================================
+  // SUMMARY
+  // ============================================
   console.log('\n🎉 Seed klar!');
-  console.log(`   ${offices.length} kontor (Göteborg 10, Stockholm 7, Malmö 8, Helsingborg 2, Lund 2, + 18 enstaka)`);
-  console.log('   Logga in: admin / admin123 | sara/johan/maria / agent123');
+  console.log(`   ${offices.length} kontor | 4 användare | ${assignmentPairs.length} kontorskopplingar`);
+  console.log(`   ${tickets.length} ärenden | ${messages.length} meddelanden | ${notes.length} anteckningar`);
+  console.log(`   ${customerNotes.length} kundnoteringar | ${ragFailures.length} kunskapsluckor | ${blocklist.length} blocklist`);
+  console.log(`   ${templates.length} mallar | ${qaHistory.length} QA-historik | ${settings.length} inställningar`);
+  console.log('\n   Logga in: admin / admin123 | sara/johan/maria / agent123');
 }
 
 main()
