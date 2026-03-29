@@ -1,10 +1,14 @@
 import { Controller, Post, Get, Body, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { PrismaService } from '../database/prisma.service';
 
 @Controller()
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private prisma: PrismaService,
+  ) {}
 
   @Post('auth/login')
   async login(@Body() body: { username: string; password: string }) {
@@ -37,10 +41,7 @@ export class AuthController {
   }
 
   @Get('public/offices')
-  getOffices() {
-    const { DatabaseService } = require('../database/database.service');
-    // Offices are exposed via the database service injected in AuthService
-    // For public route, we access directly
-    return this.authService.getAllUsers(); // TODO: wire to offices
+  async getOffices() {
+    return this.prisma.office.findMany({ orderBy: [{ city: 'asc' }, { area: 'asc' }] });
   }
 }

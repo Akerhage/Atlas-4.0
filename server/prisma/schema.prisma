@@ -1,0 +1,265 @@
+// ============================================
+// Atlas 4.0 — Prisma Schema
+// Provider: SQLite (switch to postgresql for production)
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ============================================
+// USERS & AUTHENTICATION
+// ============================================
+
+model User {
+  id            Int       @id @default(autoincrement())
+  username      String    @unique
+  passwordHash  String    @map("password_hash")
+  displayName   String?   @map("display_name")
+  role          String    @default("agent")
+  agentColor    String    @default("#0071e3") @map("agent_color")
+  avatarId      Int       @default(0) @map("avatar_id")
+  statusText    String    @default("") @map("status_text")
+  isOnline      Boolean   @default(false) @map("is_online")
+  lastSeen      Int?      @map("last_seen")
+  allowedViews  String?   @map("allowed_views")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  offices       UserOffice[]
+  ticketNotes   TicketNote[]
+  customerNotes CustomerNote[]
+  ownedTickets  Ticket[]       @relation("TicketOwner")
+
+  @@map("users")
+}
+
+// ============================================
+// OFFICES
+// ============================================
+
+model Office {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  routingTag  String    @unique @map("routing_tag")
+  city        String
+  area        String    @default("")
+  officeColor String    @default("#0071e3") @map("office_color")
+  phone       String    @default("")
+  address     String    @default("")
+  email       String    @default("")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  agents      UserOffice[]
+  tickets     Ticket[]     @relation("TicketOffice")
+
+  @@map("offices")
+}
+
+model UserOffice {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @map("user_id")
+  officeId Int    @map("office_id")
+
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  office   Office @relation(fields: [officeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, officeId])
+  @@map("user_offices")
+}
+
+// ============================================
+// TICKETS
+// ============================================
+
+model Ticket {
+  id             String    @id @default(uuid()) @map("conversation_id")
+  channel        String    @default("chat")
+  status         String    @default("open")
+  humanMode      Boolean   @default(false) @map("human_mode")
+  source         String?
+  customerName   String?   @map("customer_name")
+  customerEmail  String?   @map("customer_email")
+  customerPhone  String?   @map("customer_phone")
+  vehicle        String?
+  subject        String?
+  closeReason    String?   @map("close_reason")
+  lastMessage    String?   @map("last_message")
+  lastMessageId  Int       @default(0) @map("last_message_id")
+  archivedAt     DateTime? @map("archived_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  ownerId        Int?      @map("owner_id")
+  owner          User?     @relation("TicketOwner", fields: [ownerId], references: [id])
+  officeId       Int?      @map("office_id")
+  office         Office?   @relation("TicketOffice", fields: [officeId], references: [id])
+
+  messages       Message[]
+  notes          TicketNote[]
+  uploadedFiles  UploadedFile[]
+
+  @@index([status, updatedAt])
+  @@index([ownerId])
+  @@index([officeId])
+  @@map("tickets")
+}
+
+// ============================================
+// MESSAGES (proper table, replaces JSON blob)
+// ============================================
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  ticketId  String   @map("ticket_id")
+  role      String
+  content   String
+  isEmail   Boolean  @default(false) @map("is_email")
+  messageId String?  @map("message_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@map("messages")
+}
+
+// ============================================
+// TICKET NOTES
+// ============================================
+
+model TicketNote {
+  id        Int      @id @default(autoincrement())
+  ticketId  String   @map("ticket_id")
+  agentId   Int      @map("agent_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  agent     User     @relation(fields: [agentId], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_notes")
+}
+
+// ============================================
+// CUSTOMER NOTES
+// ============================================
+
+model CustomerNote {
+  id            Int      @id @default(autoincrement())
+  customerEmail String   @map("customer_email")
+  agentId       Int      @map("agent_id")
+  content       String
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  agent         User     @relation(fields: [agentId], references: [id])
+
+  @@index([customerEmail])
+  @@map("customer_notes")
+}
+
+// ============================================
+// TEMPLATES
+// ============================================
+
+model Template {
+  id        Int      @id @default(autoincrement())
+  name      String
+  subject   String   @default("")
+  body      String   @default("")
+  category  String?
+  owner     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("templates")
+}
+
+// ============================================
+// SETTINGS
+// ============================================
+
+model Setting {
+  key   String @id
+  value String
+
+  @@map("settings")
+}
+
+// ============================================
+// RAG FAILURES
+// ============================================
+
+model RagFailure {
+  id                Int      @id @default(autoincrement())
+  query             String
+  sessionType       String   @default("unknown") @map("session_type")
+  tsFallbackUsed    Boolean  @default(false) @map("ts_fallback_used")
+  tsFallbackSuccess Boolean  @default(false) @map("ts_fallback_success")
+  tsUrl             String?  @map("ts_url")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("rag_failures")
+}
+
+// ============================================
+// UPLOADED FILES
+// ============================================
+
+model UploadedFile {
+  id             Int      @id @default(autoincrement())
+  ticketId       String?  @map("ticket_id")
+  filename       String
+  originalName   String?  @map("original_name")
+  filepath       String
+  expiresAt      Int      @map("expires_at")
+  deleted        Boolean  @default(false)
+  uploadedAt     DateTime @default(now()) @map("uploaded_at")
+
+  ticket         Ticket?  @relation(fields: [ticketId], references: [id])
+
+  @@index([ticketId])
+  @@index([expiresAt])
+  @@map("uploaded_files")
+}
+
+// ============================================
+// EMAIL BLOCKLIST
+// ============================================
+
+model EmailBlocklist {
+  id        Int      @id @default(autoincrement())
+  pattern   String   @unique
+  type      String   @default("email")
+  addedBy   String   @default("system") @map("added_by")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([pattern])
+  @@map("email_blocklist")
+}
+
+// ============================================
+// LOCAL QA HISTORY
+// ============================================
+
+model LocalQaHistory {
+  id               Int       @id @default(autoincrement())
+  question         String
+  answer           String
+  isArchived       Boolean   @default(false) @map("is_archived")
+  handledBy        Int?      @map("handled_by")
+  handledAt        DateTime? @map("handled_at")
+  solutionText     String?   @map("solution_text")
+  originalQuestion String?   @map("original_question")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  @@index([isArchived])
+  @@map("local_qa_history")
+}
