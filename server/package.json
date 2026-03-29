@@ -17,7 +17,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "db:seed": "npx ts-node prisma/seed.ts",
+    "db:seed": "node prisma/seed.js",
+    "db:reset": "rm -f ../../atlas.db && npx prisma db push && node prisma/seed.js",
     "db:studio": "prisma studio",
     "db:generate": "prisma generate"
   },
