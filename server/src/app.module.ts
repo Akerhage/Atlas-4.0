@@ -22,7 +22,10 @@ import { UploadModule } from './upload/upload.module';
     // Environment configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: join(__dirname, '..', '..', '.env'),
+      envFilePath: [
+        join(__dirname, '..', '..', '.env'),       // server/.env
+        join(__dirname, '..', '..', '..', '.env'),  // root .env
+      ],
     }),
 
     // Rate limiting
